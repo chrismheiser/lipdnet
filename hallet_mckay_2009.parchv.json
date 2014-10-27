@@ -29,8 +29,8 @@
 
 {"measurements": [
 	
-	{"OM": [
-
+	{"measTable1": [
+		{"measTableName": "OM"}
 		{"fileName" : "HalletOM.csv"},
 		{"chronology" : "HT01"},
 
@@ -57,7 +57,7 @@
 			{"shortName" 				: ""},
 			{"unit" 					: ""},
 
-			{"climanteInterpretation" : [
+			{"climateInterpretation" : [
 
 				{"parameter" 			: ""},
 				{"parameterDetail" 		: ""},
@@ -73,9 +73,9 @@
 
 	]}
 
-	{"BSi": [
-
-	{"comments" 		    	: "depths_are_midpoints_of_05_cm_wide_samples_ages_see_McKay_and_Kaufmann_2009"},
+	{"measTable2": [
+		{"tableName": “BSi”}
+		{"comments" : "depths_are_midpoints_of_05_cm_wide_samples_ages_see_McKay_and_Kaufmann_2009"},
 	{"authorClimateInterp"  	: "NC ;NC ; T.air.SUMMER.mean"},
 	{"interpDir" 				: "NA ; NA ; 1"},
 	{"proxy" 					: "NC ; NC ; BSi"}
@@ -84,9 +84,8 @@
 ]}
 
 {"chronologies": [
-
-	{"HT01": [
-
+	{"chronTable1" : [
+		{"chronTableName" : "HT01"}
 		{"fileName" : ".csv"},
 
 		{"comments" : "Pu_spike_at3.25_cm Paired_terrestial_and_aquatic_ages_overlap
