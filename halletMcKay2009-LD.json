@@ -1,0 +1,299 @@
+// Fake URIs in use
+// units, site, filename, measurement, seasonality, boolean pos/neg, 
+// precision, measurementData, measTable
+
+{
+    "@context" : {
+        "paleoArchiveName" : "http://schema.org/name",
+        "siteName" : "http://schema.org/site",
+        "collectionName" : "http://schema.org/collection",
+        "region" : "http://schema.org/containedIn",
+        "geo" : "http://schema.org/geo",
+        "latMax": {
+      		"@id": "http://schema.org/latitude",
+      		"@type": "xsd:float"
+    	},
+    	"latMin": {
+    	    "@id": "http://schema.org/latitude",
+      		"@type": "xsd:float"
+    	},
+    	"latUnits" : "http://schema.org/units",
+    	"lonMax": {
+      		"@id": "http://schema.org/longitude",
+      		"@type": "xsd:float"
+    	},
+        "lonMin": {
+      		"@id": "http://schema.org/longitude",
+      		"@type": "xsd:float"
+    	},
+    	"lonUnits" : "http://schema.org/units",
+    	"elevation": {
+    		"@id": "http://schema.org/elevation",
+    		"@type": "xsd:float"
+    	},
+    	"elevationUnits" : "http://schema.org/units",
+    	"archiveType" : "http://schema.org/alternateName",
+    	"investigator": "http://schema.org/name",
+    	"year": "http://schema.org/Date",
+    	"year:dateCreated": {
+    		"@type" : "@id"
+    	},
+    	"year:startDate": {
+    		"@type" : "@id"
+    	},
+    	"year:endDate" : {
+    		"@type" : "@id"
+    	},
+    	"year:alternateName" : "http://schema.org/units",
+    	"whoCollected" : "http://schema.org/name",
+    	"whoAnalyzed" : "http://schema.org/name",
+    	"whoEnteredinDB" : "http://schema.org/name",
+    	"pubDOI": {
+        	"@id":"http://purl.org/ontology/bibo/doi",
+        	"@container": "@set"
+        },
+        "pubString" : "http://schema.org/alternateName",
+        "dataDOI": {
+        	"@id":"http://purl.org/ontology/bibo/doi",
+        	"@container": "@set"
+        },
+
+        "column" : {
+            "@id" : "http://rdf.data-vocabulary.org/#step",
+            "@value" : "xsd:integer"
+        },
+
+        "measurements" : "http://schema.org/measurementData",
+        "measTable" : "http://schema.org/measurementTable",
+        "measTableNumber" : {
+            "@id" : "http://schema.org/name",
+            "@value" : "xsd:integer"
+        },
+        "filename" : "http://schema.org/fileFormat",
+        "chronology" : "http://schema.org/description",
+        "measRes" : {
+        	"@id" : "http://schema.org/measurement",
+        	"@type" : "xsd:float"
+        },
+        "measResUnits" : "http://schema.org/units",
+        "longName" : "http://schema.org/description",
+        "shortName" : "http://schema.org/alternateName",
+        "proxy" : "http://schema.org/alternateName",
+        "unit" : "http://schema.org/units",
+        "parameter" : "http://schema.org/name",
+        "parameterDetail" : "http://schema.org/description",
+        "seasonality" : "http://schema.org/seasonality",
+        "seasonality:value": {
+            "@id" : "http://schema.org/value",
+            "@type": "xsd:integer"
+        },
+        "interpDirection" : {
+        	"@id" : "http://schema.org/boolean",
+        	"@type" : "xsd:boolean"
+        },
+        "material" : "http://schema.org/description",
+        "precision": {
+    	    "@id": "http://schema.org/precision",
+      		"@type": "xsd:float"
+    	},
+    	"instrument" : "http://schema.org/device",
+    	"sensorModel" : "http://schema.org/description",
+    	"archiveModel" : "http://schema.org/description",
+    	"observationModel" : "http://schema.org/description",
+
+        "chronTableName" : {
+            "@id" : "http://schema.org/name",
+            "@value" : "xsd:integer"
+        },
+    	"chronName" : "http://schema.org/name",
+    	"chronType" : "http://schema.org/description",
+    	"chronRes" : "http://schema.org/description",
+    	"chronResUnits" : "http://schema.org/units",
+        "underCountRate" : {
+        	"@id" : "http://schema.org/maxValue",
+        	"@type" : "xsd:integer"
+        },
+        "overCountRate" : {
+        	"@id" : "http://schema.ord/minValue",
+        	"@type" : "xsd:integer"
+        },
+        "countRateUnits" : "http://schema.org/units",
+        "errorLevel" : "http://schema.org/description"
+    }, // END CONTEXT
+
+    "paleoArchiveName" : "halletMcKay2009",
+    "siteName": "Hallet Lake",
+    "collectionName": "HT",
+    "region": "Alaska and Yukon",
+    "geo" : {
+    	"latMax": "61.5",
+   		"latMin": "61.5",
+   		"lonMax": "-146.2",
+    	"lonMin": "-146.2",
+    	"latUnits": "decimalDegrees",
+    	"lonUnits": "decimalDegrees",
+    },    
+	"pubDOI": "10.1007/s10933-008-9260-0",
+    "pubString": "McKay and Kaufman 2009",
+    "dataDOI": "10.1594/PANGAEA.831251",
+	"elevation": "1128",
+	"elevationUnits": "masl",
+	"archiveType": "lake",
+	"investigator": "Nicholas P. McKay",
+	"year:dateCreated": "2009",
+	"year:startDate": "",
+	"year:endDate" : "",
+	"year:alternateName" : "AD",
+	"whoCollected" : "Chris Charles",
+	"whoAnalyzed" : "Kim Cobb + Lab Tech",
+	"whoEnteredinDB" : "NPM + JEG",
+    // END HEADER DATA
+
+
+	"measurements" : [
+
+        // TABLE 1
+        {"measTableName": "OM",
+
+            "columns": [
+
+                {"column" : "1",
+                "longName":"Depth below lake floor",
+                "shortName": "Depth",
+                "unit": "mm"},
+            
+                {"column": "2",
+                "longName": "years before 1950",
+                "shortName": "Age",
+                "unit": "yr BP",
+                "year:startDate": "-52",
+                "year:endDate" : "7913",
+                "measRes": "46"},
+
+                {"column": "3",
+                "longName": "mass percent of organic matter",
+                "shortName": "OM",
+                "unit": "percent",
+                "proxy": "OM",
+                "climateInterpretation": [{
+                    "parameter": "ELA",
+                    "seasonality": "ANN",
+                    "interpDirection": "Positive"
+                }]}
+            ]
+        },
+
+        // TABLE 2
+        {"measTableName": "BSi",
+
+            "filename": "halletBSi.csv",
+            "chronology": "HT01",
+
+            "columns": [
+                {"column" : "1",
+                "longName": "Depth below lake floor",
+                "shortName": "Depth",
+                "unit": "mm"},
+
+                {"column": "2",
+                "longName": "years before 1950",
+                "shortName": "Age",
+                "unit": "yr BP",
+                "year:startDate" : "-55",
+                "year:endDate" : "8193",
+                "measRes": "35"
+                }
+
+                {"column" : "3",
+                "longName": "mass percent of biogenic silica",
+                "shortName": "BSi",
+                "unit": "permil",
+                "proxy": "BSi",
+                "interpDirection" : "Positive",
+                "climateInterpretation": [
+                    {"parameter": "Temperature",
+                    "parameterDetail": "air",
+                    "seasonality": [{
+                        "seasonality:value": "6",
+                        "seasonality:value": "7",
+                        "seasonality:value": "8"}]
+                    }
+                ]}
+            ]
+        } // END MEASUREMENT TABLES
+    ], // END MEASUREMENTS
+
+    "chronologies" : [
+        {"chronTableName": "HT01",
+        "filename": "halletChron.csv",
+        "chronType": "tiePoint",
+        "comments": "Pu_spike_at3.25_cm Paired_terrestial_and_aquatic_ages_overlap,†_Analyses_performed_at_the_Keck_Carbon_Cycle_AMS_Facility_at_UC_Irvine_or_††_the_Center_for_Accelerator_Mass_Spectrometry_at_the_Lawrence_Livermore_National_Laboratory,   §_The_14C_ages_were_calibrated_using_CALIB_v_5.02_(Stuiver_and_Reimer_1993).",
+
+        "columns" : [
+
+            {"column" : "1",
+            "longName": "type of age",
+            "shortName": "ageType",
+            "unit": "none",
+            "type": "string"
+            },
+
+            {"column" : "2",
+            "longName": "labratory ID or sample name",
+            "shortName": "labID",
+            "unit": "none",
+            "type": "string"
+            },
+
+            {"column": "3",
+            "longName": "Upper depth limit of sample",
+            "shortName": "topDepth",
+            "unit": "cm",
+            "comments": "Depths_adjusted_for_loss_of_1_cm_from_the_surface_shdiment_and_zones_of_instantaneous_sedimentation_from_240-250_cm_and_320-330_cm"
+            },
+
+            {"column": "4",
+            "longName": "lower depth limit of sample",
+            "shortName": "bottomDepth",
+            "unit": "cm"
+            },
+
+            {"column": "5",
+            "longName": "type of dated material",
+            "shortName": "materialType",
+            "unit": "none",
+            "type": "string",
+            "comments": "TPF_=_Terrestrial_plant_fragments_APF_=_aquatic_plant_fragments_WS_=_woody_stems_<120_μm_=_chitin_and_detrital_terrestrial_and_aquatic_plant_fragments_between_250_and_120_μm"
+            },
+
+            {"column": "6",
+            "longName": "radiocarbon Age",
+            "shortName": "14CAge",
+            "unit": "yr BP"
+            },
+
+            {"column": "7",
+            "longName": "radiocarbon Age uncertainty",
+            "shortName": "14CAgeUncertainty",
+            "unit": "year BP",
+            "errorLevel": "1 sigma"
+            },
+
+            {"column" : "8",
+            "longName": "calendar Age",
+            "shortName": "Age",
+            "unit": "yr BP"
+            },
+
+            {"column": "9",
+            "longName": "calibrated Age uncertainty",
+            "shortName": "AgeUncertainty",
+            "unit": "yr BP",
+            "errorLevel": "2 sigma"
+            }
+
+        ] // END CHRON COLUMNS
+
+    }] // END CHRONOLOGIES
+
+}//END DATA FILE

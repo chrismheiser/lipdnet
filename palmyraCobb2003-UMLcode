@@ -1,0 +1,134 @@
+class PaleoArchive
+{
+  name;
+  siteName;
+  collectionName;
+  region;
+  float latMax;
+  float latMin;
+  latUnits;
+  lonUnits;
+  float lonMax;
+  float lonMin;
+  string pubDOI;
+  pubString;
+  dataDOI;
+  float elevation;
+  elevationUnits;
+  archiveType;
+  investigator;
+  Integer year;
+  Integer yearMin;
+  Integer yearMax;
+  yearUnit;
+  whoCollected;
+  whoAnalyzed;
+  whoEnteredInDB;
+}
+
+class chronologies
+{
+  chronName;
+chronType;
+Integer underCountRate;
+Integer overCountRate;
+countRateUnits;
+* -- 1 PaleoArchive;
+}
+
+class measurements
+{
+  1 -- 1 PaleoArchive;
+  * -- 1 meas;
+}
+class meas
+{
+  measTableName;
+  filename;
+  chronology;
+  float measRes;
+  measResUnits;
+}
+
+class col1
+{
+  longName;
+  shortName;
+  unit;
+  1 -- 1 meas;
+}
+
+class col2
+{
+  longName;
+  shortName;
+  unit;
+  material;
+  Float precision;
+  instrument;
+    1 -- 1 meas;
+}
+
+class columnN
+{
+  longName;
+shortName;
+unit;
+* -- 1 meas;
+}
+
+class col3
+{
+  longName;
+  shortName;
+  1 -- 1 meas;
+}
+
+class forwardModel
+{
+  sensorModel;
+archiveModel;
+observationModel;
+1 -- 1 col2;
+}
+
+class climateInterpretation
+{
+  parameter;
+parameterDetail;
+seasonality;
+interpDirection;
+1 -- 1 col2;
+}
+
+class chron1
+{
+    chronName;
+chronType;
+Integer underCountRate;
+Integer overCountRate;
+countRateUnits;
+  1 -- 1 chronologies;
+}
+
+class chron2
+{
+    chronName;
+chronType;
+Integer underCountRate;
+Integer overCountRate;
+countRateUnits;
+  1 -- 1 chronologies;
+}
+
+class chronN
+{
+  chronName;
+  chronType;
+  underCountRate;
+  Integer overCountRate;
+  countRateUnits;
+  * -- 1 chronologies;
+}
+
+
