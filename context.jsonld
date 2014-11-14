@@ -1,0 +1,132 @@
+{
+    "@context" : {
+        "paleoArchiveName" : "http://schema.org/name",
+        "siteName" : "http://schema.org/site",
+        "collectionName" : "http://schema.org/collection",
+        "region" : "http://schema.org/containedIn",
+        "geo" : "http://schema.org/geo",
+
+        "latitude" : {
+
+        	"@id"   : "http://schema.org/latitude",
+            "@type" : "xsd:float",
+            "units" : "http://schema.org/units",
+
+        	"latMax": {
+        		"@id" : "http://schema.org/maxValue"
+        	},
+
+        	"latMin": {
+        		"@id" : "http://schema.org/minValue"
+        	}
+        },
+
+        "longitude" : {
+
+        	"@id"   : "http://schema.org/latitude",
+            "@type" : "xsd:float",
+            "units" : "http://schema.org/units",
+
+        	"lonMax": {
+        		"@id" : "http://schema.org/maxValue"
+        	},
+
+        	"lonMin": {
+        		"@id" : "http://schema.org/minValue"
+        	}
+        },
+        
+        "elevation": {
+            "@id": "http://schema.org/elevation",
+            "@type": "xsd:float"
+            "units" : "http://schema.org/units"
+        },
+        
+        "archiveType" : "http://schema.org/alternateName",
+        "investigator": "http://schema.org/name",
+        "year": "http://schema.org/Date",
+        "year:dateCreated": {
+            "@type" : "@id"
+        },
+        "year:startDate": {
+            "@type" : "@id"
+        },
+        "year:endDate" : {
+            "@type" : "@id"
+        },
+        "year:alternateName" : "http://schema.org/units",
+        "whoCollected" : "http://schema.org/name",
+        "whoAnalyzed" : "http://schema.org/name",
+        "whoEnteredinDB" : "http://schema.org/name",
+        "pubDOI": {
+            "@id":"http://purl.org/ontology/bibo/doi",
+            "@container": "@set"
+        },
+        "pubString" : "http://schema.org/alternateName",
+        "dataDOI": {
+            "@id":"http://purl.org/ontology/bibo/doi",
+            "@container": "@set"
+        },
+ 
+        "column" : {
+            "@id" : "http://rdf.data-vocabulary.org/#step",
+            "@value" : "xsd:integer"
+        },
+ 
+        "measurements" : "http://schema.org/measurementData",
+        "measTable" : "http://schema.org/measurementTable",
+        "measTableNumber" : {
+            "@id" : "http://schema.org/name",
+            "@value" : "xsd:integer"
+        },
+        "filename" : "http://schema.org/fileFormat",
+        "chronology" : "http://schema.org/description",
+        "measRes" : {
+            "@id" : "http://schema.org/measurement",
+            "@type" : "xsd:float"
+        },
+        "measResUnits" : "http://schema.org/units",
+        "longName" : "http://schema.org/description",
+        "shortName" : "http://schema.org/alternateName",
+        "proxy" : "http://schema.org/alternateName",
+        "unit" : "http://schema.org/units",
+        "parameter" : "http://schema.org/name",
+        "parameterDetail" : "http://schema.org/description",
+        "seasonality" : "http://schema.org/seasonality",
+        "seasonality:value": {
+            "@id" : "http://schema.org/value",
+            "@type": "xsd:integer"
+        },
+        "interpDirection" : {
+            "@id" : "http://schema.org/boolean",
+            "@type" : "xsd:boolean"
+        },
+        "material" : "http://schema.org/description",
+        "precision": {
+            "@id": "http://schema.org/precision",
+            "@type": "xsd:float"
+        },
+        "instrument" : "http://schema.org/device",
+        "sensorModel" : "http://schema.org/description",
+        "archiveModel" : "http://schema.org/description",
+        "observationModel" : "http://schema.org/description",
+ 
+        "chronTableName" : {
+            "@id" : "http://schema.org/name",
+            "@value" : "xsd:integer"
+        },
+        "chronName" : "http://schema.org/name",
+        "chronType" : "http://schema.org/description",
+        "chronRes" : "http://schema.org/description",
+        "chronResUnits" : "http://schema.org/units",
+        "underCountRate" : {
+            "@id" : "http://schema.org/maxValue",
+            "@type" : "xsd:integer"
+        },
+        "overCountRate" : {
+            "@id" : "http://schema.ord/minValue",
+            "@type" : "xsd:integer"
+        },
+        "countRateUnits" : "http://schema.org/units",
+        "errorLevel" : "http://schema.org/description"
+    }
