@@ -1,50 +1,53 @@
 {
     "@context" : {
-        "paleoArchiveName" : "http://schema.org/name",
-        "siteName" : "http://schema.org/site",
-        "collectionName" : "http://schema.org/collection",
-        "region" : "http://schema.org/containedIn",
-        "geo" : "http://schema.org/geo",
+        "xsd": "http://www.w3.org/2001/XMLSchema#",
+        "schema" : "http://schema.org/",
+
+        "paleoArchiveName" : "schema:name",
+        "siteName" : "schema:site",
+        "collectionName" : "schema:collection",
+        "region" : "schema:containedIn",
+        "geo" : "schema:geo",
 
         "latitude" : {
 
-        	"@id"   : "http://schema.org/latitude",
+        	"@id"   : "schema:latitude",
             "@type" : "xsd:float",
-            "units" : "http://schema.org/units",
+            "units" : "schema:units",
 
         	"latMax": {
-        		"@id" : "http://schema.org/maxValue"
+        		"@id" : "schema:maxValue"
         	},
 
         	"latMin": {
-        		"@id" : "http://schema.org/minValue"
+        		"@id" : "schema:minValue"
         	}
         },
 
         "longitude" : {
 
-        	"@id"   : "http://schema.org/latitude",
+        	"@id"   : "schema:latitude",
             "@type" : "xsd:float",
-            "units" : "http://schema.org/units",
+            "units" : "schema:units",
 
         	"lonMax": {
-        		"@id" : "http://schema.org/maxValue"
+        		"@id" : "schema:maxValue"
         	},
 
         	"lonMin": {
-        		"@id" : "http://schema.org/minValue"
+        		"@id" : "schema:minValue"
         	}
         },
         
         "elevation": {
-            "@id": "http://schema.org/elevation",
+            "@id": "schema:elevation",
             "@type": "xsd:float"
-            "units" : "http://schema.org/units"
+            "units" : "schema:units"
         },
         
-        "archiveType" : "http://schema.org/alternateName",
-        "investigator": "http://schema.org/name",
-        "year": "http://schema.org/Date",
+        "archiveType" : "schema:alternateName",
+        "investigator": "schema:name",
+        "year": "schema:Date",
         "year:dateCreated": {
             "@type" : "@id"
         },
@@ -54,15 +57,15 @@
         "year:endDate" : {
             "@type" : "@id"
         },
-        "year:alternateName" : "http://schema.org/units",
-        "whoCollected" : "http://schema.org/name",
-        "whoAnalyzed" : "http://schema.org/name",
-        "whoEnteredinDB" : "http://schema.org/name",
+        "year:alternateName" : "schema:units",
+        "whoCollected" : "schema:name",
+        "whoAnalyzed" : "schema:name",
+        "whoEnteredinDB" : "schema:name",
         "pubDOI": {
             "@id":"http://purl.org/ontology/bibo/doi",
             "@container": "@set"
         },
-        "pubString" : "http://schema.org/alternateName",
+        "pubString" : "schema:alternateName",
         "dataDOI": {
             "@id":"http://purl.org/ontology/bibo/doi",
             "@container": "@set"
@@ -73,32 +76,32 @@
             "@value" : "xsd:integer"
         },
  
-        "measurements" : "http://schema.org/measurementData",
-        "measTable" : "http://schema.org/measurementTable",
+        "measurements" : "schema:measurementData",
+        "measTable" : "schema:measurementTable",
         "measTableNumber" : {
-            "@id" : "http://schema.org/name",
+            "@id" : "schema:name",
             "@value" : "xsd:integer"
         },
-        "filename" : "http://schema.org/fileFormat",
-        "chronology" : "http://schema.org/description",
+        "filename" : "schema:fileFormat",
+        "chronology" : "schema:description",
         "measRes" : {
-            "@id" : "http://schema.org/measurement",
+            "@id" : "schema:measurement",
             "@type" : "xsd:float"
         },
-        "measResUnits" : "http://schema.org/units",
-        "longName" : "http://schema.org/description",
-        "shortName" : "http://schema.org/alternateName",
-        "proxy" : "http://schema.org/alternateName",
-        "unit" : "http://schema.org/units",
-        "parameter" : "http://schema.org/name",
-        "parameterDetail" : "http://schema.org/description",
-        "seasonality" : "http://schema.org/seasonality",
+        "measResUnits" : "schema:units",
+        "longName" : "schema:description",
+        "shortName" : "schema:alternateName",
+        "proxy" : "schema:alternateName",
+        "unit" : "schema:units",
+        "parameter" : "schema:name",
+        "parameterDetail" : "schema:description",
+        "seasonality" : "schema:seasonality",
         "seasonality:value": {
-            "@id" : "http://schema.org/value",
+            "@id" : "schema:value",
             "@type": "xsd:integer"
         },
         "interpDirection" : {
-            "@id" : "http://schema.org/boolean",
+            "@id" : "schemaboolean",
             "@type" : "xsd:boolean"
         },
         "material" : "http://schema.org/description",
@@ -112,21 +115,21 @@
         "observationModel" : "http://schema.org/description",
  
         "chronTableName" : {
-            "@id" : "http://schema.org/name",
+            "@id" : "schema:name",
             "@value" : "xsd:integer"
         },
-        "chronName" : "http://schema.org/name",
-        "chronType" : "http://schema.org/description",
-        "chronRes" : "http://schema.org/description",
-        "chronResUnits" : "http://schema.org/units",
+        "chronName" : "schema:name",
+        "chronType" : "schema:description",
+        "chronRes" : "schema:description",
+        "chronResUnits" : "schema:units",
         "underCountRate" : {
-            "@id" : "http://schema.org/maxValue",
+            "@id" : "schema:maxValue",
             "@type" : "xsd:integer"
         },
         "overCountRate" : {
-            "@id" : "http://schema.ord/minValue",
+            "@id" : "schema:minValue",
             "@type" : "xsd:integer"
         },
-        "countRateUnits" : "http://schema.org/units",
-        "errorLevel" : "http://schema.org/description"
+        "countRateUnits" : "schema:units",
+        "errorLevel" : "schema:description"
     }

@@ -1,0 +1,28 @@
+JSON-LD Tips
+
+
+
+   * All key-value pairs
+
+   * Each object is enclosed by curly brackets 
+
+   * Keys of an Object must be unique
+
+
+Arrays
+
+
+   * Order is not preserved in arrays unless specified
+
+
+Examples
+
+	Equivalent Phrases
+	"image" : "http://schema.org/image" 
+	"image" : {
+		"@id" : "http://schema.org/image" 
+	}
+	"image" : {
+		"@id" : "http://schema.org/image"
+		"@type" : "@id"    //specifies that the image is going to be an IRI image source. 
+	}
