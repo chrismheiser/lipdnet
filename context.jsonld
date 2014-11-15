@@ -101,18 +101,18 @@
             "@type": "xsd:integer"
         },
         "interpDirection" : {
-            "@id" : "schemaboolean",
+            "@id" : "schema:boolean",
             "@type" : "xsd:boolean"
         },
-        "material" : "http://schema.org/description",
+        "material" : "schema:description",
         "precision": {
-            "@id": "http://schema.org/precision",
+            "@id": "schema:precision",
             "@type": "xsd:float"
         },
-        "instrument" : "http://schema.org/device",
-        "sensorModel" : "http://schema.org/description",
-        "archiveModel" : "http://schema.org/description",
-        "observationModel" : "http://schema.org/description",
+        "instrument" : "schema:device",
+        "sensorModel" : "schema:description",
+        "archiveModel" : "schema:description",
+        "observationModel" : "schema:description",
  
         "chronTableName" : {
             "@id" : "schema:name",
