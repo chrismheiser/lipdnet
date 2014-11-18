@@ -1,3 +1,7 @@
+// Fake URIs in use
+// units, site, filename, measurement, seasonality, boolean pos/neg, 
+// precision, measurementData, measTable
+
 {
     "@context" : {
         "xsd": "http://www.w3.org/2001/XMLSchema#",
@@ -7,6 +11,9 @@
         "siteName" : "schema:site",
         "collectionName" : "schema:collection",
         "region" : "schema:containedIn",
+        "country" : "schema:Country",
+        "province": "schema:Province",
+        "city": "schema:City",
         "geo" : "schema:geo",
 
         "latitude" : {
@@ -47,17 +54,9 @@
         
         "archiveType" : "schema:alternateName",
         "investigator": "schema:name",
-        "year": "schema:Date",
-        "year:dateCreated": {
-            "@type" : "@id"
-        },
-        "year:startDate": {
-            "@type" : "@id"
-        },
-        "year:endDate" : {
-            "@type" : "@id"
-        },
-        "year:alternateName" : "schema:units",
+        "dateCreated": "schema:Date",
+        "startDate": "schema:Date",
+        "endDate" : "schema:Date",
         "whoCollected" : "schema:name",
         "whoAnalyzed" : "schema:name",
         "whoEnteredinDB" : "schema:name",
@@ -88,7 +87,6 @@
             "@id" : "schema:measurement",
             "@type" : "xsd:float"
         },
-        "measResUnits" : "schema:units",
         "longName" : "schema:description",
         "shortName" : "schema:alternateName",
         "proxy" : "schema:alternateName",
@@ -99,6 +97,9 @@
         "seasonality:value": {
             "@id" : "schema:value",
             "@type": "xsd:integer"
+        },
+        "seasonality:string" : {
+            "@id" : "shema:units"
         },
         "interpDirection" : {
             "@id" : "schema:boolean",
@@ -121,7 +122,6 @@
         "chronName" : "schema:name",
         "chronType" : "schema:description",
         "chronRes" : "schema:description",
-        "chronResUnits" : "schema:units",
         "underCountRate" : {
             "@id" : "schema:maxValue",
             "@type" : "xsd:integer"
@@ -130,6 +130,5 @@
             "@id" : "schema:minValue",
             "@type" : "xsd:integer"
         },
-        "countRateUnits" : "schema:units",
         "errorLevel" : "schema:description"
     }
