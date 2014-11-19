@@ -12,7 +12,6 @@
     	"lonMin": 197.917,
         "elevation": 1.2,
     	"units": "decimalDegrees",
-    	"units": "decimalDegrees"
     }],    
 	"pubDOI": "10.1029/2001GL012919",
     "pubString": "Cobb et al., 2001",
@@ -38,36 +37,31 @@
 
 		"columns" : [
 
-			{"column": "1",
-			"longName": "Calendar Date",
-			"shortName": "Year",
-			"units": "AD"
-			},
+			"1" : {
+				"longName": "Calendar Date",
+				"shortName": "Year",
+				"units": "AD"
+				},
 
-			{"column" : "2",
-			"longName": "d18O  corrected for offsets in mean coral d18O",
-			"shortName": "d180",
-			"units": "permil (VPDB)",
-			"climateInterpretation": [{
-				"parameter": "Temperature",
-				"parameterDetail": "Sea Surface",
-				"seasonality": "monthly", // DISCREPANCY BETWEEN FILES, SEASONALITY DIFFERENT IN halletMcKay2009
-				"interpDirection": "Negative"
-			}],
-			"material": "skeletal aragonite",
-			"precision": 0.1,
-			"instrument": "Micromass Optima gas source triple-collector mass spectrometer",
-			"forwardModel": [{
-				"sensorModel": "10.1029/2011GL048224",
-				"archiveModel": "10.1029/2011GL048224",
-				"observationModel": "10.5194/cp-10-825-2014"
-			}]
-			},
-
-			{"column": "3",
-			"longName": "Sample Name",
-			"shortName": "Sample Name"
-			}
+			"2" : {
+				"longName": "d18O  corrected for offsets in mean coral d18O",
+				"shortName": "d180",
+				"units": "permil (VPDB)",
+				"climateInterpretation": [{
+					"parameter": "Temperature",
+					"parameterDetail": "Sea Surface",
+					"seasonality": "monthly", // DISCREPANCY BETWEEN FILES, SEASONALITY DIFFERENT IN halletMcKay2009
+					"interpDirection": "Negative"
+					}],
+				"material": "skeletal aragonite",
+				"precision": 0.1,
+				"instrument": "Micromass Optima gas source triple-collector mass spectrometer",
+				"forwardModel": [{
+					"sensorModel": "10.1029/2011GL048224",
+					"archiveModel": "10.1029/2011GL048224",
+					"observationModel": "10.5194/cp-10-825-2014"
+					}]
+				},
 
 		]} 
 	], 
@@ -80,7 +74,8 @@
             "underCount": "4",
     		"overCount": "2",
     		"units": "percent"
-		],
+			]
+		},
 
 		{"chronTableName": "layerCounts",
 		"filename": "palmyraUTh.csv",
@@ -88,7 +83,5 @@
 		"chronRes": "?",
 		"units": "yr"
 		}
-
 	]
-	
 }

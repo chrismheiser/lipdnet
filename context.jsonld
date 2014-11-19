@@ -70,19 +70,25 @@
             "@container": "@set"
         },
  
-        "column" : {
-            "@id" : "http://rdf.data-vocabulary.org/#step",
-            "@value" : "xsd:integer"
+        "columns" : {
+            "@id" : "schema:description",
+            "@container" : "@index"
         },
  
-        "measurements" : "schema:measurementData",
+        "measurements" : {
+            "@id" : "schema:measurementData",
+            "@container" : "@index"
+        },
         "measTable" : "schema:measurementTable",
         "measTableNumber" : {
             "@id" : "schema:name",
             "@value" : "xsd:integer"
         },
         "filename" : "schema:fileFormat",
-        "chronology" : "schema:description",
+        "chronologies" : {
+            @id : "schema:description",
+            "@container" : "@index"
+        },
         "measRes" : {
             "@id" : "schema:measurement",
             "@type" : "xsd:float"
@@ -96,14 +102,15 @@
         "seasonality" : "schema:seasonality",
         "seasonality:value": {
             "@id" : "schema:value",
-            "@type": "xsd:integer"
+            "@type": "xsd:integer",
+            "@container" : "@set"
         },
         "seasonality:string" : {
-            "@id" : "shema:units"
+            "@id" : "shema:units",
+            "@container" : "@set"
         },
         "interpDirection" : {
-            "@id" : "schema:boolean",
-            "@type" : "xsd:boolean"
+            "@id" : "schema:description",
         },
         "material" : "schema:description",
         "precision": {
