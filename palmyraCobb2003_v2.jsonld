@@ -1,7 +1,3 @@
-// Fake URIs in use
-// units, site, filename, measurement, seasonality, boolean pos/neg, 
-// precision, 
-
 {
     "@context" : "../context.jsonld",
 
@@ -10,49 +6,48 @@
     "collectionName": "SB3B",
     "region": "Tropical Pacific",
     "geo" : [{
-    	"latMax": "5.883",
-   		"latMin": "5.883",
-   		"lonMax": "197.917",
-    	"lonMin": "197.917",
-    	"latUnits": "decimalDegrees",
-    	"lonUnits": "decimalDegrees"
+    	"latMax": 5.883,
+   		"latMin": 5.883,
+   		"lonMax": 197.917,
+    	"lonMin": 197.917,
+        "elevation": 1.2,
+    	"units": "decimalDegrees",
+    	"units": "decimalDegrees"
     }],    
 	"pubDOI": "10.1029/2001GL012919",
     "pubString": "Cobb et al., 2001",
     "dataDOI": "10.1594/PANGAEA.831251",
-	"elevation": "1.2",
 	"elevationUnits": "masl",
 	"archiveType": "coral",
 	"investigator": "Kim M. Cobb",
-	"year:dateCreated": "2003",
-	"year:startDate": "928",
-	"year:endDate" : "1998",
-	"year:alternateName" : "AD",
+	"dateCreated": "2003",
+	"startDate": "928",
+	"endDate" : "1998",
+	"units" : "AD",
 	"whoCollected" : "Chris Charles",
 	"whoAnalyzed" : "Kim Cobb + Lab Tech",
 	"whoEnteredinDB" : "NPM + JEG",
-	//END HEADER DATA
 
 	"measurements": [
 		
 		{"measTableName" : "d180",
 		"filename" : "palmyraMeas1.csv",
 		"chronology" : "layerCounts",
-		"measRes": "0.083",
-		"measResUnits": "years",
+		"measRes": 0.083,
+		"units": "years",
 
 		"columns" : [
 
 			{"column": "1",
 			"longName": "Calendar Date",
 			"shortName": "Year",
-			"unit": "AD"
+			"units": "AD"
 			},
 
 			{"column" : "2",
 			"longName": "d18O  corrected for offsets in mean coral d18O",
 			"shortName": "d180",
-			"unit": "permil (VPDB)",
+			"units": "permil (VPDB)",
 			"climateInterpretation": [{
 				"parameter": "Temperature",
 				"parameterDetail": "Sea Surface",
@@ -60,7 +55,7 @@
 				"interpDirection": "Negative"
 			}],
 			"material": "skeletal aragonite",
-			"precision": "0.1",
+			"precision": 0.1,
 			"instrument": "Micromass Optima gas source triple-collector mass spectrometer",
 			"forwardModel": [{
 				"sensorModel": "10.1029/2011GL048224",
@@ -74,25 +69,26 @@
 			"shortName": "Sample Name"
 			}
 
-		]} // END MEASUREMENT COLUMNS
-	], // END MEASUREMENTS
+		]} 
+	], 
 
 	"chronologies": [
 
 		{"chronTableName": "layerCounts",
 		"chronType": "layerCounted",
-		"underCountRate": "4",
-		"overCountRate": "2",
-		"countRateUnits": "percent"
-		},
+		"countRate" : [
+            "underCount": "4",
+    		"overCount": "2",
+    		"units": "percent"
+		],
 
 		{"chronTableName": "layerCounts",
 		"filename": "palmyraUTh.csv",
 		"chronType": "tiePoint",
 		"chronRes": "?",
-		"chronResUnits": "yr"
+		"units": "yr"
 		}
 
-	] // END CHRONOLOGIES
+	]
 	
-} // END DATA FILE 
+}

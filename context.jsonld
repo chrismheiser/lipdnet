@@ -122,11 +122,14 @@
         "chronName" : "schema:name",
         "chronType" : "schema:description",
         "chronRes" : "schema:description",
-        "underCountRate" : {
+        "countRate": {
+            "@container" : "@list"
+        }
+        "underCount" : {
             "@id" : "schema:maxValue",
             "@type" : "xsd:integer"
         },
-        "overCountRate" : {
+        "overCount" : {
             "@id" : "schema:minValue",
             "@type" : "xsd:integer"
         },

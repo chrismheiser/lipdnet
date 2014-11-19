@@ -1,5 +1,3 @@
-
-
 {
     "@context" : "../context.jsonld",
 
@@ -8,33 +6,31 @@
     "collectionName": "HT",
     "region": "Alaska and Yukon",
     "geo" : {
-    	"latMax": "61.5",
-   		"latMin": "61.5",
-   		"lonMax": "-146.2",
-    	"lonMin": "-146.2",
+    	"latMax": 61.5,
+   		"latMin": 61.5,
+   		"lonMax": -146.2,
+    	"lonMin": -146.2,
     	"latUnits": "decimalDegrees",
     	"lonUnits": "decimalDegrees",
     },    
 	"pubDOI": "10.1007/s10933-008-9260-0",
     "pubString": "McKay and Kaufman 2009",
     "dataDOI": "10.1594/PANGAEA.831251",
-	"elevation": "1128",
-	"elevationUnits": "masl",
+	"elevation": 1128,
+	"units": "masl",
 	"archiveType": "lake",
 	"investigator": "Nicholas P. McKay",
-	"year:dateCreated": "2009",
-	"year:startDate": "",
-	"year:endDate" : "",
-	"year:alternateName" : "AD",
+	"dateCreated": "2009",
+	"startDate": "",
+	"endDate" : "",
+	"units" : "AD",
 	"whoCollected" : "Chris Charles",
 	"whoAnalyzed" : "Kim Cobb + Lab Tech",
 	"whoEnteredinDB" : "NPM + JEG",
-    // END HEADER DATA
 
 
 	"measurements" : [
 
-        // TABLE 1
         {"measTableName": "OM",
 
             "columns": [
@@ -42,20 +38,20 @@
                 {"column" : "1",
                 "longName":"Depth below lake floor",
                 "shortName": "Depth",
-                "unit": "mm"},
+                "units": "mm"},
             
                 {"column": "2",
                 "longName": "years before 1950",
                 "shortName": "Age",
-                "unit": "yr BP",
-                "year:startDate": "-52",
-                "year:endDate" : "7913",
+                "units": "yr BP",
+                "startDate": "-52",
+                "endDate" : "7913",
                 "measRes": "46"},
 
                 {"column": "3",
                 "longName": "mass percent of organic matter",
                 "shortName": "OM",
-                "unit": "percent",
+                "units": "percent",
                 "proxy": "OM",
                 "climateInterpretation": [{
                     "parameter": "ELA",
@@ -65,7 +61,6 @@
             ]
         },
 
-        // TABLE 2
         {"measTableName": "BSi",
 
             "filename": "halletBSi.csv",
@@ -75,21 +70,21 @@
                 {"column" : "1",
                 "longName": "Depth below lake floor",
                 "shortName": "Depth",
-                "unit": "mm"},
+                "units": "mm"},
 
                 {"column": "2",
                 "longName": "years before 1950",
                 "shortName": "Age",
-                "unit": "yr BP",
-                "year:startDate" : "-55",
-                "year:endDate" : "8193",
+                "units": "yr BP",
+                "startDate" : "-55",
+                "endDate" : "8193",
                 "measRes": "35"
                 }
 
                 {"column" : "3",
                 "longName": "mass percent of biogenic silica",
                 "shortName": "BSi",
-                "unit": "permil",
+                "units": "permil",
                 "proxy": "BSi",
                 "interpDirection" : "Positive",
                 "climateInterpretation": [
@@ -102,8 +97,8 @@
                     }
                 ]}
             ]
-        } // END MEASUREMENT TABLES
-    ], // END MEASUREMENTS
+        } 
+    ], 
 
     "chronologies" : [
         {"chronTableName": "HT01",
@@ -116,34 +111,34 @@
             {"column" : "1",
             "longName": "type of age",
             "shortName": "ageType",
-            "unit": "none",
+            "units": "none",
             "type": "string"
             },
 
             {"column" : "2",
             "longName": "labratory ID or sample name",
             "shortName": "labID",
-            "unit": "none",
+            "units": "none",
             "type": "string"
             },
 
             {"column": "3",
             "longName": "Upper depth limit of sample",
             "shortName": "topDepth",
-            "unit": "cm",
+            "units": "cm",
             "comments": "Depths_adjusted_for_loss_of_1_cm_from_the_surface_shdiment_and_zones_of_instantaneous_sedimentation_from_240-250_cm_and_320-330_cm"
             },
 
             {"column": "4",
             "longName": "lower depth limit of sample",
             "shortName": "bottomDepth",
-            "unit": "cm"
+            "units": "cm"
             },
 
             {"column": "5",
             "longName": "type of dated material",
             "shortName": "materialType",
-            "unit": "none",
+            "units": "none",
             "type": "string",
             "comments": "TPF_=_Terrestrial_plant_fragments_APF_=_aquatic_plant_fragments_WS_=_woody_stems_<120_μm_=_chitin_and_detrital_terrestrial_and_aquatic_plant_fragments_between_250_and_120_μm"
             },
@@ -151,31 +146,31 @@
             {"column": "6",
             "longName": "radiocarbon Age",
             "shortName": "14CAge",
-            "unit": "yr BP"
+            "units": "yr BP"
             },
 
             {"column": "7",
             "longName": "radiocarbon Age uncertainty",
             "shortName": "14CAgeUncertainty",
-            "unit": "year BP",
+            "units": "year BP",
             "errorLevel": "1 sigma"
             },
 
             {"column" : "8",
             "longName": "calendar Age",
             "shortName": "Age",
-            "unit": "yr BP"
+            "units": "yr BP"
             },
 
             {"column": "9",
             "longName": "calibrated Age uncertainty",
             "shortName": "AgeUncertainty",
-            "unit": "yr BP",
+            "units": "yr BP",
             "errorLevel": "2 sigma"
             }
 
-        ] // END CHRON COLUMNS
+        ] 
 
-    }] // END CHRONOLOGIES
+    }] 
 
-}//END DATA FILE
+}
