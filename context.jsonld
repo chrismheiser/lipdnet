@@ -48,7 +48,7 @@
         
         "elevation": {
             "@id": "schema:elevation",
-            "@type": "xsd:float"
+            "@type": "xsd:float",
             "units" : "schema:units"
         },
         
@@ -132,3 +132,4 @@
         },
         "errorLevel" : "schema:description"
     }
+}
