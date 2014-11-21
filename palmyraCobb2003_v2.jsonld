@@ -11,7 +11,7 @@
    		"lonMax": 197.917,
     	"lonMin": 197.917,
         "elevation": 1.2,
-    	"units": "decimalDegrees",
+    	"units": "decimalDegrees"
     }],    
 	"pubDOI": "10.1029/2001GL012919",
     "pubString": "Cobb et al., 2001",
@@ -37,21 +37,21 @@
 
 		"columns" : [
 
-			"1" : {
+				{"column" : 1,
 				"longName": "Calendar Date",
 				"shortName": "Year",
 				"units": "AD"
 				},
 
-			"2" : {
+				{"column" : 2,
 				"longName": "d18O  corrected for offsets in mean coral d18O",
 				"shortName": "d180",
 				"units": "permil (VPDB)",
 				"climateInterpretation": [{
 					"parameter": "Temperature",
 					"parameterDetail": "Sea Surface",
-					"seasonality": "monthly", // DISCREPANCY BETWEEN FILES, SEASONALITY DIFFERENT IN halletMcKay2009
-					"interpDirection": "Negative"
+					"seasonality:string": "monthly",
+					"interpDirection": "negative"
 					}],
 				"material": "skeletal aragonite",
 				"precision": 0.1,
@@ -61,7 +61,7 @@
 					"archiveModel": "10.1029/2011GL048224",
 					"observationModel": "10.5194/cp-10-825-2014"
 					}]
-				},
+				}
 
 		]} 
 	], 
@@ -71,10 +71,10 @@
 		{"chronTableName": "layerCounts",
 		"chronType": "layerCounted",
 		"countRate" : [
-            "underCount": "4",
+          {"underCount": "4",
     		"overCount": "2",
     		"units": "percent"
-			]
+          }]
 		},
 
 		{"chronTableName": "layerCounts",

@@ -1,9 +1,6 @@
-// Fake URIs in use
-// units, site, filename, measurement, seasonality, boolean pos/neg, 
-// precision, measurementData, measTable
-
 {
-    "@context" : {
+
+"@context" : {
         "xsd": "http://www.w3.org/2001/XMLSchema#",
         "schema" : "http://schema.org/",
 
@@ -17,40 +14,23 @@
         "geo" : "schema:geo",
 
         "latitude" : {
-
-        	"@id"   : "schema:latitude",
-            "@type" : "xsd:float",
-            "units" : "schema:units",
-
-        	"latMax": {
-        		"@id" : "schema:maxValue"
-        	},
-
-        	"latMin": {
-        		"@id" : "schema:minValue"
-        	}
+            "@id" : "schema:latitude",
+            "@container" : "@list"
         },
-
         "longitude" : {
-
-        	"@id"   : "schema:latitude",
-            "@type" : "xsd:float",
-            "units" : "schema:units",
-
-        	"lonMax": {
-        		"@id" : "schema:maxValue"
-        	},
-
-        	"lonMin": {
-        		"@id" : "schema:minValue"
-        	}
+            "@id" : "schema:longitude",
+            "@container" : "@list"
         },
-        
-        "elevation": {
-            "@id": "schema:elevation",
-            "@type": "xsd:float",
-            "units" : "schema:units"
+        "elevation" : {
+            "@id" : "schema:elevation",
+            "@container" : "@list"
         },
+        "elevationValue" : {
+            "@id": "schema:precision",
+            "@type": "xsd:float"
+            }
+        "max" : "schema:maxValue",
+        "min" : "schema:minValue",
         
         "archiveType" : "schema:alternateName",
         "investigator": "schema:name",
@@ -67,7 +47,7 @@
         "pubString" : "schema:alternateName",
         "dataDOI": {
             "@id":"http://purl.org/ontology/bibo/doi",
-            "@container": "@set"
+            "@container": "@list"
         },
  
         "columns" : {
@@ -86,7 +66,7 @@
         },
         "filename" : "schema:fileFormat",
         "chronologies" : {
-            @id : "schema:description",
+            "@id" : "schema:description",
             "@container" : "@index"
         },
         "measRes" : {
@@ -103,14 +83,14 @@
         "seasonality:value": {
             "@id" : "schema:value",
             "@type": "xsd:integer",
-            "@container" : "@set"
+            "@container" : "@list"
         },
         "seasonality:string" : {
             "@id" : "shema:units",
-            "@container" : "@set"
+            "@container" : "@list"
         },
         "interpDirection" : {
-            "@id" : "schema:description",
+            "@id" : "schema:description"
         },
         "material" : "schema:description",
         "precision": {
@@ -131,7 +111,7 @@
         "chronRes" : "schema:description",
         "countRate": {
             "@container" : "@list"
-        }
+        },
         "underCount" : {
             "@id" : "schema:maxValue",
             "@type" : "xsd:integer"
@@ -142,4 +122,5 @@
         },
         "errorLevel" : "schema:description"
     }
+
 }
