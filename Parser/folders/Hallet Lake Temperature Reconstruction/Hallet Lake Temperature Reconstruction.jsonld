@@ -1,7 +1,0 @@
-{
-		"@context" : "context.jsonld"
-}
-
-{"siteName" 		 : "Hallet Lake Temperature Reconstruction"}
-{"collectionName" : "HT01"}
-{"region" : ""}

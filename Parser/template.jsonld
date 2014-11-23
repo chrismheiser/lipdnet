@@ -1,0 +1,87 @@
+{
+    "@context" : "http://www.cefns.nau.edu/~cmh553/context.jsonld",
+
+    "paleoArchiveName" : ,
+    "siteName": ,
+    "collectionName": ,
+    "region": "",
+    "geo" : [{
+    	"latMax": ,
+   		"latMin": ,
+   		"lonMax": ,
+    	"lonMin": ,
+        "elevation": ,
+    	"units": 
+    }],    
+	"pubDOI": ,
+    "pubString": ,
+    "dataDOI": ,
+	"elevationUnits": ,
+	"archiveType": ,
+	"investigator": ,
+	"dateCreated": ,
+	"startDate": ,
+	"endDate" : ,
+	"units" : ,
+	"whoCollected" : ,
+	"whoAnalyzed" : ,
+	"whoEnteredinDB" : ,
+
+	"measurements": [
+		
+		{"measTableName" : ,
+		"filename" : ,
+		"chronology" : ,
+		"measRes": ,
+		"units": ,
+
+		"columns" : [
+
+				{"column" : 1,
+				"longName": ,
+				"shortName": ,
+				"units": 
+				},
+
+				{"column" : 2,
+				"longName": ,
+				"shortName": ,
+				"units": ,
+				"climateInterpretation": [{
+					"parameter": ,
+					"parameterDetail": ,
+					"seasonality:string": ,
+					"interpDirection": 
+					}],
+				"material": ,
+				"precision": ,
+				"instrument": ,
+				"forwardModel": [{
+					"sensorModel": ,
+					"archiveModel": ,
+					"observationModel": 
+					}]
+				}
+
+		]} 
+	], 
+
+	"chronologies": [
+
+		{"chronTableName": ,
+		"chronType": ,
+		"countRate" : [
+          {"underCount": ,
+    		"overCount": ,
+    		"units":
+          }]
+		},
+
+		{"chronTableName": ,
+		"filename": ,
+		"chronType": ,
+		"chronRes": ,
+		"units": 
+		}
+	]
+}

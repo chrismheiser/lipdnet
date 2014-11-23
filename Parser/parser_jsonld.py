@@ -1,4 +1,3 @@
-from geoChronRParser import *
 
 def jsonld_parser(file_name):
 
