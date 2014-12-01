@@ -2,39 +2,33 @@
     "@context" : "http://www.cefns.nau.edu/~cmh553/context.jsonld",
 
     "paleoArchiveName" : "halletMcKay2009",
-    "siteName": "Hallet Lake",
     "collectionName": "HT",
-    "region": "Alaska and Yukon",
     "geo" : {
-
-        "longitude" : [
-            {"max": 61.5,
+        "longitude" : {
+            "max": 61.5,
             "min": 61.5,
             "units" : "decimalDegrees"
-            }
-            ],
-
-        "latitude" : [
-            {"lonMax": -146.2,
-            "lonMin": -146.2,
+            },
+          
+        "latitude" : {
+            "max": -146.2,
+            "min": -146.2,
             "units": "decimalDegrees"
-            }
-            ],
+            },
 
-        "elevation" : [
-            {"elevationValue": 1128,
-            "units": "masl"
-            }
-            ]
-
-    },    
+        "elevation" : {
+	       "value": 1128,
+           "units": "masl"
+            },
+	"country" : "USA",
+	"state"	  : "AK",
+    	"siteName": "Hallet Lake"
+     },    
     "pubDOI": "10.1007/s10933-008-9260-0",
     "pubString": "McKay and Kaufman 2009" ,
-    "dataDOI": "10.1594/PANGAEA.831251",
     "archiveType": "lake",
     "investigator": "Nicholas P. McKay",
     "pubYear": "2009",
-    "units" : "AD",
     "whoCollected" : "Nick McKay",
     "whoAnalyzed" : "Nick McKay",
     "whoEnteredinDB" : "Nick McKay",
@@ -43,7 +37,7 @@
     "measurements" : [
 
         {"measTableName": "OM",
-	"filename":"halletOM.csv",
+	       "filename":"halletOM.csv",
 
             "columns": [
 
@@ -52,13 +46,13 @@
                     "shortName": "Depth",
                     "units": "mm"},
                 
-                    {"column": "2",
+                    {"column": 2,
                     "longName": "years before 1950",
                     "shortName": "Age",
                     "units": "yr BP",
-                    "startDate": "-52",
-                    "endDate" : "7913",
-                    "measRes": "46"},
+                    "startDate": -52,
+                    "endDate" : 7913,
+                    "measRes": 46},
 
                     {"column" : 3,
                     "longName": "mass percent of organic matter",
@@ -82,6 +76,7 @@
 
             "columns": [
 
+
                     {"column" : 1,
                     "longName": "Depth below lake floor",
                     "shortName": "Depth",
@@ -91,9 +86,9 @@
                     "longName": "years before 1950",
                     "shortName": "Age",
                     "units": "yr BP",
-                    "startDate" : "-55",
-                    "endDate" : "8193",
-                    "measRes": "35"
+                    "startDate" : -55,
+                    "endDate" : 8193,
+                    "measRes": 35
                     },
 
                     {"column" : 3,
@@ -102,13 +97,13 @@
                     "units": "permil",
                     "proxy": "BSi",
 
-                    "climateInterpretation": [
-                        {"parameter": "Temperature",
+                    "climateInterpretation": {
+                        "parameter": "Temperature",
                         "parameterDetail": "air",
                         "interpDirection" : "Positive",
-                        "seasonality": [6,7,8] },
-            {"basis" : "calibration to Valdez air temperature"}
-                     ]
+                        "seasonality": [6,7,8],
+            		"basis" : "calibration to Valdez air temperature"
+                     }
                      }
         ] 
     }
@@ -130,7 +125,7 @@
                 },
 
             {"column" : 2,
-                "longName": "labratory ID or sample name",
+                "longName": "laboratory ID or sample name",
                 "shortName": "labID",
                 "units": "none",
                 "type": "string"
