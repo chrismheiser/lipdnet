@@ -56,7 +56,7 @@ def parser():
 
         ## Create the metadata dictionary
         metadataDict = {}
-        pubYear = int(metadata.cell_value(12,1))
+        pubYear = (metadata.cell_value(12,1))
 
         #Operations to slice together the PubString
         pubstringRm = metadata.cell_value(9,1).replace(","," ")
@@ -151,24 +151,24 @@ def parser():
                 except IndexError:
                     pass
 
-            ## Put all the data for this variable into a list
-            ## Need to catch IndexError exception or else it will go out of range
-            ## Iterations were trying to go beyond the last available cell and then breaking the list
-            rowCellData = 12
-            dataList = []
-            try:
-                while dataSheet.cell_value(rowCellData, colCellData) != xlrd.empty_cell:
-                    dataList.append(dataSheet.cell_value(rowCellData,colCellData))
-                    rowCellData += 1
-
-            except IndexError:
-                pass
-
-            ## Put our list of data values in a dictionary
-            dataDict = {'data': dataList}
+            # ## Put all the data for this variable into a list
+            # ## Need to catch IndexError exception or else it will go out of range
+            # ## Iterations were trying to go beyond the last available cell and then breaking the list
+            # rowCellData = 12
+            # dataList = []
+            # try:
+            #     while dataSheet.cell_value(rowCellData, colCellData) != xlrd.empty_cell:
+            #         dataList.append(dataSheet.cell_value(rowCellData,colCellData))
+            #         rowCellData += 1
+            #
+            # except IndexError:
+            #     pass
+            #
+            # ## Put our list of data values in a dictionary
+            # dataDict = {'data': dataList}
 
             ## Add all our data pieces for this column into a new entry in the Measurement Table Dictionary
-            measTable[columnNumber] = column, shortName, longName, units, attrDict, dataDict
+            measTable[columnNumber] = column, shortName, longName, units, attrDict
 
             ## Update counts for next loop
             rowCellVars += 1
@@ -190,11 +190,14 @@ def parser():
         ## Variables start at 5,0
         ## Data starts at 22,0
 
-        ##Below data do not have explicit cell locations
+        ## Below data do not have explicit cell locations
         # filename =
         # chronType =
         # comments =
+
+        ## Parse units from the parenthesis on the column names
         # units =
+
         # type =
 
         chronTableName = metadata.cell_value(30,1)
