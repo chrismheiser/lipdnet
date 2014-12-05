@@ -1,6 +1,15 @@
 {
     "@context": "context.jsonld",
     "geo": {
+        "longitude": {
+            "max": [
+                6.77
+            ],
+            "min": [
+                6.77
+            ],
+            "units": "decimalDegrees"
+        },
         "elevation": {
             "value": [
                 -1497.0
@@ -15,24 +24,8 @@
                 78.92
             ],
             "units": "decimalDegrees"
-        },
-        "longitude": {
-            "max": [
-                6.77
-            ],
-            "min": [
-                6.77
-            ],
-            "units": "decimalDegrees"
         }
     },
-    "investigators": [
-        "Bonnet, S.; de Vernal, A.; Hillaire-Marcel, C.; Radi, T.; Husum, K."
-    ],
-    "pubYear": [
-        "submitted (Oct 2014)",
-        2010.0
-    ],
     "collectionName": [
         "Bonnet.2010.JM06-WP-04-MCB"
     ],
@@ -41,5 +34,126 @@
     ],
     "pubDOI": [
         "doi:10.1016/j.marmicro.2009.12.001"
+    ],
+    "investigators": [
+        "Bonnet, S.; de Vernal, A.; Hillaire-Marcel, C.; Radi, T.; Husum, K."
+    ],
+    "pubYear": [
+        "submitted (Oct 2014)",
+        2010.0
+    ],
+    "measurements": [
+        {
+            "measTableName": "dataOriginal",
+            "filename": "dataOriginal.csv",
+            "columns": [
+                {
+                    "column": 1,
+                    "shortName": "depth_cm",
+                    "longName": "depth",
+                    "units": " cm",
+                    "detail": "middle of sample",
+                    "dataType": "N ",
+                    "null": "Note: Climate_interpretation_code has 3 fields separated by periods: Climate Parameter{e.g., T, P, Mode}.Parameter_detail{e.g, air, sea_surface, effective}.Climate_relation {e.g., positive or negative}"
+                },
+                {
+                    "column": 2,
+                    "shortName": "year_AD",
+                    "longName": "age",
+                    "units": " AD",
+                    "method": "linear interpolation",
+                    "dataType": "N "
+                },
+                {
+                    "column": 3,
+                    "shortName": "WIN_temp_C",
+                    "longName": "inferred sea-surface temperature (winter)",
+                    "material": "Dinocyst assemblages",
+                    "error": "GUI1990: MAT, Modern Analogue Technique, (Guiot, (1990))",
+                    "units": "deg C",
+                    "seasonality": "Winter",
+                    "archive": "marine sediments",
+                    "detail": "An annual average SST was calculated by averaging dynocist MAT summer and MAT winter SSTs; see tab \"Data (QC)\"",
+                    "method": "Modern Analogue Technique",
+                    "dataType": "N",
+                    "climateInterpretation": {
+                        "parameterDetail": "sea_surface",
+                        "parameter": "T",
+                        "interpDirection": "positive"
+                    },
+                    "basis": "Modern Analogue Technique"
+                },
+                {
+                    "column": 4,
+                    "shortName": "SUM_temp_C",
+                    "longName": "inferred sea-surface temperature (summer)",
+                    "material": "Dinocyst assemblages",
+                    "error": "GUI1990: MAT, Modern Analogue Technique, (Guiot, (1990))",
+                    "units": "deg C",
+                    "seasonality": "Summer",
+                    "archive": "marine sediments",
+                    "detail": "An annual average SST was calculated by averaging dynocist MAT summer and MAT winter SSTs; see tab \"Data (QC)\"",
+                    "method": "Modern Analogue Technique",
+                    "dataType": "N",
+                    "climateInterpretation": {
+                        "parameterDetail": "sea_surface",
+                        "parameter": "T",
+                        "interpDirection": "positive"
+                    },
+                    "basis": "Modern Analogue Technique"
+                },
+                {
+                    "column": 5,
+                    "shortName": "notes",
+                    "longName": "PLEASE USE QC DATA FOR ANALYSIS!!!!"
+                }
+            ]
+        },
+        {
+            "measTableName": "dataQC",
+            "filename": "dataQC.csv",
+            "columns": [
+                {
+                    "column": 1,
+                    "shortName": "depth_cm",
+                    "longName": "depth",
+                    "units": " cm",
+                    "detail": "middle of sample",
+                    "dataType": "N ",
+                    "null": "Note: Climate_interpretation_code has 3 fields separated by periods: Climate Parameter{e.g., T, P, Mode}.Parameter_detail{e.g, air, sea_surface, effective}.Climate_relation {e.g., positive or negative}"
+                },
+                {
+                    "column": 2,
+                    "shortName": "year_AD",
+                    "longName": "age",
+                    "units": " AD",
+                    "method": "linear interpolation",
+                    "dataType": "N "
+                },
+                {
+                    "column": 3,
+                    "shortName": "temp_C",
+                    "longName": "inferred sea-surface temperature",
+                    "material": "Dinocyst assemblages",
+                    "error": "GUI1990: MAT, Modern Analogue Technique, (Guiot, (1990))",
+                    "units": "deg C",
+                    "seasonality": "Annual",
+                    "archive": "marine sediments",
+                    "method": "Modern Analogue Technique",
+                    "dataType": "N",
+                    "climateInterpretation": {
+                        "parameterDetail": "sea_surface",
+                        "parameter": "T",
+                        "interpDirection": "positive"
+                    },
+                    "basis": "Modern Analogue Technique"
+                },
+                {
+                    "column": 4,
+                    "shortName": "notes",
+                    "longName": "An annual average SST was calculated by averaging dynocist MAT summer and MAT winter SSTs; Quality-controlled data from Bonnet et al. (2010) that was used in the O2K-LR analysis."
+                }
+            ]
+        }
     ]
 }
