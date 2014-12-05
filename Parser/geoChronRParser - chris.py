@@ -1,4 +1,6 @@
 import xlrd,os,csv
+import json
+from collections import OrderedDict
 #importing the jsonld * causes duplicate outputs
 
 
@@ -48,56 +50,71 @@ def name_to_jsonld(title_in):
 
 ## Traverse all cells in a row. If you find new data in a cell, add it to the list.
 ## Outputs a list of cell data for the specified row.
-def get_cells_right(sheet_id, row, col):
-    col_loop = 5
+def get_cells_right(workbook, sheet, row, col):
+    col_loop = 0
     cell_data = []
-    while col_loop > 0:
+    temp_sheet = workbook.sheet_by_name(sheet)
+    while col_loop < temp_sheet.ncols:
         col += 1
-        col_loop -= 1
-        if sheet_id.cell_value(row, col) != xlrd.empty_cell and sheet_id.cell_value(row, col) != '':
-            cell_data.append(sheet_id.cell_value(row, col))
+        col_loop += 1
+        try:
+            if temp_sheet.cell_value(row, col) != xlrd.empty_cell and temp_sheet.cell_value(row, col) != '':
+                cell_data.append(temp_sheet.cell_value(row, col))
+        except IndexError:
+            continue
+
     return cell_data
 
 
 ## Traverse all cells in a column moving downward. Primarily created for the metadata sheet, but may use elsewhere
 ## Check the cell title, and switch it to
-def get_cells_down(sheet_id, row, col):
+def get_cells_down(workbook, sheet, row, col):
     row_loop = 0
     special_cases = ['latMin', 'longMin', 'longMax', 'latMax', 'elevationVal']
-    longitude = {'longitude': {'units': 'decimalDegrees'}}
-    latitude = {'latitude': {'units': 'decimalDegrees'}}
-    geo = {}
-    elevation = {'elevation': {'units': 'm'}}
-    json_sheet_id = name_to_jsonld(sheet_id)
-    overallDict = {}
+    lon_inner = {}
+    geo_inner = {}
+    elev_inner = {}
+    lat_inner = {}
+    bottomDict = {}
+    topDict = OrderedDict()
 
-    ## Can't access sheet because sheet_id is returning sheet OBJ not sheet name
-    print(json_sheet_id)
-    print(sheet_id)
-    while row_loop < sheet_id.nrows:
+    lon_inner['units'] = 'decimalDegrees'
+    lat_inner['units'] = 'decimalDegrees'
+    elev_inner['units'] = 'm'
+    temp_sheet = workbook.sheet_by_name(sheet)
+    temp_sheet_name = name_to_jsonld(sheet)
+
+    ## Loop until we hit the max rows in the sheet
+    while row_loop < temp_sheet.nrows:
         try:
-            if sheet_id.cell_value(row, col) != xlrd.empty_cell and sheet_id.cell_value(row, col) != '':
+            ## If there is content in the cell...
+            if temp_sheet.cell_value(row, col) != xlrd.empty_cell and temp_sheet.cell_value(row, col) != '':
 
                 ## Convert title to correct format, and grab all data for that row
-                title = name_to_jsonld(sheet_id.cell_value(row, col))
-                cell_data = get_cells_right(sheet_id, row, col)
+                title_formal = temp_sheet.cell_value(row, col)
+                title_json = name_to_jsonld(title_formal)
+                cell_data = get_cells_right(workbook, sheet, row, col)
+
+                ## If we don't have a title for it, then it's not information we want to grab
+                if not title_json:
+                    pass
 
                 ## Handle special block of creating GEO dictionary
-                if title in special_cases:
-                    if title == 'latMax':
-                        latitude['latitude'] = {'max': cell_data}
-                    elif title == 'latMin':
-                        latitude['latitude'] = {'min': cell_data}
-                    elif title == 'longMax':
-                        longitude['longitude'] = {'max': cell_data}
-                    elif title == 'longMin':
-                        longitude['longitude'] = {'min': cell_data}
-                    elif title == 'elevationVal':
-                        elevation['elevation'] = {'value': cell_data}
+                elif title_json in special_cases:
+                    if title_json == 'latMax':
+                        lat_inner['max'] = cell_data
+                    elif title_json == 'latMin':
+                        lat_inner['min'] = cell_data
+                    elif title_json == 'longMax':
+                        lon_inner['max'] = cell_data
+                    elif title_json == 'longMin':
+                        lon_inner['min'] = cell_data
+                    elif title_json == 'elevationVal':
+                        elev_inner['value'] = cell_data
 
                 ## All other cases do not need fancy work
                 else:
-                    overallDict[json_sheet_id] = {title: cell_data}
+                    bottomDict[title_json] = cell_data
 
         except IndexError:
             continue
@@ -105,8 +122,15 @@ def get_cells_down(sheet_id, row, col):
         row_loop += 1
 
     ## Wait until all processing is finished, then combine all GEO elements and add to overall dictionary
-    geo['geo'] = longitude, latitude, elevation
-    return overallDict
+
+    geo = {'longitude': lon_inner,
+            'latitude': lat_inner,
+            'elevation': elev_inner}
+    topDict['@context'] = "context.jsonld"
+    topDict['geo'] = geo
+    for k, v in bottomDict.items():
+        topDict[k] = v
+    return topDict
 
 
 def parser():
@@ -153,16 +177,22 @@ def parser():
         for sheet in workbook.sheet_names():
             if sheet == 'Metadata':
                 metadata = workbook.sheet_by_index(workbook.sheet_names().index('Metadata'))
+                metadata_str = 'Metadata'
             elif sheet == 'Chronology':
                 chronology = workbook.sheet_by_index(workbook.sheet_names().index('Chronology'))
+                chronology_str = 'Chronology'
             elif sheet == 'Data (QC)':
                 data_qc = workbook.sheet_by_index(workbook.sheet_names().index('Data (QC)'))
+                data_qc_str = 'Data (QC)'
             elif sheet == 'ProxyList':
                 proxyList = workbook.sheet_by_index(workbook.sheet_names().index('ProxyList'))
+                proxyList_str = 'ProxyList'
             elif sheet == 'Data (original)':
                 data_original = workbook.sheet_by_index(workbook.sheet_names().index('Data (original)'))
+                data_original_str = 'Data (original)'
             elif sheet == 'About':
                 about = workbook.sheet_by_index(workbook.sheet_names().index('About'))
+                about_str = 'About'
 
 
         ## Check what worksheets are in this workbook
@@ -197,8 +227,7 @@ def parser():
             #whoEnteredinDB =
 
         ## Create the metadata dictionary
-        metadataDict = get_cells_down(metadata, 0, 0)
-        print(metadataDict)
+        metadataDict = get_cells_down(workbook, metadata_str, 0, 0)
 
         # pubYear = (metadata.cell_value(12,1))
         #Operations to slice together the PubString
@@ -273,31 +302,29 @@ def parser():
                                 title_out = 'error'
                             elif title_in == 'Seasonality':
                                 title_out = 'seasonality'
-                            contents = data_qc.cell_value(rowCellVars,i)
+                            contents = data_qc.cell_value(rowCellVars, i)
 
                         ## Inert the variable into the attributes dictionary
                         attrDict[title_out] = contents
                 except IndexError:
                     pass
 
+            ## Put all the data for this variable into a list
+            ## Need to catch IndexError exception or else it will go out of range
+            ## Iterations were trying to go beyond the last available cell and then breaking the list
+            rowCellData = 12
+            dataList = []
+            try:
+                while data_qc.cell_value(rowCellData, colCellData) != xlrd.empty_cell \
+                        and data_qc.cell_value(rowCellData, colCellData) != '':
+                    dataList.append(data_qc.cell_value(rowCellData, colCellData))
+                    rowCellData += 1
 
-            ## DO NOT NEED THIS DATA IN THE JSON OUTPUT. USE THIS LATER FOR THE CSV OUTPUT
+            except IndexError:
+                pass
 
-            # ## Put all the data for this variable into a list
-            # ## Need to catch IndexError exception or else it will go out of range
-            # ## Iterations were trying to go beyond the last available cell and then breaking the list
-            # rowCellData = 12
-            # dataList = []
-            # try:
-            #     while dataSheet.cell_value(rowCellData, colCellData) != xlrd.empty_cell:
-            #         dataList.append(dataSheet.cell_value(rowCellData,colCellData))
-            #         rowCellData += 1
-            #
-            # except IndexError:
-            #     pass
-            #
             # ## Put our list of data values in a dictionary
-            # dataDict = {'data': dataList}
+            measDataDict = {'data': dataList}
 
             ## Add all our data pieces for this column into a new entry in the Measurement Table Dictionary
             measTable[columnNumber] = column, shortName, longName, units, attrDict
@@ -331,7 +358,7 @@ def parser():
         # units =
         # type =
 
-        chronTableName = metadata.cell_value(30,1)
+        chronTableName = metadata.cell_value(30, 1)
 
         # Create the chronology table dictionary
         chronTable = {}
@@ -342,7 +369,7 @@ def parser():
 
 
         try:
-            while chronology.cell_value(rowCellVars,0) != xlrd.empty_cell and chronology.cell_value(rowCellVars,0) != '':
+            while chronology.cell_value(rowCellVars, 0) != xlrd.empty_cell and chronology.cell_value(rowCellVars, 0) != '':
 
                 ## Four mandatory variables for each column
                 ## Had to do separately because variable names are different in Excel file.
@@ -356,14 +383,14 @@ def parser():
                 dataList = []
                 try:
                     while chronology.cell_value(rowCellData, colCellData) != xlrd.empty_cell and chronology.cell_value(rowCellData, colCellData) != '':
-                        dataList.append(chronology.cell_value(rowCellData,colCellData))
+                        dataList.append(chronology.cell_value(rowCellData, colCellData))
                         rowCellData += 1
 
                 except IndexError:
                     pass
 
                 ## Put our list of data values in a dictionary
-                # dataDict = {'data': dataList}
+                chronDataDict = {'data': dataList}
 
                 ## Add all our data pieces for this column into a new entry in the Measurement Table Dictionary
                 chronTable[columnNumber] = column, shortName, longName
@@ -387,33 +414,30 @@ def parser():
 
   #########################  FILE NAMING AND OUTPUT #######################
 
-        # #Create jsonld and csv files with the filename we found
-        # new_file_name_jsonld = str(name) + '/' + str(name) + '.jsonld'
-        # new_file_name_csv = str(name) + '/' + str(name) + '.csv'
-        #
-        # # creates the directory 'output' if it does not already exist
-        # if not os.path.exists('output/' + str(name)):
-        #     os.makedirs('output/' + str(name))
-        #
-        # # creates the new jsonld and csv files
-        # file_jsonld = open('output/' + new_file_name_jsonld, 'w')
-        # file_csv = open('output/' + new_file_name_csv, 'w')
-        #
-        # # makes the jsonld and csv files read and writeable
-        # file_jsonld = open('output/' + new_file_name_jsonld, 'r+')
-        # file_csv = open('output/' + new_file_name_csv, 'r+')
-        #
-        # # makes sure that the context is definied in every jsonld file
-        # file_jsonld.write('{"@context" : "context.jsonld"\n')
-        # ## Write Metadata Dictionary to file
-        # file_jsonld.write(str(metadataDict))
-        # file_jsonld.write(',\n\n')
-        # ## Write Measurement Dictionary to file
-        # file_jsonld.write(str(measTableDict))
-        # file_jsonld.write(',\n\n')
-        # ## Write Chronology Dictionary to file
-        # file_jsonld.write(str(chronTableDict))
-        # file_jsonld.write('}\n')
+        #Create jsonld and csv files with the filename we found
+
+        # creates the directory 'output' if it does not already exist
+        if not os.path.exists('output/' + str(name)):
+            os.makedirs('output/' + str(name))
+
+        ## CSV
+        csv_folder_and_name = str(name) + '/' + str(name) + '.csv'
+        csv_full_path = 'output/' + csv_folder_and_name
+        file_csv = open(csv_full_path, 'w')
+        writer = csv.writer(open(csv_full_path, 'wb'))
+        with open(csv_full_path, 'w', newline='') as f:
+            w = csv.writer(f)
+            w.writerows(chronDataDict.items())
+
+        ## JSON LD
+        new_file_name_jsonld = str(name) + '/' + str(name) + '.jsonld'
+        file_jsonld = open('output/' + new_file_name_jsonld, 'w')
+        file_jsonld = open('output/' + new_file_name_jsonld, 'r+')
+
+        ##
+        json.dump(metadataDict, file_jsonld, indent=4)
+
+        ## Write Metadata Dictionary to file
 
 
 parser()
