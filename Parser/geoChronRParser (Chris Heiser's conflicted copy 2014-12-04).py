@@ -48,56 +48,67 @@ def name_to_jsonld(title_in):
 
 ## Traverse all cells in a row. If you find new data in a cell, add it to the list.
 ## Outputs a list of cell data for the specified row.
-def get_cells_right(sheet_id, row, col):
-    col_loop = 5
+def get_cells_right(workbook, sheet, row, col):
+    col_loop = 0
     cell_data = []
-    while col_loop > 0:
+    temp_sheet = workbook.sheet_by_name(sheet)
+    while col_loop < temp_sheet.ncols:
         col += 1
-        col_loop -= 1
-        if sheet_id.cell_value(row, col) != xlrd.empty_cell and sheet_id.cell_value(row, col) != '':
-            cell_data.append(sheet_id.cell_value(row, col))
-    return cell_data
+        col_loop += 1
+        try:
+            if temp_sheet.cell_value(row, col) != xlrd.empty_cell and temp_sheet.cell_value(row, col) != '':
+                cell_data.append(temp_sheet.cell_value(row, col))
+            return cell_data
+        except IndexError:
+            continue
 
 
 ## Traverse all cells in a column moving downward. Primarily created for the metadata sheet, but may use elsewhere
 ## Check the cell title, and switch it to
-def get_cells_down(sheet_id, row, col):
+def get_cells_down(workbook, sheet, row, col):
     row_loop = 0
     special_cases = ['latMin', 'longMin', 'longMax', 'latMax', 'elevationVal']
-    longitude = {'longitude': {'units': 'decimalDegrees'}}
-    latitude = {'latitude': {'units': 'decimalDegrees'}}
-    geo = {}
-    elevation = {'elevation': {'units': 'm'}}
-    json_sheet_id = name_to_jsonld(sheet_id)
-    overallDict = {}
+    lon_inner = {}
+    geo_inner = {}
+    elev_inner = {}
+    lat_inner = {}
+    bottomDict = {}
+    topDict = {}
 
+    lon_inner['units'] = 'decimalDegrees'
+    lat_inner['units'] = 'decimalDegrees'
+    elev_inner['units'] = 'm'
+    temp_sheet = workbook.sheet_by_name(sheet)
+    temp_sheet_name = name_to_jsonld(sheet)
     ## Can't access sheet because sheet_id is returning sheet OBJ not sheet name
-    print(json_sheet_id)
-    print(sheet_id)
-    while row_loop < sheet_id.nrows:
+    while row_loop < temp_sheet.nrows:
         try:
-            if sheet_id.cell_value(row, col) != xlrd.empty_cell and sheet_id.cell_value(row, col) != '':
+            if temp_sheet.cell_value(row, col) != xlrd.empty_cell and temp_sheet.cell_value(row, col) != '':
+
+
+                ## SOMETHING WRONG IN HERE. NOT GRABBING ALL CELL DATA, NOT GRABBING MULTIPLE COL DATA
 
                 ## Convert title to correct format, and grab all data for that row
-                title = name_to_jsonld(sheet_id.cell_value(row, col))
-                cell_data = get_cells_right(sheet_id, row, col)
+                title_formal = temp_sheet.cell_value(row, col)
+                title_json = name_to_jsonld(title_formal)
+                cell_data = get_cells_right(workbook, sheet, row, col)
 
                 ## Handle special block of creating GEO dictionary
                 if title in special_cases:
                     if title == 'latMax':
-                        latitude['latitude'] = {'max': cell_data}
+                        lat_inner['max'] = cell_data
                     elif title == 'latMin':
-                        latitude['latitude'] = {'min': cell_data}
+                        lat_inner['min'] = cell_data
                     elif title == 'longMax':
-                        longitude['longitude'] = {'max': cell_data}
+                        lon_inner['max'] = cell_data
                     elif title == 'longMin':
-                        longitude['longitude'] = {'min': cell_data}
+                        lon_inner['min'] = cell_data
                     elif title == 'elevationVal':
-                        elevation['elevation'] = {'value': cell_data}
+                        elev_inner['value'] = cell_data
 
                 ## All other cases do not need fancy work
                 else:
-                    overallDict[json_sheet_id] = {title: cell_data}
+                    bottomDict[title] = cell_data
 
         except IndexError:
             continue
@@ -105,8 +116,12 @@ def get_cells_down(sheet_id, row, col):
         row_loop += 1
 
     ## Wait until all processing is finished, then combine all GEO elements and add to overall dictionary
-    geo['geo'] = longitude, latitude, elevation
-    return overallDict
+    lon_outer = {'longitude': lon_inner}
+    lat_outer = {'latitude': lat_inner}
+    elev_outer = {'elevation': elev_inner}
+    geo_inner['geo'] = lon_outer, lat_outer, elev_outer
+    topDict[temp_sheet_name] = bottomDict, geo_inner
+    return topDict
 
 
 def parser():
@@ -153,16 +168,22 @@ def parser():
         for sheet in workbook.sheet_names():
             if sheet == 'Metadata':
                 metadata = workbook.sheet_by_index(workbook.sheet_names().index('Metadata'))
+                metadata_str = 'Metadata'
             elif sheet == 'Chronology':
                 chronology = workbook.sheet_by_index(workbook.sheet_names().index('Chronology'))
+                chronology_str = 'Chronology'
             elif sheet == 'Data (QC)':
                 data_qc = workbook.sheet_by_index(workbook.sheet_names().index('Data (QC)'))
+                data_qc_str = 'Data (QC)'
             elif sheet == 'ProxyList':
                 proxyList = workbook.sheet_by_index(workbook.sheet_names().index('ProxyList'))
+                proxyList_str = 'ProxyList'
             elif sheet == 'Data (original)':
                 data_original = workbook.sheet_by_index(workbook.sheet_names().index('Data (original)'))
+                data_original_str = 'Data (original)'
             elif sheet == 'About':
                 about = workbook.sheet_by_index(workbook.sheet_names().index('About'))
+                about_str = 'About'
 
 
         ## Check what worksheets are in this workbook
@@ -197,7 +218,7 @@ def parser():
             #whoEnteredinDB =
 
         ## Create the metadata dictionary
-        metadataDict = get_cells_down(metadata, 0, 0)
+        metadataDict = get_cells_down(workbook, metadata_str, 0, 0)
         print(metadataDict)
 
         # pubYear = (metadata.cell_value(12,1))
