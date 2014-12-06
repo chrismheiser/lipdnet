@@ -6,6 +6,56 @@ from collections import OrderedDict
 ## GLOBAL VARIABLES
 finalDict = OrderedDict()
 
+## Use this to ouput data columns to a csv file
+def output_csv(workbook, sheet, name):
+    ## CSV
+    json_naming = name_to_jsonld(sheet)
+    temp_sheet = workbook.sheet_by_name(sheet)
+    csv_folder_and_name = str(name) + '/' + str(name) + str(json_naming) + '.csv'
+    csv_full_path = 'output/' + csv_folder_and_name
+    file_csv = open(csv_full_path, 'w', newline='')
+    w = csv.writer(file_csv)
+
+    end_row = (temp_sheet.nrows - 1)
+
+    ## Loop to find starting data cell
+    for i in range(0, temp_sheet.nrows):
+
+        ## If we find "data" then, use that as a reference to find first data cell
+        if temp_sheet.cell_value(i, 0) == 'Data':
+            start_row = i + 3
+            current_row = start_row - 1
+
+    ## Check how many columns we're going to have
+    try:
+        var_limit = 0
+        while temp_sheet.cell_value(start_row, var_limit) != " " \
+                and temp_sheet.cell_value(start_row, var_limit) != xlrd.empty_cell\
+                and temp_sheet.cell_value(start_row, var_limit) != "":
+            var_limit += 1
+
+        ## Until we reach the bottom worksheet
+        while current_row < temp_sheet.nrows:
+            data_list = []
+
+            ## Move down a row and go back to column 0
+            current_row += 1
+            current_column = -1
+
+            ## Until we reach the right side worksheet
+            while current_column < var_limit:
+
+                # Increment to column 0, and grab the cell content
+                current_column += 1
+                cell_value = temp_sheet.cell_value(current_row, current_column)
+                data_list.append(cell_value)
+            w.writerow(data_list)
+    except IndexError:
+        pass
+
+    file_csv.close()
+    return
+
 
 ## Use this to convert formal titles to camelcase json_ld text that matches our context file
 ## Keep a growing list of all titles that are being used in the json_ld context
@@ -206,7 +256,7 @@ def cells_right_datasheets(workbook, sheet, row, col, colListNum):
     return attrDict
 
 ## Returns nothing, but adds all measurement table data to the final dictionary
-def cells_down_datasheets(workbook, sheet, row, col):
+def cells_down_datasheets(filename, workbook, sheet, row, col):
 
     ## Create a dictionary to hold each column as a separate entry
     measTableDict = OrderedDict()
@@ -233,7 +283,7 @@ def cells_down_datasheets(workbook, sheet, row, col):
 
     ## Add all our data pieces for this column into a new entry in the Measurement Table Dictionary
     measTableDict['measTableName'] = measTableName
-    measTableDict['filename'] = str(measTableName) + ".csv"
+    measTableDict['filename'] = str(filename) + str(measTableName) + ".csv"
     measTableDict['columns'] = columnsTop
 
     return measTableDict
@@ -340,8 +390,8 @@ def parser():
 ##################################### DATA WORKSHEET #################################################################
 
 
-        ws_original = cells_down_datasheets(workbook, data_original_str, 2, 0)
-        ws_qc = cells_down_datasheets(workbook, data_qc_str, 2, 0)
+        ws_original = cells_down_datasheets(name, workbook, data_original_str, 2, 0)
+        ws_qc = cells_down_datasheets(name, workbook, data_qc_str, 2, 0)
 
         combined = ws_original, ws_qc
 
@@ -421,22 +471,15 @@ def parser():
             os.makedirs('output/' + str(name))
 
         ## CSV
-        csv_folder_and_name = str(name) + '/' + str(name) + '.csv'
-        csv_full_path = 'output/' + csv_folder_and_name
-        file_csv = open(csv_full_path, 'w')
-        writer = csv.writer(open(csv_full_path, 'wb'))
-        with open(csv_full_path, 'w', newline='') as f:
-            w = csv.writer(f)
-            w.writerows(chronDataDict.items())
+        output_csv(workbook, data_qc_str, name)
+        output_csv(workbook, data_original_str, name)
 
         ## JSON LD
         new_file_name_jsonld = str(name) + '/' + str(name) + '.jsonld'
         file_jsonld = open('output/' + new_file_name_jsonld, 'w')
         file_jsonld = open('output/' + new_file_name_jsonld, 'r+')
 
-        ## Write finalDict to json-ld file with dump
-        # json.dump(metadataDict, file_jsonld, indent=4)
+        # Write finalDict to json-ld file with dump
         json.dump(finalDict, file_jsonld, indent=4)
-        # json.dump(output_meas_original, file_jsonld, indent=4)
 
 parser()

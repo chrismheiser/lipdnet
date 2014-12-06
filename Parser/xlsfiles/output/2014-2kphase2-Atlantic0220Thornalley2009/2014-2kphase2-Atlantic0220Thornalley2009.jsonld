@@ -4,121 +4,55 @@
         "longitude": {
             "units": "decimalDegrees",
             "min": [
-                6.77
+                -17.82
             ],
             "max": [
-                6.77
+                -17.82
             ]
         },
         "elevation": {
             "units": "m",
             "value": [
-                -1497.0
+                -1938.0
             ]
         },
         "latitude": {
             "units": "decimalDegrees",
             "min": [
-                78.92
+                62.08
             ],
             "max": [
-                78.92
+                62.08
             ]
         }
     },
     "pubDOI": [
-        "doi:10.1016/j.marmicro.2009.12.001"
+        "doi:10.1038/nature07717"
     ],
     "investigators": [
-        "Bonnet, S.; de Vernal, A.; Hillaire-Marcel, C.; Radi, T.; Husum, K."
+        "Thornalley, D.J.R; Elderfield, H.; McCave, N"
     ],
     "siteName": [
-        "West Spitzberg, Fram Strait"
+        "RAPiD-12-1K, South Iceland Rise, northeast North Atlantic"
     ],
     "pubYear": [
         "submitted (Oct 2014)",
-        2010.0
+        2009.0
     ],
     "collectionName": [
-        "Bonnet.2010.JM06-WP-04-MCB"
+        "Thornalley.2009.RAPiD-12-1K"
     ],
     "measurements": [
         {
             "measTableName": "dataOriginal",
-            "filename": "2014-2kphase2-Arctic1147Bonnet2010dataOriginal.csv",
+            "filename": "2014-2kphase2-Atlantic0220Thornalley2009dataOriginal.csv",
             "columns": [
                 {
                     "column": 1,
                     "shortName": "depth_cm",
                     "longName": "depth",
                     "units": " cm",
-                    "detail": "middle of sample",
-                    "dataType": "N ",
-                    "null": "Note: Climate_interpretation_code has 3 fields separated by periods: Climate Parameter{e.g., T, P, Mode}.Parameter_detail{e.g, air, sea_surface, effective}.Climate_relation {e.g., positive or negative}"
-                },
-                {
-                    "column": 2,
-                    "shortName": "year_AD",
-                    "longName": "age",
-                    "units": " AD",
-                    "method": "linear interpolation",
-                    "dataType": "N "
-                },
-                {
-                    "column": 3,
-                    "shortName": "WIN_temp_C",
-                    "longName": "inferred sea-surface temperature (winter)",
-                    "material": "Dinocyst assemblages",
-                    "error": "GUI1990: MAT, Modern Analogue Technique, (Guiot, (1990))",
-                    "units": "deg C",
-                    "seasonality": "Winter",
-                    "archive": "marine sediments",
-                    "detail": "An annual average SST was calculated by averaging dynocist MAT summer and MAT winter SSTs; see tab \"Data (QC)\"",
-                    "method": "Modern Analogue Technique",
-                    "dataType": "N",
-                    "climateInterpretation": {
-                        "parameterDetail": "sea_surface",
-                        "parameter": "T",
-                        "interpDirection": "positive"
-                    },
-                    "basis": "Modern Analogue Technique"
-                },
-                {
-                    "column": 4,
-                    "shortName": "SUM_temp_C",
-                    "longName": "inferred sea-surface temperature (summer)",
-                    "material": "Dinocyst assemblages",
-                    "error": "GUI1990: MAT, Modern Analogue Technique, (Guiot, (1990))",
-                    "units": "deg C",
-                    "seasonality": "Summer",
-                    "archive": "marine sediments",
-                    "detail": "An annual average SST was calculated by averaging dynocist MAT summer and MAT winter SSTs; see tab \"Data (QC)\"",
-                    "method": "Modern Analogue Technique",
-                    "dataType": "N",
-                    "climateInterpretation": {
-                        "parameterDetail": "sea_surface",
-                        "parameter": "T",
-                        "interpDirection": "positive"
-                    },
-                    "basis": "Modern Analogue Technique"
-                },
-                {
-                    "column": 5,
-                    "shortName": "notes",
-                    "longName": "PLEASE USE QC DATA FOR ANALYSIS!!!!"
-                }
-            ]
-        },
-        {
-            "measTableName": "dataQC",
-            "filename": "2014-2kphase2-Arctic1147Bonnet2010dataQC.csv",
-            "columns": [
-                {
-                    "column": 1,
-                    "shortName": "depth_cm",
-                    "longName": "depth",
-                    "units": " cm",
-                    "detail": "middle of sample",
+                    "detail": "top ",
                     "dataType": "N ",
                     "null": "Note: Climate_interpretation_code has 3 fields separated by periods: Climate Parameter{e.g., T, P, Mode}.Parameter_detail{e.g, air, sea_surface, effective}.Climate_relation {e.g., positive or negative}"
                 },
@@ -134,24 +68,70 @@
                     "column": 3,
                     "shortName": "temp_C",
                     "longName": "inferred sea-surface temperature",
-                    "material": "Dinocyst assemblages",
-                    "error": "GUI1990: MAT, Modern Analogue Technique, (Guiot, (1990))",
+                    "material": "foram Mg/Ca",
+                    "error": "BAR2005: Mg/Ca=0.794*exp(0.10*SST), (Barker et al., (2005), in combination with Thornalley et al., (2009); error \u00b11.3\u00b0C)",
                     "units": "deg C",
-                    "seasonality": "Annual",
+                    "seasonality": "MJJ",
                     "archive": "marine sediments",
-                    "method": "Modern Analogue Technique",
+                    "method": "Mg/Ca",
                     "dataType": "N",
                     "climateInterpretation": {
                         "parameterDetail": "sea_surface",
                         "parameter": "T",
                         "interpDirection": "positive"
                     },
-                    "basis": "Modern Analogue Technique"
+                    "basis": "Mg/Ca calibration to SST"
                 },
                 {
                     "column": 4,
                     "shortName": "notes",
-                    "longName": "An annual average SST was calculated by averaging dynocist MAT summer and MAT winter SSTs; Quality-controlled data from Bonnet et al. (2010) that was used in the O2K-LR analysis."
+                    "longName": "Original  dataset from Thornalley et al. (2009) - PLEASE USE QC DATA FOR ANALYSIS!!!!"
+                }
+            ]
+        },
+        {
+            "measTableName": "dataQC",
+            "filename": "2014-2kphase2-Atlantic0220Thornalley2009dataQC.csv",
+            "columns": [
+                {
+                    "column": 1,
+                    "shortName": "depth_cm",
+                    "longName": "depth",
+                    "units": " cm",
+                    "detail": "top",
+                    "dataType": "N ",
+                    "null": "Note: Climate_interpretation_code has 3 fields separated by periods: Climate Parameter{e.g., T, P, Mode}.Parameter_detail{e.g, air, sea_surface, effective}.Climate_relation {e.g., positive or negative}"
+                },
+                {
+                    "column": 2,
+                    "shortName": "year_AD",
+                    "longName": "age",
+                    "units": " AD",
+                    "method": "linear interpolation",
+                    "dataType": "N "
+                },
+                {
+                    "column": 3,
+                    "shortName": "temp_C",
+                    "longName": "inferred sea-surface temperature",
+                    "material": "foram Mg/Ca",
+                    "error": "BAR2005: Mg/Ca=0.794*exp(0.10*SST), (Barker et al., (2005), in combination with Thornalley et al., (2009); error \u00b11.3\u00b0C)",
+                    "units": "deg C",
+                    "seasonality": "MJJ",
+                    "archive": "marine sediments",
+                    "method": "Mg/Ca",
+                    "dataType": "N",
+                    "climateInterpretation": {
+                        "parameterDetail": "sea_surface",
+                        "parameter": "T",
+                        "interpDirection": "positive"
+                    },
+                    "basis": "Mg/Ca calibration to SST"
+                },
+                {
+                    "column": 4,
+                    "shortName": "notes",
+                    "longName": "All O2K-LR records have been quality-controlled according to protocols published in Nature Geoscience supplement"
                 }
             ]
         }
