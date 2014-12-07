@@ -6,9 +6,10 @@ from collections import OrderedDict
 ## GLOBAL VARIABLES
 finalDict = OrderedDict()
 
+
 ## Use this to ouput data columns to a csv file
 def output_csv(workbook, sheet, name):
-    ## CSV
+
     json_naming = name_to_jsonld(sheet)
     temp_sheet = workbook.sheet_by_name(sheet)
     csv_folder_and_name = str(name) + '/' + str(name) + str(json_naming) + '.csv'
@@ -16,22 +17,21 @@ def output_csv(workbook, sheet, name):
     file_csv = open(csv_full_path, 'w', newline='')
     w = csv.writer(file_csv)
 
-    end_row = (temp_sheet.nrows - 1)
-
     ## Loop to find starting data cell
     for i in range(0, temp_sheet.nrows):
 
-        ## If we find "data" then, use that as a reference to find first data cell
-        if temp_sheet.cell_value(i, 0) == 'Data':
-            start_row = i + 3
-            current_row = start_row - 1
+        ## Find the first cell that has a number value, or has NA
+        if isinstance(temp_sheet.cell_value(i, 0), int) or isinstance(temp_sheet.cell_value(i, 0), float)\
+            or temp_sheet.cell_value(i, 0) == 'NA' or temp_sheet.cell_value(i, 0) == 'N/A':
+            current_row = i
+            break
 
     ## Check how many columns we're going to have
     try:
         var_limit = 0
-        while temp_sheet.cell_value(start_row, var_limit) != " " \
-                and temp_sheet.cell_value(start_row, var_limit) != xlrd.empty_cell\
-                and temp_sheet.cell_value(start_row, var_limit) != "":
+        while temp_sheet.cell_value(current_row, var_limit) != " " \
+                and temp_sheet.cell_value(current_row, var_limit) != xlrd.empty_cell\
+                and temp_sheet.cell_value(current_row, var_limit) != "":
             var_limit += 1
 
         ## Until we reach the bottom worksheet
@@ -39,17 +39,18 @@ def output_csv(workbook, sheet, name):
             data_list = []
 
             ## Move down a row and go back to column 0
-            current_row += 1
-            current_column = -1
+            current_column = 0
 
             ## Until we reach the right side worksheet
             while current_column < var_limit:
 
                 # Increment to column 0, and grab the cell content
-                current_column += 1
                 cell_value = temp_sheet.cell_value(current_row, current_column)
                 data_list.append(cell_value)
+                current_column += 1
             w.writerow(data_list)
+            current_row += 1
+
     except IndexError:
         pass
 
@@ -66,10 +67,12 @@ def name_to_jsonld(title_in):
         title_out = 'metadata'
     elif title_in == 'Chronology':
         title_out = 'chronology'
-    elif title_in == 'Data (QC)':
+    elif title_in == 'Data (QC)' or title_in == 'Data(QC)':
         title_out = 'dataQC'
-    elif title_in == 'Data (original)':
+    elif title_in == 'Data (original)' or title_in == 'Data(original)':
         title_out = 'dataOriginal'
+    elif title_in == 'Data':
+        title_out = 'data'
     elif title_in == 'ProxyList':
         title_out = 'proxyList'
     elif title_in == 'About':
@@ -318,6 +321,8 @@ def parser():
         if file.endswith(".xls") or file.endswith(".xlsx"):
             excel_files.append(file)
 
+
+    datasheetNameList = []
     # ## Loop over all the lines (filenames) that are in the txt file
     print("Processing... ")
     for current_file in excel_files:
@@ -329,6 +334,11 @@ def parser():
 
         ## Most common sheets. If find sheet with matching name, set to variable
         for sheet in workbook.sheet_names():
+            new_name = name_to_jsonld(sheet)
+            data_original_str = None
+            data_qc_str = None
+            data_str = None
+
             if sheet == 'Metadata':
                 metadata = workbook.sheet_by_index(workbook.sheet_names().index('Metadata'))
                 metadata_str = 'Metadata'
@@ -338,19 +348,33 @@ def parser():
             elif sheet == 'Data (QC)':
                 data_qc = workbook.sheet_by_index(workbook.sheet_names().index('Data (QC)'))
                 data_qc_str = 'Data (QC)'
-            elif sheet == 'ProxyList':
+                datasheetNameList.append(data_qc_str)
+            elif sheet == 'Data(QC)':
+                data_qc = workbook.sheet_by_index(workbook.sheet_names().index('Data(QC)'))
+                data_qc_str = 'Data(QC)'
+                datasheetNameList.append(data_qc_str)
+            elif new_name == 'ProxyList':
                 proxyList = workbook.sheet_by_index(workbook.sheet_names().index('ProxyList'))
                 proxyList_str = 'ProxyList'
             elif sheet == 'Data (original)':
                 data_original = workbook.sheet_by_index(workbook.sheet_names().index('Data (original)'))
                 data_original_str = 'Data (original)'
+                datasheetNameList.append(data_original_str)
+            elif sheet == 'Data(original)':
+                data_original = workbook.sheet_by_index(workbook.sheet_names().index('Data(original)'))
+                data_original_str = 'Data(original)'
+                datasheetNameList.append(data_original_str)
             elif sheet == 'About':
                 about = workbook.sheet_by_index(workbook.sheet_names().index('About'))
                 about_str = 'About'
+            elif sheet == 'Data':
+                data = workbook.sheet_by_index(workbook.sheet_names().index('Data'))
+                data_str = 'Data'
+                datasheetNameList.append(data_str)
+
 
         # Naming scheme
         # Use whatever string name comes before the file extension
-
         name = current_file
 
         if 'xlsfiles/' in name:
@@ -390,17 +414,17 @@ def parser():
 ##################################### DATA WORKSHEET #################################################################
 
 
-        ws_original = cells_down_datasheets(name, workbook, data_original_str, 2, 0)
-        ws_qc = cells_down_datasheets(name, workbook, data_qc_str, 2, 0)
+        ## Need to handle cases where there is Data_QC, Data_original, or Data, or a combination of them.
+        combined = []
 
-        combined = ws_original, ws_qc
+        for sheet_str in datasheetNameList:
+            sheet_name = sheet_str
+            sheet_str = cells_down_datasheets(name, workbook, sheet_str, 2, 0)
+            combined.append(sheet_str)
 
         ## Add all dict items without adding in all the extra braces
         finalDict['measurements'] = combined
 
-        ## Create Top level Measurement Dictionary so we can give it a key
-        measTableDict = {}
-        # measTableDict['measTableName'] = measTable
 
 ########################## CHRONOLOGY WORKSHEET ######################################################################
 
@@ -470,9 +494,13 @@ def parser():
         if not os.path.exists('output/' + str(name)):
             os.makedirs('output/' + str(name))
 
+
+
+        ## SOMETHING WRONG HERE. NOT OUTPUTTING ALL DATA SHEETS TO CSV FILES
         ## CSV
-        output_csv(workbook, data_qc_str, name)
-        output_csv(workbook, data_original_str, name)
+        for sheet_str in datasheetNameList:
+            output_csv(workbook, sheet_str, name)
+        del datasheetNameList[:]
 
         ## JSON LD
         new_file_name_jsonld = str(name) + '/' + str(name) + '.jsonld'

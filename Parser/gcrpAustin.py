@@ -424,6 +424,9 @@ def parser():
 
         ##################### CSV ####################################
 
+        file_csv = open(csv_full_path, 'w')
+        writer = csv.writer(file_csv)
+
         end_col = (data_qc.ncols - 1)
         end_row = (data_qc.nrows - 1)
         output_row = -1
@@ -435,22 +438,21 @@ def parser():
                 start_row = i + 3
                 current_row = start_row - 1
 
-        while current_row < end_row:
+        for i in range(current_row, end_row):
+
             data_list = []
 
-            current_row += 1
-            current_column = -1
+            current_column = 0
 
-                while current_column < end_col:
+            for i in range(current_column, end_col):
 
-                    current_column += 1
-                    cell_value = data_qc.cell_value(current_row, current_column)
+                cell_value = data_qc.cell_value(current_row, current_column)
+                data_list.append(str(cell_value) + ', ')
 
-                    data_list.append(str(cell_value) + ' , ')
-
-                    with open(file_csv, 'w') as example:
-                        w = csv.writer(example)
-                        w.writerow(data_list)
+                x = 0
+                y = 0
+                index = [x, y]
+                writer.writerow(data_list)
 
 
 
