@@ -1,51 +1,37 @@
 {
     "@context": "context.jsonld",
     "geo": {
-        "elevation": {
-            "value": [
-                -1497.0
-            ],
-            "units": "m"
-        },
         "longitude": {
-            "max": [
-                6.77
-            ],
+            "max": 6.77,
             "units": "decimalDegrees",
-            "min": [
-                6.77
-            ]
+            "min": 6.77
         },
         "latitude": {
-            "max": [
-                78.92
-            ],
+            "max": 78.92,
             "units": "decimalDegrees",
-            "min": [
-                78.92
-            ]
+            "min": 78.92
+        },
+        "elevation": {
+            "value": -1497.0,
+            "units": "m"
         }
     },
-    "investigators": [
-        "Bonnet, S.; de Vernal, A.; Hillaire-Marcel, C.; Radi, T.; Husum, K."
-    ],
-    "pubYear": [
-        "submitted (Oct 2014)",
-        2010.0
-    ],
-    "collectionName": [
-        "Bonnet.2010.JM06-WP-04-MCB"
-    ],
-    "siteName": [
-        "West Spitzberg, Fram Strait"
-    ],
-    "pubDOI": [
-        "doi:10.1016/j.marmicro.2009.12.001"
-    ],
+    "pub": {
+        "authors": "Bonnet, S.; de Vernal, A.; Hillaire-Marcel, C.; Radi, T.; Husum, K.",
+        "DOI": "doi:10.1016/j.marmicro.2009.12.001",
+        "year": [
+            "submitted (Oct 2014)",
+            2010.0
+        ]
+    },
+    "comments": "All O2K-LR records have been quality-controlled according to protocols published in Nature Geoscience supplement;\u00a0see \"Data (QC) tab\" cell C6 for details",
+    "siteName": "West Spitzberg, Fram Strait",
+    "collectionName": "Bonnet.2010.JM06-WP-04-MCB",
     "measurements": [
         {
             "measTableName": "dataQC",
             "filename": "2014-2kphase2-Arctic1147Bonnet2010dataQC.csv",
+            "comments": "An annual average SST was calculated by averaging dynocist MAT summer and MAT winter SSTs; Quality-controlled data from Bonnet et al. (2010) that was used in the O2K-LR analysis.",
             "columns": [
                 {
                     "column": 1,
@@ -53,8 +39,7 @@
                     "longName": "depth",
                     "units": " cm",
                     "detail": "middle of sample",
-                    "dataType": "N ",
-                    "null": "Note: Climate_interpretation_code has 3 fields separated by periods: Climate Parameter{e.g., T, P, Mode}.Parameter_detail{e.g, air, sea_surface, effective}.Climate_relation {e.g., positive or negative}"
+                    "dataType": "N "
                 },
                 {
                     "column": 2,
@@ -71,27 +56,23 @@
                     "material": "Dinocyst assemblages",
                     "error": "GUI1990: MAT, Modern Analogue Technique, (Guiot, (1990))",
                     "units": "deg C",
-                    "seasonality": "Annual",
+                    "climateInterpretation": {
+                        "parameter": "T",
+                        "parameterDetail": "sea_surface",
+                        "interpDirection": "positive",
+                        "seasonality": "Annual",
+                        "basis": "Modern Analogue Technique"
+                    },
                     "archive": "marine sediments",
                     "method": "Modern Analogue Technique",
-                    "dataType": "N",
-                    "climateInterpretation": {
-                        "parameterDetail": "sea_surface",
-                        "parameter": "T",
-                        "interpDirection": "positive"
-                    },
-                    "basis": "Modern Analogue Technique"
-                },
-                {
-                    "column": 4,
-                    "shortName": "notes",
-                    "longName": "An annual average SST was calculated by averaging dynocist MAT summer and MAT winter SSTs; Quality-controlled data from Bonnet et al. (2010) that was used in the O2K-LR analysis."
+                    "dataType": "N"
                 }
             ]
         },
         {
             "measTableName": "dataOriginal",
             "filename": "2014-2kphase2-Arctic1147Bonnet2010dataOriginal.csv",
+            "comments": "PLEASE USE QC DATA FOR ANALYSIS!!!!",
             "columns": [
                 {
                     "column": 1,
@@ -99,8 +80,7 @@
                     "longName": "depth",
                     "units": " cm",
                     "detail": "middle of sample",
-                    "dataType": "N ",
-                    "null": "Note: Climate_interpretation_code has 3 fields separated by periods: Climate Parameter{e.g., T, P, Mode}.Parameter_detail{e.g, air, sea_surface, effective}.Climate_relation {e.g., positive or negative}"
+                    "dataType": "N "
                 },
                 {
                     "column": 2,
@@ -117,17 +97,17 @@
                     "material": "Dinocyst assemblages",
                     "error": "GUI1990: MAT, Modern Analogue Technique, (Guiot, (1990))",
                     "units": "deg C",
-                    "seasonality": "Winter",
+                    "climateInterpretation": {
+                        "parameter": "T",
+                        "parameterDetail": "sea_surface",
+                        "interpDirection": "positive",
+                        "seasonality": "Winter",
+                        "basis": "Modern Analogue Technique"
+                    },
                     "archive": "marine sediments",
                     "detail": "An annual average SST was calculated by averaging dynocist MAT summer and MAT winter SSTs; see tab \"Data (QC)\"",
                     "method": "Modern Analogue Technique",
-                    "dataType": "N",
-                    "climateInterpretation": {
-                        "parameterDetail": "sea_surface",
-                        "parameter": "T",
-                        "interpDirection": "positive"
-                    },
-                    "basis": "Modern Analogue Technique"
+                    "dataType": "N"
                 },
                 {
                     "column": 4,
@@ -136,22 +116,17 @@
                     "material": "Dinocyst assemblages",
                     "error": "GUI1990: MAT, Modern Analogue Technique, (Guiot, (1990))",
                     "units": "deg C",
-                    "seasonality": "Summer",
+                    "climateInterpretation": {
+                        "parameter": "T",
+                        "parameterDetail": "sea_surface",
+                        "interpDirection": "positive",
+                        "seasonality": "Summer",
+                        "basis": "Modern Analogue Technique"
+                    },
                     "archive": "marine sediments",
                     "detail": "An annual average SST was calculated by averaging dynocist MAT summer and MAT winter SSTs; see tab \"Data (QC)\"",
                     "method": "Modern Analogue Technique",
-                    "dataType": "N",
-                    "climateInterpretation": {
-                        "parameterDetail": "sea_surface",
-                        "parameter": "T",
-                        "interpDirection": "positive"
-                    },
-                    "basis": "Modern Analogue Technique"
-                },
-                {
-                    "column": 5,
-                    "shortName": "notes",
-                    "longName": "PLEASE USE QC DATA FOR ANALYSIS!!!!"
+                    "dataType": "N"
                 }
             ]
         }

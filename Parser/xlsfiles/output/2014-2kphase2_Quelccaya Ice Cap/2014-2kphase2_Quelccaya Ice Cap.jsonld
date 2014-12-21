@@ -1,0 +1,182 @@
+{
+    "@context": "context.jsonld",
+    "geo": {
+        "longitude": {
+            "max": -70.8333,
+            "units": "decimalDegrees",
+            "min": -70.8333
+        },
+        "latitude": {
+            "max": -13.9333,
+            "units": "decimalDegrees",
+            "min": -13.9333
+        },
+        "elevation": {
+            "value": 5670.0,
+            "units": "m"
+        }
+    },
+    "pub": {
+        "authors": "Thompson, L.G.; Mosley-Thompson, E.; Davis, M.E.; Zagorodnov, V.S.; Howat, I.M.; Mikhalenko, V.N.; Lin, P.-N. ",
+        "DOI": "10.1126/science.1234210 ",
+        "year": 2013
+    },
+    "comments": "All O2K-LR records have been quality-controlled according to protocols published in Nature Geoscience supplement;\u00a0see \"Data (QC) tab\" cell C6 for details",
+    "siteName": "Cold Air Cave",
+    "collectionName": "Quelccaya2013SDann",
+    "measurements": [
+        {
+            "measTableName": "data",
+            "filename": "2014-2kphase2_Quelccaya Ice Capdata.csv",
+            "columns": [
+                {
+                    "column": 1,
+                    "shortName": "age_AD",
+                    "longName": "Age (years AD) Beginning of thermal year (austral winter) ",
+                    "units": "AD ",
+                    "climateInterpretation": {
+                        "seasonality": "austral winter"
+                    },
+                    "dataType": "N"
+                },
+                {
+                    "column": 2,
+                    "shortName": "d18OiceSMOW",
+                    "longName": "delta18O ice ",
+                    "material": "ice ",
+                    "units": "per mil SMOW ",
+                    "climateInterpretation": {
+                        "parameter": "T",
+                        "parameterDetail": "sea",
+                        "interpDirection": "P",
+                        "seasonality": "austral winter",
+                        "basis": "Three-year running mean significantly correlated to SST Ni\u00f1o 4 region"
+                    },
+                    "archive": "ice core",
+                    "dataType": "N"
+                },
+                {
+                    "column": 3,
+                    "shortName": "iceacc_m",
+                    "longName": "Ice accumulation rate ",
+                    "units": "meters water equivalent ",
+                    "climateInterpretation": {
+                        "seasonality": "austral winter"
+                    },
+                    "archive": "ice core",
+                    "dataType": "N"
+                },
+                {
+                    "column": 4,
+                    "shortName": "dust",
+                    "longName": "Dust (0.63 to 20 microns diameter) ",
+                    "units": "per mL ",
+                    "climateInterpretation": {
+                        "seasonality": "austral winter"
+                    },
+                    "archive": "ice core",
+                    "dataType": "N"
+                },
+                {
+                    "column": 5,
+                    "shortName": "f_ppb",
+                    "longName": "F - concentration (ppb) ",
+                    "units": "ppb ",
+                    "climateInterpretation": {
+                        "seasonality": "austral winter"
+                    },
+                    "archive": "ice core",
+                    "dataType": "N"
+                },
+                {
+                    "column": 6,
+                    "shortName": "cl_ppb",
+                    "longName": "Cl - concentration (ppb) ",
+                    "units": "ppb ",
+                    "climateInterpretation": {
+                        "seasonality": "austral winter"
+                    },
+                    "archive": "ice core",
+                    "dataType": "N"
+                },
+                {
+                    "column": 7,
+                    "shortName": "so4_ppb",
+                    "longName": "SO4 2- concentration (ppb) ",
+                    "units": "ppb ",
+                    "climateInterpretation": {
+                        "seasonality": "austral winter"
+                    },
+                    "archive": "ice core",
+                    "dataType": "N"
+                },
+                {
+                    "column": 8,
+                    "shortName": "no3_ppb",
+                    "longName": "NO3 - concentration (ppb) ",
+                    "units": "ppb ",
+                    "climateInterpretation": {
+                        "seasonality": "austral winter"
+                    },
+                    "archive": "ice core",
+                    "dataType": "N"
+                },
+                {
+                    "column": 9,
+                    "shortName": "na_ppb",
+                    "longName": "Na + concentration (ppb) ",
+                    "units": "ppb ",
+                    "climateInterpretation": {
+                        "seasonality": "austral winter"
+                    },
+                    "archive": "ice core",
+                    "dataType": "N"
+                },
+                {
+                    "column": 10,
+                    "shortName": "nh4_ppb",
+                    "longName": "NH4 + concentration (ppb) ",
+                    "units": "ppb ",
+                    "climateInterpretation": {
+                        "seasonality": "austral winter"
+                    },
+                    "archive": "ice core",
+                    "dataType": "N"
+                },
+                {
+                    "column": 11,
+                    "shortName": "k_ppb",
+                    "longName": "K + concentration (ppb) ",
+                    "units": "ppb ",
+                    "climateInterpretation": {
+                        "seasonality": "austral winter"
+                    },
+                    "archive": "ice core",
+                    "dataType": "N"
+                },
+                {
+                    "column": 12,
+                    "shortName": "mg_ppb",
+                    "longName": "Mg 2+ concentration (ppb) ",
+                    "units": "ppb ",
+                    "climateInterpretation": {
+                        "seasonality": "austral winter"
+                    },
+                    "archive": "ice core",
+                    "dataType": "N"
+                },
+                {
+                    "column": 13,
+                    "shortName": "ca_ppb",
+                    "longName": "Ca 2+ concentration (ppb) ",
+                    "units": "ppb ",
+                    "climateInterpretation": {
+                        "seasonality": "austral winter"
+                    },
+                    "archive": "ice core",
+                    "dataType": "N"
+                }
+            ]
+        }
+    ]
+}

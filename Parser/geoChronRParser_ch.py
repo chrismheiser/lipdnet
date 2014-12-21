@@ -6,7 +6,6 @@ from collections import OrderedDict
 ## GLOBAL VARIABLES
 finalDict = OrderedDict()
 
-
 ## Use this to ouput data columns to a csv file
 def output_csv(workbook, sheet, name):
 
@@ -17,24 +16,24 @@ def output_csv(workbook, sheet, name):
     file_csv = open(csv_full_path, 'w', newline='')
     w = csv.writer(file_csv)
 
-    ## Loop to find starting data cell
-    for i in range(0, temp_sheet.nrows):
-
-        ## Find the first cell that has a number value, or has NA
-        if isinstance(temp_sheet.cell_value(i, 0), int) or isinstance(temp_sheet.cell_value(i, 0), float)\
-            or temp_sheet.cell_value(i, 0) == 'NA' or temp_sheet.cell_value(i, 0) == 'N/A':
-            current_row = i
-            break
-
-    ## Check how many columns we're going to have
     try:
+        ## Loop to find starting data cell
+        for i in range(0, temp_sheet.nrows):
+
+            ## Find the first cell that has a number value, or has NA
+            ## Then backtrack one row to where all the variable names are
+            if isinstance(temp_sheet.cell_value(i, 0), int) or isinstance(temp_sheet.cell_value(i, 0), float)\
+                or temp_sheet.cell_value(i, 0) == 'NA' or temp_sheet.cell_value(i, 0) == 'N/A':
+                current_row = i - 1
+                break
+
+        ## Loop over all variable names, and count how many there are. We need to loop this many times.
         var_limit = 0
-        while temp_sheet.cell_value(current_row, var_limit) != " " \
-                and temp_sheet.cell_value(current_row, var_limit) != xlrd.empty_cell\
-                and temp_sheet.cell_value(current_row, var_limit) != "":
+        while cell_check(workbook, sheet, current_row, var_limit):
             var_limit += 1
 
         ## Until we reach the bottom worksheet
+        current_row += 1
         while current_row < temp_sheet.nrows:
             data_list = []
 
@@ -57,8 +56,29 @@ def output_csv(workbook, sheet, name):
     file_csv.close()
     return
 
+## Check an array to see if it is a single item or not
+## Returns Boolean
+def single_item(array):
+    if len(array) == 1:
+        return True
+    return False
 
-## Use this to convert formal titles to camelcase json_ld text that matches our context file
+## Do cell_check to see if there is any content to retrieve
+## Returns Boolean
+def cell_check(workbook, sheet, row, col):
+    temp_sheet = workbook.sheet_by_name(sheet)
+    try:
+        if temp_sheet.cell_value(row, col) != "N/A" \
+            and temp_sheet.cell_value(row, col) != " " \
+            and temp_sheet.cell_value(row, col) != xlrd.empty_cell\
+            and temp_sheet.cell_value(row, col) != "":
+            return True
+        return False
+    except IndexError:
+        pass
+
+
+## Convert formal titles to camelcase json_ld text that matches our context file
 ## Keep a growing list of all titles that are being used in the json_ld context
 def name_to_jsonld(title_in):
 
@@ -84,7 +104,7 @@ def name_to_jsonld(title_in):
     elif title_in == 'Year':
         title_out = 'pubYear'
     elif title_in == 'Investigators (Lastname, first; lastname2, first2)':
-        title_out = 'investigators'
+        title_out = 'authors'
     elif title_in == 'Site name':
         title_out = 'siteName'
     elif title_in == 'Northernmost latitude (decimal degree, South negative, WGS84)':
@@ -127,6 +147,9 @@ def name_to_jsonld(title_in):
         title_out = 'shortName'
     elif title_in == 'Units':
         title_out = 'units'
+    elif title_in == 'notes' or title_in == 'Notes'\
+            or title_in == 'Comments' or title_in == 'comments':
+        title_out = 'comments'
     else:
         return
 
@@ -154,18 +177,19 @@ def cells_right_metadata(workbook, sheet, row, col):
 ## Check the cell title, and switch it to
 def cells_down_metadata(workbook, sheet, row, col):
     row_loop = 0
-    special_cases = ['latMin', 'longMin', 'longMax', 'latMax', 'elevationVal']
+    special_cases = ['latMin', 'longMin', 'longMax', 'latMax', 'elevationVal', 'pubDOI', 'pubYear', 'authors']
+
+    ## Special dictionaries to make nested block data
     lon_inner = {}
-    geo_inner = {}
     elev_inner = {}
     lat_inner = {}
     bottomDict = {}
+    pub_inner = {}
 
     lon_inner['units'] = 'decimalDegrees'
     lat_inner['units'] = 'decimalDegrees'
     elev_inner['units'] = 'm'
     temp_sheet = workbook.sheet_by_name(sheet)
-    temp_sheet_name = name_to_jsonld(sheet)
 
     ## Loop until we hit the max rows in the sheet
     while row_loop < temp_sheet.nrows:
@@ -185,19 +209,54 @@ def cells_down_metadata(workbook, sheet, row, col):
                 ## Handle special block of creating GEO dictionary
                 elif title_json in special_cases:
                     if title_json == 'latMax':
-                        lat_inner['max'] = cell_data
+                        if single_item(cell_data):
+                            lat_inner['max'] = cell_data[0]
+                        else:
+                            lat_inner['max'] = cell_data
                     elif title_json == 'latMin':
-                        lat_inner['min'] = cell_data
+                        if single_item(cell_data):
+                            lat_inner['min'] = cell_data[0]
+                        else:
+                            lat_inner['min'] = cell_data
                     elif title_json == 'longMax':
-                        lon_inner['max'] = cell_data
+                        if single_item(cell_data):
+                            lon_inner['max'] = cell_data[0]
+                        else:
+                            lon_inner['max'] = cell_data
                     elif title_json == 'longMin':
-                        lon_inner['min'] = cell_data
+                        if single_item(cell_data):
+                            lon_inner['min'] = cell_data[0]
+                        else:
+                            lon_inner['min'] = cell_data
                     elif title_json == 'elevationVal':
-                        elev_inner['value'] = cell_data
+                        if single_item(cell_data):
+                            elev_inner['value'] = cell_data[0]
+                        else:
+                            elev_inner['value'] = cell_data
+                    elif title_json == 'pubDOI':
+                        if single_item(cell_data):
+                            pub_inner['DOI'] = cell_data[0]
+                        else:
+                            pub_inner['DOI'] = cell_data
+                    elif title_json == 'pubYear':
+                        if single_item(cell_data):
+                            pub_inner['year'] = int(cell_data[0])
+                        else:
+                            pub_inner['year'] = cell_data
+                    elif title_json == 'authors':
+                        if single_item(cell_data):
+                            pub_inner['authors'] = cell_data[0]
+                        else:
+                            pub_inner['authors'] = cell_data
 
-                ## All other cases do not need fancy work
+                ## All other cases do not need fancy structuring
                 else:
-                    bottomDict[title_json] = cell_data
+                    if single_item(cell_data):
+                        bottomDict[title_json] = cell_data[0]
+                    elif len(cell_data) == 0:
+                        pass
+                    else:
+                        bottomDict[title_json] = cell_data
 
         except IndexError:
             continue
@@ -210,6 +269,7 @@ def cells_down_metadata(workbook, sheet, row, col):
             'elevation': elev_inner}
     finalDict['@context'] = "context.jsonld"
     finalDict['geo'] = geo
+    finalDict['pub'] = pub_inner
 
     ## Add all dict items without adding in all the extra braces
     for k, v in bottomDict.items():
@@ -223,9 +283,12 @@ def cells_down_metadata(workbook, sheet, row, col):
 def cells_right_datasheets(workbook, sheet, row, col, colListNum):
     temp_sheet = workbook.sheet_by_name(sheet)
 
-    ## Iterate over all attributes, and add them to the column so long as they are not empty
+    ## Iterate over all attributes, and add them to the column if they are not empty
     attrDict = OrderedDict()
     attrDict['column'] = colListNum
+
+    ## Separate dict for climateInterp block
+    climInDict = {}
 
     try:
         ## Loop until we hit the right-side boundary
@@ -239,18 +302,32 @@ def cells_right_datasheets(workbook, sheet, row, col, colListNum):
 
                 title_in = name_to_jsonld(temp_sheet.cell_value(1, col))
 
-                ## Special case if we need to split the climate interpretation cell
+                ## Special case if we need to split the climate interpretation string into 3 parts
                 if title_in == 'climateInterpretation':
                     cicSplit = temp_sheet.cell_value(row, col).split('.')
-                    contents = {'parameter': cicSplit[0],
-                                'parameterDetail': cicSplit[1],
-                                'interpDirection': cicSplit[2]}
+                    climInDict['parameter'] = cicSplit[0]
+                    climInDict['parameterDetail'] = cicSplit[1]
+                    climInDict['interpDirection'] = cicSplit[2]
+
+                ## Special case to add these two categories to climateInterpretation
+                elif title_in == 'seasonality' or title_in == 'basis':
+                    climInDict[title_in] = temp_sheet.cell_value(row, col)
+
+                ## If the key is null, then this is a not a cell we want to add
+                ## Happens when we get to the cells that are filled with formatting instructions
+                ## Ex. "Climate_interpretation_code has 3 fields separated by periods..."
+                elif title_in is None:
+                    pass
+
                 # All other cases, change to json-ld naming
                 else:
                     contents = temp_sheet.cell_value(row, col)
+                    ## Inert the variable into the attributes dictionary
+                    attrDict[title_in] = contents
 
-                ## Inert the variable into the attributes dictionary
-                attrDict[title_in] = contents
+            ## Only add climateInterp dict if it's not empty
+            if climInDict:
+                attrDict['climateInterpretation'] = climInDict
             col += 1
 
     except IndexError:
@@ -270,13 +347,24 @@ def cells_down_datasheets(filename, workbook, sheet, row, col):
     temp_sheet = workbook.sheet_by_name(sheet)
     measTableName = name_to_jsonld(sheet)
     columnsTop = []
+    commentList = []
     colListNum = 1
 
     ## Loop downward until you hit the "Data" box
     try:
         while temp_sheet.cell_value(row, col) != 'Data':
+
+            variable = name_to_jsonld(temp_sheet.cell_value(row, col))
+
             ## If the cell isn't blank or empty, then grab the data
-            if temp_sheet.cell_value(row, col) != '' and temp_sheet.cell_value(row, col) != xlrd.empty_cell:
+            ## Special case for handling comments since we want to stop them from being inserted at column level
+            if variable == 'comments':
+                for i in range(1,3):
+                    if cell_check(workbook, sheet, row, i):
+                        commentList.append(temp_sheet.cell_value(row, i))
+
+            ## All other cases, create a list of columns, one dictionary per column
+            elif temp_sheet.cell_value(row, col) != '' and temp_sheet.cell_value(row, col) != xlrd.empty_cell:
                 columnsTop.append(cells_right_datasheets(workbook, sheet, row, col, colListNum))
                 colListNum += 1
             row += 1
@@ -287,8 +375,14 @@ def cells_down_datasheets(filename, workbook, sheet, row, col):
     ## Add all our data pieces for this column into a new entry in the Measurement Table Dictionary
     measTableDict['measTableName'] = measTableName
     measTableDict['filename'] = str(filename) + str(measTableName) + ".csv"
+
+    ## If comments exist, insert them at table level
+    if commentList:
+        measTableDict['comments'] = commentList[0]
     measTableDict['columns'] = columnsTop
 
+    ## Reset list back to null for next loop
+    commentList = []
     return measTableDict
 
 
@@ -324,7 +418,7 @@ def parser():
 
     datasheetNameList = []
     # ## Loop over all the lines (filenames) that are in the txt file
-    print("Processing... ")
+    print("Processing files: ")
     for current_file in excel_files:
         print(current_file)
 
@@ -396,17 +490,6 @@ def parser():
             #whoAnalyzed =
             #whoEnteredinDB =
 
-        # pubYear = (metadata.cell_value(12,1))
-        #Operations to slice together the PubString
-        # pubstringRm = metadata.cell_value(9,1).replace(","," ")
-        # pubStringSplit = pubstringRm.split()
-        # pubStringRip = pubStringSplit[0] + " and " + pubStringSplit[2] + " " + str(pubYear)
-        # pubString = pubStringRip
-
-        # #Choose first person from investigator cell
-        # investigatorSplit = metadata.cell_value(3,1).split(';')
-        # investigator = investigatorSplit[0]
-
         ## Run the method for adding metadata info to finalDict
         cells_down_metadata(workbook, metadata_str, 0, 0)
 
@@ -417,8 +500,8 @@ def parser():
         ## Need to handle cases where there is Data_QC, Data_original, or Data, or a combination of them.
         combined = []
 
+        ## Loop over the data sheets we know exist
         for sheet_str in datasheetNameList:
-            sheet_name = sheet_str
             sheet_str = cells_down_datasheets(name, workbook, sheet_str, 2, 0)
             combined.append(sheet_str)
 
@@ -490,13 +573,10 @@ def parser():
 
         ## Combine everything we have into the final dictionary
 
-        # creates the directory 'output' if it does not already exist
+        ## Creates the directory 'output' if it does not already exist
         if not os.path.exists('output/' + str(name)):
             os.makedirs('output/' + str(name))
 
-
-
-        ## SOMETHING WRONG HERE. NOT OUTPUTTING ALL DATA SHEETS TO CSV FILES
         ## CSV
         for sheet_str in datasheetNameList:
             output_csv(workbook, sheet_str, name)
@@ -507,7 +587,8 @@ def parser():
         file_jsonld = open('output/' + new_file_name_jsonld, 'w')
         file_jsonld = open('output/' + new_file_name_jsonld, 'r+')
 
-        # Write finalDict to json-ld file with dump
+        ## Write finalDict to json-ld file with dump
+        ## Dump outputs into a readable json hierarchy
         json.dump(finalDict, file_jsonld, indent=4)
 
 parser()
