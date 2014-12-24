@@ -4,43 +4,66 @@
 
 import json
 
-##############################################################################
+## Keep a list of units with acceptable and synonomous unit names
+## Match the input name to the key, and then check the input value against the list of acceptable values
 
-acceptable_keys = ['geo', 'investigators', 'pubYear', 'collectionName', \
-                   'siteName', 'pubDOI', 'measurements']
-
-##############################################################################
-
-geo = ['elevation', 'longitude', 'latitude']
-
-elevation = ['value', 'units']
-longitude = ['max', 'units', 'min']
-latitude = ['max', 'units', 'min']
-
-##############################################################################
-
-measurements = ['measTableName', 'filename', 'columns']
-
-columns = ['column', 'shortName', 'longName', 'units', 'detail', 'dataType', \
-           'method', 'material', 'error', 'seasonality', 'archive', \
-           'climateInterpretation', 'basis']
-
-climateInterpretation = ['parameterDetail', 'parameter', 'interpDirection']
-
-##############################################################################
+synonyms = {"elev_units": ["m", "meters", "Meters", "METERS", "M",
+                           "km", "kilometers", "Kilometers", "KILOMETERS", "Km", "KM",
+                           "ft", "feet", "Feet", "FEET", "Ft", "FT"],
+            "long_lat_units": ["decimalDegrees", "dd", "Dd", "DD", "Decimal Degrees", "DecimalDegrees",
+                               "minutes", "m", "min", "M", "MIN", "Minutes", "MINUTES",
+                                "seconds", "s", "sec", "S", "SEC", "Seconds", "SECONDS"],
+            "interpDirection": ["POSITIVE", "Positive", "positive", "pos", "Pos", "POS", "p", "P",
+                                "NEGATIVE", "Negative", "negative", "neg", "Neg", "NEG", "n", "N"],
+            "dataType": ["n", 'N']
+}
 
 ## Some values may be a list of items or one item.
 ## Remember to handle both cases
-dictionaries = ["geo", "value", "longitude", "latitude", "pub", "climateInterpretation" ]
+
+dictionaries = ["geo", "elevation", "longitude", "latitude", "pub", "climateInterpretation"]
 strings = ["@context", "units", "collectionName", "authors", "DOI", "siteName", "comments", "shortName", "longName", "archive", "detail", "method",
-           "dataType", "basis", "seasonality", "parameter", "parameterDetail", "interpDirection", "filename", "measTableName"]
+           "dataType", "basis", "seasonality", "parameter", "parameterDetail", "interpDirection", "filename", "measTableName", "material"]
 floats = ["value", "max", "min"]
 integers = ["year", "column"]
 lists = ["measurements", "columns"]
 
 
-## Take in some key - value pair, and make sure the value is the correct type for that key.
+def value_check(key, value):
+
+    """ If validates correctly, nothing happens
+        If does not validate, give option to add new unit to database or pick from predefined units
+        Returns Nothing """
+
+    for k,v in synonyms.items():
+        if k == key:
+            if value in v:
+                print("Synonym found\n")
+                return
+
+            ## Their unit does not match anything in our database for that key
+            else:
+                ## Show them all the units that we have to choose from
+                user_ask = input("Error with unit. Did you mean one of these?\n {0}\n (yes/no)\n".format(v))
+
+                ## User picks one of the currently listed synonyms
+                if user_ask == "yes" or "y":
+                    user_pick = input("Type your choice:\n")
+                    value = user_pick
+
+                ## Help the user add their unit to the database
+                else:
+                    ## If they try to add a unit 3 times, and they say no to the verification, we'll just move on.
+                    for i in range(0,3):
+                        user_add = input("Please type the unit you would like to add\n")
+                        user_verify = input("You're about to add {0} to the {1} database.\n Are you sure you want to do this? (y/n)\n".format(user_add, k))
+                        if user_verify == "yes" or "y":
+                            v.append(user_add)
+                            return
+
+##Take in some key - value pair, and make sure the value is the correct type for that key.
 def validate(key, value):
+
     if key in lists:
         if isinstance(value, list):
             return True
@@ -55,8 +78,9 @@ def validate(key, value):
             return True
     return False
 
-## Take input list, and recurse down to find dictionaries and key-value pairs
+##Take input list, and recurse down to find dictionaries and key-value pairs
 def iterate_l(l):
+
     for items in range(len(l)):
         iterate_d(l[items])
 
@@ -68,8 +92,8 @@ def iterate_d(d):
         if isinstance(v, dict):
             iterate_d(v)
 
-        ## if value is a list, throw it to special function to handle lists
-        elif k == "measurements":
+        ## if value is a list, throw it to special function to separate the list
+        elif isinstance(v, list):
             iterate_l(v)
 
         ## if value is not a dictionary, we must have reached the bottom of the the nesting
@@ -77,8 +101,7 @@ def iterate_d(d):
             if validate(k,v):
                 print("validated : {0} : {1}".format(k, v))
             else:
-                print("invalid : {0} : {1}".format(k, v))
-
+                print("invalid value type: {0} : {1}".format(k, v))
 
 ## main function to open the jsonld file, validate, and close again.
 def run():
