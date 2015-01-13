@@ -8,19 +8,12 @@
         },
         "latitude": {
             "max": -13.9333,
-                {
-                    "column": 2,
-                    "shortName": "d18OiceSMOW",
-                    "longName": "delta18O ice ",
-                    "material": "ice ",
-                    "units": "per mil SMOW ",
-                    "climateInterpretation": {
             "units": "decimalDegrees",
             "min": -13.9333
         },
         "elevation": {
             "value": 5670.0,
-            "units": "This will throw an ERROR"
+            "units": "m"
         }
     },
     "pub": {
@@ -46,6 +39,13 @@
                     },
                     "dataType": "N"
                 },
+                {
+                    "column": 2,
+                    "shortName": "d18OiceSMOW",
+                    "longName": "delta18O ice ",
+                    "material": "ice ",
+                    "units": "per mil SMOW ",
+                    "climateInterpretation": {
                         "parameter": "T",
                         "parameterDetail": "sea",
                         "interpDirection": "P",

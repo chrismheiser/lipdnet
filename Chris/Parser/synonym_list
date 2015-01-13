@@ -1,0 +1,64 @@
+## ACCEPTABLE KEYS
+
+geo, elevation, longitude, latitude,
+investigators, authors
+pub, Pub, PUB
+year, Year, YEAR, yr,
+max, Max, MAX,
+value, Value, VALUE
+units, Units, UNITS, Unit, UNIT, unit
+DOI, doi, Doi,
+collectionName,
+
+
+## ACCEPTABLE VALUES
+
+geo -> dict, str
+
+elev_value -> float,int
+elev_units -> meters, m, feet, ft, 
+
+longitude -> dict, str
+long_max -> float, int
+long_min -> float, int
+long_units -> degrees, decimalDegrees, minutes, seconds
+
+latitude -> dict, str
+lat_min -> float, int
+lat_max -> float, int
+lat_units -> degrees, decimalDegrees, minutes, seconds
+
+pub -> dict, str
+authors -> str
+year -> float, int
+doi -> str
+
+siteName -> str
+comments -> str
+collectionName -> str
+measurements -> list
+
+measTableName -> str
+filename -> str
+columns -> list
+
+column -> int
+shortName -> str
+longName -> str
+archive -> str
+detail -> str
+method -> str
+dataType ->
+climateInterpretation -> dict, str
+basis
+seasonality
+parameter
+parameterDetail
+interpDirection
+
+
+## SYNONYMS 
+age, Age, AGE,
+age_ad, Age_AD, Age_ad, AGE_ad, AGE_AD,
+age_bc, Age_BC, Age_bc, AGE_bc, AGE_BC,
+
