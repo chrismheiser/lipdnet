@@ -7,7 +7,7 @@ import json
 ##############################################################################
 
 # use stored layers to store each key in later iterations
-stored_layers = {"layer_one" : "", "layer_two" : "", "layer_three" : "", "layer_four" : "" }
+stored_layers = {"layer_one": "", "layer_two": "", "layer_three": "", "layer_four": ""}
 
 synonyms = {"elev_units": ["m", "meters", "Meters", "METERS", "M",
                            "km", "kilometers", "Kilometers", "KILOMETERS", "Km", "KM",
@@ -95,10 +95,7 @@ def iterate_d(d):
 
     loops = 0
 
-
     for k, v in d.items():
-
-
 
         # if value is a dictionary, then we need to expand that dictionary
         if isinstance(v, dict):
@@ -125,7 +122,7 @@ def iterate_d(d):
                 stored_layers["layer_three"] = k
             if loops == 4:
                 stored_layers["layer_four"] = k
-                
+
             iterate_l(v)
 
         # if value is not a dictionary, we must have reached the bottom of the the nesting
