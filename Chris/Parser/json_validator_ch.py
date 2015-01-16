@@ -19,8 +19,6 @@ IDEAS:
         b. short_name is on the level above units
 
 3.
-
-
 Units that we need to regulate :
 Geo -> longitude -> units
 Geo -> latitude -> units
@@ -31,96 +29,130 @@ measurements -> columns -> units
 
 import json
 
+acceptable_pairs = {"distance": ["m", "meters", "km", "kilometers", "ft", "feet"],
+                    "coordinates": ["decimaldegrees", "dd", "decimal degrees", "minutes", "m", "min", "seconds", "s", "sec"],
+                    "interpDirection": ["positive", "pos", "p", "negative", "neg", "n"],
+                    "dataType": ["n", 'y'],
+                    "date": ["ad", "bc"]
+                    }
 
-
-synonyms = {"elevation": ["m", "meters", "Meters", "METERS", "M",
-                           "km", "kilometers", "Kilometers", "KILOMETERS", "Km", "KM",
-                           "ft", "feet", "Feet", "FEET", "Ft", "FT"],
-            "coordinates": ["decimalDegrees", "dd", "Dd", "DD", "Decimal Degrees", "DecimalDegrees",
-                               "minutes", "m", "min", "M", "MIN", "Minutes", "MINUTES",
-                                "seconds", "s", "sec", "S", "SEC", "Seconds", "SECONDS"],
-            "interpDirection": ["POSITIVE", "Positive", "positive", "pos", "Pos", "POS", "p", "P",
-                                "NEGATIVE", "Negative", "negative", "neg", "Neg", "NEG", "n", "N"],
-            "dataType": ["n", 'N'],
-            "date": ["AD", "ad", "BC", "bc"]
-            }
-unit_titles = ['dataType', 'units', 'unit', 'interpDirection']
-
-regulated_units = ['coordinates', 'concentration', 'time', 'distance', 'liquid', 'depth']
+acceptable_titles = ['distance', 'coordinates', 'date', 'dataType', 'interpDirection']
 
 ## Some values may be a list of items or one item.
 ## Remember to handle both cases
-dictionaries = ["geo", "value", "longitude", "latitude", "pub", "climateInterpretation" ]
-strings = ["@context", "units", "collectionName", "authors", "DOI", "siteName", "comments", "shortName", "longName", "archive", "detail", "method",
-           "dataType", "basis", "seasonality", "parameter", "parameterDetail", "interpDirection", "filename", "measTableName", "material"]
+dictionaries = ["geo", "value", "longitude", "latitude", "pub", "climateInterpretation", 'elevation']
+strings = ["@context", "units", "collectionName", "authors", "DOI", "siteName", "comments", "shortName", "longName",
+           "archive", "detail", "method", "dataType", "basis", "seasonality", "parameter", "parameterDetail",
+           "interpDirection", "filename", "measTableName", "material"]
 floats = ["value", "max", "min"]
 integers = ["year", "column"]
 lists = ["measurements", "columns"]
 
-## Find a way to grab the unit shortname when traversing downward
-## When you move to another unit, wipe shortname and start over
-temp_shortName = []
 
-def value_check(key, value):
+"""
+To make things easier, this function is meant to format all incoming names into lowercase
+format. This way we don't need to hard code a bunch of different permutations of the same name.
+Ex: age, Age, AGE. We can make it lowercase, and then check it against our list of acceptable short
+names or units.
+Accepts: String
+Returns: String
+"""
+def to_lowercase(name):
+    return name.lower()
 
-    """ If validates correctly, nothing happens
-        If does not validate, give option to add new unit to database or pick from predefined units
-        Returns Nothing """
+"""
+Specific methods validate values based on what type of unit they are.
+These are for units that will remain constant. (hard-coded)
+If there is something wrong with the validation, we'll move to the "unrecognized" method and ask user for verification.
+Accepts: key, value
+Returns: Boolean
+"""
+def coordinates(k, v):
+    for i, j in v.items():
+        if i == 'units':
+            j = to_lowercase(j)
 
-    # ## Lump all coordinate units in the one synonym key
-    # if shortname == ('longitude' or 'latitude' or 'elevation'):
-    #     syn_key = 'coordinates'
-    #
-    # ## If not special case, then syn_key is that same as shortname
-    # else:
-    #     syn_key = shortname
+            ## We found a match. Return True - validated
+            if j in acceptable_pairs['coordinates']:
+                return True
 
-    ## Loop through the synonyms keys
-    for k, v in synonyms.items():
-
-        ## If the input key matches one of out specific unit titles, then keep going
-        if key in unit_titles:
-            ## Loop through the key entry that
-            for units in synonyms[k]:
-                if value == units:
-                    print("Synonym found: {0}\n".format(value))
-                    return
-
-        ## Their unit does not match anything in our database for that key
-        else:
-            ## Show them all the units that we have to choose from
-            print("Unit not found : {0}. Did you mean one of these?\n {1}\n (yes/no)\n".format(value, v))
-            user_ask = input()
-
-            ## User picks one of the currently listed synonyms
-            if user_ask == ("yes" or "y"):
-                user_pick = input("Type your choice:\n")
-                value = user_pick
-                return
-
-            ## Help the user add their unit to the database
+            ## The unit value was not found in the database
+            ## Throw to unrecognized function in ('longitude', 'M', 'coordinates') format.
             else:
-                ## If they try to add a unit 3 times, and they say no to the verification, we'll just move on.
-                for i in range(0, 3):
+                unrecognized(k, j, 'coordinates')
 
-                    ## Do you want to add this to the database?
-                    print("Would you like to add to the database?\n{0}:{1} \n".format(key, value))
-                    user_add = input()
+    ## Did not find 'units' key in this dictionary
+    ## Validation fails
+    return False
 
-                    if user_add == ("yes" or "y"):
+def distance(k, v):
+    for i, j in v.items():
+        if i == 'units':
+            j = to_lowercase(j)
+            if j in acceptable_pairs['distance']:
+                return True
+            else:
+                unrecognized(k, j, 'distance')
+    return False
 
-                        ## Verification step. Are you sure you want to add it?
-                        print("Adding '{0}'.\n Are you sure you want to add this? (y/n)\n".format(k))
-                        user_verify = input()
+def interp_dir(k, v):
+    v = to_lowercase(v)
+    if v in acceptable_pairs['interpDirection']:
+        return True
+    else:
+        unrecognized(k, v, 'interpDirection')
+    return False
 
-                        ##verfication passed, add to the dictionary in "shortname : unit" format
-                        if user_verify == ('y' or 'yes'):
-                            ## Temp placeholder. Figure out how to grab shortname and unit to add to synonyms{}
-                            synonyms['shortName'] = 'unit'
-                        return
+def data_type(k, v):
+    v = to_lowercase(v)
+    if v in acceptable_pairs['dataType']:
+        return True
+    else:
+        unrecognized(k, v, 'dataType')
 
+## Needs special treatment. Have to grab short name and unit separately
+def iter_special_lsts(shortLst_in, unitLst_in):
+    for names in shortLst_in:
+        print('short: {0} unit: {1}'.format(shortLst_in[names], unitLst_in[names]))
+        pass
+
+def short_unit(shortname_in, unitname_in):
+    pass
+
+def unrecognized(key, value):
+
+    """
+    This method will interact with the user
+    If we enter here, then that means the validation failed somewhere prior,
+    and we need to check for spelling anomalies or adding the new unit to the database
+    Accepts: key, value
+    Returns: None
+    """
+
+    ## Make sure the unit is correct and this is not a typo, etc.
+    print("{0}:{1} not recognized. Is the entry correct? (yes/no)\n".format(key, value))
+    user_check1 = input().lower()
+
+    ## The entry is correct, but we don't have it yet.
+    ## Ask what type of unit it is, and add it to the database
+    if user_check1 == ("yes" or "y"):
+        print('We can add this unit for future use. What type of unit is it?\n')
+        print(acceptable_titles)
+        user_unit = input()
+        if user_unit in acceptable_titles:
+            print('Adding {0} as an acceptable unit for {1}'.format(value, user_unit))
+            acceptable_pairs[user_unit].append(value)
+
+    ## The entry wasn't correct.
+    elif user_check1 == ('no' or 'n'):
+
+
+    else:
+        print("Invalid answer. Let's try again")
+        unrecognized(key, value)
 
 ## Take in some key - value pair, and make sure the value is the correct type for that key.
+## This is a lower validation, as it doesn't necessarily check the value or units
 def validate(key, value):
     if key in lists:
         if isinstance(value, list):
@@ -134,74 +166,66 @@ def validate(key, value):
     elif key in strings:
         if isinstance(value, str):
             return True
+    elif key in dictionaries:
+        if isinstance(value, dict):
+            return True
     return False
 
 ## Take input list, and recurse down to find dictionaries and key-value pairs
-def iterate_l(l):
+def iter_list(l):
     for items in range(len(l)):
-        iterate_d(l[items])
+        iter_dict(l[items])
+"""
+These two arrays will keep corresponding short names and units at matching indexes
+Ex: shortname_lst[0] = 'age_ad'
+    units_lst[0] = 'AD'
+"""
+shortname_lst = []
+units_lst = []
 
-output_list = []
-
-## Take an input dictionary, and recurse down every time you find a nested dictionary
-def iterate_d(d):
-
-    loops = 0
+## Take input dictionary, and recurse downward
+def iter_dict(d):
 
     for k, v in d.items():
-        temp_shortName.append(k)
-        print(temp_shortName)
+
+        ## Check that data structures are correct
+        if not validate(k, v):
+            print('incorrect format: {0}:{1}'.format(k, v))
 
         ## if value is a dictionary, then we need to expand that dictionary
         if isinstance(v, dict):
-            loops += 1
-            output_list.append(k)
-            iterate_d(v)
+            iter_dict(v)
 
         ## if value is a list, throw it to special function to handle lists
         elif isinstance(v, list):
-            loops += 1
-            output_list.append(k)
-            iterate_l(v)
+            iter_list(v)
 
         ## if value is not a dictionary, we must have reached the bottom of the the nesting
         else:
-            if loops == 0:
+            ## If statements catch all the normal units that we can check manually
+            if k == ('longitude' or 'latitude'):
+                coordinates(k, v)
+            elif k == 'elevation':
+                distance(k, v)
+            elif k == 'dataType':
+                data_type(k, v)
+            elif k == 'interpDirection':
+                interp_dir(k, v)
+            elif k == 'shortName':
+                shortname_lst.append(v)
+            elif k == 'units':
+                units_lst.append(v)
+            else:
+                if not validate(k, v):
+                    print('invalid: {0}:{1}'.format(k, v))
+                    unrecognized(k, v)
 
-                if validate(k, v):
-                    value_check(k, v)
-                    print("valid : {0} : {1}".format(k, v))
 
-                else:
-                    value_check(k, v)
-                    print("invalid : {0} : {1}".format(k, v))
 
-            elif loops == 1:
-
-                if len(output_list) > 1:
-                    output_list.remove(output_list[0])
-
-                if validate(k, v):
-                    value_check(k, v)
-                    print("valid : {0} : {1} : {2}".format(output_list[0], k, v))
-
-                else:
-                    value_check(k, v)
-                    print("invalid : {0} : {1} : {2}".format(output_list[0], k, v))
-
-            elif loops == 2:
-
-                if len(output_list) > 2:
-                    output_list.remove(output_list[0])
-
-                if validate(k, v):
-                    value_check(k, v)
-                    print("valid : {0} : {1} : {2} : {3}".format(output_list[0], output_list[1], k, v))
-
-                else:
-                    value_check(k, v)
-                    print("invalid : {0} : {1} : {2} : {3}".format(output_list[0], output_list[1], k, v))
-
+    ## Find out how to use two arrays to validate short[X] with units[X]
+    print(units_lst)
+    print(shortname_lst)
+    print('\n\n')
 
 
 ## main function to open the jsonld file, validate, and close again.
@@ -209,7 +233,7 @@ def run():
     json_path = 'test.jsonld'
     json_data = open(json_path)
     data = json.load(json_data)
-    iterate_d(data)
+    iter_dict(data)
     json_data.close()
 
 run()

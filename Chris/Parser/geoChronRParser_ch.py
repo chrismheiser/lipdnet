@@ -1,7 +1,7 @@
 import xlrd,os,csv
 import json
 from collections import OrderedDict
-import json_validator_ch
+# import json_validator_ch
 
 
 ## GLOBAL VARIABLES

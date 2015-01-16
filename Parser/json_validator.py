@@ -38,7 +38,7 @@ def value_check(key, value):
         If does not validate, give option to add new unit to database or pick from predefined units
         Returns Nothing """
 
-    for k,v in synonyms.items():
+    for k, v in synonyms.items():
         if key in ['units', 'interpDirection', 'dataType']:
             for i in k:
                 if value in v:
@@ -102,11 +102,11 @@ def iterate_d(d):
             loops += 1
             if loops == 1:
                 stored_layers["layer_one"] = k
-            if loops == 2:
+            elif loops == 2:
                 stored_layers["layer_two"] = k
-            if loops == 3:
+            elif loops == 3:
                 stored_layers["layer_three"] = k
-            if loops == 4:
+            else:
                 stored_layers["layer_four"] = k
 
             iterate_d(v)
@@ -116,11 +116,11 @@ def iterate_d(d):
             loops += 1
             if loops == 1:
                 stored_layers["layer_one"] = k
-            if loops == 2:
+            elif loops == 2:
                 stored_layers["layer_two"] = k
-            if loops == 3:
+            elif loops == 3:
                 stored_layers["layer_three"] = k
-            if loops == 4:
+            else:
                 stored_layers["layer_four"] = k
 
             iterate_l(v)
@@ -130,8 +130,8 @@ def iterate_d(d):
             if loops == 0:
 
                 if validate(k,v):
-                    print("valid : {0} : {1}".format(k, v))
                     value_check(k, v)
+                    print("valid : {0} : {1}".format(k, v))
 
                 else:
                     value_check(k, v)
@@ -139,16 +139,13 @@ def iterate_d(d):
 
             elif loops == 1:
 
-                if len(output_list) > 1:
-                    output_list.remove(output_list[0])
-
                 if validate(k,v):
-                    print("valid : {0} : {1} : {2}".format(output_list[0], k, v))
+                    print("valid : {0} : {1} : {2}".format(stored_layers["layer_one"], k, v))
                     value_check(k, v)
 
                 else:
                     value_check(k, v)
-                    print("invalid : {0} : {1} : {2}".format(output_list[0], k, v))
+                    print("invalid : {0} : {1} : {2}".format(stored_layers["layer_one"], k, v))
 
             elif loops == 2:
 
@@ -156,12 +153,12 @@ def iterate_d(d):
                     output_list.remove(output_list[0])
 
                 if validate(k,v):
-                    print("valid : {0} : {1} : {2} : {3}".format(output_list[0], output_list[1], k, v))
+                    print("valid : {0} : {1} : {2} : {3}".format(stored_layers["layer_one"], stored_layers["layer_two"], k, v))
                     value_check(k, v)
 
                 else:
                     value_check(k, v)
-                    print("invalid : {0} : {1} : {2} : {3}".format(output_list[0], output_list[1], k, v))
+                    print("invalid : {0} : {1} : {2} : {3}".format(stored_layers["layer_one"], stored_layers["layer_two"], k, v))
 
 
 

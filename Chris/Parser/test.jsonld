@@ -13,7 +13,7 @@
         },
         "elevation": {
             "value": 5670.0,
-            "units": "This will throw and error"
+            "units": "m"
         }
     },
     "pub": {
