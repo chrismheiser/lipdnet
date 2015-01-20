@@ -26,6 +26,12 @@ def output_csv(workbook, sheet, name):
             if isinstance(temp_sheet.cell_value(i, 0), int) or isinstance(temp_sheet.cell_value(i, 0), float)\
                 or temp_sheet.cell_value(i, 0) == 'NA' or temp_sheet.cell_value(i, 0) == 'N/A':
                 current_row = i - 1
+
+                ## If there are no variable headers, make sure to move back down a row or we'll break when
+                ## trying to grab all the CSV columns.
+                ## (We don't want to loop over the "Missing Value" row)
+                if 'Missing' in temp_sheet.cell_value(current_row, 0):
+                    current_row += 1
                 break
 
         ## Loop over all variable names, and count how many there are. We need to loop this many times.
@@ -108,13 +114,13 @@ def name_to_jsonld(title_in):
         title_out = 'authors'
     elif title_in == 'Site name':
         title_out = 'siteName'
-    elif title_in == 'Northernmost latitude (decimal degree, South negative, WGS84)':
+    elif 'Northernmost latitude' in title_in:
         title_out = 'latMax'
-    elif title_in == 'Southernmost latitude (decimal degree, South negative, WGS84)':
+    elif 'Southernmost latitude' in title_in:
         title_out = 'latMin'
-    elif title_in == 'Easternmost longitude (decimal degree, West negative, WGS84)':
+    elif 'Easternmost longitude' in title_in:
         title_out = 'longMax'
-    elif title_in == 'Westernmost longitude (decimal degree, West negative, WGS84)':
+    elif 'Westernmost longitude' in title_in:
         title_out = 'longMin'
     elif title_in == 'elevation (m), below sea level negative':
         title_out = 'elevationVal'
