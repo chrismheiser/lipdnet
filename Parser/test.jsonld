@@ -8,13 +8,6 @@
         },
         "latitude": {
             "max": -13.9333,
-                {
-                    "column": 2,
-                    "shortName": "d18OiceSMOW",
-                    "longName": "delta18O ice ",
-                    "material": "ice ",
-                    "units": "per mil SMOW ",
-                    "climateInterpretation": {
             "units": "decimalDegrees",
             "min": -13.9333
         },
@@ -46,12 +39,13 @@
                     },
                     "dataType": "N"
                 },
+                {
                         "parameter": "T",
                         "parameterDetail": "sea",
                         "interpDirection": "P",
                         "seasonality": "austral winter",
-                        "basis": "Three-year running mean significantly correlated to SST Ni\u00f1o 4 region"
-                    },
+                        "basis": "Three-year running mean significantly correlated to SST Ni\u00f1o 4 region",
+                    
                     "archive": "ice core",
                     "dataType": "N"
                 },

@@ -1,5 +1,4 @@
 {
-
 "@context" : {
         "xsd": "http://www.w3.org/2001/XMLSchema#",
         "schema" : "http://schema.org/",
@@ -28,7 +27,7 @@
         "elevationValue" : {
             "@id": "schema:precision",
             "@type": "xsd:float"
-            }
+            },
         "max" : "schema:maxValue",
         "min" : "schema:minValue",
         
@@ -40,29 +39,18 @@
         "whoCollected" : "schema:name",
         "whoAnalyzed" : "schema:name",
         "whoEnteredinDB" : "schema:name",
-        "pubDOI": {
-            "@id":"http://purl.org/ontology/bibo/doi",
-            "@container": "@set"
-        },
-        "pubString" : "schema:alternateName",
-        "dataDOI": {
-            "@id":"http://purl.org/ontology/bibo/doi",
-            "@container": "@list"
-        },
- 
         "columns" : {
             "@id" : "schema:description",
             "@container" : "@index"
         },
- 
-        "measurements" : {
-            "@id" : "schema:measurementData",
-            "@container" : "@index"
-        },
-        "measTable" : "schema:measurementTable",
         "measTableNumber" : {
             "@id" : "schema:name",
             "@value" : "xsd:integer"
+        },
+        "measTable" : "schema:measurementTable",
+        "measurements" : {
+            "@id" : "schema:measurementData",
+            "@container" : "@index"
         },
         "filename" : "schema:fileFormat",
         "chronologies" : {
@@ -79,17 +67,16 @@
         "unit" : "schema:units",
         "parameter" : "schema:name",
         "parameterDetail" : "schema:description",
-        "seasonality" : "schema:seasonality",
         "seasonality:value": {
             "@id" : "schema:value",
             "@type": "xsd:integer",
             "@container" : "@list"
         },
         "seasonality:string" : {
-            "@id" : "shema:units",
+            "@id" : "schema:units",
             "@container" : "@list"
         },
-        "interpDirection" : {
+  		"interpDirection" : {
             "@id" : "schema:description"
         },
         "material" : "schema:description",
@@ -101,26 +88,26 @@
         "sensorModel" : "schema:description",
         "archiveModel" : "schema:description",
         "observationModel" : "schema:description",
- 
-        "chronTableName" : {
-            "@id" : "schema:name",
-            "@value" : "xsd:integer"
-        },
         "chronName" : "schema:name",
         "chronType" : "schema:description",
         "chronRes" : "schema:description",
-        "countRate": {
-            "@container" : "@list"
+        "errorLevel" : "schema:description",
+        "overCount" : {
+            "@id" : "schema:minValue",
+            "@type" : "xsd:integer"
         },
         "underCount" : {
             "@id" : "schema:maxValue",
             "@type" : "xsd:integer"
         },
-        "overCount" : {
-            "@id" : "schema:minValue",
-            "@type" : "xsd:integer"
+        "chronTableName" : {
+            "@id" : "schema:name",
+            "@value" : "xsd:integer"
         },
-        "errorLevel" : "schema:description"
-    }
+        "countRate": {
+          "@id" : "xsd:integer",
+          "@container" : "@list"
+        }
 
+}
 }

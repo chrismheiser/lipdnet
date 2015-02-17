@@ -1,9 +1,7 @@
 import xlrd,os,csv
 import json
 from collections import OrderedDict
-import flatten
-import flatten_test
-import validator_ch
+# import json_validator_ch
 
 ## GLOBAL VARIABLES
 finalDict = OrderedDict()
@@ -23,7 +21,7 @@ def output_csv_datasheet(workbook, sheet, name):
     try:
         ## Loop to find starting variable name
         ## Try to find if there are variable headers or not
-        ref_first_var = traverse_short_row_str(temp_sheet)
+        ref_first_var = traverse_first_short(temp_sheet)
 
         ## Traverse down to the "Missing Value" cell to get us near the data we want.
         missing_val_row = traverse_missing_value(temp_sheet)
@@ -34,11 +32,12 @@ def output_csv_datasheet(workbook, sheet, name):
         ## Loop for 5 times past "Missing Value" to see if we get a match on the variable header
         ## Don't want to loop for too long, or we're wasting our time.
         position_start = var_headers_check(temp_sheet, missing_val_row, ref_first_var)
-        data_cell_start = traverse_headers_to_data(temp_sheet, position_start)
+        data_cell_start = traverse_to_data(temp_sheet, position_start)
 
         ## Loop over all variable names, and count how many there are. We need to loop this many times.
-        first_short_cell = traverse_short_row_int(temp_sheet)
-        var_limit = count_vars(temp_sheet, first_short_cell)
+        var_limit = 0
+        while cell_check(workbook, sheet, data_cell_start, var_limit):
+            var_limit += 1
 
         ## Until we reach the bottom worksheet
         current_row = data_cell_start
@@ -68,29 +67,29 @@ def output_csv_datasheet(workbook, sheet, name):
 ## Output the data columns from chronology sheet to csv file
 ## Accepts: Workbook(obj), sheet(str), name(str)
 ## Returns: None
-# def output_csv_chronology(workbook, sheet, name):
-#     json_naming = name_to_jsonld(sheet)
-#     temp_sheet = workbook.sheet_by_name(sheet)
-#     csv_folder_and_name = str(name) + '/' + str(name) + str(json_naming) + '.csv'
-#     csv_full_path = 'output/' + csv_folder_and_name
-#     file_csv = open(csv_full_path, 'w', newline='')
-#     w = csv.writer(file_csv)
-#
-#     try:
-#         total_vars = count_chron_variables(temp_sheet)
-#         row = traverse_to_chron_data(temp_sheet)
-#
-#         while row < temp_sheet.nrows:
-#
-#             data_list = get_chron_data(temp_sheet, row, total_vars)
-#             w.writerow(data_list)
-#             row += 1
-#
-#     except IndexError:
-#         pass
-#
-#     file_csv.close()
-#     return
+def output_csv_chronology(workbook, sheet, name):
+    json_naming = name_to_jsonld(sheet)
+    temp_sheet = workbook.sheet_by_name(sheet)
+    csv_folder_and_name = str(name) + '/' + str(name) + str(json_naming) + '.csv'
+    csv_full_path = 'output/' + csv_folder_and_name
+    file_csv = open(csv_full_path, 'w', newline='')
+    w = csv.writer(file_csv)
+
+    try:
+        total_vars = count_chron_variables(temp_sheet)
+        row = traverse_to_chron_data(temp_sheet)
+
+        while row < temp_sheet.nrows:
+
+            data_list = get_chron_data(temp_sheet, row, total_vars)
+            w.writerow(data_list)
+            row += 1
+
+    except IndexError:
+        pass
+
+    file_csv.close()
+    return
 
 """
 MISC HELPER METHODS
@@ -105,10 +104,9 @@ def single_item(array):
     return False
 
 ## Do cell_check to see if there is any content to retrieve
-## True if not empty
-## False if empty
 ## Returns Boolean
-def cell_occupied(temp_sheet, row, col):
+def cell_check(workbook, sheet, row, col):
+    temp_sheet = workbook.sheet_by_name(sheet)
     try:
         if temp_sheet.cell_value(row, col) != ("N/A" and " " and xlrd.empty_cell and ""):
             return True
@@ -121,8 +119,6 @@ def cell_occupied(temp_sheet, row, col):
 ## Accepts: String
 ## Returns: String
 def name_to_jsonld(title_in):
-
-## PROBLEM HERE. NEED TO FIGURE OUT HOW TO IGNORE FLOATS AND INTS PASSING THROUGH ACCIDENTALLY
 
     ## Sheet names
     if title_in == 'Metadata':
@@ -202,7 +198,7 @@ def name_to_jsonld(title_in):
 ## Returns: string
 def get_data_type(temp_sheet, colListNum):
 
-    short = traverse_short_row_str(temp_sheet)
+    short = traverse_first_short(temp_sheet)
     mv_cell = traverse_missing_value(temp_sheet)
     row = var_headers_check(temp_sheet, mv_cell, short)
     str_type = instance_str((temp_sheet.cell_value(row, colListNum-1)))
@@ -227,7 +223,7 @@ def instance_str(cell):
 ## Returns: data_list(list)
 def replace_missing_vals(cell_entry, missing_val):
 
-    missing_val_list = ['none', 'na', '', '-', 'n/a', 'N/A', 'N/a']
+    missing_val_list = ['none', 'na', '', '-']
     if missing_val not in missing_val_list:
         missing_val_list.append(missing_val)
     if isinstance(cell_entry, str):
@@ -256,54 +252,20 @@ def extract_short(string_in):
 DATA WORKSHEET HELPER METHODS
 """
 
-## Starts at the first short name, and counts how many variables are present
-## Accepts: temp_sheet(obj), first_short(int)
-## Returns: vars(int)
-def count_vars(temp_sheet, first_short):
-    vars = 0
-
-    ## If we hit a blank cell, or the MV / Data cells, then stop
-    while cell_occupied(temp_sheet, first_short, 0) and ("Missing" and "Data") not in temp_sheet.cell_value(first_short, 0):
-        vars += 1
-        first_short += 1
-    return vars
-
 ## Look for what missing value is being used.
 ## Accepts: None
 ## Returns: Missing value (str)
 def get_missing_val(temp_sheet):
     row = traverse_missing_value(temp_sheet)
-    ## There are two blank cells to check for a missing value
-    empty = ''
     missing_val = temp_sheet.cell_value(row, 1)
-    missing_val2 = temp_sheet.cell_value(row, 2)
-    if cell_occupied(temp_sheet, row, 1):
-        if isinstance(missing_val, str):
-            missing_val = missing_val.lower()
-        return missing_val
-    elif cell_occupied(temp_sheet, row, 2):
-        if isinstance(missing_val2, str):
-            missing_val2 = missing_val2.lower()
-        return missing_val2
-    return empty
-
-## Traverse to short name cell in data sheet. Get the row number.
-## Accepts: temp_sheet(obj)
-## Returns: current_row(int)
-def traverse_short_row_int(temp_sheet):
-    for i in range(0, temp_sheet.nrows):
-        ## We need to keep the first variable name as a reference.
-        ## Then loop down past "Missing Value" to see if there is a matching variable header
-        ## If there's not match, then there must not be a variable header row.
-        if 'Short' in temp_sheet.cell_value(i, 0):
-            current_row = i + 1
-            return current_row
-    return
+    if isinstance(missing_val, str):
+        missing_val = missing_val.lower()
+    return missing_val
 
 ## Traverse to short name cell in data sheet
 ## Accepts: temp_sheet(obj)
 ## Returns: first_var(str)
-def traverse_short_row_str(temp_sheet):
+def traverse_first_short(temp_sheet):
     for i in range(0, temp_sheet.nrows):
 
         ## We need to keep the first variable name as a reference.
@@ -330,81 +292,30 @@ def traverse_missing_value(temp_sheet):
     return
 
 ## Traverse to the first cell that has data
-## If the cell on Col 0 has content, check 5 cells to the right for content also, just to be sure.
 ## Accepts: temp_sheet(obj), var_headers_start(int)
 ## Returns: data_cell_start(int)
-def traverse_headers_to_data(temp_sheet, start_cell):
+def traverse_to_data(temp_sheet, start_cell):
 
     ## Start at the var_headers row, and try to find the start of the data cells
     ## Loop for 5 times. It's unlikely that there are more than 5 blank rows between the var_header row and
     ## the start of the data cells. Usually it's 1 or 2 at most.
-    while not cell_occupied(temp_sheet, start_cell, 0):
+    for i in range(0, 5):
         start_cell += 1
-    return start_cell
+        if temp_sheet.cell_value(start_cell, 0) != (" " or xlrd.empty_cell or ''):
+            data_cell_start = start_cell
+            return data_cell_start
+    return
 
-## Traverse from the missing value cell to the first occupied cell
-## Accepts: temp_sheet(obj), start (int)
-## Returns: start(int)
-def traverse_mv_to_headers(temp_sheet, start):
-
-    ## Start at the var_headers row, and try to find the start of the data cells
-    ## Loop for 5 times. It's unlikely that there are more than 5 blank rows between the var_header row and
-    ## the start of the data cells. Usually it's 1 or 2 at most.
-    start += 1
-    ## Move past the empty cells
-    while not cell_occupied(temp_sheet, start, 0):
-        start += 1
-    ## Check if there is content in first two cols
-    ## Move down a row, check again. (Safety check)
-    num = 0
-    for i in range(0, 2):
-        if cell_occupied(temp_sheet, start, i):
-            num += 1
-    start += 1
-    for i in range(0, 2):
-        if cell_occupied(temp_sheet, start, i):
-            num += 1
-    return start
-
-## Check for matching variables first.
-## If match, return var_header cell int.
-## If no match, check the first two rows to see if one is all strings, or if there's some discrepancy
+## Check if there are matching variable names under "Short_Name" and "Missing Value" cells
+## If match, return var_header cell int. No match, return missing value cell int.
 ## Accepts: temp_sheet(obj), var_headers_start(int), ref_first_var(str)
 ## Returns: start_cell(int)
 def var_headers_check(temp_sheet, missing_val_row, ref_first_var):
-    start = traverse_mv_to_headers(temp_sheet, missing_val_row)
-    ## If we find a match, then Variable headers exist for this file
-    if temp_sheet.cell_value(start, 0) == ref_first_var:
-        return start + 1
-    ## No var match, start to manually check the first two rows and make a best guess
-    else:
-        col = 0
-        str_row1 = 0
-        str_row2 = 0
-
-        ## Row 1
-        while col < temp_sheet.ncols:
-            if isinstance(temp_sheet.cell_value(start, col), str):
-                str_row1 += 1
-            col += 1
-
-        ## Reset variables
-        col = 0
-        start += 1
-
-        ## Row 2
-        while col < temp_sheet.ncols:
-            if isinstance(temp_sheet.cell_value(start, col), str):
-                str_row2 += 1
-            col += 1
-
-        ## If the top row has more strings than the bottom row, then the top row must be the header
-        if str_row1 > str_row2:
-            return start
-        ## If not, then we probably don't have a header, so move back up one row
-        else:
-            return start-1
-    ## If we still aren't sure, traverse one row down from the MV box and start from there
+    for i in range(0, 5):
+        missing_val_row += 1
+        ## If we find a match, then Variable headers exist for this file
+        if temp_sheet.cell_value(missing_val_row, 0) == ref_first_var:
+            return missing_val_row + 1
     return traverse_missing_value(temp_sheet) + 1
 
 ## Traverse all cells in a row. If you find new data in a cell, add it to the list.
@@ -563,11 +474,9 @@ def cells_right_datasheets(workbook, sheet, row, col, colListNum):
                     climInDict[title_in] = temp_sheet.cell_value(row, col)
 
                 ## If the key is null, then this is a not a cell we want to add
-                ## We also don't want Data Type, because we manually check for the content data type later
-                ## Don't want it to overwrite the other data type.
                 ## Happens when we get to the cells that are filled with formatting instructions
                 ## Ex. "Climate_interpretation_code has 3 fields separated by periods..."
-                elif title_in is (None or 'dataType'):
+                elif title_in is None:
                     pass
 
                 # All other cases, change to json-ld naming
@@ -612,7 +521,7 @@ def cells_down_datasheets(filename, workbook, sheet, row, col):
             ## Special case for handling comments since we want to stop them from being inserted at column level
             if variable == 'comments':
                 for i in range(1, 3):
-                    if cell_occupied(temp_sheet, row, i):
+                    if cell_check(workbook, sheet, row, i):
                         commentList.append(temp_sheet.cell_value(row, i))
 
             ## All other cases, create a list of columns, one dictionary per column
@@ -747,7 +656,7 @@ PARSER
 def parser():
 
     ## Ask the user if their excel files are in the current directory, or to specify a file path
-    default_path = '/Users/nick/Dropbox/GeochronR/ExcelInputToParse/Australasia'
+    default_path = '/Users/nick/Dropbox/GeochronR/ExcelInputToParse/Antarctica'
     print("Are your files stored in the current 'xlsfiles' directory? (y/n)")
     answer = input()
     print("\n")
@@ -784,9 +693,9 @@ def parser():
         ## Most common sheets. If find sheet with matching name, set to variable
         for sheet in workbook.sheet_names():
             new_name = name_to_jsonld(sheet)
-            # data_original_str = None
-            # data_qc_str = None
-            # data_str = None
+            data_original_str = None
+            data_qc_str = None
+            data_str = None
 
             if sheet == 'Metadata':
                 metadata = workbook.sheet_by_index(workbook.sheet_names().index('Metadata'))
@@ -794,25 +703,25 @@ def parser():
             elif sheet == 'Chronology':
                 chronology = workbook.sheet_by_index(workbook.sheet_names().index('Chronology'))
                 chronology_str = 'Chronology'
-            elif 'Data' in sheet:
-                # data_qc = workbook.sheet_by_index(workbook.sheet_names().index(sheet))
-                # data_qc_str = sheet
-                datasheetNameList.append(sheet)
-            # elif sheet == 'Data(QC)':
-            #     data_qc = workbook.sheet_by_index(workbook.sheet_names().index('Data(QC)'))
-            #     data_qc_str = 'Data(QC)'
-            #     datasheetNameList.append(data_qc_str)
-            # elif sheet == 'Data (original)':
-            #     data_original = workbook.sheet_by_index(workbook.sheet_names().index('Data (original)'))
-            #     data_original_str = 'Data (original)'
-            #     datasheetNameList.append(data_original_str)
-            # elif sheet == 'Data(original)':
-            #     data_original = workbook.sheet_by_index(workbook.sheet_names().index('Data(original)'))
-            #     data_original_str = 'Data(original)'
-            #     datasheetNameList.append(data_original_str)
+            elif sheet == 'Data (QC)':
+                data_qc = workbook.sheet_by_index(workbook.sheet_names().index('Data (QC)'))
+                data_qc_str = 'Data (QC)'
+                datasheetNameList.append(data_qc_str)
+            elif sheet == 'Data(QC)':
+                data_qc = workbook.sheet_by_index(workbook.sheet_names().index('Data(QC)'))
+                data_qc_str = 'Data(QC)'
+                datasheetNameList.append(data_qc_str)
             elif new_name == 'ProxyList':
                 proxyList = workbook.sheet_by_index(workbook.sheet_names().index('ProxyList'))
                 proxyList_str = 'ProxyList'
+            elif sheet == 'Data (original)':
+                data_original = workbook.sheet_by_index(workbook.sheet_names().index('Data (original)'))
+                data_original_str = 'Data (original)'
+                datasheetNameList.append(data_original_str)
+            elif sheet == 'Data(original)':
+                data_original = workbook.sheet_by_index(workbook.sheet_names().index('Data(original)'))
+                data_original_str = 'Data(original)'
+                datasheetNameList.append(data_original_str)
             elif sheet == 'About':
                 about = workbook.sheet_by_index(workbook.sheet_names().index('About'))
                 about_str = 'About'
@@ -882,7 +791,7 @@ def parser():
 
         ## Creates the directory 'output' if it does not already exist
         if not os.path.exists('output/' + str(name)):
-              os.makedirs('output/' + str(name))
+            os.makedirs('output/' + str(name))
 
         ## CSV - DATA
         for sheet_str in datasheetNameList:
@@ -890,10 +799,9 @@ def parser():
         del datasheetNameList[:]
 
         ## CSV - CHRONOLOGY
-        # output_csv_chronology(workbook, chronology_str, name)
+        output_csv_chronology(workbook, chronology_str, name)
 
         ## JSON LD
-        ## PROBLEM WITH OUTPUTTING THE CORRECT FILE NAME FOR JSON LD FILE NAMES
         new_file_name_jsonld = str(name) + '/' + str(name) + '.jsonld'
         file_jsonld = open('output/' + new_file_name_jsonld, 'w')
         file_jsonld = open('output/' + new_file_name_jsonld, 'r+')
@@ -901,12 +809,5 @@ def parser():
         ## Write finalDict to json-ld file with dump
         ## Dump outputs into a readable json hierarchy
         json.dump(finalDict, file_jsonld, indent=4)
-
-        ## Flatten the JSON LD file, and output it to its own file
-        flattened_file = flatten.run(finalDict)
-        new_file_flat_json = str(name) + '/' + str(name) + '_flat.json'
-        file_flat_jsonld = open('output/' + new_file_flat_json, 'w')
-        file_flat_jsonld = open('output/' + new_file_flat_json, 'r+')
-        json.dump(flattened_file, file_flat_jsonld, indent=0)
 
 parser()
