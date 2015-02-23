@@ -1,5 +1,8 @@
 {
     "@context": "context.jsonld",
+    "siteName": "Site DML07",
+    "comments": "Mean annual snow accumulation rate (0.059 m ice equivalent)",
+    "collectionName": "B31",
     "geo": {
         "longitude": {
             "min": -3.43,
@@ -17,6 +20,7 @@
         }
     },
     "pub": {
+        "authors": "Graf; Sommer",
         "DOI": [
             "10.3189/172756402781818492",
             "10.1029/2000JD900450"
@@ -24,12 +28,8 @@
         "year": [
             2002.0,
             2000.0
-        ],
-        "authors": "Graf; Sommer"
+        ]
     },
-    "siteName": "Site DML07",
-    "comments": "Mean annual snow accumulation rate (0.059 m ice equivalent)",
-    "collectionName": "B31",
     "measurements": [
         {
             "measTableName": "data",
@@ -42,7 +42,7 @@
                     "longName": "Date",
                     "units": "Year in AD",
                     "archive": "ice core",
-                    "null": "Note: Climate_interpretation_code has 3 fields separated by periods: Climate Parameter{e.g., T, P, Mode}.Parameter_detail{e.g, air, sea_surface, effective}.Climate_relation {e.g., positive or negative}"
+                    "Note": "Climate_interpretation_code has 3 fields separated by periods: Climate Parameter{e.g., T, P, Mode}.Parameter_detail{e.g, air, sea_surface, effective}.Climate_relation {e.g., positive or negative}"
                 },
                 {
                     "column": 2,

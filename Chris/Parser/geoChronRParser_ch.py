@@ -1,9 +1,9 @@
-import xlrd,os,csv
+import xlrd, os, csv
 import json
 from collections import OrderedDict
 import flatten
-import flatten_test
-import validator_ch
+# import flatten_test
+# import validator_ch
 
 ## GLOBAL VARIABLES
 finalDict = OrderedDict()

@@ -30,6 +30,18 @@
             },
         "max" : "schema:maxValue",
         "min" : "schema:minValue",
+
+
+        "pub" : "schema:publisher",
+        "authors" : "schema:author",
+        "DOI" : "schema:PublicationIssue",
+        "year" : "schema:datePublished",
+        "basis" : "schema:description",
+        "archive" : "schema:description",
+        "dataType" : "schema:DataType",
+        "comments" : "schema:comment",
+        "null" : "schema:description",
+
         
         "archiveType" : "schema:alternateName",
         "investigator": "schema:name",
@@ -64,7 +76,7 @@
         "longName" : "schema:description",
         "shortName" : "schema:alternateName",
         "proxy" : "schema:alternateName",
-        "unit" : "schema:units",
+        "units" : "schema:units",
         "parameter" : "schema:name",
         "parameterDetail" : "schema:description",
         "seasonality:value": {
