@@ -3,7 +3,7 @@ import json
 from collections import OrderedDict
 import flatten
 # import flatten_test
-# import validator_ch
+import validator_ch
 
 ## GLOBAL VARIABLES
 finalDict = OrderedDict()
@@ -904,6 +904,7 @@ def parser():
 
         ## Flatten the JSON LD file, and output it to its own file
         flattened_file = flatten.run(finalDict)
+        validate_flat_file = validator_ch.run(flattened_file)
         new_file_flat_json = str(name) + '/' + str(name) + '_flat.json'
         file_flat_jsonld = open('output/' + new_file_flat_json, 'w')
         file_flat_jsonld = open('output/' + new_file_flat_json, 'r+')

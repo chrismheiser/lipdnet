@@ -2,10 +2,16 @@
 "@context" : {
         "xsd": "http://www.w3.org/2001/XMLSchema#",
         "schema" : "http://schema.org/",
+
+        "paleoArchiveName" : "schema:name",
         "siteName" : "schema:site",
-        "comments" : "schema:comment",
         "collectionName" : "schema:collection",
+        "region" : "schema:containedIn",
+        "country" : "schema:Country",
+        "province": "schema:Province",
+        "city": "schema:City",
         "geo" : "schema:geo",
+
         "latitude" : {
             "@id" : "schema:latitude",
             "@container" : "@list"
@@ -24,36 +30,55 @@
             },
         "max" : "schema:maxValue",
         "min" : "schema:minValue",
+
+
         "pub" : "schema:publisher",
         "authors" : "schema:author",
         "DOI" : "schema:PublicationIssue",
         "year" : "schema:datePublished",
-        "measurements" : {
-            "@id" : "schema:measurementData",
+        "basis" : "schema:description",
+        "archive" : "schema:description",
+        "dataType" : "schema:DataType",
+        "comments" : "schema:comment",
+        "null" : "schema:description",
+
+        
+        "archiveType" : "schema:alternateName",
+        "investigator": "schema:name",
+        "dateCreated": "schema:Date",
+        "startDate": "schema:Date",
+        "endDate" : "schema:Date",
+        "whoCollected" : "schema:name",
+        "whoAnalyzed" : "schema:name",
+        "whoEnteredinDB" : "schema:name",
+        "columns" : {
+            "@id" : "schema:description",
             "@container" : "@index"
         },
         "measTableNumber" : {
             "@id" : "schema:name",
             "@value" : "xsd:integer"
         },
-        "measTableName" : "schema:name",
+        "measTable" : "schema:measurementTable",
+        "measurements" : {
+            "@id" : "schema:measurementData",
+            "@container" : "@index"
+        },
         "filename" : "schema:fileFormat",
-        "columns" : {
+        "chronologies" : {
             "@id" : "schema:description",
             "@container" : "@index"
         },
-        "column" : "xsd:integer",
+        "measRes" : {
+            "@id" : "schema:measurement",
+            "@type" : "xsd:float"
+        },
         "longName" : "schema:description",
         "shortName" : "schema:alternateName",
+        "proxy" : "schema:alternateName",
         "units" : "schema:units",
-        "dataType" : "schema:DataType",
-        "archive" : "schema:alternateName",
-        "note" : "schema:description",
-        "material" : "schema:description",
-        "climateInterpretation" : {
-            "@id" : "schema:description",
-            "@container" : "@index"
-        },
+        "parameter" : "schema:name",
+        "parameterDetail" : "schema:description",
         "seasonality:value": {
             "@id" : "schema:value",
             "@type": "xsd:integer",
@@ -63,26 +88,37 @@
             "@id" : "schema:units",
             "@container" : "@list"
         },
-        "interpDirection" : {
+  		"interpDirection" : {
             "@id" : "schema:description"
         },
-        "proxy" : "schema:alternateName",
-        "parameter" : "schema:name",
-        "parameterDetail" : "schema:description",
-        "chronologies" : {
-            "@id" : "schema:description",
-            "@container" : "@index"
-        },
+        "material" : "schema:description",
         "precision": {
             "@id": "schema:precision",
             "@type": "xsd:float"
         },
+        "instrument" : "schema:device",
+        "sensorModel" : "schema:description",
+        "archiveModel" : "schema:description",
+        "observationModel" : "schema:description",
         "chronName" : "schema:name",
         "chronType" : "schema:description",
         "chronRes" : "schema:description",
+        "errorLevel" : "schema:description",
+        "overCount" : {
+            "@id" : "schema:minValue",
+            "@type" : "xsd:integer"
+        },
+        "underCount" : {
+            "@id" : "schema:maxValue",
+            "@type" : "xsd:integer"
+        },
         "chronTableName" : {
             "@id" : "schema:name",
             "@value" : "xsd:integer"
+        },
+        "countRate": {
+          "@id" : "xsd:integer",
+          "@container" : "@list"
         }
 
 }

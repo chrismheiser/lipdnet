@@ -7,6 +7,9 @@ new flattened structure back to the parser.
 
 """
 
+# Count how many dictionaries are in a list
+# Accepts: list
+# Returns: int
 def count_dicts(list_in):
     count = 0
     for i in range(0, len(list_in)):
