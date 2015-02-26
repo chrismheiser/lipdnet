@@ -1,6 +1,9 @@
 import json
 import re
 
+# All path items are automatically strings. If you think it's an int or float, use this to attempt to convert it.
+# Accepts: str
+# Returns: int or float
 def convert_num(number):
     try:
         return int(number)
@@ -17,7 +20,9 @@ def path_str_split(str_path):
 def secondary_check():
     return
 
-# Simple if statements to check for the easy attr's (high level)
+# Simple check to see if the given item is the right type. True if valid, False if invalid
+# Accepts: str
+# Returns: bool
 def first_checks(str_path):
 
     path_list = path_str_split(str_path)
