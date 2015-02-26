@@ -32,7 +32,6 @@ def check_bottom(dict_in):
         count = count_strings_list(dict_in)
     else:
         count = 0
-        print("Not string or dict")
 
     # If there are equal number of string values and items in the dictionary, then there's no more nesting.
     # Meaning we are at the bottom of the path
@@ -151,7 +150,6 @@ def dive(dict_in, current, overall):
         else:
             for k, v in dict_in.items():
                 append_two_items(k, v, current, overall)
-            overall.append('')
 
     # If we are not at the bottom, then add whatever current paths you can, and then make another dive
     else:
@@ -182,7 +180,6 @@ def dive(dict_in, current, overall):
                     columns = count_dicts(v)
                     for items in range(0, columns):
                         dive(v[items], current, overall)
-                        overall.append('\n')
                     current.clear()
 
                 # If you have a list with raw data (no nesting), then do single appends on all its items.
@@ -195,7 +192,6 @@ def dive(dict_in, current, overall):
                 else:
                     for item in range(0, len(v)):
                         # Appending a space for readability purposes
-                        overall.append('\n')
                         dive(v[item], current, overall)
 
     return overall
