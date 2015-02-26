@@ -20,18 +20,21 @@ def path_str_split(str_path):
 
 
 # Deeper check for column attr's and such (low level)
-def secondary_check():
+# Accept: str
+# Return: bool
+def second_pass(str_path):
     return
 
 
 # Simple check to see if the given item is the right type. True if valid, False if invalid
 # Accepts: str
 # Returns: bool
-def first_checks(str_path):
+def first_pass(str_path):
+
     valid = False
     path_list = path_str_split(str_path)
-    key = path_list[len(path_list) - 2]
-    value = path_list[len(path_list) - 1]
+    key = path_list[len(path_list)-2]
+    value = path_list[len(path_list)-1]
 
     if '@context' in path_list:
         if isinstance(value, str):
@@ -128,6 +131,11 @@ def first_checks(str_path):
         if isinstance(value, str):
             valid = True
 
+    elif 'error' in path_list:
+        convert = convert_num(value)
+        if isinstance(convert, float) or isinstance(convert, int):
+            valid = True
+
     elif 'climateInterpretation' in path_list:
 
         if 'seasonality' in path_list:
@@ -153,25 +161,42 @@ def first_checks(str_path):
     # Throw to another function that does deeper validation
     if valid:
         pass
-        # print('Valid: {0} - {1}'.format(key, value))
+
     # Show what items are invalid
     else:
-        pass
-        # print('Invalid: {0} - {1}'.format(key, value))
+        print('Invalid: {0} - {1}'.format(key, value))
 
     return valid
 
 
 # Main method
-def run(file):
+def run():
     error_count = 0
+    file = 'test_flat2.json'
     flat_json = open(file)
     data = json.load(flat_json)
 
     # Loop through each path in flat_json. If it returns false, that means there's an error. Update count.
     for item in data:
-        if not first_checks(item):
+        if not first_pass(item):
             error_count += 1
-    print("{0} errors found".format(error_count))
+
+    # Check whether to quit validation, or to go on to second validation
+    # Print errors if found
+    if error_count == 0:
+
+        print("Simple Validation: Passed")
+        for item in data:
+            if not second_pass(item):
+                error_count += 1
+
+        if error_count == 0:
+            print("Deep Validation: Passed")
+        else:
+            print("Deep Validation: {0} errors".format(error_count))
+    else:
+        print("Simple Validation: {0} errors".format(error_count))
 
     return
+
+run()
