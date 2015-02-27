@@ -2,6 +2,8 @@
 "@context" : {
         "xsd": "http://www.w3.org/2001/XMLSchema#",
         "schema" : "http://schema.org/",
+        "linkedearth" : "http://www.organicdatacuration.org/linkedearth/index.php/Property:#",
+        "wiki" : 
         "siteName" : "schema:site",
         "comments" : "schema:comment",
         "collectionName" : "schema:collection",
@@ -51,9 +53,9 @@
         "shortName" : "schema:alternateName",
         "units" : "schema:units",
         "dataType" : "schema:DataType",
-        "archive" : "http://www.organicdatacuration.org/linkedearth/index.php/Property:Archive",
+  "archive" : "linkedearth:Archive",
         "note" : "schema:description",
-        "material" : "http://www.organicdatacuration.org/linkedearth/index.php/Property:MeasurementMaterial",
+        "material" : "linkedearth:MeasurementMaterial",
         "climateInterpretation" : {
             "@id" : "http://www.organicdatacuration.org/linkedearth/index.php/Property:Interpretation",
             "@container" : "@index"

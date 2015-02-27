@@ -1,12 +1,16 @@
 # import flatten_test
 # import validator_ch
+# import validator_ch
+# import validator_test_easy
+
 import xlrd
-import os
 import csv
 import json
 from collections import OrderedDict
 import flatten
-import validator_ch
+import tkinter
+import tkinter.filedialog
+import os
 
 # GLOBAL VARIABLES
 finalDict = OrderedDict()
@@ -71,29 +75,29 @@ def output_csv_datasheet(workbook, sheet, name):
 # Output the data columns from chronology sheet to csv file
 # Accepts: Workbook(obj), sheet(str), name(str)
 # Returns: None
-# def output_csv_chronology(workbook, sheet, name):
-#     json_naming = name_to_jsonld(sheet)
-#     temp_sheet = workbook.sheet_by_name(sheet)
-#     csv_folder_and_name = str(name) + '/' + str(name) + str(json_naming) + '.csv'
-#     csv_full_path = 'output/' + csv_folder_and_name
-#     file_csv = open(csv_full_path, 'w', newline='')
-#     w = csv.writer(file_csv)
-#
-#     try:
-#         total_vars = count_chron_variables(temp_sheet)
-#         row = traverse_to_chron_data(temp_sheet)
-#
-#         while row < temp_sheet.nrows:
-#
-#             data_list = get_chron_data(temp_sheet, row, total_vars)
-#             w.writerow(data_list)
-#             row += 1
-#
-#     except IndexError:
-#         pass
-#
-#     file_csv.close()
-#     return
+def output_csv_chronology(workbook, sheet, name):
+    json_naming = name_to_jsonld(sheet)
+    temp_sheet = workbook.sheet_by_name(sheet)
+    csv_folder_and_name = str(name) + '/' + str(name) + str(json_naming) + '.csv'
+    csv_full_path = 'output/' + csv_folder_and_name
+    file_csv = open(csv_full_path, 'w', newline='')
+    w = csv.writer(file_csv)
+
+    try:
+        total_vars = count_chron_variables(temp_sheet)
+        row = traverse_to_chron_data(temp_sheet)
+
+        while row < temp_sheet.nrows:
+
+            data_list = get_chron_data(temp_sheet, row, total_vars)
+            w.writerow(data_list)
+            row += 1
+
+    except IndexError:
+        pass
+
+    file_csv.close()
+    return
 
 """
 MISC HELPER METHODS
@@ -749,21 +753,35 @@ PARSER
 def parser():
 
     # Ask the user if their excel files are in the current directory, or to specify a file path
-    default_path = '/Users/nick/Dropbox/GeochronR/ExcelInputToParse/Australasia'
-    print("Are your files stored in the current 'xlsfiles' directory? (y/n)")
-    answer = input()
-    print("\n")
+    # default_path = '/Users/nick/Dropbox/GeochronR/ExcelInputToParse/Australasia'
+    # print("Are your files stored in the current 'xlsfiles' directory? (y/n)")
+    # answer = input()
+    # print("\n")
 
     # Specify a directory path
-    if answer is "n":
-        print("Please specify the path where your files are stored: ")
-        print("(Ex: /Users/chrisheiser1/Desktop or /Users/chrisheiser1/Dropbox/GeoChronR/ExcelInputToParse)")
-        user_path = input()
-        os.chdir(user_path)
+    # if answer is "n":
+    #     print("Please specify the path where your files are stored: ")
+        # print("(Ex: /Users/chrisheiser1/Desktop or /Users/chrisheiser1/Dropbox/GeoChronR/ExcelInputToParse)")
+        # user_path = input()
+        # os.chdir(user_path)
 
     # Use current directory
-    else:
-        os.chdir(default_path)
+    # else:
+    #     os.chdir(default_path)
+
+
+    chron_run = input("Run Chronology? (y/n)\n")
+    flat_run = input("Flatten JSON? (y/n)\n")
+
+    root = tkinter.Tk()
+    root.withdraw()
+    currdir = os.getcwd()
+    tempdir = tkinter.filedialog.askdirectory(parent=root, initialdir=currdir, title='Please select a directory')
+    if len(tempdir) > 0:
+        print("You chose %s" % tempdir)
+    os.chdir(tempdir)
+
+
 
     # Add all excel files from user-specified directory, or from current directory
     # Puts all file names in a list we iterate over
@@ -892,7 +910,8 @@ def parser():
         del datasheetNameList[:]
 
         # CSV - CHRONOLOGY
-        # output_csv_chronology(workbook, chronology_str, name)
+        if chron_run == 'y':
+            output_csv_chronology(workbook, chronology_str, name)
 
         # JSON LD
         # PROBLEM WITH OUTPUTTING THE CORRECT FILE NAME FOR JSON LD FILE NAMES
@@ -904,13 +923,14 @@ def parser():
         # Dump outputs into a readable json hierarchy
         json.dump(finalDict, file_jsonld, indent=4)
 
-        # Flatten the JSON LD file, and output it to its own file
-        flattened_file = flatten.run(finalDict)
-        new_file_flat_json = str(name) + '/' + str(name) + '_flat.json'
-        file_flat_jsonld = open('output/' + new_file_flat_json, 'w')
-        file_flat_jsonld = open('output/' + new_file_flat_json, 'r+')
-        json.dump(flattened_file, file_flat_jsonld, indent=0)
-        # validate_flat = validator_test.run('output/' + new_file_flat_json)
+        if flat_run == 'y':
+            # Flatten the JSON LD file, and output it to its own file
+            flattened_file = flatten.run(finalDict)
+            new_file_flat_json = str(name) + '/' + str(name) + '_flat.json'
+            file_flat_jsonld = open('output/' + new_file_flat_json, 'w')
+            file_flat_jsonld = open('output/' + new_file_flat_json, 'r+')
+            json.dump(flattened_file, file_flat_jsonld, indent=0)
+            # validate_flat = validator_test.run('output/' + new_file_flat_json)
 
 
 parser()

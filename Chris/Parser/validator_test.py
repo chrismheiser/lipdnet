@@ -26,7 +26,7 @@ def second_pass(str_path):
     return
 
 
-# Simple check to see if the given item is the right type. True if valid, False if invalid
+# Simple check to see if the given key-value is the right type. True if valid, False if invalid
 # Accepts: str
 # Returns: bool
 def first_pass(str_path):

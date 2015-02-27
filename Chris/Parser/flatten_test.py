@@ -180,7 +180,6 @@ def dive(dict_in, current, overall):
                     columns = count_dicts(v)
                     for items in range(0, columns):
                         dive(v[items], current, overall)
-                        overall.append('')
                     current.clear()
 
                 # If you have a list with raw data (no nesting), then do single appends on all its items.
@@ -193,7 +192,6 @@ def dive(dict_in, current, overall):
                 else:
                     for item in range(0, len(v)):
                         # Appending a space for readability purposes
-                        overall.append('')
                         dive(v[item], current, overall)
 
     return overall
