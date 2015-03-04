@@ -1,0 +1,26 @@
+
+
+A few things to  do now:
+- keep working on exception handling: I’ve tried my best, but with each NCDC file I discover a new exception to their own rules...
+- settle on a data standard that we’re going to use for PAGES2K, LMR, and GeoChronR
+- make this R-friendly (no idea how to, though I know that R can read RDF and csv, so it shouldn’t be too hard). 
+
+Let me know what you see as the next steps!
+Cheers
+Julien
+--
+Julien Emile-Geay  -  Assistant Professor  || University of Southern California
+Department of Earth Sciences & Center for Applied Mathematical Sciences 
+ 3651 Trousdale Parkway, ZHS 275. Los Angeles, CA 90089 - 0740
+Tel:  (213) 740 2945         |                 http://climdyn.usc.edu
+
+
+
+
+
+
+
+
+
+
+

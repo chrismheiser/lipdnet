@@ -1,0 +1,8 @@
+
+
+It’s not perfect, but it’s pretty darn good: it inhales NCDC data descriptor files (2013 vintage or later), of the form 'filename.txt', exports data and metadata to a Python ordered
+dictionary and a matlab structure (filename.mat), the metadata to RDF Turtle
+file filename.ttl and the raw data to filename_data.csv . If primary chronological
+information is provided in the file, it is exported to filename_chronology.txt
+
+I include an example script of how to use it, which generated the attached figures effortlessly.

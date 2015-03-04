@@ -752,36 +752,20 @@ PARSER
 """
 def parser():
 
-    # Ask the user if their excel files are in the current directory, or to specify a file path
-    # default_path = '/Users/nick/Dropbox/GeochronR/ExcelInputToParse/Australasia'
-    # print("Are your files stored in the current 'xlsfiles' directory? (y/n)")
-    # answer = input()
-    # print("\n")
-
-    # Specify a directory path
-    # if answer is "n":
-    #     print("Please specify the path where your files are stored: ")
-        # print("(Ex: /Users/chrisheiser1/Desktop or /Users/chrisheiser1/Dropbox/GeoChronR/ExcelInputToParse)")
-        # user_path = input()
-        # os.chdir(user_path)
-
-    # Use current directory
-    # else:
-    #     os.chdir(default_path)
-
-
+    # Ask user if they want to run the Chronology sheets or flatten the JSON files.
+    # This is an all or nothign choice
     chron_run = input("Run Chronology? (y/n)\n")
     flat_run = input("Flatten JSON? (y/n)\n")
 
+    # Display a dialog box that let's the user browse for the directory with all their excel files.
     root = tkinter.Tk()
     root.withdraw()
     currdir = os.getcwd()
-    tempdir = tkinter.filedialog.askdirectory(parent=root, initialdir=currdir, title='Please select a directory')
+    #tempdir = tkinter.filedialog.askdirectory(parent=root, initialdir=currdir, title='Please select a directory')
+    tempdir = "/Users/Nick/Dropbox/GeoChronR/ExcelInputToParse/Arctic"
     if len(tempdir) > 0:
-        print("You chose %s" % tempdir)
+        print("Directory: " + tempdir)
     os.chdir(tempdir)
-
-
 
     # Add all excel files from user-specified directory, or from current directory
     # Puts all file names in a list we iterate over
@@ -789,7 +773,6 @@ def parser():
     for file in os.listdir():
         if file.endswith(".xls") or file.endswith(".xlsx"):
             excel_files.append(file)
-
 
     datasheetNameList = []
     # Loop over all the lines (filenames) that are in the txt file
