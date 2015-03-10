@@ -603,7 +603,7 @@ def cells_down_datasheets(filename, workbook, sheet, row, col):
     # If we hit either of these, that should mean that we found all the variables
     # For each short_name, we should create a column entry and match all the info for that column
     temp_sheet = workbook.sheet_by_name(sheet)
-    measTableName = name_to_jsonld(sheet)
+    measTableName = sheet
     columnsTop = []
     commentList = []
     colListNum = 1
@@ -632,6 +632,7 @@ def cells_down_datasheets(filename, workbook, sheet, row, col):
 
     # Add all our data pieces for this column into a new entry in the Measurement Table Dictionary
     measTableDict['measTableName'] = measTableName
+
     measTableDict['filename'] = str(filename) + str(measTableName) + ".csv"
 
     # If comments exist, insert them at table level
@@ -761,10 +762,10 @@ def parser():
     root = tkinter.Tk()
     root.withdraw()
     currdir = os.getcwd()
-    #tempdir = tkinter.filedialog.askdirectory(parent=root, initialdir=currdir, title='Please select a directory')
-    tempdir = "/Users/Nick/Dropbox/GeoChronR/ExcelInputToParse/Arctic"
-    if len(tempdir) > 0:
-        print("Directory: " + tempdir)
+    tempdir = tkinter.filedialog.askdirectory(parent=root, initialdir=currdir, title='Please select a directory')
+
+    # if len(tempdir) > 0:
+    #     print("Directory: " + tempdir)
     os.chdir(tempdir)
 
     # Add all excel files from user-specified directory, or from current directory
