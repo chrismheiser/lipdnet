@@ -224,7 +224,6 @@ def parse(file):
                 #         vars_dict[vars_names[i]].append(convert_num(old_list[i]))
 
 
-
     # Piece together geo block
     geo['latitude'] = lat
     geo['longitude'] = lon
@@ -243,8 +242,8 @@ def parse(file):
 def main():
 
     # Cut the extension from the file name
-    file = 'noaa.txt'
-    split = file.split('.')
+    file = 'noaa-original.txt'
+    split = file.split('-')
     name = split[0]
 
     # Run the file through the parser
@@ -256,7 +255,7 @@ def main():
     # print(dict_out)
 
     # LPD file output
-    new_file_name_jsonld = str(name) + '.jsonld'
+    new_file_name_jsonld = str(name) + '-out.jsonld'
     file_jsonld = open(new_file_name_jsonld, 'w')
     file_jsonld = open(new_file_name_jsonld, 'r+')
 

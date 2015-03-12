@@ -1,11 +1,11 @@
 __author__ = 'chrisheiser1'
-import json
 
 """
 The flattener takes in the final dictionary (JSON LD) from the parser, flattens it, and then returns the
 new flattened structure back to the parser.
 
 """
+
 
 # Count how many dictionaries are in a list
 # Accepts: list
@@ -16,6 +16,7 @@ def count_dicts(list_in):
         if type_check(list_in[i]) == 'dict':
             count += 1
     return count
+
 
 # Check if we're at the bottom of the nesting
 # Accept: dict or list
@@ -40,6 +41,7 @@ def check_bottom(dict_in):
 
     return bottom
 
+
 # Count how many strings are in the list.
 # Accepts: list
 # Returns: int
@@ -49,6 +51,7 @@ def count_strings_list(list_in):
         if type_check(list_in[i]) == ('str' or 'int' or 'float'):
             count += 1
     return count
+
 
 # Check if all the entries in V are strings
 # Accepts: dict
@@ -64,6 +67,7 @@ def count_strings_dict(dict_in):
                     count += 1
     return count
 
+
 # Remove all the empty strings from the final list
 # Accepts: list
 # Returns: list
@@ -74,6 +78,7 @@ def remove_empty_items(list_in):
             list_in.remove("")
         i += 1
     return list_in
+
 
 # Take the path list, and turn it into a path string
 # Accepts: list
@@ -89,6 +94,7 @@ def to_string(list_in):
         return path_join + '-' + k_v_join
     return ':'.join(map(str, list_in))
 
+
 # Check what type of item we have
 # Accepts: generic
 # Returns: string
@@ -103,6 +109,7 @@ def type_check(item):
         print('type error')
         return
 
+
 # ACCEPTS: dictionary(dict), current path (list), overall path (list)
 # RETURNS: None
 def append_one_item(v, current, overall):
@@ -111,6 +118,7 @@ def append_one_item(v, current, overall):
     overall.append(temp)
     current.remove(v)
     return
+
 
 # If the item we have is a dead end, add the key-value to the current path
 # Then, convert the path to a string, and add to the overall list of paths
@@ -125,6 +133,7 @@ def append_two_items(k, v, current, overall):
     current.remove(v)
     current.remove(k)
     return
+
 
 # ACCEPT: dictionary (dict), current path (list), overall path (list)
 # RETURNS: overall path (list)
@@ -197,6 +206,8 @@ def dive(dict_in, current, overall):
     return overall
 
 
+# Accepts: Dictionary
+# Returns: List (of strings)
 def run(final_dict):
     current = []
     overall = []
