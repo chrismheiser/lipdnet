@@ -101,7 +101,6 @@ def output_csv_chronology(workbook, sheet, name):
     file_csv.close()
     return
 
-
 """
 MISC HELPER METHODS
 """
@@ -134,7 +133,6 @@ def cell_occupied(temp_sheet, row, col):
 # Accepts: String
 # Returns: String
 def name_to_jsonld(title_in):
-
 
     # Sheet names
     if title_in == 'Metadata':
@@ -464,7 +462,6 @@ def cells_right_metadata(workbook, sheet, row, col):
 
     return cell_data
 
-
 # Traverse all cells in a column moving downward. Primarily created for the metadata sheet, but may use elsewhere
 # Check the cell title, and switch it to
 def cells_down_metadata(workbook, sheet, row, col):
@@ -640,14 +637,14 @@ def cells_down_datasheets(filename, workbook, sheet, row, col):
     # If we hit either of these, that should mean that we found all the variables
     # For each short_name, we should create a column entry and match all the info for that column
     temp_sheet = workbook.sheet_by_name(sheet)
-    measTableName = name_to_jsonld(sheet)
+    measTableName = sheet
     columnsTop = []
     commentList = []
     colListNum = 1
 
     # Loop downward until you hit the "Data" box
     try:
-        while temp_sheet.cell_value(row, col) != 'Data':
+        while ('Data' or 'Missing Value') not in temp_sheet.cell_value(row, col):
 
             variable = name_to_jsonld(temp_sheet.cell_value(row, col))
 
@@ -669,6 +666,7 @@ def cells_down_datasheets(filename, workbook, sheet, row, col):
 
     # Add all our data pieces for this column into a new entry in the Measurement Table Dictionary
     measTableDict['measTableName'] = measTableName
+
     measTableDict['filename'] = str(filename) + str(measTableName) + ".csv"
 
     # If comments exist, insert them at table level
@@ -679,6 +677,7 @@ def cells_down_datasheets(filename, workbook, sheet, row, col):
     # Reset list back to null for next loop
     commentList = []
     return measTableDict
+
 
 """
 CHRONOLOGY HELPER METHODS
@@ -805,10 +804,10 @@ def parser():
     root = tkinter.Tk()
     root.withdraw()
     currdir = os.getcwd()
-    #tempdir = tkinter.filedialog.askdirectory(parent=root, initialdir=currdir, title='Please select a directory')
-    tempdir = "/Users/Nick/Dropbox/GeoChronR/ExcelInputToParse/Aus2kLR"
-    if len(tempdir) > 0:
-        print("Directory: " + tempdir)
+    tempdir = tkinter.filedialog.askdirectory(parent=root, initialdir=currdir, title='Please select a directory')
+
+    # if len(tempdir) > 0:
+    #     print("Directory: " + tempdir)
     os.chdir(tempdir)
 
     # Add all excel files from user-specified directory, or from current directory
