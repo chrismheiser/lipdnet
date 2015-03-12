@@ -15,7 +15,6 @@ import os
 # GLOBAL VARIABLES
 finalDict = OrderedDict()
 
-
 # Use this to output data columns to a csv file
 # Accepts: Workbook(Obj), Sheet(str), name(str)
 # Returns: None
@@ -73,7 +72,6 @@ def output_csv_datasheet(workbook, sheet, name):
     file_csv.close()
     return
 
-
 # Output the data columns from chronology sheet to csv file
 # Accepts: Workbook(obj), sheet(str), name(str)
 # Returns: None
@@ -101,11 +99,9 @@ def output_csv_chronology(workbook, sheet, name):
     file_csv.close()
     return
 
-
 """
 MISC HELPER METHODS
 """
-
 
 # Check an array to see if it is a single item or not
 # Accepts: List
@@ -114,7 +110,6 @@ def single_item(array):
     if len(array) == 1:
         return True
     return False
-
 
 # Do cell_check to see if there is any content to retrieve
 # True if not empty
@@ -127,7 +122,6 @@ def cell_occupied(temp_sheet, row, col):
         return False
     except IndexError:
         pass
-
 
 # Convert formal titles to camelcase json_ld text that matches our context file
 # Keep a growing list of all titles that are being used in the json_ld context
@@ -209,7 +203,6 @@ def name_to_jsonld(title_in):
 
     return title_out
 
-
 # Find out what type of values are stored in a specific column in data sheet
 # Accepts: sheet(obj), colListNum(int)
 # Returns: string
@@ -218,23 +211,8 @@ def get_data_type(temp_sheet, colListNum):
     short = traverse_short_row_str(temp_sheet)
     mv_cell = traverse_missing_value(temp_sheet)
     row = var_headers_check(temp_sheet, mv_cell, short)
-    temp = temp_sheet.cell_value(row, colListNum-1)
-
-    # Make sure we are not getting the dataType of a "NaN" item
-    while (temp == 'NaN') and (row < temp_sheet.nrows):
-        row += 1
-
-    # If we find a value before reaching the end of the column, determine the dataType
-    if row < temp_sheet.nrows:
-        # Determine what type the item is
-        str_type = instance_str(temp_sheet.cell_value(row, colListNum - 1))
-
-    # If the whole column is NaN's, then there is no dataType
-    else:
-        str_type = 'None'
-
+    str_type = instance_str((temp_sheet.cell_value(row, colListNum-1)))
     return str_type
-
 
 # Tells you what data type you have, and outputs it in string form
 # Accepts: data
@@ -251,7 +229,6 @@ def instance_str(cell):
 
     # Look for any missing values in the data_list. If you find any, replace with 'NaN'
 
-
 # Accepts: data_list(list), missing_val(str)
 # Returns: data_list(list)
 def replace_missing_vals(cell_entry, missing_val):
@@ -265,7 +242,6 @@ def replace_missing_vals(cell_entry, missing_val):
         cell_entry = 'NaN'
     return cell_entry
 
-
 # Extract units from a string. In the format "elevation (meters)"
 # Get the units from inside the parens
 # Accepts: string
@@ -274,7 +250,6 @@ def extract_units(string_in):
     start = '('
     stop = ')'
     return string_in[string_in.index(start)+1:string_in.index(stop)]
-
 
 # Extract the short name from a string that also has units.
 # Accepts: string
@@ -287,7 +262,6 @@ def extract_short(string_in):
 DATA WORKSHEET HELPER METHODS
 """
 
-
 # Starts at the first short name, and counts how many variables are present
 # Accepts: temp_sheet(obj), first_short(int)
 # Returns: vars(int)
@@ -299,7 +273,6 @@ def count_vars(temp_sheet, first_short):
         vars += 1
         first_short += 1
     return vars
-
 
 # Look for what missing value is being used.
 # Accepts: None
@@ -320,7 +293,6 @@ def get_missing_val(temp_sheet):
         return missing_val2
     return empty
 
-
 # Traverse to short name cell in data sheet. Get the row number.
 # Accepts: temp_sheet(obj)
 # Returns: current_row(int)
@@ -333,7 +305,6 @@ def traverse_short_row_int(temp_sheet):
             current_row = i + 1
             return current_row
     return
-
 
 # Traverse to short name cell in data sheet
 # Accepts: temp_sheet(obj)
@@ -350,7 +321,6 @@ def traverse_short_row_str(temp_sheet):
             return ref_first_var
     return
 
-
 # Traverse to missing value cell in data sheet
 # Accepts: temp_sheet(obj)
 # Returns: row (int)
@@ -365,7 +335,6 @@ def traverse_missing_value(temp_sheet):
             return missing_row_num
     return
 
-
 # Traverse to the first cell that has data
 # If the cell on Col 0 has content, check 5 cells to the right for content also, just to be sure.
 # Accepts: temp_sheet(obj), var_headers_start(int)
@@ -378,7 +347,6 @@ def traverse_headers_to_data(temp_sheet, start_cell):
     while not cell_occupied(temp_sheet, start_cell, 0):
         start_cell += 1
     return start_cell
-
 
 # Traverse from the missing value cell to the first occupied cell
 # Accepts: temp_sheet(obj), start (int)
@@ -403,7 +371,6 @@ def traverse_mv_to_headers(temp_sheet, start):
         if cell_occupied(temp_sheet, start, i):
             num += 1
     return start
-
 
 # Check for matching variables first.
 # If match, return var_header cell int.
@@ -446,7 +413,6 @@ def var_headers_check(temp_sheet, missing_val_row, ref_first_var):
     # If we still aren't sure, traverse one row down from the MV box and start from there
     return traverse_missing_value(temp_sheet) + 1
 
-
 # Traverse all cells in a row. If you find new data in a cell, add it to the list.
 # Outputs a list of cell data for the specified row.
 def cells_right_metadata(workbook, sheet, row, col):
@@ -463,7 +429,6 @@ def cells_right_metadata(workbook, sheet, row, col):
             continue
 
     return cell_data
-
 
 # Traverse all cells in a column moving downward. Primarily created for the metadata sheet, but may use elsewhere
 # Check the cell title, and switch it to
@@ -569,7 +534,6 @@ def cells_down_metadata(workbook, sheet, row, col):
 
     return
 
-
 # Returns an attributes dictionary
 def cells_right_datasheets(workbook, sheet, row, col, colListNum):
     temp_sheet = workbook.sheet_by_name(sheet)
@@ -628,7 +592,6 @@ def cells_right_datasheets(workbook, sheet, row, col, colListNum):
 
     return attrDict
 
-
 # Adds all measurement table data to the final dictionary
 # Returns: None
 def cells_down_datasheets(filename, workbook, sheet, row, col):
@@ -640,7 +603,7 @@ def cells_down_datasheets(filename, workbook, sheet, row, col):
     # If we hit either of these, that should mean that we found all the variables
     # For each short_name, we should create a column entry and match all the info for that column
     temp_sheet = workbook.sheet_by_name(sheet)
-    measTableName = name_to_jsonld(sheet)
+    measTableName = sheet
     columnsTop = []
     commentList = []
     colListNum = 1
@@ -669,6 +632,7 @@ def cells_down_datasheets(filename, workbook, sheet, row, col):
 
     # Add all our data pieces for this column into a new entry in the Measurement Table Dictionary
     measTableDict['measTableName'] = measTableName
+
     measTableDict['filename'] = str(filename) + str(measTableName) + ".csv"
 
     # If comments exist, insert them at table level
@@ -684,7 +648,6 @@ def cells_down_datasheets(filename, workbook, sheet, row, col):
 CHRONOLOGY HELPER METHODS
 """
 
-
 # Traverse down to the row that has the first variable
 # Accepts: temp_sheet(obj)
 # Returns: row (int)
@@ -697,7 +660,6 @@ def traverse_to_chron_var(temp_sheet):
             row += 1
     return row
 
-
 # Count the number of chron variables:
 # Accepts: temp_sheet(obj)
 # Returns: total_count(int)
@@ -708,7 +670,6 @@ def count_chron_variables(temp_sheet):
         total_count += 1
         start_row += 1
     return total_count
-
 
 # Capture all the vars in the chron sheet (for json-ld output)
 # Accepts: sheet, start_row(int)
@@ -750,7 +711,6 @@ def get_chron_var(temp_sheet, start_row):
 
     return out_list
 
-
 # Traverse down to the first row that has chron data
 # Accepts: temp_sheet(obj)
 # Returns: row(int)
@@ -770,7 +730,6 @@ def traverse_to_chron_data(temp_sheet):
         traverse_row += 1
 
     return traverse_row
-
 
 # Capture all data in for a specific chron data row (for csv output)
 # Accepts: temp_sheet(obj), row(int), total_vars(int)
@@ -792,8 +751,6 @@ def get_chron_data(temp_sheet, row, total_vars):
 """
 PARSER
 """
-
-
 def parser():
 
     # Ask user if they want to run the Chronology sheets or flatten the JSON files.
@@ -805,10 +762,10 @@ def parser():
     root = tkinter.Tk()
     root.withdraw()
     currdir = os.getcwd()
-    #tempdir = tkinter.filedialog.askdirectory(parent=root, initialdir=currdir, title='Please select a directory')
-    tempdir = "/Users/Nick/Dropbox/GeoChronR/ExcelInputToParse/Aus2kLR"
-    if len(tempdir) > 0:
-        print("Directory: " + tempdir)
+    tempdir = tkinter.filedialog.askdirectory(parent=root, initialdir=currdir, title='Please select a directory')
+
+    # if len(tempdir) > 0:
+    #     print("Directory: " + tempdir)
     os.chdir(tempdir)
 
     # Add all excel files from user-specified directory, or from current directory
