@@ -16,10 +16,12 @@ Things to do:
     DONE-Figure out how to capture the data cols and maybe put it in a list(?)
     DONE-do you need to lowercase all the strings?
     DONE-Piece together all the dictionaries into the final dictionaries
+    DONE-Determine which info from the NOAA text file that we want to keep (waiting on Nick)
+    DONE-get rid of K-V's that are in the dictionary blocks. It's adding duplicates at the root level.
 
     HALF DONE-Convert all names to JSONLD naming (method to convert to camel casing)
-    DONE-Determine which info from the NOAA text file that we want to keep (waiting on Nick)
-    -get rid of K-V's that are in the dictionary blocks. It's adding duplicates at the root level.
+    - Get rid of blank values. Stop them from adding to the dictionary
+    - Figure out what to do with coreLength val and unit
 
     IGNORE KEYS: earliestYear, mostRecentYear, dataLine variables
 """
@@ -70,6 +72,16 @@ def name_to_jsonld(title):
     return out
 
 
+def split_name_unit(line):
+    if ' ' in line:
+        line = line.split()
+        value = convert_num(line[0])
+        unit = line[1]
+        return value, unit
+    else:
+        return None, None
+
+
 # Remove the unnecessary characters in the line that we don't want
 def str_cleanup(line):
     # line = line.lower()
@@ -113,7 +125,10 @@ def parse(file):
     ignore = ['earliestYear', 'mostRecentYear']
 
     # List of keys that need their values converted to ints/floats
-    numbers = ['volume', 'value', 'min', 'max', 'pages', 'edition']
+    numbers = ['volume', 'value', 'min', 'max', 'pages', 'edition', 'coreLength']
+
+    # List of items that need to be split (value, units)
+    split = ['coreLength', 'elevation']
 
     # Lists for what keys go in specific dictionary blocks
     lat_lst = ['northernmostLatitude', 'southernmostLatitude']
@@ -121,7 +136,7 @@ def parse(file):
     geo_lst = ['location', 'country']
     elev_lst = ['elevation']
     pub_lst = ['onlineResource', 'originalSourceUrl', 'investigators', 'authors', 'publishedDateOrYear',
-               'publishedTitle', 'journalName', 'volume', 'doi', 'fullCitation', 'abstract']
+               'publishedTitle', 'journalName', 'volume', 'doi', 'fullCitation', 'abstract', 'pages', 'edition']
 
     with open(file, 'r') as f:
         for line in iter(f):
@@ -140,7 +155,7 @@ def parse(file):
                     key = name_to_camelCase(key)
 
                     # Ignore any entries that are specified in the skip list, or any that have empty values
-                    if (key not in ignore) and (value != ("" or " ")):
+                    if (key not in ignore) or (value != ("" or " ")):
 
                         # Two special cases, because sometimes there's multiple funding agencies and grants
                         # Appending numbers to the names prevents them from overwriting each other in the final dict
@@ -164,44 +179,43 @@ def parse(file):
                                 lon['min'] = convert_num(value)
                         elif key in elev_lst:
                             # Split the elev string into value and units
-                            if ' ' in value:
-                                value = value.split()
-                            elev['value'] = convert_num(value[0])
-                            elev['units'] = value[1]
+                            val, unit = split_name_unit(value)
+                            elev['value'] = convert_num(val)
+                            elev['units'] = unit
                         elif key in geo_lst:
                             geo[key] = value
                         elif key in pub_lst:
-                            pub[key] = value
-                        else:
                             if key in numbers:
-                                final_dict[key] = convert_num(value)
+                                pub[key] = convert_num(value)
                             else:
-                                final_dict[key] = value
+                                pub[key] = value
+                        else:
+                            final_dict[key] = value
 
                 # Ignore any errors from NoneTypes that are returned from slice_key_val
                 except TypeError:
                     pass
 
             # Data Columns
-            else:
-                # Split the line at each space (There's one space between each data item)
-                old_list = line.split()
-
-                # For the first loop, we want to take the variable names, count vars, and create the dictionary entries
-                if not create_lists:
-                    vars_names = []
-                    for vars in old_list:
-                        vars_names.append(vars)
-                        vars_dict[vars] = []
-                        var_count += 1
-                    create_lists = True
+            # else:
+            #     # Split the line at each space (There's one space between each data item)
+            #     old_list = line.split()
+            #
+            #     # For the first loop, we want to take the variable names, count vars, and create the dictionary entries
+            #     if not create_lists:
+            #         vars_names = []
+            #         for vars in old_list:
+            #             vars_names.append(vars)
+            #             vars_dict[vars] = []
+            #             var_count += 1
+            #         create_lists = True
 
                 # For all other loops, we are dealing with the actual data
-                else:
-                    # We have simultaneous looping. For each var key, we add the corresponding data item to the val list
-                    # Also, converts numbers from str type, back into floats
-                    for i in range(0, var_count):
-                        vars_dict[vars_names[i]].append(convert_num(old_list[i]))
+                # else:
+                #     # We have simultaneous looping. For each var key, we add the corresponding data item to the val list
+                #     # Also, converts numbers from str type, back into floats
+                #     for i in range(0, var_count):
+                #         vars_dict[vars_names[i]].append(convert_num(old_list[i]))
 
     # Insert the data dictionaries into the final dictionary
     for k, v in vars_dict.items():
