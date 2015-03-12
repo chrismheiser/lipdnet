@@ -18,9 +18,10 @@ Things to do:
     DONE-Piece together all the dictionaries into the final dictionaries
     DONE-Determine which info from the NOAA text file that we want to keep (waiting on Nick)
     DONE-get rid of K-V's that are in the dictionary blocks. It's adding duplicates at the root level.
+    DONE- Get rid of blank values. Stop them from adding to the dictionary
+
 
     HALF DONE-Convert all names to JSONLD naming (method to convert to camel casing)
-    - Get rid of blank values. Stop them from adding to the dictionary
     - Figure out what to do with coreLength val and unit
 
     IGNORE KEYS: earliestYear, mostRecentYear, dataLine variables
@@ -120,6 +121,7 @@ def parse(file):
     lon = OrderedDict()
     elev = OrderedDict()
     pub = OrderedDict()
+    coreLen = OrderedDict()
 
     # List of items that we don't want to output
     ignore = ['earliestYear', 'mostRecentYear']
@@ -155,14 +157,14 @@ def parse(file):
                     key = name_to_camelCase(key)
 
                     # Ignore any entries that are specified in the skip list, or any that have empty values
-                    if (key not in ignore) or (value != ("" or " ")):
+                    if (key not in ignore) and (value != ("" and " ")):
 
                         # Two special cases, because sometimes there's multiple funding agencies and grants
                         # Appending numbers to the names prevents them from overwriting each other in the final dict
-                        if key == 'Funding_Agency_Name':
+                        if key == 'fundingAgencyName':
                             key = key + '-' + str(funding)
                             funding += 1
-                        elif key == 'Grant':
+                        elif key == 'grant':
                             key = key + '-' + str(grants)
                             grants += 1
 
@@ -189,6 +191,10 @@ def parse(file):
                                 pub[key] = convert_num(value)
                             else:
                                 pub[key] = value
+                        elif key == 'coreLength':
+                            val, unit = split_name_unit(value)
+                            coreLen['value'] = val
+                            coreLen['unit'] = unit
                         else:
                             final_dict[key] = value
 
@@ -217,16 +223,20 @@ def parse(file):
                 #     for i in range(0, var_count):
                 #         vars_dict[vars_names[i]].append(convert_num(old_list[i]))
 
-    # Insert the data dictionaries into the final dictionary
-    for k, v in vars_dict.items():
-        final_dict[k] = v
+
 
     # Piece together geo block
     geo['latitude'] = lat
     geo['longitude'] = lon
     geo['elevation'] = elev
     final_dict['geo'] = geo
+    final_dict['coreLength'] = coreLen
     final_dict['pub'] = pub
+
+     # Insert the data dictionaries into the final dictionary
+    for k, v in vars_dict.items():
+        final_dict[k] = v
+
     return final_dict
 
 
