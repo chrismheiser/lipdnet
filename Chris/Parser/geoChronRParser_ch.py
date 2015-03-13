@@ -21,7 +21,7 @@ finalDict = OrderedDict()
 # Returns: None
 def output_csv_datasheet(workbook, sheet, name):
 
-    json_naming = name_to_jsonld(sheet)
+    json_naming = sheet
     temp_sheet = workbook.sheet_by_name(sheet)
     csv_folder_and_name = str(name) + '/' + str(name) + str(json_naming) + '.csv'
     csv_full_path = 'output/' + csv_folder_and_name

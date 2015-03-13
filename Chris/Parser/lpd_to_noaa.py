@@ -5,15 +5,31 @@ from collections import OrderedDict
 import flatten
 
 
+"""
+TO DO LIST
+
+    DONE - import jsonld file
+    DONE - flatten the jsonld data
+
+    -
+
+"""
+
 def parse(file):
 
     boundary = '#-----------------------------------------------------------------------'
 
+    # Open the file
     json_data = open(file)
+    # Load in the json data from the file
     data = json.load(json_data)
+    # Flatten the json dictionary
     flat = flatten.run(data)
+    # Print out each item in the list for debugging
     # for item in flat:
     #     print(item)
+
+    # Return the flattened list
     return flat
 
 
@@ -27,13 +43,14 @@ def main():
     # Run the file through the parser
     output = parse(file)
 
-    # LPD file output
+    # Txt file output
     new_file_name_jsonld = str(name) + '-out.txt'
     file_txt = open(new_file_name_jsonld, 'w')
+
+    # Write each item in the list into our output text file
     for item in output:
         file_txt.write("%s\n" % item)
     file_txt = open(new_file_name_jsonld, 'r+')
-
 
     return
 

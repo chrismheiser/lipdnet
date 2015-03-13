@@ -19,10 +19,10 @@ Things to do:
     DONE-Determine which info from the NOAA text file that we want to keep (waiting on Nick)
     DONE-get rid of K-V's that are in the dictionary blocks. It's adding duplicates at the root level.
     DONE- Get rid of blank values. Stop them from adding to the dictionary
+    DONE- Figure out what to do with coreLength val and unit
 
 
     HALF DONE-Convert all names to JSONLD naming (method to convert to camel casing)
-    - Figure out what to do with coreLength val and unit
 
     IGNORE KEYS: earliestYear, mostRecentYear, dataLine variables
 """
@@ -238,8 +238,8 @@ def parse(file):
 
     return final_dict
 
-
-def main():
+# Main function takes in file name, and outputs new jsonld file
+def main(file):
 
     # Cut the extension from the file name
     file = 'noaa-original.txt'
