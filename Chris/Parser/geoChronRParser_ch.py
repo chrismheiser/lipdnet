@@ -641,25 +641,29 @@ def cells_down_datasheets(filename, workbook, sheet, row, col):
     columnsTop = []
     commentList = []
     colListNum = 1
+    iter_var = True
 
-    # Loop downward until you hit the "Data" box
+    # Loop for all variables in top section
     try:
-        while ('Data' or 'Missing Value') not in temp_sheet.cell_value(row, col):
+        while iter_var:
+            # print(temp_sheet.cell_value(row, col))
+            if temp_sheet.cell_value(row, col) == ('Data' or 'Missing Value' or 'The value or character string used as a placeholder for missing values'):
+                break
+            else:
+                variable = name_to_jsonld(temp_sheet.cell_value(row, col))
 
-            variable = name_to_jsonld(temp_sheet.cell_value(row, col))
+                # If the cell isn't blank or empty, then grab the data
+                # Special case for handling comments since we want to stop them from being inserted at column level
+                if variable == 'comments':
+                    for i in range(1, 3):
+                        if cell_occupied(temp_sheet, row, i):
+                            commentList.append(temp_sheet.cell_value(row, i))
 
-            # If the cell isn't blank or empty, then grab the data
-            # Special case for handling comments since we want to stop them from being inserted at column level
-            if variable == 'comments':
-                for i in range(1, 3):
-                    if cell_occupied(temp_sheet, row, i):
-                        commentList.append(temp_sheet.cell_value(row, i))
-
-            # All other cases, create a list of columns, one dictionary per column
-            elif temp_sheet.cell_value(row, col) != ('' and xlrd.empty_cell):
-                columnsTop.append(cells_right_datasheets(workbook, sheet, row, col, colListNum))
-                colListNum += 1
-            row += 1
+                # All other cases, create a list of columns, one dictionary per column
+                elif temp_sheet.cell_value(row, col) != ('' and xlrd.empty_cell):
+                    columnsTop.append(cells_right_datasheets(workbook, sheet, row, col, colListNum))
+                    colListNum += 1
+                row += 1
 
     except IndexError:
         pass
@@ -797,18 +801,21 @@ def parser():
 
     # Ask user if they want to run the Chronology sheets or flatten the JSON files.
     # This is an all or nothign choice
-    chron_run = input("Run Chronology? (y/n)\n")
-    flat_run = input("Flatten JSON? (y/n)\n")
+    need_response = True
+    while need_response:
+        chron_run = input("Run Chronology? (y/n)\n")
+        flat_run = input("Flatten JSON? (y/n)\n")
 
     # Display a dialog box that let's the user browse for the directory with all their excel files.
-    root = tkinter.Tk()
-    root.withdraw()
-    currdir = os.getcwd()
-    tempdir = tkinter.filedialog.askdirectory(parent=root, initialdir=currdir, title='Please select a directory')
+    # root = tkinter.Tk()
+    # root.withdraw()
+    # currdir = os.getcwd()
+    # tempdir = tkinter.filedialog.askdirectory(parent=root, initialdir=currdir, title='Please select a directory')
 
     # if len(tempdir) > 0:
     #     print("Directory: " + tempdir)
-    os.chdir(tempdir)
+    # os.chdir(tempdir)
+    os.chdir('/Users/chrisheiser1/Desktop')
 
     # Add all excel files from user-specified directory, or from current directory
     # Puts all file names in a list we iterate over
