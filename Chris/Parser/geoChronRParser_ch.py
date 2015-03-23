@@ -646,8 +646,10 @@ def cells_down_datasheets(filename, workbook, sheet, row, col):
     # Loop for all variables in top section
     try:
         while iter_var:
-            # print(temp_sheet.cell_value(row, col))
-            if temp_sheet.cell_value(row, col) == ('Data' or 'Missing Value' or 'The value or character string used as a placeholder for missing values'):
+
+            cell = temp_sheet.cell_value(row, col)
+            if ('Data' in cell) or ('Missing Value' in cell)\
+                    or ('The value or character string used as a placeholder for missing values' in cell):
                 break
             else:
                 variable = name_to_jsonld(temp_sheet.cell_value(row, col))
@@ -800,11 +802,18 @@ PARSER
 def parser():
 
     # Ask user if they want to run the Chronology sheets or flatten the JSON files.
-    # This is an all or nothign choice
-    need_response = True
-    while need_response:
-        chron_run = input("Run Chronology? (y/n)\n")
-        flat_run = input("Flatten JSON? (y/n)\n")
+    # This is an all or nothing choice
+    # need_response = True
+    # while need_response:
+    #     chron_run = input("Run Chronology? (y/n)\n")
+    #     if chron_run == ('y' and 'n'):
+    #         flat_run = input("Flatten JSON? (y/n)\n")
+    #         if flat_run == ('y' and 'n'):
+    #             need_response = False
+
+    # For testing, assume we don't want to run these to make things easier for now.
+    chron_run = 'n'
+    flat_run = 'n'
 
     # Display a dialog box that let's the user browse for the directory with all their excel files.
     # root = tkinter.Tk()
