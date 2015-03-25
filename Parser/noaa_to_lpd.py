@@ -38,11 +38,11 @@ def convert_num(number):
 
 # Convert underscore naming into camel case naming
 def name_to_camelCase(strings):
-    strings = strings.lower()
+    # strings = strings.lower()
     split_word = strings.split('_')
-    for i in range(0, len(split_word)):
-        if i != 0:
-            split_word[i] = split_word[i].title()
+    # for i in range(0, len(split_word)):
+    #     if i != 0:
+    #         split_word[i] = split_word[i].title()
     strings = ''.join(split_word)
     return strings
 
@@ -124,21 +124,21 @@ def parse(file):
     coreLen = OrderedDict()
 
     # List of items that we don't want to output
-    ignore = ['earliestYear', 'mostRecentYear']
+    ignore = ['EarliestYear', 'MostRecentYear']
 
     # List of keys that need their values converted to ints/floats
-    numbers = ['volume', 'value', 'min', 'max', 'pages', 'edition', 'coreLength']
+    numbers = ['Volume', 'Value', 'Min', 'Max', 'Pages', 'Edition', 'CoreLength']
 
     # List of items that need to be split (value, units)
-    split = ['coreLength', 'elevation']
+    split = ['CoreLength', 'Elevation']
 
     # Lists for what keys go in specific dictionary blocks
-    lat_lst = ['northernmostLatitude', 'southernmostLatitude']
-    lon_lst = ['easternmostLongitude', 'westernmostLongitude']
-    geo_lst = ['location', 'country']
-    elev_lst = ['elevation']
-    pub_lst = ['onlineResource', 'originalSourceUrl', 'investigators', 'authors', 'publishedDateOrYear',
-               'publishedTitle', 'journalName', 'volume', 'doi', 'fullCitation', 'abstract', 'pages', 'edition']
+    lat_lst = ['NorthernmostLatitude', 'SouthernmostLatitude']
+    lon_lst = ['EasternmostLongitude', 'WesternmostLongitude']
+    geo_lst = ['Location', 'Country']
+    elev_lst = ['Elevation']
+    pub_lst = ['OnlineResource', 'OriginalSourceUrl', 'Investigators', 'Authors', 'PublishedDateOrYear',
+               'PublishedTitle', 'JournalName', 'Volume', 'Doi', 'FullCitation', 'Abstract', 'Pages', 'Edition']
 
     with open(file, 'r') as f:
         for line in iter(f):
@@ -161,29 +161,29 @@ def parse(file):
 
                         # Two special cases, because sometimes there's multiple funding agencies and grants
                         # Appending numbers to the names prevents them from overwriting each other in the final dict
-                        if key == 'fundingAgencyName':
+                        if key == 'FundingAgencyName':
                             key = key + '-' + str(funding)
                             funding += 1
-                        elif key == 'grant':
+                        elif key == 'Grant':
                             key = key + '-' + str(grants)
                             grants += 1
 
                         # Insert into the final dictionary
                         if key in lat_lst:
                             if key == lat_lst[0]:
-                                lat['max'] = convert_num(value)
+                                lat['Max'] = convert_num(value)
                             elif key == lat_lst[1]:
-                                lat['min'] = convert_num(value)
+                                lat['Min'] = convert_num(value)
                         elif key in lon_lst:
                             if key == lon_lst[0]:
-                                lon['max'] = convert_num(value)
+                                lon['Max'] = convert_num(value)
                             elif key == lon_lst[1]:
-                                lon['min'] = convert_num(value)
+                                lon['Min'] = convert_num(value)
                         elif key in elev_lst:
                             # Split the elev string into value and units
                             val, unit = split_name_unit(value)
-                            elev['value'] = convert_num(val)
-                            elev['units'] = unit
+                            elev['Value'] = convert_num(val)
+                            elev['Unit'] = unit
                         elif key in geo_lst:
                             geo[key] = value
                         elif key in pub_lst:
@@ -191,10 +191,10 @@ def parse(file):
                                 pub[key] = convert_num(value)
                             else:
                                 pub[key] = value
-                        elif key == 'coreLength':
+                        elif key == 'CoreLength':
                             val, unit = split_name_unit(value)
-                            coreLen['value'] = val
-                            coreLen['unit'] = unit
+                            coreLen['Value'] = val
+                            coreLen['Unit'] = unit
                         else:
                             final_dict[key] = value
 
@@ -225,18 +225,19 @@ def parse(file):
 
 
     # Piece together geo block
-    geo['latitude'] = lat
-    geo['longitude'] = lon
-    geo['elevation'] = elev
-    final_dict['geo'] = geo
-    final_dict['coreLength'] = coreLen
-    final_dict['pub'] = pub
+    geo['Latitude'] = lat
+    geo['Longitude'] = lon
+    geo['Elevation'] = elev
+    final_dict['Geo'] = geo
+    final_dict['CoreLength'] = coreLen
+    final_dict['Pub'] = pub
 
      # Insert the data dictionaries into the final dictionary
     for k, v in vars_dict.items():
         final_dict[k] = v
 
     return final_dict
+
 
 # Main function takes in file name, and outputs new jsonld file
 def main(file):
@@ -265,4 +266,4 @@ def main(file):
 
     return
 
-main()
+main('noaa-original.txt')

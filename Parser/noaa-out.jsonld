@@ -1,52 +1,52 @@
 {
-    "note": "Please cite Publication, and Online_Resource and date accessed when using these data.",
-    "archive": "Corals and Sclerosponges",
-    "date": "2005-07",
-    "studyName": "Guam Porites Coral Isotope Data for 1790 to 2000",
-    "fundingAgencyName-1": "Japan Society for the Promotion of Science",
-    "grant-1": "12304028, 12740288",
-    "fundingAgencyName-2": "GCMAPS",
-    "fundingAgencyName-3": "Fujiwara Natural History Foundation",
-    "fundingAgencyName-4": "Tohoku University Advanced Science and Technology Center for the Dynamic Earth",
-    "siteName": "Guam Coral",
-    "collectionName": "05guam01a",
-    "timeUnit": "AD",
-    "notes": "previous name- Double2005corald18O",
-    "speciesName": "Porites lobata",
-    "commonName": "Lobe Coral",
-    "data line variables format": "Variables list, one per line, shortname-tab-longname-tab-longname components (9 components: what, material, error, units, seasonality, archive, detail, method, C or N for Character or Numeric data)",
-    "missing values": "NAN",
-    "geo": {
-        "location": "i.e Ocean>Pacific Ocean>Central Pacific Ocean>Guam",
-        "country": "Guam",
-        "latitude": {
-            "max": 13.6,
-            "min": 13.6
+    "NOTE": "Please cite Publication, and Online_Resource and date accessed when using these data.",
+    "OriginalSourceURL": "ftp://ftp.ncdc.noaa.gov/pub/data/paleo/coral/west_pacific/guam2005.txt",
+    "Archive": "Corals and Sclerosponges",
+    "Date": "2005-07",
+    "StudyName": "Guam Porites Coral Isotope Data for 1790 to 2000",
+    "PublishedDateorYear": "2005-05-27",
+    "DOI": "10.1029/2004JC002555",
+    "FundingAgencyName-1": "Japan Society for the Promotion of Science",
+    "Grant-1": "12304028, 12740288",
+    "FundingAgencyName-2": "GCMAPS",
+    "FundingAgencyName-3": "Fujiwara Natural History Foundation",
+    "FundingAgencyName-4": "Tohoku University Advanced Science and Technology Center for the Dynamic Earth",
+    "SiteName": "Guam Coral",
+    "CollectionName": "05guam01a",
+    "TimeUnit": "AD",
+    "Notes": "previous name- Double2005corald18O",
+    "SpeciesName": "Porites lobata",
+    "CommonName": "Lobe Coral",
+    "Data line variables format": "Variables list, one per line, shortname-tab-longname-tab-longname components (9 components: what, material, error, units, seasonality, archive, detail, method, C or N for Character or Numeric data)",
+    "Missing Values": "NAN",
+    "Geo": {
+        "Location": "i.e Ocean>Pacific Ocean>Central Pacific Ocean>Guam",
+        "Country": "Guam",
+        "Latitude": {
+            "Max": 13.6,
+            "Min": 13.6
         },
-        "longitude": {
-            "max": 144.83,
-            "min": 144.83
+        "Longitude": {
+            "Max": 144.83,
+            "Min": 144.83
         },
-        "elevation": {
-            "value": -4.5,
-            "units": "m"
+        "Elevation": {
+            "Value": -4.5,
+            "Units": "m"
         }
     },
-    "coreLength": {
-        "value": 2.73,
-        "unit": "m"
+    "CoreLength": {
+        "Value": 2.73,
+        "Unit": "m"
     },
-    "pub": {
-        "onlineResource": "https://www.ncdc.noaa.gov/cdo/f?p=519:1:::::P1_STUDY_ID:1915",
-        "originalSourceUrl": "ftp://ftp.ncdc.noaa.gov/pub/data/paleo/coral/west_pacific/guam2005.txt",
-        "investigators": "Asami, R.; Yamada, T.; Iryu, Y.; Quinn, T.M.; Meyer, C.P.; Paulay, G.",
-        "authors": "Asami, R.; Yamada, T.; Iryu, Y.; Quinn, T.M.; Meyer, C.P.; Paulay, G.",
-        "publishedDateOrYear": "2005-05-27",
-        "publishedTitle": "Interannual and decadal variability of the western Pacific sea surface condition for the years 1787-2000",
-        "journalName": "Journal of Geophysical Research",
-        "volume": 110.0,
-        "doi": "10.1029/2004JC002555",
-        "fullCitation": "Asami, R., T. Yamada, Y. Iryu, T.M. Quinn, C.P. Meyer, and G. Paulay.  2005.  Interannual and decadal variability of the western Pacific sea surface condition for  the years 1787-2000: Reconstruction based on stable isotope record from a Guam coral.  Journal Geophysical Research, 110, C05018,doi:10.1029/2004JC002555.",
-        "abstract": "We present a monthly resolved, 213-year stable isotope time series from a coral from Guam (13\u0001N, 145\u0001E), which is located on the northern edge of the western Pacific warm pool. Oxygen isotopic composition of the coral skeleton (d18Ocoral) shows seasonal, interannual, and decadal variability, which documents significant oceanographic changes related to thermal and hydrologic variations in this region. The d18Ocoral anomaly reflects sea surface temperature (SST) anomaly and sea surface salinity (SSS) anomaly with significant r values of \u00010.69 and 0.49, respectively, which are strongly linked to oceanographic changes that occur during El Nin\u02dco\u2013Southern Oscillation (ENSO) warm and cool phases. We identified 46 ENSO warm (El Nin\u02dco) and 53 cool phases (La Nin\u02dca) in the coral record, which are consistent with those phases reconstructed by Nin\u02dco 3.4 SST anomaly. Spectral analyses of the d 18Ocoral anomaly record for the years 1790\u20131999 identified significant peaks around 3 to 7 years. These results indicate that the Guam coral has recorded ENSO periodicity. The d18Ocoral anomaly shows decadal variability of 15- to 45- year periodicity with significant shifts (<0.2%) from warmer to cooler condition and vice versa. An accumulative decrease in d18Ocoral time series may imply 0.75\u0001C warming of SST and 0.23% freshening of seawater d18O, corresponding to a decrease of SSS by 0.85, in the northwestern tropical Pacific over the last 2 centuries."
+    "Pub": {
+        "OnlineResource": "https://www.ncdc.noaa.gov/cdo/f?p=519:1:::::P1_STUDY_ID:1915",
+        "Investigators": "Asami, R.; Yamada, T.; Iryu, Y.; Quinn, T.M.; Meyer, C.P.; Paulay, G.",
+        "Authors": "Asami, R.; Yamada, T.; Iryu, Y.; Quinn, T.M.; Meyer, C.P.; Paulay, G.",
+        "PublishedTitle": "Interannual and decadal variability of the western Pacific sea surface condition for the years 1787-2000",
+        "JournalName": "Journal of Geophysical Research",
+        "Volume": 110.0,
+        "FullCitation": "Asami, R., T. Yamada, Y. Iryu, T.M. Quinn, C.P. Meyer, and G. Paulay.  2005.  Interannual and decadal variability of the western Pacific sea surface condition for  the years 1787-2000: Reconstruction based on stable isotope record from a Guam coral.  Journal Geophysical Research, 110, C05018,doi:10.1029/2004JC002555.",
+        "Abstract": "We present a monthly resolved, 213-year stable isotope time series from a coral from Guam (13\u0001N, 145\u0001E), which is located on the northern edge of the western Pacific warm pool. Oxygen isotopic composition of the coral skeleton (d18Ocoral) shows seasonal, interannual, and decadal variability, which documents significant oceanographic changes related to thermal and hydrologic variations in this region. The d18Ocoral anomaly reflects sea surface temperature (SST) anomaly and sea surface salinity (SSS) anomaly with significant r values of \u00010.69 and 0.49, respectively, which are strongly linked to oceanographic changes that occur during El Nin\u02dco\u2013Southern Oscillation (ENSO) warm and cool phases. We identified 46 ENSO warm (El Nin\u02dco) and 53 cool phases (La Nin\u02dca) in the coral record, which are consistent with those phases reconstructed by Nin\u02dco 3.4 SST anomaly. Spectral analyses of the d 18Ocoral anomaly record for the years 1790\u20131999 identified significant peaks around 3 to 7 years. These results indicate that the Guam coral has recorded ENSO periodicity. The d18Ocoral anomaly shows decadal variability of 15- to 45- year periodicity with significant shifts (<0.2%) from warmer to cooler condition and vice versa. An accumulative decrease in d18Ocoral time series may imply 0.75\u0001C warming of SST and 0.23% freshening of seawater d18O, corresponding to a decrease of SSS by 0.85, in the northwestern tropical Pacific over the last 2 centuries."
     }
 }

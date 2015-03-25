@@ -293,7 +293,7 @@ def count_vars(temp_sheet, first_short):
     vars = 0
 
     # If we hit a blank cell, or the MV / Data cells, then stop
-    while cell_occupied(temp_sheet, first_short, 0) and ("Missing" and "Data") not in temp_sheet.cell_value(first_short, 0):
+    while cell_occupied(temp_sheet, first_short, 0) and temp_sheet.cell_value(first_short, 0) != ("Missing" and "Data"):
         vars += 1
         first_short += 1
     return vars
@@ -648,8 +648,8 @@ def cells_down_datasheets(filename, workbook, sheet, row, col):
         while iter_var:
 
             cell = temp_sheet.cell_value(row, col)
-            if ('Data' in cell) or ('Missing Value' in cell)\
-                    or ('The value or character string used as a placeholder for missing values' in cell):
+            if (cell == 'Data') or (cell == 'Missing Value')\
+                    or (cell == 'The value or character string used as a placeholder for missing values'):
                 break
             else:
                 variable = name_to_jsonld(temp_sheet.cell_value(row, col))

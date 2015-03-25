@@ -15,23 +15,23 @@
 # Description/Documentation lines begin with #
 # Data lines have no #
 #
-# Archive: (i.e proxy type - ice core, paleoceanography, etc)
+# Archive:
 #--------------------
 # Contribution_Date
-#	Date:  YYYY-MM-DD
+#	Date:
 #--------------------
 # Title
-#	Study_Name: Where, When and What - e.g. Fort Stanton Cave, New Mexico 55-11kY Speleothem d18O Data 
+#	Study_Name:
 #--------------------
 # Investigators
-#       Investigators:  Last_name, first_initial.Middle_initial.; ... Last_name, first_initial.Middle_initial.
+#       Investigators:
 #--------------------
 # Description_Notes_and_Keywords
 #	Description: 
 #--------------------
 # Publication 
 #       Authors: 
-#       Published_Date_or_Year:  YYYY-MM-DD or YYYY      
+#       Published_Date_or_Year:
 #       Published_Title: 
 #       Journal_Name: 
 #       Volume: 
@@ -49,20 +49,20 @@
 #------------------
 # Site_Information 
 #       Site_Name: 
-#       Location: i.e Africa>Eastern Africa>Mozambique
+#       Location:
 #	Country:  
 #	Northernmost_Latitude:  
 # 	Southernmost_Latitude:  
 # 	Easternmost_Longitude:  
 # 	Westernmost_Longitude:  
-# 	Elevation:   m  
+# 	Elevation:
 #------------------
 # Data_Collection   
 #	Collection_Name:  
 #	Earliest_Year:  
 #	Most_Recent_Year:  
 #	Time_Unit:  
-#	Core_Length: m
+#	Core_Length:
 #	Notes: 
 #------------------
 # Chronology: 
@@ -80,10 +80,6 @@
 # Data variables follow are preceded by "##" in columns one and two.
 # Data line variables format:  Variables list, one per line, shortname-tab-longname-tab-longname components (9 components: what, material, error, units, seasonality, archive, detail, method, C or N for Character or Numeric data) 
 #
-## depth_cm	depth, , , cm, , , , ,N
-## age_calBP	age, , , calendar years before present, , , , ,N
-## d18OcarbVPDB	delta18O, calcium carbonate, , per mil VPDB, ,speleothem, , ,N 
-## notes	,,,,,,,,C		
 #
 #----------------
 # Data:
@@ -91,4 +87,3 @@
 # Data line format - tab-delimited text, variable short name as header
 # Missing Values:  
 #
-depth_cm	age_calBP	d18OcarbVPDB	notes
