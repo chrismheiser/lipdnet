@@ -4,28 +4,29 @@ import json
 from collections import OrderedDict
 import flatten
 import re
-
+import os
+import sys
 
 """
 TO DO LIST
 
     DONE - import jsonld file
     DONE - flatten the jsonld data
+    DONE - Output new NOAA text file
+    DONE- Convert keys back to underscore naming
 
-    - Convert keys back to underscore naming
-    - Insert values into matching key values
-    - Output new NOAA text file
+    WIP - Insert values into matching key values
+
+PROBLEMS
+    - Figure out why Long max and Long min are not being output to the text file
+    - Figure out why CoreLength and Elevation are not being output to text file
+    - Need to fix some formatting problems in output file
+    - Add in the data columns at the bottom of the file
 
 """
 
-"""
-Special cases for renaming:
-Elevation : Value, Units
-Core_Length: Value, Units
 
-"""
-
-
+# Convert CamelCase naming back to Underscore naming
 def name_to_underscore(key):
 
     if key == 'DOI' or key == 'NOTE':
@@ -34,7 +35,7 @@ def name_to_underscore(key):
     elif key == 'PublishedDateorYear':
         string_out = 'Published_Date_or_Year'
 
-    elif key == 'OriginalSourceURL':
+    elif key == ('OriginalSourceURL' or 'Original_Source_URL'):
         string_out = 'Original_Source_URL'
 
     else:
@@ -53,17 +54,22 @@ def name_to_underscore(key):
     return string_out
 
 
+# Used in the path_context function. Split the full path into a list of steps
 def split_path(string):
-    string = string.split(':')
-    if 'OriginalSourceURL' in string:
-        string[1] = string[1] + ':' + string[2]
+    out = []
+    position = string.find(':')
+    # If value is -1, that means the item was not found in the string.
+    if position != -1:
+        key = string[:position]
+        val = string[position+1:]
+        out.append(key)
+        out.append(val)
 
-    if ('-' in string[0]) and ('Funding' not in string[0]) and ('Grant' not in string[0]):
-        last = string[1]
-        string = string[0].split('-')
-        string.append(last)
+    if ('-' in key) and ('Funding' not in key) and ('Grant' not in key):
+        out = key.split('-')
+        out.append(val)
 
-    return string
+    return out
 
 
 def path_context(flat_file):
@@ -71,76 +77,100 @@ def path_context(flat_file):
     new_dict = {}
 
     # Lists to recompile Values and Units
-    lat = []
-    lon = []
     elev = []
     core = []
 
     # Print out each item in the list for debugging
     for item in flat_file:
         split_list = split_path(item)
+        lst_len = len(split_list)
+        value = split_list[lst_len-1]
+        print(split_list)
 
-        # if ('Max' in split_list) or ('Min' in split_list) or ('Unit' in split_list) or ('Value' in split_list):
-        #     key, val = path_context(split_list)
-        #     new_dict[key] = val
-        #
-        # else:
-        #     new_dict[split_list[0]] = split_list[1]
+        if 'Latitude' and 'Max' in split_list:
+            new_dict['Northernmost_Latitude'] = value
+
+        elif 'Latitude' and 'Min' in split_list:
+            new_dict['Southernmost_Latitude'] = value
+
+        elif 'Longitude' and 'Max' in split_list:
+            new_dict['Easternmost_Longitude'] = value
+
+        elif 'Longitude' and 'Min' in split_list:
+            new_dict['Westernmost_Longitude'] = value
+
+        elif 'Elevation' in split_list:
+            elev.append(value)
+
+        elif 'CoreLength' in split_list:
+            core.append(value)
+
+        else:
+            if len(split_list) > 2:
+                key = lst_len - 2
+                new_dict[split_list[key]] = value
+
+            else:
+                new_dict[split_list[0]] = split_list[1]
+
+    new_dict['Core_Length'] = ''.join(core)
+    new_dict['Elevation'] = ''.join(elev)
     return new_dict
 
 
 def parse(file, template):
 
-    # Units that depend on the full string path
-    ignore = ['Max', 'Min', 'Value', 'Unit']
+    # Naming setup
+    name_split = file.split('.')
+    out_name = name_split[0] + '-l2n.txt'
 
-    # Items that are split into 2 parts: Value and Units
-    split = ['CoreLength', 'Elevation']
+    # Create a new output text file
+    file_o = open(out_name, 'w')
+    # file_exist = os.getcwd() + '/' + out_name
+    # if not os.path.exists(file_exist):
+    #     open(out_name, 'w')
+    # else:
+    #     print('Txt file already exists with that name')
+    #     sys.exit(0)
 
-
-    # Open the file
+    # Open the JSON file
     json_data = open(file)
 
     # Load in the json data from the file
     data = json.load(json_data)
-    # for k, v in data.items():
-    #     k = name_to_underscore(k)
-    #     new_dict[k] = v
 
     # Flatten the json dictionary
     flat = flatten.run(data)
 
     # Create a new dictionary with keys matching NOAA template
     dict_out = path_context(flat)
+    for k, v in dict_out.items():
+        new = name_to_underscore(k)
+        dict_out[new] = dict_out.pop(k)
 
-    # with open(template, 'r') as f:
-    #     for line in iter(f):
+    with open(template, 'r') as f:
+        for line in iter(f):
+            for k, v in dict_out.items():
+                if k in line:
+                    position = line.find(':')
+                    line = line[:position+1] + ' ' + v + '\n'
 
-    # Return the flattened list
-    return flat
+            file_o.write(line)
+
+    file_o.close()
+    return
 
 
 def main(file):
 
-    template = 'noaa-template.txt'
+    template = 'noaa-blank.txt'
 
     # Cut the extension from the file name
-    file = 'noaa-out.jsonld'
-    split = file.split('-')
-    name = split[0]
+    file = 'noaa-n2l.jsonld'
 
     # Run the file through the parser
-    output = parse(file, template)
-
-    # Txt file output
-    new_file_name_jsonld = str(name) + '-out.txt'
-    file_txt = open(new_file_name_jsonld, 'w')
-
-    # Write each item in the list into our output text file
-    for item in output:
-        file_txt.write("%s\n" % item)
-    file_txt = open(new_file_name_jsonld, 'r+')
+    parse(file, template)
 
     return
 
-main('noaa-out.jsonld')
+main('noaa-n2l.jsonld')

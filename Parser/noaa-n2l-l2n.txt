@@ -1,0 +1,89 @@
+﻿# Study Title
+#----------------------------------------------------------------------- 
+ Variables list, one per line, shortname-tab-longname-tab-longname components (9 components: what, material, error, units, seasonality, archive, detail, method, C or N for Character or Numeric data)
+#                                  and 
+#                     NOAA Paleoclimatology Program 
+#----------------------------------------------------------------------- 
+# NOTE: https://www.ncdc.noaa.gov/cdo/f?p=519:1:::::P1_STUDY_ID:1915
+ Asami, R.; Yamada, T.; Iryu, Y.; Quinn, T.M.; Meyer, C.P.; Paulay, G.
+#
+#
+# Online_Resource: https://www.ncdc.noaa.gov/cdo/f?p=519:1:::::P1_STUDY_ID:1915
+#
+# Original_Source_URL: ftp://ftp.ncdc.noaa.gov/pub/data/paleo/ (assigned by WDC Paleo)
+# 
+# Description/Documentation lines begin with #
+ Variables list, one per line, shortname-tab-longname-tab-longname components (9 components: what, material, error, units, seasonality, archive, detail, method, C or N for Character or Numeric data)
+#
+# Archive: Corals and Sclerosponges
+#--------------------
+ 2005-07
+#	Date: 2005-07
+#--------------------
+# Title
+#	Study_Name: Variables list, one per line, shortname-tab-longname-tab-longname components (9 components: what, material, error, units, seasonality, archive, detail, method, C or N for Character or Numeric data)
+#--------------------
+ Asami, R.; Yamada, T.; Iryu, Y.; Quinn, T.M.; Meyer, C.P.; Paulay, G.
+#       Investigators: Asami, R.; Yamada, T.; Iryu, Y.; Quinn, T.M.; Meyer, C.P.; Paulay, G.
+#--------------------
+ previous name- Double2005corald18O
+#	Description: 
+#--------------------
+# Publication 
+#       Authors: Asami, R.; Yamada, T.; Iryu, Y.; Quinn, T.M.; Meyer, C.P.; Paulay, G.
+#       Published_Date_or_Year: 2005-07
+#       Published_Title: Interannual and decadal variability of the western Pacific sea surface condition for the years 1787-2000
+#       Journal_Name: Journal of Geophysical Research
+#       Volume: 110.0
+#       Edition: 
+#       Issue: 
+#       Pages: 
+#       DOI: 10.1029/2004JC002555
+#       Online_Resource: https://www.ncdc.noaa.gov/cdo/f?p=519:1:::::P1_STUDY_ID:1915
+#       Full_Citation: Asami, R., T. Yamada, Y. Iryu, T.M. Quinn, C.P. Meyer, and G. Paulay.  2005.  Interannual and decadal variability of the western Pacific sea surface condition for  the years 1787-2000: Reconstruction based on stable isotope record from a Guam coral.  Journal Geophysical Research, 110, C05018,doi:10.1029/2004JC002555.
+#       Abstract: We present a monthly resolved, 213-year stable isotope time series from a coral from Guam (13N, 145E), which is located on the northern edge of the western Pacific warm pool. Oxygen isotopic composition of the coral skeleton (d18Ocoral) shows seasonal, interannual, and decadal variability, which documents significant oceanographic changes related to thermal and hydrologic variations in this region. The d18Ocoral anomaly reflects sea surface temperature (SST) anomaly and sea surface salinity (SSS) anomaly with significant r values of 0.69 and 0.49, respectively, which are strongly linked to oceanographic changes that occur during El Nin˜o–Southern Oscillation (ENSO) warm and cool phases. We identified 46 ENSO warm (El Nin˜o) and 53 cool phases (La Nin˜a) in the coral record, which are consistent with those phases reconstructed by Nin˜o 3.4 SST anomaly. Spectral analyses of the d 18Ocoral anomaly record for the years 1790–1999 identified significant peaks around 3 to 7 years. These results indicate that the Guam coral has recorded ENSO periodicity. The d18Ocoral anomaly shows decadal variability of 15- to 45- year periodicity with significant shifts (<0.2%) from warmer to cooler condition and vice versa. An accumulative decrease in d18Ocoral time series may imply 0.75C warming of SST and 0.23% freshening of seawater d18O, corresponding to a decrease of SSS by 0.85, in the northwestern tropical Pacific over the last 2 centuries.
+#------------------
+# Funding_Agency 
+#       Funding_Agency_Name: 
+#       Grant: 
+#------------------
+# Site_Information 
+#       Site_Name: Guam Coral
+#       Location: i.e Ocean>Pacific Ocean>Central Pacific Ocean>Guam
+#	Country: Guam
+#	Northernmost_Latitude: 144.83
+# 	Southernmost_Latitude: 144.83
+# 	Easternmost_Longitude:  
+# 	Westernmost_Longitude:  
+# 	Elevation:
+#------------------
+ Variables list, one per line, shortname-tab-longname-tab-longname components (9 components: what, material, error, units, seasonality, archive, detail, method, C or N for Character or Numeric data)
+#	Collection_Name:  
+#	Earliest_Year:  
+#	Most_Recent_Year:  
+#	Time_Unit: AD
+#	Core_Length:
+#	Notes: previous name- Double2005corald18O
+#------------------
+# Chronology: 
+# 
+#
+# 
+#
+# 
+#
+#
+# 	
+#----------------	
+# Variables 
+#
+ Variables list, one per line, shortname-tab-longname-tab-longname components (9 components: what, material, error, units, seasonality, archive, detail, method, C or N for Character or Numeric data)
+# Data line variables format: Variables list, one per line, shortname-tab-longname-tab-longname components (9 components: what, material, error, units, seasonality, archive, detail, method, C or N for Character or Numeric data)
+#
+#
+#----------------
+# Data: Variables list, one per line, shortname-tab-longname-tab-longname components (9 components: what, material, error, units, seasonality, archive, detail, method, C or N for Character or Numeric data)
+ Variables list, one per line, shortname-tab-longname-tab-longname components (9 components: what, material, error, units, seasonality, archive, detail, method, C or N for Character or Numeric data)
+ Variables list, one per line, shortname-tab-longname-tab-longname components (9 components: what, material, error, units, seasonality, archive, detail, method, C or N for Character or Numeric data)
+# Missing Values:  
+#

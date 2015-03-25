@@ -243,20 +243,16 @@ def parse(file):
 def main(file):
 
     # Cut the extension from the file name
-    file = 'noaa-original.txt'
+    file = 'noaa-testfile.txt'
     split = file.split('-')
     name = split[0]
 
     # Run the file through the parser
     dict_out = parse(file)
 
-    # Print out the items for debugging purposes
-    # for k, v in dict_out.items():
-    #     print(k, v)
-    # print(dict_out)
 
     # LPD file output
-    new_file_name_jsonld = str(name) + '-out.jsonld'
+    new_file_name_jsonld = str(name) + 'n2l.jsonld'
     file_jsonld = open(new_file_name_jsonld, 'w')
     file_jsonld = open(new_file_name_jsonld, 'r+')
 
@@ -266,4 +262,4 @@ def main(file):
 
     return
 
-main('noaa-original.txt')
+main('noaa-testfile.txt')
