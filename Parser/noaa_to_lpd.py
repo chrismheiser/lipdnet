@@ -110,10 +110,14 @@ def slice_key_val(line):
 # Parse through the text file grabbing the metadata and data columns
 def parse(file):
 
+    # Counters to track what to show what number to append to grant and funding keys
     grants = 1
     funding = 1
+
     var_count = 0
     create_lists = False
+
+    # All dictionaries needed to create JSON structure
     vars_dict = OrderedDict()
     final_dict = OrderedDict()
     geo = OrderedDict()
@@ -157,7 +161,7 @@ def parse(file):
                     key = name_to_camelCase(key)
 
                     # Ignore any entries that are specified in the skip list, or any that have empty values
-                    if (key not in ignore) and (value != ("" and " ")):
+                    if key not in ignore:
 
                         # Two special cases, because sometimes there's multiple funding agencies and grants
                         # Appending numbers to the names prevents them from overwriting each other in the final dict
@@ -252,7 +256,7 @@ def main(file):
 
 
     # LPD file output
-    new_file_name_jsonld = str(name) + 'n2l.jsonld'
+    new_file_name_jsonld = str(name) + '-n2l.jsonld'
     file_jsonld = open(new_file_name_jsonld, 'w')
     file_jsonld = open(new_file_name_jsonld, 'r+')
 
