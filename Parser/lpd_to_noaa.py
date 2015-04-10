@@ -17,11 +17,9 @@ TO DO LIST
     DONE - Figure out why Long max and Long min are not being output to the text file
     DONE - Figure out why CoreLength and Elevation are not being output to text file
     DONE - Need to fix some formatting problems in output file
-
-    WIP - Insert values into matching key values
-
-    - Add in the data columns at the bottom of the file
-    - Problem replacing 'Data' in certain lines. Using k = "Data" and v =Variables list, one per line, shortname-..."
+    DONE - Insert values into matching key values
+    DONE - Problem replacing 'Data' in certain lines. Using k = "Data" and v =Variables list, one per line, shortname-..."
+    DONE - Add in the data columns at the bottom of the file
 
 """
 
@@ -56,7 +54,10 @@ def name_to_underscore(key):
             ext_split = key.split('-')
             num_ext = ext_split[1]
         string_split = re.findall('[A-Z][a-z]*', key)
-        string_out = string_split[0]
+        try:
+            string_out = string_split[0]
+        except IndexError:
+            string_out = key
         for word in range(1, len(string_split)):
             string_out = string_out + '_' + string_split[word]
         if extension:
@@ -164,6 +165,21 @@ def path_context(flat_file):
     return new_dict
 
 
+# Split the input dictionary into two parts: The column data, and the var data.
+def get_col_dict(dict_in):
+    dict_col = OrderedDict()
+    dict_var = OrderedDict()
+
+    for k, v in dict_in.items():
+        if k == 'Columns':
+            dict_col[k] = v
+        else:
+            dict_var[k] = v
+
+    return dict_col, dict_var
+
+
+# The main parser
 def parse(file, template):
 
     # Naming setup
@@ -179,8 +195,11 @@ def parse(file, template):
     # Load in the json data from the file
     data = json.load(json_data)
 
+    # Don't want to flatten the column data, so split the data into two different dictionaries
+    col_data, var_data = get_col_dict(data)
+
     # Flatten the json dictionary
-    flat = flatten.run(data)
+    flat = flatten.run(var_data)
 
     # Create a new dictionary with keys matching NOAA template
     funding = {}
@@ -206,21 +225,18 @@ def parse(file, template):
         else:
             dict_out[new] = v
 
-    # # Delete the Grant and Funding entries from dict_out. We don't need them anymore.
-    # for k, v in dict_temp.items():
-    #     if ("Grant" and "Funding_Agency_Name") not in k:
-    #         dict_out[k] = v
-
     # Open the NOAA template file, and read line by line
     with open(template, 'r') as f:
         line_num = 0
         skip = False
         for line in iter(f):
 
+            # We skip lines 46-48 because they have FundingAgency lines that we don't want
             if (line_num < 46) or (line_num > 48):
+
                 # Clean the key of all symbols and spaces
                 clean_key = clean_keys(line)
-                # print('clean key: ' + clean_key)
+
                 # When you reach the funding block, write all funding and grant entries at the same time
                 if clean_key == '# Funding_Agency \n':
                     write_funding_block(file_o, funding, grant)
@@ -240,11 +256,57 @@ def parse(file, template):
 
             line_num += 1
 
+    # Write column data back to the file
+    # Need to write col data for each item in the value list.
+    file_o.write(line)
+    var_count = 0
+    var_titles = []
+    data_list = []
+
+    # Collect the number of variables, and the variable names from the col dictionary
+    for k, v in col_data.items():
+        for i, j in v.items():
+            var_count += 1
+            var_titles.append(i)
+
+    # Combine the variable names to make a title row. Write it to the file
+    var_titles.append('\n')
+    line = ' '.join(var_titles)
+    file_o.write(line)
+
+    # Nested loop to add one data item from each variable to the row at a time.
+    for k, v in col_data.items():
+        item = 0
+        max_length = 0
+
+        # Find the max
+        for i, j in v.items():
+            if len(j) > max_length:
+                max_length = len(j)
+
+        # Loop the amount of times of the biggest list
+        while item < max_length:
+            line = ''
+            for i, j in v.items():
+                # If data lists are not the same size, we don't want to go out of bounds.
+                try:
+                    data_list.append(str(j[item]))
+                except IndexError:
+                    data_list.append(j['  '])
+
+            # Increase counter, write line to file, and clear line
+            item += 1
+            data_list.append('\n')
+            line = ' '.join(data_list)
+            file_o.write(line)
+            data_list.clear()
+
     # Close the file and end
     file_o.close()
     return
 
 
+# Load in the template file, and run through the parser
 def main(file):
 
     template = 'noaa-blank.txt'
@@ -256,5 +318,6 @@ def main(file):
     parse(file, template)
 
     return
+
 
 main('noaa-n2l.jsonld')

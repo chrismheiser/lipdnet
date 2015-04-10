@@ -1,0 +1,40 @@
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>{% block title %} GeoChronR {% endblock %}</title>
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css"/>
+    <link rel="stylesheet" type="text/css" href="{{STATIC_URL}}master.css"/>
+  <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    {% block css_links %}
+
+{#        Any extra CSS links that every page should use will go inside of this block.  #}
+    {% endblock %}
+</head>
+<style>
+    {% block page_style %}
+{#        Any CSS that is specific only to the base page will go inside of this block.  #}
+
+    {% endblock %}
+</style>
+<body>
+
+{% block content %}
+{#        Any content specific to the base page (i.e. a navbar, footer, sidebar) should go in this area. #}
+
+{% endblock %}
+<script src="https://code.jquery.com/jquery-1.11.2.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
+    <script>
+        {% block js %}
+
+{#            Any JavaScript specific to this page will come here.  #}
+        {% endblock %}
+    </script>
+</body>
+
+</html>

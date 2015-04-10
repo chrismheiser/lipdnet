@@ -126,6 +126,7 @@ def parse(file):
     elev = OrderedDict()
     pub = OrderedDict()
     coreLen = OrderedDict()
+    data_dict = OrderedDict()
 
     # List of items that we don't want to output
     ignore = ['EarliestYear', 'MostRecentYear']
@@ -207,25 +208,25 @@ def parse(file):
                     pass
 
             # Data Columns
-            # else:
-            #     # Split the line at each space (There's one space between each data item)
-            #     old_list = line.split()
-            #
-            #     # For the first loop, we want to take the variable names, count vars, and create the dictionary entries
-            #     if not create_lists:
-            #         vars_names = []
-            #         for vars in old_list:
-            #             vars_names.append(vars)
-            #             vars_dict[vars] = []
-            #             var_count += 1
-            #         create_lists = True
+            else:
+                # Split the line at each space (There's one space between each data item)
+                old_list = line.split()
+
+                # For the first loop, we want to take the variable names, count vars, and create the dictionary entries
+                if not create_lists:
+                    vars_names = []
+                    for vars1 in old_list:
+                        vars_names.append(vars1)
+                        vars_dict[vars1] = []
+                        var_count += 1
+                    create_lists = True
 
                 # For all other loops, we are dealing with the actual data
-                # else:
-                #     # We have simultaneous looping. For each var key, we add the corresponding data item to the val list
-                #     # Also, converts numbers from str type, back into floats
-                #     for i in range(0, var_count):
-                #         vars_dict[vars_names[i]].append(convert_num(old_list[i]))
+                else:
+                    # We have simultaneous looping. For each var key, we add the corresponding data item to the val list
+                    # Also, converts numbers from str type, back into floats
+                    for i in range(0, var_count):
+                        vars_dict[vars_names[i]].append(convert_num(old_list[i]))
 
 
     # Piece together geo block
@@ -238,7 +239,9 @@ def parse(file):
 
      # Insert the data dictionaries into the final dictionary
     for k, v in vars_dict.items():
-        final_dict[k] = v
+        data_dict[k] = v
+
+    final_dict['Columns'] = data_dict
 
     return final_dict
 
@@ -265,5 +268,6 @@ def main(file):
     json.dump(dict_out, file_jsonld, indent=4)
 
     return
+
 
 main('noaa-testfile.txt')

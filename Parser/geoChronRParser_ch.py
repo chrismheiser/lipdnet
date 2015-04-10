@@ -690,6 +690,20 @@ CHRONOLOGY HELPER METHODS
 """
 
 
+# Since chron sheets are always inconsistent, get all cells in the sheet and don't try to parse.
+def blind_data_capture(temp_sheet):
+    chronology = OrderedDict()
+    start_row = traverse_to_chron_var(temp_sheet)
+    for row in range(start_row, temp_sheet.nrows):
+        key = str(row)
+        row_list = []
+        for col in range(0, temp_sheet.ncols):
+            row_list.append(temp_sheet.cell_value(row, col))
+        chronology[key] = row_list
+
+    return chronology
+
+
 # Traverse down to the row that has the first variable
 # Accepts: temp_sheet(obj)
 # Returns: row (int)
@@ -697,9 +711,11 @@ def traverse_to_chron_var(temp_sheet):
     row = 0
     while 'Chronology' in temp_sheet.cell_value(row, 0):
         row += 1
-    if temp_sheet.cell_value(row+1, 0):
-        while temp_sheet.cell_value(row, 0) == '':
-            row += 1
+    # if temp_sheet.cell_value(row+1, 0):
+    #     while temp_sheet.cell_value(row, 0) == '':
+    #         row += 1
+    # Jump one row lower than the template cells
+    row += 1
     return row
 
 
@@ -924,17 +940,13 @@ def parser():
 ###########################
 
         # chronTableName = metadata.cell_value(30, 1)
-        #
-        # if chronology:
-        #     start_row = traverse_to_chron_var(chronology)
-        #     columns_list_chron = get_chron_var(chronology, start_row)
-        #
-        # ## Create a top level Chronology dictionary so we can give it a key
-        # chronDict = {}
-        # chronDict['chronTableName'] = chronTableName
-        # chronDict['filename'] = str(name) + str(chronTableName) + '.csv'
-        # chronDict['columns'] = columns_list_chron
-        # finalDict['chronology'] = chronDict
+
+        if chronology:
+            chron_dict = blind_data_capture(chronology)
+
+        # Create a top level Chronology dictionary so we can give it a key
+
+        finalDict['chronology'] = chron_dict
 
 ############################
 ## FILE NAMING AND OUTPUT ##
