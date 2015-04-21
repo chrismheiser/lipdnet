@@ -691,7 +691,7 @@ CHRONOLOGY HELPER METHODS
 """
 
 
-# Since chron sheets are always inconsistent, get all cells in the sheet and don't try to parse.
+# This was the temporary, inconsistent way to get chron data as a whole chunk.
 def blind_data_capture(temp_sheet):
     chronology = OrderedDict()
     start_row = traverse_to_chron_var(temp_sheet)
@@ -703,21 +703,6 @@ def blind_data_capture(temp_sheet):
         chronology[key] = row_list
 
     return chronology
-
-
-# Traverse down to the row that has the first variable
-# Accepts: temp_sheet(obj)
-# Returns: row (int)
-def traverse_to_chron_var(temp_sheet):
-    row = 0
-    while 'Chronology' in temp_sheet.cell_value(row, 0):
-        row += 1
-    # if temp_sheet.cell_value(row+1, 0):
-    #     while temp_sheet.cell_value(row, 0) == '':
-    #         row += 1
-    # Jump one row lower than the template cells
-    row += 1
-    return row
 
 
 # Count the number of chron variables:
@@ -743,7 +728,7 @@ def get_chron_var(temp_sheet, start_row):
 
         short_cell = temp_sheet.cell_value(start_row, 0)
         long_cell = temp_sheet.cell_value(start_row, 1)
-        print(long_cell)
+
         # If there are parenthesis (units) in this cell, capture the units
         if ('(' or ')') in short_cell:
             units = extract_units(short_cell)
@@ -794,6 +779,21 @@ def traverse_to_chron_data(temp_sheet):
     return traverse_row
 
 
+# Traverse down to the row that has the first variable
+# Accepts: temp_sheet(obj)
+# Returns: row (int)
+def traverse_to_chron_var(temp_sheet):
+    row = 0
+    while 'Chronology' in temp_sheet.cell_value(row, 0):
+        row += 1
+    # if temp_sheet.cell_value(row+1, 0):
+    #     while temp_sheet.cell_value(row, 0) == '':
+    #         row += 1
+    # Jump one row lower than the template cells
+    row += 1
+    return row
+
+
 # Capture all data in for a specific chron data row (for csv output)
 # Accepts: temp_sheet(obj), row(int), total_vars(int)
 # Returns: data_row(list)
@@ -841,7 +841,7 @@ def parser():
     # if len(tempdir) > 0:
     #     print("Directory: " + tempdir)
     # os.chdir(tempdir)
-    os.chdir('/Users/chrisheiser1/Desktop')
+    os.chdir('/Users/chrisheiser1/Desktop/')
 
     # Add all excel files from user-specified directory, or from current directory
     # Puts all file names in a list we iterate over
@@ -942,8 +942,20 @@ def parser():
 
         # chronTableName = metadata.cell_value(30, 1)
 
+        # if chronology:
+            # chron_dict = blind_data_capture(chronology)
+
+        chronTableName = metadata.cell_value(30, 1)
         if chronology:
-            chron_dict = blind_data_capture(chronology)
+            start_row = traverse_to_chron_var(chronology)
+            columns_list_chron = get_chron_var(chronology, start_row)
+
+        ## Create a top level Chronology dictionary so we can give it a key
+        chron_dict = {}
+        chron_dict['chronTableName'] = chronTableName
+        chron_dict['filename'] = str(name) + str(chronTableName) + '.csv'
+        chron_dict['columns'] = columns_list_chron
+        finalDict['chronology'] = chron_dict
 
         # Create a top level Chronology dictionary so we can give it a key
 
@@ -965,8 +977,8 @@ def parser():
         del datasheetNameList[:]
 
         # CSV - CHRONOLOGY
-        if chron_run == 'y':
-            output_csv_chronology(workbook, chronology_str, name)
+        # if chron_run == 'y':
+        output_csv_chronology(workbook, chronology_str, name)
 
         # JSON LD
         new_file_name_jsonld = str(name) + '/' + str(name) + '.jsonld'
