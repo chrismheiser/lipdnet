@@ -3,14 +3,15 @@
 # import validator_ch
 # import validator_test_easy
 
-import xlrd
 import csv
 import json
 from collections import OrderedDict
-import flatten
-import tkinter
-import tkinter.filedialog
 import os
+
+import xlrd
+
+from flattener import flatten
+
 
 # GLOBAL VARIABLES
 finalDict = OrderedDict()
@@ -968,7 +969,6 @@ def parser():
             output_csv_chronology(workbook, chronology_str, name)
 
         # JSON LD
-        # PROBLEM WITH OUTPUTTING THE CORRECT FILE NAME FOR JSON LD FILE NAMES
         new_file_name_jsonld = str(name) + '/' + str(name) + '.jsonld'
         file_jsonld = open('output/' + new_file_name_jsonld, 'w')
         file_jsonld = open('output/' + new_file_name_jsonld, 'r+')

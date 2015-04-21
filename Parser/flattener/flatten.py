@@ -105,10 +105,7 @@ def type_check(item):
         return 'list'
     elif isinstance(item, dict):
         return 'dict'
-    else:
-        print('type error')
-        return
-
+    return
 
 # ACCEPTS: dictionary(dict), current path (list), overall path (list)
 # RETURNS: None

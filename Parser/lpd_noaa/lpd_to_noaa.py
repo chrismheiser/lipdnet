@@ -2,10 +2,11 @@ __author__ = 'chrisheiser1'
 
 import json
 from collections import OrderedDict
-import flatten
 import re
 import os
-import sys
+
+from flattener import flatten
+
 
 """
 TO DO LIST
@@ -159,8 +160,10 @@ def path_context(flat_file):
             else:
                 new_dict[split_list[0]] = split_list[1]
 
-    new_dict['Core_Length'] = concat_units(core)
-    new_dict['Elevation'] = concat_units(elev)
+    if core:
+        new_dict['Core_Length'] = concat_units(core)
+    if elev:
+        new_dict['Elevation'] = concat_units(elev)
 
     return new_dict
 
@@ -180,17 +183,11 @@ def get_col_dict(dict_in):
 
 
 # The main parser
-def parse(file, template):
+def parse(file_in, file_out, template):
 
-    # Naming setup
-    name_split = file.split('.')
-    out_name = name_split[0] + '-l2n.txt'
-
-    # Create a new output text file
-    file_o = open(out_name, 'w')
 
     # Open the JSON file
-    json_data = open(file)
+    json_data = open(file_in)
 
     # Load in the json data from the file
     data = json.load(json_data)
@@ -239,7 +236,7 @@ def parse(file, template):
 
                 # When you reach the funding block, write all funding and grant entries at the same time
                 if clean_key == '# Funding_Agency \n':
-                    write_funding_block(file_o, funding, grant)
+                    write_funding_block(file_out, funding, grant)
                     skip = True
 
                 else:
@@ -251,14 +248,14 @@ def parse(file, template):
 
                 # After we have made all the changes to the line, write it back to the file
                 if not skip:
-                    file_o.write(line)
+                    file_out.write(line)
                 skip = False
 
             line_num += 1
 
     # Write column data back to the file
     # Need to write col data for each item in the value list.
-    file_o.write(line)
+    file_out.write(line)
     var_count = 0
     var_titles = []
     data_list = []
@@ -272,7 +269,7 @@ def parse(file, template):
     # Combine the variable names to make a title row. Write it to the file
     var_titles.append('\n')
     line = ' '.join(var_titles)
-    file_o.write(line)
+    file_out.write(line)
 
     # Nested loop to add one data item from each variable to the row at a time.
     for k, v in col_data.items():
@@ -298,26 +295,48 @@ def parse(file, template):
             item += 1
             data_list.append('\n')
             line = ' '.join(data_list)
-            file_o.write(line)
+            file_out.write(line)
             data_list.clear()
 
     # Close the file and end
-    file_o.close()
-    return
+    file_out.close()
+    return file_out
 
 
 # Load in the template file, and run through the parser
-def main(file):
+def main():
 
     template = 'noaa-blank.txt'
+    file_list = []
 
-    # Cut the extension from the file name
-    file = 'noaa-n2l.jsonld'
+    os.chdir('/Users/chrisheiser1/Dropbox/GeoChronR/noaa_lpd_files/output/')
+    for file in os.listdir():
+        if file.endswith('.jsonld'):
+            file_list.append(file)
 
-    # Run the file through the parser
-    parse(file, template)
+    for txts in file_list:
+
+        # Cut the extension from the file name
+        if '-lpd.json' in txts:
+            name = txts.split('-')
+        else:
+            name = txts.split(".")
+
+        # Creates the directory 'output' if it does not already exist
+        if not os.path.exists('output/'):
+              os.makedirs('output/')
+
+        # Naming setup
+        out_name = name[0] + '-noaa.txt'
+
+        # Create a new output text file
+        file_out = open('output/' + out_name, 'w')
+
+        print(txts)
+        # Run the file through the parser
+        parse(txts, file_out, template)
 
     return
 
 
-main('noaa-n2l.jsonld')
+main()

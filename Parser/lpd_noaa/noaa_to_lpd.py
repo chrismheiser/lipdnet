@@ -2,6 +2,7 @@ __author__ = 'chrisheiser1'
 
 from collections import OrderedDict
 import json
+import os
 
 
 """
@@ -146,7 +147,11 @@ def parse(file):
                'PublishedTitle', 'JournalName', 'Volume', 'Doi', 'FullCitation', 'Abstract', 'Pages', 'Edition']
 
     with open(file, 'r') as f:
+        line_num = 0
+        missing_val = False
+
         for line in iter(f):
+            line_num += 1
 
             # Metadata section
             if "#" in line:
@@ -157,6 +162,10 @@ def parse(file):
                     # Split the line into key, value pieces
                     key, value = slice_key_val(line)
                     value = value.lstrip()
+
+                    # We need to know if we've hit the missing value line
+                    if (key.lower() == 'missing value') or (key.lower() == 'missing values'):
+                        missing_val = True
 
                     # Convert naming to camel case
                     key = name_to_camelCase(key)
@@ -208,14 +217,14 @@ def parse(file):
                     pass
 
             # Data Columns
-            else:
+            elif ('#' not in line) and missing_val:
                 # Split the line at each space (There's one space between each data item)
-                old_list = line.split()
+                num_list = line.split()
 
                 # For the first loop, we want to take the variable names, count vars, and create the dictionary entries
                 if not create_lists:
                     vars_names = []
-                    for vars1 in old_list:
+                    for vars1 in num_list:
                         vars_names.append(vars1)
                         vars_dict[vars1] = []
                         var_count += 1
@@ -225,8 +234,11 @@ def parse(file):
                 else:
                     # We have simultaneous looping. For each var key, we add the corresponding data item to the val list
                     # Also, converts numbers from str type, back into floats
-                    for i in range(0, var_count):
-                        vars_dict[vars_names[i]].append(convert_num(old_list[i]))
+                    if num_list:
+                        for i in range(0, var_count):
+                            vars_dict[vars_names[i]].append(convert_num(num_list[i]))
+
+
 
 
     # Piece together geo block
@@ -247,27 +259,43 @@ def parse(file):
 
 
 # Main function takes in file name, and outputs new jsonld file
-def main(file):
+def main():
 
-    # Cut the extension from the file name
-    file = 'noaa-testfile.txt'
-    split = file.split('-')
-    name = split[0]
+    file_list = []
+    os.chdir('/Users/chrisheiser1/Dropbox/GeoChronR/noaa_lpd_files/')
+    for file in os.listdir():
+        if file.endswith('.txt'):
+            file_list.append(file)
 
-    # Run the file through the parser
-    dict_out = parse(file)
+    for txts in file_list:
 
+        # Cut the extension from the file name
+        if '-noaa.txt' in txts:
+            split = txts.split('-')
+        else:
+            split = txts.split('.')
+        name = split[0]
 
-    # LPD file output
-    new_file_name_jsonld = str(name) + '-n2l.jsonld'
-    file_jsonld = open(new_file_name_jsonld, 'w')
-    file_jsonld = open(new_file_name_jsonld, 'r+')
+        # Run the file through the parser
+        dict_out = parse(txts)
 
-    # Write finalDict to json-ld file with dump
-    # Dump outputs into a human-readable json hierarchy
-    json.dump(dict_out, file_jsonld, indent=4)
+        # Creates the directory 'output' if it does not already exist
+        # path = 'output/' + name
+        # if not os.path.exists(path):
+        #       os.makedirs(path)
+
+        # LPD file output
+        out_name = name + '-lpd.jsonld'
+        # file_jsonld = open(path + '/' + out_name, 'w')
+        # file_jsonld = open(path + '/' + out_name, 'r+')
+        file_jsonld = open('output/' + out_name, 'w')
+        file_jsonld = open('output/' + out_name, 'r+')
+
+        # Write finalDict to json-ld file with dump
+        # Dump outputs into a human-readable json hierarchy
+        json.dump(dict_out, file_jsonld, indent=4)
 
     return
 
 
-main('noaa-testfile.txt')
+main()
