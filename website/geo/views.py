@@ -9,6 +9,10 @@ def index(request):
     return render(request, 'index.html')
 
 
+def splash(request):
+    return render(request, 'splash.html')
+
+
 def upload(request):
     return render(request, 'upload.html')
 

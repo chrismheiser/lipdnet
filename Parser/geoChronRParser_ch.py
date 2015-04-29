@@ -1,17 +1,13 @@
-# import flatten_test
-# import validator_ch
-# import validator_ch
-# import validator_test_easy
-
+import flattener.flatten_test
+import flattener.flatten
+import validator.validator_test
+import validator.validator_test_easy
+from collections import OrderedDict
+from flattener import flatten
 import csv
 import json
-from collections import OrderedDict
 import os
-
 import xlrd
-
-from flattener import flatten
-
 
 # GLOBAL VARIABLES
 finalDict = OrderedDict()
@@ -833,15 +829,15 @@ def parser():
     flat_run = 'n'
 
     # Display a dialog box that let's the user browse for the directory with all their excel files.
-    # root = tkinter.Tk()
-    # root.withdraw()
-    # currdir = os.getcwd()
-    # tempdir = tkinter.filedialog.askdirectory(parent=root, initialdir=currdir, title='Please select a directory')
+    root = tkinter.Tk()
+    root.withdraw()
+    currdir = os.getcwd()
+    tempdir = tkinter.filedialog.askdirectory(parent=root, initialdir=currdir, title='Please select a directory')
 
     # if len(tempdir) > 0:
     #     print("Directory: " + tempdir)
     # os.chdir(tempdir)
-    os.chdir('/Users/chrisheiser1/Desktop/')
+    # os.chdir('/Users/chrisheiser1/Desktop/')
 
     # Add all excel files from user-specified directory, or from current directory
     # Puts all file names in a list we iterate over
