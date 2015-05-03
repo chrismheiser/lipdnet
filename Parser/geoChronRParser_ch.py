@@ -1,13 +1,15 @@
-import flattener.flatten_test
-import flattener.flatten
-import validator.validator_test
-import validator.validator_test_easy
+# import flattener.flatten_test
+# import flattener.flatten
+# import validator.validator_test
+# import validator.validator_test_easy
 from collections import OrderedDict
 from flattener import flatten
 import csv
 import json
 import os
 import xlrd
+from tkinter import filedialog
+import tkinter
 
 # GLOBAL VARIABLES
 finalDict = OrderedDict()
@@ -720,7 +722,8 @@ def get_chron_var(temp_sheet, start_row):
     col_dict = OrderedDict()
     out_list = []
     column = 1
-    while temp_sheet.cell_value(start_row, 0) != '':
+
+    while (temp_sheet.cell_value(start_row, 0) != '') and (start_row < temp_sheet.nrows):
 
         short_cell = temp_sheet.cell_value(start_row, 0)
         long_cell = temp_sheet.cell_value(start_row, 1)
@@ -780,13 +783,12 @@ def traverse_to_chron_data(temp_sheet):
 # Returns: row (int)
 def traverse_to_chron_var(temp_sheet):
     row = 0
-    while 'Chronology' in temp_sheet.cell_value(row, 0):
+    while row < temp_sheet.nrows-1:
+        if 'Parameter' in temp_sheet.cell_value(row, 0):
+            row += 1
+            break
         row += 1
-    # if temp_sheet.cell_value(row+1, 0):
-    #     while temp_sheet.cell_value(row, 0) == '':
-    #         row += 1
-    # Jump one row lower than the template cells
-    row += 1
+
     return row
 
 
@@ -819,25 +821,25 @@ def parser():
     # need_response = True
     # while need_response:
     #     chron_run = input("Run Chronology? (y/n)\n")
-    #     if chron_run == ('y' and 'n'):
+    #     if chron_run == 'y' or 'n':
     #         flat_run = input("Flatten JSON? (y/n)\n")
-    #         if flat_run == ('y' and 'n'):
+    #         if flat_run == 'y' or 'n':
     #             need_response = False
 
     # For testing, assume we don't want to run these to make things easier for now.
-    chron_run = 'n'
+    chron_run = 'y'
     flat_run = 'n'
 
     # Display a dialog box that let's the user browse for the directory with all their excel files.
-    root = tkinter.Tk()
-    root.withdraw()
-    currdir = os.getcwd()
-    tempdir = tkinter.filedialog.askdirectory(parent=root, initialdir=currdir, title='Please select a directory')
+    # root = tkinter.Tk()
+    # root.withdraw()
+    # currdir = os.getcwd()
+    # tempdir = tkinter.filedialog.askdirectory(parent=root, initialdir='/Users/chrisheiser1/Dropbox/GeoChronR/', title='Please select a directory')
 
     # if len(tempdir) > 0:
     #     print("Directory: " + tempdir)
     # os.chdir(tempdir)
-    # os.chdir('/Users/chrisheiser1/Desktop/')
+    os.chdir('/Users/chrisheiser1/Dropbox/GeoChronR/chronologiesToBeFormatted/Africa/')
 
     # Add all excel files from user-specified directory, or from current directory
     # Puts all file names in a list we iterate over
@@ -936,26 +938,26 @@ def parser():
 ## CHRONOLOGY WORKSHEETS ##
 ###########################
 
+        # Old method that grabs chronology data in a big chunk
         # chronTableName = metadata.cell_value(30, 1)
-
         # if chronology:
             # chron_dict = blind_data_capture(chronology)
-
         chronTableName = metadata.cell_value(30, 1)
-        if chronology:
-            start_row = traverse_to_chron_var(chronology)
-            columns_list_chron = get_chron_var(chronology, start_row)
+        if chron_run == 'y':
+            if chronology:
+                start_row = traverse_to_chron_var(chronology)
+                columns_list_chron = get_chron_var(chronology, start_row)
 
-        ## Create a top level Chronology dictionary so we can give it a key
-        chron_dict = {}
-        chron_dict['chronTableName'] = chronTableName
-        chron_dict['filename'] = str(name) + str(chronTableName) + '.csv'
-        chron_dict['columns'] = columns_list_chron
-        finalDict['chronology'] = chron_dict
+            ## Create a top level Chronology dictionary so we can give it a key
+            chron_dict = {}
+            chron_dict['chronTableName'] = chronTableName
+            chron_dict['filename'] = str(name) + str(chronTableName) + '.csv'
+            chron_dict['columns'] = columns_list_chron
+            finalDict['chronology'] = chron_dict
 
-        # Create a top level Chronology dictionary so we can give it a key
+            # Create a top level Chronology dictionary so we can give it a key
 
-        finalDict['chronology'] = chron_dict
+            finalDict['chronology'] = chron_dict
 
 ############################
 ## FILE NAMING AND OUTPUT ##
@@ -973,8 +975,8 @@ def parser():
         del datasheetNameList[:]
 
         # CSV - CHRONOLOGY
-        # if chron_run == 'y':
-        output_csv_chronology(workbook, chronology_str, name)
+        if chron_run == 'y':
+            output_csv_chronology(workbook, chronology_str, name)
 
         # JSON LD
         new_file_name_jsonld = str(name) + '/' + str(name) + '.jsonld'
