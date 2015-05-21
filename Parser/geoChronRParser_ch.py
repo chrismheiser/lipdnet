@@ -22,7 +22,7 @@ def output_csv_datasheet(workbook, sheet, name):
 
     json_naming = sheet
     temp_sheet = workbook.sheet_by_name(sheet)
-    csv_folder_and_name = str(name) + '/' + str(name) + str(json_naming) + '.csv'
+    csv_folder_and_name = str(name) + '/' + str(name) + '-' + str(json_naming) + '.csv'
     csv_full_path = 'output/' + csv_folder_and_name
     file_csv = open(csv_full_path, 'w', newline='')
     w = csv.writer(file_csv)
@@ -79,7 +79,7 @@ def output_csv_datasheet(workbook, sheet, name):
 def output_csv_chronology(workbook, sheet, name):
     json_naming = name_to_jsonld(sheet)
     temp_sheet = workbook.sheet_by_name(sheet)
-    csv_folder_and_name = str(name) + '/' + str(name) + str(json_naming) + '.csv'
+    csv_folder_and_name = str(name) + '/' + str(name) + '-' + str(json_naming) + '.csv'
     csv_full_path = 'output/' + csv_folder_and_name
     file_csv = open(csv_full_path, 'w', newline='')
     w = csv.writer(file_csv)
@@ -672,7 +672,7 @@ def cells_down_datasheets(filename, workbook, sheet, row, col):
     # Add all our data pieces for this column into a new entry in the Measurement Table Dictionary
     measTableDict['measTableName'] = measTableName
 
-    measTableDict['filename'] = str(filename) + str(measTableName) + ".csv"
+    measTableDict['filename'] = str(filename) + '-' + str(measTableName) + ".csv"
 
     # If comments exist, insert them at table level
     if commentList:
@@ -839,7 +839,7 @@ def parser():
     # if len(tempdir) > 0:
     #     print("Directory: " + tempdir)
     # os.chdir(tempdir)
-    os.chdir('/Users/chrisheiser1/Dropbox/GeoChronR/chronologiesToBeFormatted/Africa/')
+    os.chdir('/Users/chrisheiser1/Dropbox/GeoChronR/chronologiesToBeFormatted/')
 
     # Add all excel files from user-specified directory, or from current directory
     # Puts all file names in a list we iterate over
@@ -951,7 +951,9 @@ def parser():
             ## Create a top level Chronology dictionary so we can give it a key
             chron_dict = {}
             chron_dict['chronTableName'] = chronTableName
-            chron_dict['filename'] = str(name) + str(chronTableName) + '.csv'
+
+            ## FIX THIS RIGHT HERE VVVVVV
+            chron_dict['filename'] = str(name) + '- Chronology.csv'
             chron_dict['columns'] = columns_list_chron
             finalDict['chronology'] = chron_dict
 

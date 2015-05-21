@@ -26,6 +26,8 @@ Things to do:
     DONE - Strip '\n' from lines, and rstrip() also
     DONE - Data columns are overwriting each other
     DONE - Convert all names to JSONLD naming (method to convert to camel casing)
+    - Fix case where Variables section doesn't have double ## marks
+
 
     IGNORE KEYS: earliestYear, mostRecentYear, dataLine variables
 
@@ -199,6 +201,8 @@ def parse(file, path):
     chron_vars_start = True
     missing_val_on = False
     data_vals_on = False
+    variables_on = False
+
 
     # Lists
     data_var_names = []
@@ -217,7 +221,16 @@ def parse(file, path):
     final_dict = OrderedDict()
 
     # List of items that we don't want to output
-    ignore = ['EarliestYear', 'MostRecentYear', 'Data line variables format']
+    ignore_keys = ['EarliestYear', 'MostRecentYear']
+    ignore_var_lines = ['(have no #)',
+                        'line variables format',
+                        'c or n for character or numeric',
+                        'preceded by "##"'
+                        ]
+    ignore_data_lines = ['(have no #)',
+                         'tab-delimited text',
+                         'age ensembles archived']
+    ignore_blanks = ['\n', '', '#\n']
 
     # List of keys that need their values converted to ints/floats
     numbers = ['Volume', 'Value', 'Min', 'Max', 'Pages', 'Edition', 'CoreLength']
@@ -247,9 +260,12 @@ def parse(file, path):
             if chronology_on:
 
                 # When reaching the end of the chron section, set the marker to off and close the CSV file
-                if '#----' in line:
+                if '-------' in line:
                     chronology_on = False
-                    chron_csv.close()
+
+                    # If there is nothing between the chronology start and the end barrier, then there won't be a CSV
+                    if chron_start_line != line_num-1:
+                        chron_csv.close()
 
                 # Special case for first line in chron section. Grab variables and open a new CSV file
                 elif chron_vars_start:
@@ -275,43 +291,70 @@ def parse(file, path):
 
             # Variables Section
             # Variables are the only lines that have a double # in front
-            elif "##" in line and 'Data variables follow that' not in line:
+            elif variables_on:
 
-                # Split the line items, and cleanup
-                cleaned_line = separate_data_vars(line)
+                process_line = True
 
-                # Add the items into a column dictionary
-                data_col_dict = create_var_col(cleaned_line)
+                # If you hit the end of the section, turn the marker off
+                if "------" in line:
+                    variables_on = False
+                    process_line = False
 
-                # Keep a list of all variable names
-                data_var_names.append(data_col_dict['Name'])
+                for item in ignore_var_lines:
+                    if item in line:
+                        process_line = False
+                for item in ignore_blanks:
+                    if item == line:
+                        process_line = False
 
-                # Add the column dictionary into a final dictionary
-                data_dict["Column " + str(data_col_ct)] = data_col_dict
-                data_col_ct += 1
+                # If the line isn't in the ignore list, then it's a variable line
+                if process_line:
+
+                    # Split the line items, and cleanup
+                    cleaned_line = separate_data_vars(line)
+
+                    # Add the items into a column dictionary
+                    data_col_dict = create_var_col(cleaned_line)
+
+                    # Keep a list of all variable names
+                    data_var_names.append(data_col_dict['Name'])
+
+                    # Add the column dictionary into a final dictionary
+                    data_dict["Column " + str(data_col_ct)] = data_col_dict
+                    data_col_ct += 1
 
             # Data Section
             elif missing_val_on:
 
-                # Split the line at each space (There's one space between each data item)
-                values = line.split()
+                process_line = True
 
-                # Write all data values to CSV
-                if data_vals_on:
-                    dw.writerow(values)
+                for item in ignore_data_lines:
+                    if item in line:
+                        process_line = False
+                for item in ignore_blanks:
+                    if item == line:
+                        process_line = False
 
-                # Check for the line of variables
-                else:
+                if process_line:
+                    # Split the line at each space (There's one space between each data item)
+                    values = line.split()
 
-                    var = str_cleanup(values[0].lstrip())
-                    # Check if a variable name is in the current line
-                    if var == data_var_names[0]:
-                        data_vals_on = True
+                    # Write all data values to CSV
+                    if data_vals_on:
+                        dw.writerow(values)
 
-                        # Open CSV for writing
-                        csv_path = path + '/' + filename + '-data.csv'
-                        data_csv = open(csv_path, 'w', newline='')
-                        dw = csv.writer(data_csv)
+                    # Check for the line of variables
+                    else:
+
+                        var = str_cleanup(values[0].lstrip())
+                        # Check if a variable name is in the current line
+                        if var == data_var_names[0]:
+                            data_vals_on = True
+
+                            # Open CSV for writing
+                            csv_path = path + '/' + filename + '-data.csv'
+                            data_csv = open(csv_path, 'w', newline='')
+                            dw = csv.writer(data_csv)
 
             # Metadata section
             else:
@@ -326,6 +369,9 @@ def parse(file, path):
                         # Use chronology line as a marker to show if we have hit the Chronology section
                         if key.lower() == 'chronology':
                             chronology_on = True
+                            chron_start_line = line_num
+                        elif key.lower() == 'variables':
+                            variables_on = True
 
                     else:
                         # Use missing value line as a marker to show if we have hit the Data section
@@ -338,7 +384,7 @@ def parse(file, path):
                         l_key = key.lower()
 
                         # Ignore any entries that are specified in the skip list, or any that have empty values
-                        if key not in ignore:
+                        if key not in ignore_keys and value != '':
 
                             # Two special cases, because sometimes there's multiple funding agencies and grants
                             # Appending numbers to the names prevents them from overwriting each other in the final dict
@@ -411,7 +457,8 @@ def main():
 
     # Store a list of all the txt files in the specified directory. This is what we'll process.
     file_list = []
-    os.chdir('/Users/chrisheiser1/Dropbox/GeoChronR/noaa_lpd_files/test/')
+    # os.chdir('/Users/chrisheiser1/Desktop/')
+    os.chdir('/Users/chrisheiser1/Dropbox/GeoChronR/noaa_lipd_files/chron')
     for file in os.listdir():
         if file.endswith('.txt'):
             file_list.append(file)
