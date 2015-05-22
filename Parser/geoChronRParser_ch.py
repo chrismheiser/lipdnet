@@ -20,9 +20,8 @@ finalDict = OrderedDict()
 # Returns: None
 def output_csv_datasheet(workbook, sheet, name):
 
-    json_naming = sheet
     temp_sheet = workbook.sheet_by_name(sheet)
-    csv_folder_and_name = str(name) + '/' + str(name) + '-' + str(json_naming) + '.csv'
+    csv_folder_and_name = str(name) + '/' + str(name) + '-' + str(sheet) + '.csv'
     csv_full_path = 'output/' + csv_folder_and_name
     file_csv = open(csv_full_path, 'w', newline='')
     w = csv.writer(file_csv)
@@ -77,9 +76,9 @@ def output_csv_datasheet(workbook, sheet, name):
 # Accepts: Workbook(obj), sheet(str), name(str)
 # Returns: None
 def output_csv_chronology(workbook, sheet, name):
-    json_naming = name_to_jsonld(sheet)
+
     temp_sheet = workbook.sheet_by_name(sheet)
-    csv_folder_and_name = str(name) + '/' + str(name) + '-' + str(json_naming) + '.csv'
+    csv_folder_and_name = str(name) + '/' + str(name) + '-' + str(sheet) + '.csv'
     csv_full_path = 'output/' + csv_folder_and_name
     file_csv = open(csv_full_path, 'w', newline='')
     w = csv.writer(file_csv)
@@ -626,7 +625,7 @@ def cells_right_datasheets(workbook, sheet, row, col, colListNum):
 
 
 # Adds all measurement table data to the final dictionary
-# Returns: None
+# Returns: Dictionary
 def cells_down_datasheets(filename, workbook, sheet, row, col):
 
     # Create a dictionary to hold each column as a separate entry
@@ -636,7 +635,6 @@ def cells_down_datasheets(filename, workbook, sheet, row, col):
     # If we hit either of these, that should mean that we found all the variables
     # For each short_name, we should create a column entry and match all the info for that column
     temp_sheet = workbook.sheet_by_name(sheet)
-    measTableName = sheet
     columnsTop = []
     commentList = []
     colListNum = 1
@@ -670,9 +668,9 @@ def cells_down_datasheets(filename, workbook, sheet, row, col):
         pass
 
     # Add all our data pieces for this column into a new entry in the Measurement Table Dictionary
-    measTableDict['measTableName'] = measTableName
+    measTableDict['measTableName'] = sheet
 
-    measTableDict['filename'] = str(filename) + '-' + str(measTableName) + ".csv"
+    measTableDict['filename'] = str(filename) + '-' + str(sheet) + ".csv"
 
     # If comments exist, insert them at table level
     if commentList:
@@ -726,30 +724,34 @@ def get_chron_var(temp_sheet, start_row):
     while (temp_sheet.cell_value(start_row, 0) != '') and (start_row < temp_sheet.nrows):
 
         short_cell = temp_sheet.cell_value(start_row, 0)
-        long_cell = temp_sheet.cell_value(start_row, 1)
+        units_cell = temp_sheet.cell_value(start_row, 1)
+        long_cell = temp_sheet.cell_value(start_row, 2)
 
-        # If there are parenthesis (units) in this cell, capture the units
-        if ('(' or ')') in short_cell:
-            units = extract_units(short_cell)
-            short_name = extract_short(short_cell)
 
-        # else, this cell is unitless. Just capture the short name.
-        else:
-            units = 'none'
-            short_name = short_cell
+        # Don't believe that these steps are necessary now that the units and cells are consistently formatted.
 
-        # Grab the long name. We have units from the short cell, so if there are units in the long_cell also,
-        # then extract only the long_name and trash the units.
-        if ('(' or ')') in long_cell:
-            long_name = extract_short(long_cell)
-        else:
-            long_name = long_cell
+        # # If there are parenthesis (units) in this cell, capture the units
+        # if ('(' or ')') in short_cell:
+        #     units = extract_units(short_cell)
+        #     short_name = extract_short(short_cell)
+        #
+        # # else, this cell is unitless. Just capture the short name.
+        # else:
+        #     units = 'none'
+        #     short_name = short_cell
+        #
+        # # Grab the long name. We have units from the short cell, so if there are units in the long_cell also,
+        # # then extract only the long_name and trash the units.
+        # if ('(' or ')') in long_cell:
+        #     long_name = extract_short(long_cell)
+        # else:
+        #     long_name = long_cell
 
         ## Fill the dictionary for this column
         col_dict['column'] = column
-        col_dict['shortName'] = short_name
-        col_dict['longName'] = long_name
-        col_dict['units'] = units
+        col_dict['shortName'] = short_cell
+        col_dict['longName'] = long_cell
+        col_dict['units'] = units_cell
         out_list.append(col_dict.copy())
         start_row += 1
         column += 1
@@ -839,7 +841,9 @@ def parser():
     # if len(tempdir) > 0:
     #     print("Directory: " + tempdir)
     # os.chdir(tempdir)
-    os.chdir('/Users/chrisheiser1/Dropbox/GeoChronR/chronologiesToBeFormatted/')
+    # os.chdir('/Users/chrisheiser1/Dropbox/GeoChronR/chronologiesToBeFormatted/')
+    os.chdir('/Users/chrisheiser1/Desktop/')
+
 
     # Add all excel files from user-specified directory, or from current directory
     # Puts all file names in a list we iterate over
@@ -942,23 +946,21 @@ def parser():
         # chronTableName = metadata.cell_value(30, 1)
         # if chronology:
             # chron_dict = blind_data_capture(chronology)
+
+        # Capture chronology by traversing the sheet and matching variable names
         chronTableName = metadata.cell_value(30, 1)
+        chron_dict = OrderedDict()
+
         if chron_run == 'y':
             if chronology:
+                chron_dict['chronTableName'] = chronTableName
+                chron_dict['filename'] = str(name) + '-' + str(chronology_str) + '.csv'
+
                 start_row = traverse_to_chron_var(chronology)
                 columns_list_chron = get_chron_var(chronology, start_row)
-
-            ## Create a top level Chronology dictionary so we can give it a key
-            chron_dict = {}
-            chron_dict['chronTableName'] = chronTableName
-
-            ## FIX THIS RIGHT HERE VVVVVV
-            chron_dict['filename'] = str(name) + '- Chronology.csv'
-            chron_dict['columns'] = columns_list_chron
-            finalDict['chronology'] = chron_dict
+                chron_dict['columns'] = columns_list_chron
 
             # Create a top level Chronology dictionary so we can give it a key
-
             finalDict['chronology'] = chron_dict
 
 ############################
