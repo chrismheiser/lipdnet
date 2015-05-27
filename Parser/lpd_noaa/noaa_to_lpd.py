@@ -26,8 +26,14 @@ Things to do:
     DONE - Strip '\n' from lines, and rstrip() also
     DONE - Data columns are overwriting each other
     DONE - Convert all names to JSONLD naming (method to convert to camel casing)
-    - Fix case where Variables section doesn't have double ## marks
-
+    DONE - Fix case where Variables section doesn't have double ## marks
+    DONE - update to have same measurements columns as old format
+    DONE - update to have consistent naming as old format
+    DONE - add meastablename and filename (csv) fields
+    DONE - change the formatting for the funding block. new structure
+    WIP - description and notes section needs special parsing
+    WIP - yamalia - fix values that span multiple lines (i.e. abstract, description and notes)
+    - need special parsing for any links (don't want to split in form 'http' + '//www.something.com')
 
     IGNORE KEYS: earliestYear, mostRecentYear, dataLine variables
 
@@ -40,34 +46,35 @@ Things to do:
 
 # Receive split list from separate_data_vars, and turn it into a dictionary for that column
 # Accept list, return dictionary
-def create_var_col(list_in):
+def create_var_col(list_in, col_count):
     # Format: what, material, error, units, seasonality, archive, detail, method,
     # C or N for Character or Numeric data, direction of relation to climate (positive or negative)
     dict_out = OrderedDict()
+    dict_out['column'] = col_count
     for index, item in enumerate(list_in):
         if item != '':
             if index == 0:
-                dict_out['Name'] = item
+                dict_out['shortName'] = item
             elif index == 1:
-                dict_out['What'] = item
+                dict_out['longName'] = item
             elif index == 2:
-                dict_out['Material'] = item
+                dict_out['material'] = item
             elif index == 3:
-                dict_out['Error'] = item
+                dict_out['error'] = item
             elif index == 4:
-                dict_out['Units'] = item
+                dict_out['units'] = item
             elif index == 5:
-                dict_out['Seasonality'] = item
+                dict_out['seasonality'] = item
             elif index == 6:
-                dict_out['Archive'] = item
+                dict_out['archive'] = item
             elif index == 7:
-                dict_out['Detail'] = item
+                dict_out['detail'] = item
             elif index == 8:
-                dict_out['Method'] = item
+                dict_out['method'] = item
             elif index == 9:
-                dict_out['C or N'] = item
+                dict_out['dataType'] = item
             elif index == 10:
-                dict_out['Direction'] = item
+                dict_out['direction'] = item
     return dict_out
 
 
@@ -137,21 +144,22 @@ def name_to_jsonld(title):
 # Special split for [elevation, core, etc] that have value and units on one line.
 # Accept string, return integer and string
 def split_name_unit(line):
-    try:
-        # Sometimes the units are wrapped in parenthesis
-        if '(' in line:
-            line = line.split('(')
-            line[1] = line[1].replace(')', '')
-        # If no parenthesis
-        else:
-            line = line.split()
-        value = line[0]
-        unit = line[1]
-    # Catch error when trying to split a line that has no space between value and unit (i.e. '150cm')
-    except IndexError:
-        value = line[0]
-        unit = 'refer to value'
-    return value, unit
+    if line != '':
+        try:
+            # Sometimes the units are wrapped in parenthesis
+            if '(' in line:
+                line = line.split('(')
+                line[1] = line[1].replace(')', '')
+            # If no parenthesis
+            else:
+                line = line.split()
+            value = line[0]
+            unit = line[1]
+        # Catch error when trying to split a line that has no space between value and unit (i.e. '150cm')
+        except IndexError:
+            value = line[0]
+            unit = 'refer to value'
+        return value, unit
 
 
 # Remove the unnecessary characters in the line that we don't want
@@ -186,15 +194,16 @@ def slice_key_val(line):
 # Main parser.
 # Accept the text file. We'll open it, read it, and return a compiled dictionary to write to a json file
 # May write a chronology CSV, and a data CSV, depending on what data is available
-def parse(file, path):
+def parse(file, path, filename):
+
+    # Strings
+    last_insert = None
 
     # Counters
-    grants = 1
-    funding = 1
+    grant_id = 0
+    funding_id = 0
     data_col_ct = 1
     line_num = 0
-    name = file.split('.')
-    filename = name[0]
 
     # Boolean markers
     chronology_on = False
@@ -203,12 +212,16 @@ def parse(file, path):
     data_vals_on = False
     variables_on = False
 
-
     # Lists
     data_var_names = []
+    chron_col_list = []
+    data_col_list = []
+    data_tables = []
+    funding = []
     missing_val_alts = ['missing value', 'missing values', 'missingvalue', 'missingvalues', 'missing_values']
 
     # All dictionaries needed to create JSON structure
+    temp_funding = OrderedDict()
     vars_dict = OrderedDict()
     geo = OrderedDict()
     lat = OrderedDict()
@@ -217,7 +230,8 @@ def parse(file, path):
     pub = OrderedDict()
     coreLen = OrderedDict()
     chron_dict = OrderedDict()
-    data_dict = OrderedDict()
+    data_dict_upper = OrderedDict()
+    data_dict_lower = OrderedDict()
     final_dict = OrderedDict()
 
     # List of items that we don't want to output
@@ -247,6 +261,7 @@ def parse(file, path):
                 'elev': ['Elevation']
     }
 
+    funding_lst = ['FundingAgencyName', 'Grant']
     pub_lst = ['OnlineResource', 'OriginalSourceUrl', 'Investigators', 'Authors', 'PublishedDateOrYear',
                'PublishedTitle', 'JournalName', 'Volume', 'Doi', 'FullCitation', 'Abstract', 'Pages', 'Edition']
 
@@ -272,7 +287,8 @@ def parse(file, path):
                     chron_vars_start = False
 
                     # Open CSV for writing
-                    csv_path = path + '/' + filename + '-chron.csv'
+                    chron_filename = filename + '-chronology.csv'
+                    csv_path = path + '/' + chron_filename
                     chron_csv = open(csv_path, 'w', newline='')
                     cw = csv.writer(chron_csv)
 
@@ -281,8 +297,16 @@ def parse(file, path):
                     line = line.lstrip()
                     variables = line.split('|')
                     for index, var in enumerate(variables):
-                        chron_dict['Column ' + str(chron_col_ct)] = var.replace('\n', '').lstrip().rstrip()
+                        temp_dict = OrderedDict()
+                        temp_dict['column'] = chron_col_ct
+                        name, unit = split_name_unit(var.replace('\n', '').lstrip().rstrip())
+                        temp_dict['shortName'] = name
+                        temp_dict['units'] = unit
+                        chron_col_list.append(temp_dict)
                         chron_col_ct += 1
+                    chron_dict['filename'] = chron_filename
+                    chron_dict['chronTableName'] = 'Chronology'
+                    chron_dict['columns'] = chron_col_list
 
                 # Split the line of data values, then write to CSV file
                 else:
@@ -314,13 +338,13 @@ def parse(file, path):
                     cleaned_line = separate_data_vars(line)
 
                     # Add the items into a column dictionary
-                    data_col_dict = create_var_col(cleaned_line)
+                    data_col_dict = create_var_col(cleaned_line, data_col_ct)
 
                     # Keep a list of all variable names
-                    data_var_names.append(data_col_dict['Name'])
+                    data_var_names.append(data_col_dict['shortName'])
 
                     # Add the column dictionary into a final dictionary
-                    data_dict["Column " + str(data_col_ct)] = data_col_dict
+                    data_col_list.append(data_col_dict)
                     data_col_ct += 1
 
             # Data Section
@@ -352,82 +376,104 @@ def parse(file, path):
                             data_vals_on = True
 
                             # Open CSV for writing
-                            csv_path = path + '/' + filename + '-data.csv'
+                            data_filename = filename + '-data.csv'
+                            csv_path = path + '/' + data_filename
                             data_csv = open(csv_path, 'w', newline='')
                             dw = csv.writer(data_csv)
 
             # Metadata section
             else:
-                line = str_cleanup(line)
+                # Line Continuation: Sometimes there are items that span a few lines.
+                # If this happens, we want to combine them all properly into one entry.
+                if '#' not in line and line != '' and last_insert is not None:
+                    old_val = last_insert[key]
+                    last_insert[key] = old_val + line
 
-                # Grab the key and value from the current line
-                try:
-                    # Split the line into key, value pieces
-                    key, value = slice_key_val(line)
+                # No Line Continuation: This is the start or a new entry
+                else:
+                    line = str_cleanup(line)
 
-                    if value is None:
-                        # Use chronology line as a marker to show if we have hit the Chronology section
-                        if key.lower() == 'chronology':
-                            chronology_on = True
-                            chron_start_line = line_num
-                        elif key.lower() == 'variables':
-                            variables_on = True
+                    # Grab the key and value from the current line
+                    try:
+                        # Split the line into key, value pieces
+                        key, value = slice_key_val(line)
 
-                    else:
-                        # Use missing value line as a marker to show if we have hit the Data section
-                        if key.lower() in missing_val_alts:
-                            missing_val_on = True
-                            final_dict[key] = value
+                        if value is None:
+                            # Use chronology line as a marker to show if we have hit the Chronology section
+                            if key.lower() == 'chronology':
+                                chronology_on = True
+                                chron_start_line = line_num
+                            elif key.lower() == 'variables':
+                                variables_on = True
 
-                        # Convert naming to camel case
-                        key = name_to_camelCase(key)
-                        l_key = key.lower()
-
-                        # Ignore any entries that are specified in the skip list, or any that have empty values
-                        if key not in ignore_keys and value != '':
-
-                            # Two special cases, because sometimes there's multiple funding agencies and grants
-                            # Appending numbers to the names prevents them from overwriting each other in the final dict
-                            if key == 'FundingAgencyName':
-                                key = key + '-' + str(funding)
-                                funding += 1
-                            elif key == 'Grant':
-                                key = key + '-' + str(grants)
-                                grants += 1
-
-                            # Insert into the final dictionary
-                            if l_key in geo_keys['lat_n'] or l_key in geo_keys['lat_s']:
-                                if l_key in geo_keys['lat_n']:
-                                    lat['Max'] = convert_num(value)
-                                elif l_key in geo_keys['lat_s']:
-                                    lat['Min'] = convert_num(value)
-                            elif l_key in geo_keys['lon_e'] or l_key in geo_keys['lon_w']:
-                                if l_key in geo_keys['lon_e']:
-                                    lon['Max'] = convert_num(value)
-                                elif l_key in geo_keys['lon_w']:
-                                    lon['Min'] = convert_num(value)
-                            elif key in geo_keys['elev']:
-                                # Split the elev string into value and units
-                                val, unit = split_name_unit(value)
-                                elev['Value'] = convert_num(val)
-                                elev['Unit'] = unit
-                            elif key in geo_keys['places']:
-                                geo[key] = value
-                            elif key in pub_lst:
-                                if key in numbers:
-                                    pub[key] = convert_num(value)
-                                else:
-                                    pub[key] = value
-                            elif key == 'CoreLength':
-                                val, unit = split_name_unit(value)
-                                coreLen['Value'] = val
-                                coreLen['Unit'] = unit
-                            else:
+                        else:
+                            # Use missing value line as a marker to show if we have hit the Data section
+                            if key.lower() in missing_val_alts:
+                                missing_val_on = True
                                 final_dict[key] = value
 
-                # Ignore any errors from NoneTypes that are returned from slice_key_val
-                except TypeError:
-                    pass
+                            # Convert naming to camel case
+                            key = name_to_camelCase(key)
+                            l_key = key.lower()
+
+                            # Ignore any entries that are specified in the skip list, or any that have empty values
+                            if key not in ignore_keys:
+
+                                # Insert into the final dictionary
+                                if l_key in geo_keys['lat_n'] or l_key in geo_keys['lat_s']:
+                                    if l_key in geo_keys['lat_n']:
+                                        last_insert = lat
+                                        lat['max'] = convert_num(value)
+                                    elif l_key in geo_keys['lat_s']:
+                                        lat['min'] = convert_num(value)
+                                elif l_key in geo_keys['lon_e'] or l_key in geo_keys['lon_w']:
+                                    last_insert = lon
+                                    if l_key in geo_keys['lon_e']:
+                                        lon['max'] = convert_num(value)
+                                    elif l_key in geo_keys['lon_w']:
+                                        lon['min'] = convert_num(value)
+                                elif key in geo_keys['elev']:
+                                    # Split the elev string into value and units
+                                    val, unit = split_name_unit(value)
+                                    elev['value'] = convert_num(val)
+                                    elev['unit'] = unit
+                                    last_insert = elev
+                                elif key in geo_keys['places']:
+                                    geo[key] = value
+                                    last_insert = geo
+                                elif key in pub_lst:
+                                    last_insert = pub
+                                    if key in numbers:
+                                        pub[key] = convert_num(value)
+                                    else:
+                                        pub[key] = value
+                                elif key == 'CoreLength':
+                                    val, unit = split_name_unit(value)
+                                    coreLen['value'] = val
+                                    coreLen['unit'] = unit
+                                    last_insert = coreLen
+
+                                elif key in funding_lst:
+                                    if key == 'FundingAgencyName':
+                                        funding_id += 1
+                                        key = 'name'
+                                    elif key == 'Grant':
+                                        grant_id += 1
+                                        key = 'grant'
+                                    temp_funding[key] = value
+
+                                    # If both counters are matching, we are ready to add content to the funding list
+                                    if grant_id == funding_id:
+                                        funding.append(temp_funding.copy())
+                                        temp_funding.clear()
+
+                                else:
+                                    final_dict[key] = value
+                                    last_insert = final_dict
+
+                    # Ignore any errors from NoneTypes that are returned from slice_key_val
+                    except TypeError:
+                        pass
 
     # Wait to close the data CSV until we reached the end of the text file
     try:
@@ -435,19 +481,28 @@ def parse(file, path):
     except NameError:
         print("Couldn't Close Data CSV")
 
+    # Piece together measurements block
+    data_dict_upper['filename'] = data_filename
+    data_dict_upper['measTableName'] = 'Data'
+    data_dict_upper['columns'] = data_col_list
+    data_tables.append(data_dict_upper)
+
     # Piece together geo block
-    geo['Latitude'] = lat
-    geo['Longitude'] = lon
-    geo['Elevation'] = elev
-    final_dict['Geo'] = geo
-    final_dict['CoreLength'] = coreLen
-    final_dict['Pub'] = pub
-    final_dict['Chronology'] = chron_dict
-    final_dict['Data'] = data_dict
+    geo['latitude'] = lat
+    geo['longitude'] = lon
+    geo['elevation'] = elev
+
+    # Piece together final dictionary
+    final_dict['funding'] = funding
+    final_dict['geo'] = geo
+    final_dict['coreLength'] = coreLen
+    final_dict['pub'] = pub
+    final_dict['chronology'] = chron_dict
+    final_dict['measurements'] = data_tables
 
      # Insert the data dictionaries into the final dictionary
     for k, v in vars_dict.items():
-        data_dict[k] = v
+        data_dict_lower[k] = v
 
     return final_dict
 
@@ -457,8 +512,8 @@ def main():
 
     # Store a list of all the txt files in the specified directory. This is what we'll process.
     file_list = []
-    # os.chdir('/Users/chrisheiser1/Desktop/')
-    os.chdir('/Users/chrisheiser1/Dropbox/GeoChronR/noaa_lipd_files/chron')
+    os.chdir('/Users/chrisheiser1/Desktop/')
+    # os.chdir('/Users/chrisheiser1/Dropbox/GeoChronR/noaa_lipd_files/chron')
     for file in os.listdir():
         if file.endswith('.txt'):
             file_list.append(file)
@@ -469,11 +524,7 @@ def main():
         print(txts)
 
         # Cut the extension from the file name
-        if '-noaa.txt' in txts:
-            split = txts.split('-')
-        else:
-            split = txts.split('.')
-        name = split[0]
+        name = os.path.splitext(txts)[0]
 
         # Creates the directory 'output' if it does not already exist
         path = 'output/' + name
@@ -481,10 +532,10 @@ def main():
               os.makedirs(path)
 
         # Run the file through the parser
-        dict_out = parse(txts, path)
+        dict_out = parse(txts, path, name)
 
         # LPD file output
-        out_name = name + '-lpd.jsonld'
+        out_name = name + '.jsonld'
         file_jsonld = open(path + '/' + out_name, 'w')
         file_jsonld = open(path + '/' + out_name, 'r+')
         # file_jsonld = open('output/' + out_name, 'w')
