@@ -31,9 +31,10 @@ Things to do:
     DONE - update to have consistent naming as old format
     DONE - add meastablename and filename (csv) fields
     DONE - change the formatting for the funding block. new structure
-    WIP - description and notes section needs special parsing
-    WIP - yamalia - fix values that span multiple lines (i.e. abstract, description and notes)
+    DONE - description and notes section needs special parsing
+    DONE - yamalia - fix values that span multiple lines (i.e. abstract, description and notes)
     - need special parsing for any links (don't want to split in form 'http' + '//www.something.com')
+    - account for elevations that are a range and not just a single number
 
     IGNORE KEYS: earliestYear, mostRecentYear, dataLine variables
 
@@ -211,9 +212,11 @@ def parse(file, path, filename):
     missing_val_on = False
     data_vals_on = False
     variables_on = False
+    description_on = False
 
     # Lists
     data_var_names = []
+    temp_description = []
     chron_col_list = []
     data_col_list = []
     data_tables = []
@@ -313,13 +316,27 @@ def parse(file, path, filename):
                     values = line.split()
                     cw.writerow(values)
 
+            # Description Section
+            # Descriptions are often long paragraphs spanning multiple lines, but don't follow the key/value format
+            elif description_on:
+
+                # End of the section. Turn marker off
+                if '-------' in line:
+                    description_on = False
+                    value = ''.join(temp_description)
+                    final_dict['description_and_notes'] = value
+
+                else:
+                    line = str_cleanup(line)
+                    temp_description.append(line)
+
             # Variables Section
             # Variables are the only lines that have a double # in front
             elif variables_on:
 
                 process_line = True
 
-                # If you hit the end of the section, turn the marker off
+                # End of the section. Turn marker off
                 if "------" in line:
                     variables_on = False
                     process_line = False
@@ -447,6 +464,10 @@ def parse(file, path, filename):
                                         pub[key] = convert_num(value)
                                     else:
                                         pub[key] = value
+                                elif key == 'Description':
+                                    description_on = True
+                                    temp_description.append(value)
+
                                 elif key == 'CoreLength':
                                     val, unit = split_name_unit(value)
                                     coreLen['value'] = val
