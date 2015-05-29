@@ -4,6 +4,7 @@ from collections import OrderedDict
 import json
 import os
 import csv
+import re
 
 
 """
@@ -33,8 +34,9 @@ Things to do:
     DONE - change the formatting for the funding block. new structure
     DONE - description and notes section needs special parsing
     DONE - yamalia - fix values that span multiple lines (i.e. abstract, description and notes)
+    DONE - account for elevations that are a range and not just a single number
+
     - need special parsing for any links (don't want to split in form 'http' + '//www.something.com')
-    - account for elevations that are a range and not just a single number
 
     IGNORE KEYS: earliestYear, mostRecentYear, dataLine variables
 
@@ -142,24 +144,52 @@ def name_to_jsonld(title):
     return out
 
 
-# Special split for [elevation, core, etc] that have value and units on one line.
-# Accept string, return integer and string
+# Split a name and unit that are bunched together (i.e. '250m')
+def name_unit_regex(word):
+    r = re.findall(r'(\d+)(\w+?)', word)
+    value = r[0][0]
+    unit = r[0][1]
+    return value, unit
+
+
+# Check if the string contains digits
+def contains_digits(word):
+    return any(i.isdigit() for i in word)
+
+
+# Split a string that has value and unit as one.
 def split_name_unit(line):
     if line != '':
-        try:
-            # Sometimes the units are wrapped in parenthesis
-            if '(' in line:
-                line = line.split('(')
-                line[1] = line[1].replace(')', '')
-            # If no parenthesis
-            else:
+        # If there are parenthesis, remove them
+        line = line.replace('(', '').replace(')', '')
+        # When value and units are a range (i.e. '100 m - 200 m').
+        if 'to' in line or '-' in line:
+            line = line.replace('to', '').replace('-', '')
+            val_list = [int(s) for s in line.split() if s.isdigit()]
+            unit_list = [s for s in line.split() if not s.isdigit()]
+            # For items that did not split properly. Need regex split.
+            for item in unit_list:
+                if contains_digits(item):
+                    unit_list = []
+                    i, v = name_unit_regex(item)
+                    val_list.append(i)
+                    unit_list.append(v)
+            # Piece the number range back together.
+            value = str(val_list[0]) + ' to ' + str(val_list[1])
+            unit = unit_list[0]
+        else:
+            # Normal case. Value and unit separated by a space.
+            if ' ' in line:
                 line = line.split()
-            value = line[0]
-            unit = line[1]
-        # Catch error when trying to split a line that has no space between value and unit (i.e. '150cm')
-        except IndexError:
-            value = line[0]
-            unit = 'refer to value'
+                value = line[0]
+                unit = line[1]
+            # No Value. Line only contains a unit.
+            elif not contains_digits(line):
+                value = 'n/a'
+                unit = line
+            # Value and unit bunched together ('100m'). Use regex to identify groups.
+            else:
+                value, unit = name_unit_regex(line)
         return value, unit
 
 
@@ -477,7 +507,7 @@ def parse(file, path, filename):
                                 elif key in funding_lst:
                                     if key == 'FundingAgencyName':
                                         funding_id += 1
-                                        key = 'name'
+                                        key = 'agency'
                                     elif key == 'Grant':
                                         grant_id += 1
                                         key = 'grant'
