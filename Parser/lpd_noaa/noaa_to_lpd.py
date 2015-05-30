@@ -247,7 +247,6 @@ def str_cleanup(line):
 
     return line
 
-# Test Slack Github connection
 
 # Get the key and value items from a line by looking for and lines that have a ":"
 # Accepts string, return two strings
@@ -263,10 +262,6 @@ def slice_key_val(line):
         key = line
         value = None
         return key, value
-
-
-def sort_num(numbers):
-	return numbers.sort(key=float)
 
 
 def geo_multipoint(lat, lon):
