@@ -35,7 +35,8 @@ Things to do:
     DONE - description and notes section needs special parsing
     DONE - yamalia - fix values that span multiple lines (i.e. abstract, description and notes)
     DONE - account for elevations that are a range and not just a single number
-
+    - parse lat and long data into the new geojson format, include point and multiPoint cases
+    - handle multiple publication sections
     - need special parsing for any links (don't want to split in form 'http' + '//www.something.com')
 
     IGNORE KEYS: earliestYear, mostRecentYear, dataLine variables
@@ -43,6 +44,47 @@ Things to do:
     # How to properly loop with enumerate
     for index, val in enumerate(values):
         values[index] = val.lstrip()
+
+
+If we are given 4 values, we need to create a bounding box and add a 'bbox' field
+bbpx = [small lat, smallest lon, largest lat, largest lon]
+
+"geo": {
+    "type": "Feature",
+    "bbox": [66.0, 65.6, ]
+    "geometry": {
+        "type": "MultiPoint",
+        "coordinates": [ [66.0, 71.2], [66.0, 65.6], [67.7, 71.2], [67.7, 65.6] ]
+    },
+    "properties": {
+        "siteName": "RAPiD-12-1K, South Iceland Rise, northeast North Atlantic"
+    }
+},
+
+
+1. parse all lat and long data
+2. check if there are 2 values or 4 values
+    2a. if there are 4 values, is are they all unique or no?
+3a. 4 unique values -> Multipoint + bbox
+4. create a lat list and a lon list
+5. sort lists in ascending order. = create a list for bbox
+6. start making a list of 4 unique points of the box = [ [lat1, lon3] [lat1, lon4] [lat2, lon3] [lat2, lon4] ]
+
+3b. 2 unique values -> Point
+
+If there is only one point given, we use the type point and add the two values
+
+"geo": {
+    "type": "Point",
+
+    "geometry": {
+        "type": "MultiPoint",
+        "coordinates": [66.0, 71.2]
+    },
+    "properties": {
+        "siteName": "RAPiD-12-1K, South Iceland Rise, northeast North Atlantic"
+    }
+},
 
 """
 
@@ -163,7 +205,7 @@ def split_name_unit(line):
         # If there are parenthesis, remove them
         line = line.replace('(', '').replace(')', '')
         # When value and units are a range (i.e. '100 m - 200 m').
-        if 'to' in line or '-' in line:
+        if ' to ' in line or ' - ' in line:
             line = line.replace('to', '').replace('-', '')
             val_list = [int(s) for s in line.split() if s.isdigit()]
             unit_list = [s for s in line.split() if not s.isdigit()]
@@ -182,7 +224,7 @@ def split_name_unit(line):
             if ' ' in line:
                 line = line.split()
                 value = line[0]
-                unit = line[1]
+                unit = ' '.join(line[1:])
             # No Value. Line only contains a unit.
             elif not contains_digits(line):
                 value = 'n/a'
@@ -257,9 +299,8 @@ def parse(file, path, filename):
     temp_funding = OrderedDict()
     vars_dict = OrderedDict()
     geo = OrderedDict()
-    lat = OrderedDict()
-    lon = OrderedDict()
-    elev = OrderedDict()
+    geo_geometry = OrderedDict()
+    geo_properties = OrderedDict()
     pub = OrderedDict()
     coreLen = OrderedDict()
     chron_dict = OrderedDict()
@@ -432,9 +473,9 @@ def parse(file, path, filename):
             else:
                 # Line Continuation: Sometimes there are items that span a few lines.
                 # If this happens, we want to combine them all properly into one entry.
-                if '#' not in line and line != '' and last_insert is not None:
-                    old_val = last_insert[key]
-                    last_insert[key] = old_val + line
+                if '#' not in line and line not in ignore_blanks and last_insert is not None:
+                    old_val = last_insert[old_key]
+                    last_insert[old_key] = old_val + line
 
                 # No Line Continuation: This is the start or a new entry
                 else:
@@ -467,28 +508,32 @@ def parse(file, path, filename):
                             if key not in ignore_keys:
 
                                 # Insert into the final dictionary
-                                if l_key in geo_keys['lat_n'] or l_key in geo_keys['lat_s']:
-                                    if l_key in geo_keys['lat_n']:
-                                        last_insert = lat
-                                        lat['max'] = convert_num(value)
-                                    elif l_key in geo_keys['lat_s']:
-                                        lat['min'] = convert_num(value)
-                                elif l_key in geo_keys['lon_e'] or l_key in geo_keys['lon_w']:
-                                    last_insert = lon
-                                    if l_key in geo_keys['lon_e']:
-                                        lon['max'] = convert_num(value)
-                                    elif l_key in geo_keys['lon_w']:
-                                        lon['min'] = convert_num(value)
-                                elif key in geo_keys['elev']:
-                                    # Split the elev string into value and units
-                                    val, unit = split_name_unit(value)
-                                    elev['value'] = convert_num(val)
-                                    elev['unit'] = unit
-                                    last_insert = elev
-                                elif key in geo_keys['places']:
-                                    geo[key] = value
-                                    last_insert = geo
-                                elif key in pub_lst:
+
+                                # Old method for capturing geo data
+                                # if l_key in geo_keys['lat_n'] or l_key in geo_keys['lat_s']:
+                                #     if l_key in geo_keys['lat_n']:
+                                #         last_insert = lat
+                                #         lat['max'] = convert_num(value)
+                                #     elif l_key in geo_keys['lat_s']:
+                                #         lat['min'] = convert_num(value)
+                                # elif l_key in geo_keys['lon_e'] or l_key in geo_keys['lon_w']:
+                                #     last_insert = lon
+                                #     if l_key in geo_keys['lon_e']:
+                                #         lon['max'] = convert_num(value)
+                                #     elif l_key in geo_keys['lon_w']:
+                                #         lon['min'] = convert_num(value)
+                                # elif key in geo_keys['elev']:
+                                #     # Split the elev string into value and units
+                                #     val, unit = split_name_unit(value)
+                                #     elev['value'] = convert_num(val)
+                                #     elev['unit'] = unit
+                                #     last_insert = elev
+                                # elif key in geo_keys['places']:
+                                #     geo[key] = value
+                                #     last_insert = geo
+                                    geo['type'] = value
+
+                                if key in pub_lst:
                                     last_insert = pub
                                     if key in numbers:
                                         pub[key] = convert_num(value)
@@ -521,6 +566,7 @@ def parse(file, path, filename):
                                 else:
                                     final_dict[key] = value
                                     last_insert = final_dict
+                                old_key = key
 
                     # Ignore any errors from NoneTypes that are returned from slice_key_val
                     except TypeError:
@@ -539,9 +585,8 @@ def parse(file, path, filename):
     data_tables.append(data_dict_upper)
 
     # Piece together geo block
-    geo['latitude'] = lat
-    geo['longitude'] = lon
-    geo['elevation'] = elev
+    geo['geometry'] = geo_geometry
+    geo['properties'] = geo_properties
 
     # Piece together final dictionary
     final_dict['funding'] = funding
@@ -563,8 +608,8 @@ def main():
 
     # Store a list of all the txt files in the specified directory. This is what we'll process.
     file_list = []
-    os.chdir('/Users/chrisheiser1/Desktop/')
-    # os.chdir('/Users/chrisheiser1/Dropbox/GeoChronR/noaa_lipd_files/chron')
+    # os.chdir('/Users/chrisheiser1/Desktop/')
+    os.chdir('/Users/chrisheiser1/Dropbox/GeoChronR/noaa_lipd_files/nochron')
     for file in os.listdir():
         if file.endswith('.txt'):
             file_list.append(file)
