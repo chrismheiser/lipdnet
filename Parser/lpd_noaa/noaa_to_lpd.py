@@ -247,6 +247,7 @@ def str_cleanup(line):
 
     return line
 
+# Test Slack Github connection
 
 # Get the key and value items from a line by looking for and lines that have a ":"
 # Accepts string, return two strings
