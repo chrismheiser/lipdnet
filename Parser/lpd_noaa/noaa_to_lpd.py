@@ -5,6 +5,7 @@ import json
 import os
 import csv
 import re
+import copy
 
 
 """
@@ -44,47 +45,6 @@ Things to do:
     # How to properly loop with enumerate
     for index, val in enumerate(values):
         values[index] = val.lstrip()
-
-
-If we are given 4 values, we need to create a bounding box and add a 'bbox' field
-bbpx = [small lat, smallest lon, largest lat, largest lon]
-
-"geo": {
-    "type": "Feature",
-    "bbox": [66.0, 65.6, ]
-    "geometry": {
-        "type": "MultiPoint",
-        "coordinates": [ [66.0, 71.2], [66.0, 65.6], [67.7, 71.2], [67.7, 65.6] ]
-    },
-    "properties": {
-        "siteName": "RAPiD-12-1K, South Iceland Rise, northeast North Atlantic"
-    }
-},
-
-
-1. parse all lat and long data
-2. check if there are 2 values or 4 values
-    2a. if there are 4 values, is are they all unique or no?
-3a. 4 unique values -> Multipoint + bbox
-4. create a lat list and a lon list
-5. sort lists in ascending order. = create a list for bbox
-6. start making a list of 4 unique points of the box = [ [lat1, lon3] [lat1, lon4] [lat2, lon3] [lat2, lon4] ]
-
-3b. 2 unique values -> Point
-
-If there is only one point given, we use the type point and add the two values
-
-"geo": {
-    "type": "Point",
-
-    "geometry": {
-        "type": "MultiPoint",
-        "coordinates": [66.0, 71.2]
-    },
-    "properties": {
-        "siteName": "RAPiD-12-1K, South Iceland Rise, northeast North Atlantic"
-    }
-},
 
 """
 
@@ -264,13 +224,33 @@ def slice_key_val(line):
         return key, value
 
 
+# Use to determine 2-point or 4-point coordinates
+# Return geometry dict, and (multipoint/bbox or point) type
+def create_coordinates(lat, lon):
+
+	# Sort lat an lon in numerical order
+	lat.sort()
+	lon.sort()
+	# 4 coordinate values
+	if len(lat) == 2 and len(lon) == 2:
+		geo_dict = geo_multipoint(lat, lon)
+	# 2 coordinate values
+	elif len(lat) == 1 and len(lon) == 1:
+		geo_dict = geo_point(lat,lon)
+	else:
+		geo_dict = {}
+		print("More than 4 coordinates")
+	return geo_dict
+
+
+# Create a geoJson MultiPoint-type dictionary
 def geo_multipoint(lat, lon):
 
 	geo_dict = OrderedDict()
 	geometry_dict = OrderedDict()
 	coordinates = []
 	bbox = []
-	temp = []
+	temp = [None, None]
 
 	# if the value pairs are matching, then it's not a real MultiPoint type. Send to other method
 	if lat[0] == lat[1] and lon[0] == lon[1]:
@@ -282,15 +262,15 @@ def geo_multipoint(lat, lon):
 	else:
 		# Creates bounding box
 		for index, point in enumerate(lat):
-			bbox.append(latitude[index])
-			bbox.append(longitude[index])
+			bbox.append(lat[index])
+			bbox.append(lon[index])
 
 		# Creates coordinates list
 		for i in lat:
 			temp[0] = i
 			for j in lon:
 				temp[1] = j
-				coordinates.append(temp)
+				coordinates.append(copy.copy(temp))
 
 		# Create geometry block
 		geometry_dict['type'] = 'MultiPoint'
@@ -304,6 +284,7 @@ def geo_multipoint(lat, lon):
 	return geo_dict
 
 
+# Create a geoJson Point-type dictionary
 def geo_point(lat, lon):
 
 	coordinates = []
@@ -316,8 +297,8 @@ def geo_point(lat, lon):
 	geometry_dict['coordinates'] = coordinates
 	geo_dict['type'] = 'Feature'
 	geo_dict['geometry'] = geometry_dict
-
 	return geo_dict
+
 
 # Main parser.
 # Accept the text file. We'll open it, read it, and return a compiled dictionary to write to a json file
@@ -342,6 +323,8 @@ def parse(file, path, filename):
     description_on = False
 
     # Lists
+    lat = []
+    lon = []
     data_var_names = []
     temp_description = []
     chron_col_list = []
@@ -353,8 +336,6 @@ def parse(file, path, filename):
     # All dictionaries needed to create JSON structure
     temp_funding = OrderedDict()
     vars_dict = OrderedDict()
-    geo = OrderedDict()
-    geo_geometry = OrderedDict()
     geo_properties = OrderedDict()
     pub = OrderedDict()
     coreLen = OrderedDict()
@@ -382,13 +363,13 @@ def parse(file, path, filename):
     split = ['CoreLength', 'Elevation']
 
     # Lists for what keys go in specific dictionary blocks
-    geo_keys = {'lat_n': ['northernmostlatitude', 'northernmost latitude'],
-                'lat_s': ['southernmostlatitude', 'southernmost latitude'],
-                'lon_e': ['easternmostlongitude', 'easternmost longitude'],
-                'lon_w': ['westernmostlongitude', 'westernmost longitude'],
-                'places': ['Location', 'Country'],
-                'elev': ['Elevation']
-    }
+    geo_keys = {'lat': ['northernmostlatitude', 'northernmost latitude','northernmost_latitude',
+                        'southernmostlatitude', 'southernmost latitude', 'southernmost_latitude'],
+                'lon': ['easternmostlongitude', 'easternmost longitude', 'easternmost_longitude',
+                        'westernmostlongitude', 'westernmost longitude', 'westernmost_longitude'],
+                'places': ['location', 'country'],
+                'elev': ['elevation']
+                }
 
     funding_lst = ['FundingAgencyName', 'Grant']
     pub_lst = ['OnlineResource', 'OriginalSourceUrl', 'Investigators', 'Authors', 'PublishedDateOrYear',
@@ -565,30 +546,13 @@ def parse(file, path, filename):
                                 # Insert into the final dictionary
 
                                 # Old method for capturing geo data
-                                # if l_key in geo_keys['lat_n'] or l_key in geo_keys['lat_s']:
-                                #     if l_key in geo_keys['lat_n']:
-                                #         last_insert = lat
-                                #         lat['max'] = convert_num(value)
-                                #     elif l_key in geo_keys['lat_s']:
-                                #         lat['min'] = convert_num(value)
-                                # elif l_key in geo_keys['lon_e'] or l_key in geo_keys['lon_w']:
-                                #     last_insert = lon
-                                #     if l_key in geo_keys['lon_e']:
-                                #         lon['max'] = convert_num(value)
-                                #     elif l_key in geo_keys['lon_w']:
-                                #         lon['min'] = convert_num(value)
-                                # elif key in geo_keys['elev']:
-                                #     # Split the elev string into value and units
-                                #     val, unit = split_name_unit(value)
-                                #     elev['value'] = convert_num(val)
-                                #     elev['unit'] = unit
-                                #     last_insert = elev
-                                # elif key in geo_keys['places']:
-                                #     geo[key] = value
-                                #     last_insert = geo
-                                    geo['type'] = value
-
-                                if key in pub_lst:
+                                if key.lower() in geo_keys['lat']:
+                                    lat.append(convert_num(value))
+                                elif key.lower() in geo_keys['lon']:
+                                    lon.append(convert_num(value))
+                                elif key == 'SiteName':
+                                    geo_properties['siteName'] = value
+                                elif key in pub_lst:
                                     last_insert = pub
                                     if key in numbers:
                                         pub[key] = convert_num(value)
@@ -640,7 +604,7 @@ def parse(file, path, filename):
     data_tables.append(data_dict_upper)
 
     # Piece together geo block
-    geo['geometry'] = geo_geometry
+    geo = create_coordinates(lat, lon)
     geo['properties'] = geo_properties
 
     # Piece together final dictionary
