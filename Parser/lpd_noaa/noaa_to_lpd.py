@@ -124,7 +124,7 @@ def name_to_camelCase(strings):
 def name_to_jsonld(title):
 
     if title == '':
-         out = ''
+        out = ''
 
     # Northernmost_Latitude -> lat:max
     # Southernmost_Latitude -> lat:min
@@ -228,60 +228,60 @@ def slice_key_val(line):
 # Return geometry dict, and (multipoint/bbox or point) type
 def create_coordinates(lat, lon):
 
-	# Sort lat an lon in numerical order
-	lat.sort()
-	lon.sort()
-	# 4 coordinate values
-	if len(lat) == 2 and len(lon) == 2:
-		geo_dict = geo_multipoint(lat, lon)
-	# 2 coordinate values
-	elif len(lat) == 1 and len(lon) == 1:
-		geo_dict = geo_point(lat,lon)
-	else:
-		geo_dict = {}
-		print("More than 4 coordinates")
-	return geo_dict
+    # Sort lat an lon in numerical order
+    lat.sort()
+    lon.sort()
+    # 4 coordinate values
+    if len(lat) == 2 and len(lon) == 2:
+        geo_dict = geo_multipoint(lat, lon)
+    # 2 coordinate values
+    elif len(lat) == 1 and len(lon) == 1:
+        geo_dict = geo_point(lat,lon)
+    else:
+        geo_dict = {}
+        print("More than 4 coordinates")
+    return geo_dict
 
 
 # Create a geoJson MultiPoint-type dictionary
 def geo_multipoint(lat, lon):
 
-	geo_dict = OrderedDict()
-	geometry_dict = OrderedDict()
-	coordinates = []
-	bbox = []
-	temp = [None, None]
+    geo_dict = OrderedDict()
+    geometry_dict = OrderedDict()
+    coordinates = []
+    bbox = []
+    temp = [None, None]
 
-	# if the value pairs are matching, then it's not a real MultiPoint type. Send to other method
-	if lat[0] == lat[1] and lon[0] == lon[1]:
-		lat.pop()
-		lon.pop()
-		geo_dict = geo_point(lat, lon)
+    # if the value pairs are matching, then it's not a real MultiPoint type. Send to other method
+    if lat[0] == lat[1] and lon[0] == lon[1]:
+        lat.pop()
+        lon.pop()
+        geo_dict = geo_point(lat, lon)
 
-	# 4 unique values
-	else:
-		# Creates bounding box
-		for index, point in enumerate(lat):
-			bbox.append(lat[index])
-			bbox.append(lon[index])
+    # 4 unique values
+    else:
+        # Creates bounding box
+        for index, point in enumerate(lat):
+            bbox.append(lat[index])
+            bbox.append(lon[index])
 
-		# Creates coordinates list
-		for i in lat:
-			temp[0] = i
-			for j in lon:
-				temp[1] = j
-				coordinates.append(copy.copy(temp))
+        # Creates coordinates list
+        for i in lat:
+            temp[0] = i
+            for j in lon:
+                temp[1] = j
+                coordinates.append(copy.copy(temp))
 
-		# Create geometry block
-		geometry_dict['type'] = 'MultiPoint'
-		geometry_dict['coordinates'] = coordinates
+        # Create geometry block
+        geometry_dict['type'] = 'MultiPoint'
+        geometry_dict['coordinates'] = coordinates
 
-		# Create geo block
-		geo_dict['type'] = 'Featured'
-		geo_dict['bbox'] = bbox
-		geo_dict['geometry'] = geometry_dict
+        # Create geo block
+        geo_dict['type'] = 'Featured'
+        geo_dict['bbox'] = bbox
+        geo_dict['geometry'] = geometry_dict
 
-	return geo_dict
+    return geo_dict
 
 
 # Create a geoJson Point-type dictionary
@@ -304,7 +304,6 @@ def geo_point(lat, lon):
 # Accept the text file. We'll open it, read it, and return a compiled dictionary to write to a json file
 # May write a chronology CSV, and a data CSV, depending on what data is available
 def parse(file, path, filename):
-
     # Strings
     last_insert = None
 
@@ -321,6 +320,7 @@ def parse(file, path, filename):
     data_vals_on = False
     variables_on = False
     description_on = False
+    publication_on = False
 
     # Lists
     lat = []
@@ -331,13 +331,14 @@ def parse(file, path, filename):
     data_col_list = []
     data_tables = []
     funding = []
+    pub = []
     missing_val_alts = ['missing value', 'missing values', 'missingvalue', 'missingvalues', 'missing_values']
 
     # All dictionaries needed to create JSON structure
     temp_funding = OrderedDict()
+    temp_pub = OrderedDict()
     vars_dict = OrderedDict()
     geo_properties = OrderedDict()
-    pub = OrderedDict()
     coreLen = OrderedDict()
     chron_dict = OrderedDict()
     data_dict_upper = OrderedDict()
@@ -422,6 +423,19 @@ def parse(file, path, filename):
                 else:
                     values = line.split()
                     cw.writerow(values)
+
+            # Publication Section
+            # There can be multiple publications. Create a dictionary for each one.
+            elif publication_on:
+                if '-----' in line:
+                    pub.append(temp_pub.copy())
+                    temp_pub.clear()
+                    publication_on = False
+
+                else:
+                    line = str_cleanup(line)
+                    key, value = slice_key_val(line)
+                    temp_pub[key] = value
 
             # Description Section
             # Descriptions are often long paragraphs spanning multiple lines, but don't follow the key/value format
@@ -529,6 +543,8 @@ def parse(file, path, filename):
                                 chron_start_line = line_num
                             elif key.lower() == 'variables':
                                 variables_on = True
+                            elif key.lower() == 'publication':
+                                publication_on = True
 
                         else:
                             # Use missing value line as a marker to show if we have hit the Data section
@@ -608,10 +624,10 @@ def parse(file, path, filename):
     geo['properties'] = geo_properties
 
     # Piece together final dictionary
+    final_dict['pub'] = pub
     final_dict['funding'] = funding
     final_dict['geo'] = geo
     final_dict['coreLength'] = coreLen
-    final_dict['pub'] = pub
     final_dict['chronology'] = chron_dict
     final_dict['measurements'] = data_tables
 
