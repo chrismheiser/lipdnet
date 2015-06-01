@@ -36,9 +36,10 @@ Things to do:
     DONE - description and notes section needs special parsing
     DONE - yamalia - fix values that span multiple lines (i.e. abstract, description and notes)
     DONE - account for elevations that are a range and not just a single number
-    - parse lat and long data into the new geojson format, include point and multiPoint cases
-    - handle multiple publication sections
-    - need special parsing for any links (don't want to split in form 'http' + '//www.something.com')
+    DONE - parse lat and long data into the new geojson format, include point and multiPoint cases
+    DONE - handle multiple publication sections
+    ? - need special parsing for any links (don't want to split in form 'http' + '//www.something.com')
+     - Test compatibility on all LMR files
 
     IGNORE KEYS: earliestYear, mostRecentYear, dataLine variables
 
@@ -304,8 +305,10 @@ def geo_point(lat, lon):
 # Accept the text file. We'll open it, read it, and return a compiled dictionary to write to a json file
 # May write a chronology CSV, and a data CSV, depending on what data is available
 def parse(file, path, filename):
+
     # Strings
     last_insert = None
+    missing_str = ''
 
     # Counters
     grant_id = 0
@@ -316,23 +319,22 @@ def parse(file, path, filename):
     # Boolean markers
     chronology_on = False
     chron_vars_start = True
-    missing_val_on = False
     data_vals_on = False
     variables_on = False
     description_on = False
     publication_on = False
+    data_on = False
 
     # Lists
     lat = []
     lon = []
-    data_var_names = []
+    pub = []
+    funding = []
     temp_description = []
     chron_col_list = []
+    data_var_names = []
     data_col_list = []
     data_tables = []
-    funding = []
-    pub = []
-    missing_val_alts = ['missing value', 'missing values', 'missingvalue', 'missingvalues', 'missing_values']
 
     # All dictionaries needed to create JSON structure
     temp_funding = OrderedDict()
@@ -347,29 +349,32 @@ def parse(file, path, filename):
 
     # List of items that we don't want to output
     ignore_keys = ['EarliestYear', 'MostRecentYear']
-    ignore_var_lines = ['(have no #)',
+    ignore_var_lines = ['have no #', 'variables',
+                        'lines begin with #',
+                        'double marker',
                         'line variables format',
+                        'line format',
                         'c or n for character or numeric',
-                        'preceded by "##"'
+                        'preceded by'
                         ]
-    ignore_data_lines = ['(have no #)',
+    ignore_data_lines = ['have no #',
                          'tab-delimited text',
                          'age ensembles archived']
-    ignore_blanks = ['\n', '', '#\n']
+    ignore_blanks = ['\n', '', '#\n', '# \n', ' ']
 
     # List of keys that need their values converted to ints/floats
     numbers = ['Volume', 'Value', 'Min', 'Max', 'Pages', 'Edition', 'CoreLength']
 
-    # List of items that need to be split (value, units)
-    split = ['CoreLength', 'Elevation']
+    # Missing value name appears as many variations. Try to account for all of them
+    missing_val_alts = ['missing value', 'missing values', 'missingvalue', 'missingvalues', 'missing_values',
+                        'missing variables', 'missing_variables', 'missingvariables']
 
     # Lists for what keys go in specific dictionary blocks
     geo_keys = {'lat': ['northernmostlatitude', 'northernmost latitude','northernmost_latitude',
                         'southernmostlatitude', 'southernmost latitude', 'southernmost_latitude'],
                 'lon': ['easternmostlongitude', 'easternmost longitude', 'easternmost_longitude',
                         'westernmostlongitude', 'westernmost longitude', 'westernmost_longitude'],
-                'places': ['location', 'country'],
-                'elev': ['elevation']
+                'properties': ['location', 'country', 'elevation', 'sitename'],
                 }
 
     funding_lst = ['FundingAgencyName', 'Grant']
@@ -451,7 +456,7 @@ def parse(file, path, filename):
                     line = str_cleanup(line)
                     temp_description.append(line)
 
-            # Variables Section
+            # VARIABLES #
             # Variables are the only lines that have a double # in front
             elif variables_on:
 
@@ -463,7 +468,7 @@ def parse(file, path, filename):
                     process_line = False
 
                 for item in ignore_var_lines:
-                    if item in line:
+                    if item.lower() in line.lower():
                         process_line = False
                 for item in ignore_blanks:
                     if item == line:
@@ -486,7 +491,7 @@ def parse(file, path, filename):
                     data_col_ct += 1
 
             # Data Section
-            elif missing_val_on:
+            elif data_on:
 
                 process_line = True
 
@@ -496,6 +501,10 @@ def parse(file, path, filename):
                 for item in ignore_blanks:
                     if item == line:
                         process_line = False
+                for item in missing_val_alts:
+                    if item in line:
+                        process_line = False
+                        key, missing_str = slice_key_val(line)
 
                 if process_line:
                     # Split the line at each space (There's one space between each data item)
@@ -510,7 +519,7 @@ def parse(file, path, filename):
 
                         var = str_cleanup(values[0].lstrip())
                         # Check if a variable name is in the current line
-                        if var == data_var_names[0]:
+                        if var.lower() == data_var_names[0].lower():
                             data_vals_on = True
 
                             # Open CSV for writing
@@ -536,7 +545,7 @@ def parse(file, path, filename):
                         # Split the line into key, value pieces
                         key, value = slice_key_val(line)
 
-                        if value is None:
+                        if value is None or key == 'Data':
                             # Use chronology line as a marker to show if we have hit the Chronology section
                             if key.lower() == 'chronology':
                                 chronology_on = True
@@ -545,16 +554,17 @@ def parse(file, path, filename):
                                 variables_on = True
                             elif key.lower() == 'publication':
                                 publication_on = True
+                            elif key.lower() == 'data':
+                                data_on = True
 
                         else:
                             # Use missing value line as a marker to show if we have hit the Data section
-                            if key.lower() in missing_val_alts:
-                                missing_val_on = True
-                                final_dict[key] = value
+                            # if key.lower() in missing_val_alts:
+                            #     missing_val_on = True
+                            #     final_dict[key] = value
 
                             # Convert naming to camel case
                             key = name_to_camelCase(key)
-                            l_key = key.lower()
 
                             # Ignore any entries that are specified in the skip list, or any that have empty values
                             if key not in ignore_keys:
@@ -564,16 +574,20 @@ def parse(file, path, filename):
                                 # Old method for capturing geo data
                                 if key.lower() in geo_keys['lat']:
                                     lat.append(convert_num(value))
+
                                 elif key.lower() in geo_keys['lon']:
                                     lon.append(convert_num(value))
-                                elif key == 'SiteName':
-                                    geo_properties['siteName'] = value
+
+                                elif key.lower() in geo_keys['properties']:
+                                    geo_properties[key] = value
+
                                 elif key in pub_lst:
                                     last_insert = pub
                                     if key in numbers:
                                         pub[key] = convert_num(value)
                                     else:
                                         pub[key] = value
+
                                 elif key == 'Description':
                                     description_on = True
                                     temp_description.append(value)
@@ -611,11 +625,12 @@ def parse(file, path, filename):
     try:
         data_csv.close()
     except NameError:
-        print("Couldn't Close Data CSV")
+        print("Couldn't close Data CSV")
 
     # Piece together measurements block
     data_dict_upper['filename'] = data_filename
     data_dict_upper['measTableName'] = 'Data'
+    data_dict_upper['missingValue'] = missing_str
     data_dict_upper['columns'] = data_col_list
     data_tables.append(data_dict_upper)
 
@@ -644,7 +659,7 @@ def main():
     # Store a list of all the txt files in the specified directory. This is what we'll process.
     file_list = []
     # os.chdir('/Users/chrisheiser1/Desktop/')
-    os.chdir('/Users/chrisheiser1/Dropbox/GeoChronR/noaa_lipd_files/nochron')
+    os.chdir('/Users/chrisheiser1/Dropbox/GeoChronR/noaa_lipd_files/lmr')
     for file in os.listdir():
         if file.endswith('.txt'):
             file_list.append(file)
