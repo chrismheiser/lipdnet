@@ -309,7 +309,8 @@ def main():
     template = 'noaa-blank.txt'
     file_list = []
 
-    os.chdir('/Users/chrisheiser1/Dropbox/GeoChronR/noaa_lpd_files/output/')
+    os.chdir('/Users/chrisheiser1/Desktop/output')
+    # os.chdir('/Users/chrisheiser1/Dropbox/GeoChronR/noaa_lpd_files/output/')
     for file in os.listdir():
         if file.endswith('.jsonld'):
             file_list.append(file)

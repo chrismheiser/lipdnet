@@ -112,11 +112,12 @@ def convert_num(number):
 # Convert underscore naming into camel case naming
 # Accept string, return string
 def name_to_camelCase(strings):
-    # strings = strings.lower()
+    strings = strings.lower()
     split_word = strings.split('_')
-    # for i in range(0, len(split_word)):
-    #     if i != 0:
-    #         split_word[i] = split_word[i].title()
+    if len(split_word) > 0:
+        for i, word in enumerate(split_word):
+            if i > 0:
+                split_word[i] = word.title()
     strings = ''.join(split_word)
     return strings
 
@@ -402,7 +403,7 @@ def parse(file, path, filename):
                 else:
                     line = str_cleanup(line)
                     key, value = slice_key_val(line)
-                    temp_pub[key] = value
+                    temp_pub[name_to_camelCase(key)] = value
 
             # DESCRIPTION
             # Descriptions are often long paragraphs spanning multiple lines, but don't follow the key/value format
@@ -412,7 +413,7 @@ def parse(file, path, filename):
                 if '-------' in line:
                     description_on = False
                     value = ''.join(temp_description)
-                    final_dict['description_and_notes'] = value
+                    final_dict['description'] = value
 
                 # The first line in the section. Split into key, value
                 elif 'Description:' in line:
@@ -440,7 +441,7 @@ def parse(file, path, filename):
                         lon.append(convert_num(value))
 
                     elif key.lower() in site_info['properties']:
-                        geo_properties[key] = value
+                        geo_properties[name_to_camelCase(key)] = value
 
             # CHRONOLOGY
             elif chronology_on:
@@ -675,8 +676,8 @@ def main():
 
     # Store a list of all the txt files in the specified directory. This is what we'll process.
     file_list = []
-    # os.chdir('/Users/chrisheiser1/Desktop/')
-    os.chdir('/Users/chrisheiser1/Dropbox/GeoChronR/noaa_lipd_files/lmr')
+    os.chdir('/Users/chrisheiser1/Desktop/')
+    # os.chdir('/Users/chrisheiser1/Dropbox/GeoChronR/noaa_lipd_files/lmr')
     for file in os.listdir():
         if file.endswith('.txt'):
             file_list.append(file)
@@ -702,8 +703,7 @@ def main():
         file_jsonld = open(path + '/' + out_name, 'w')
         file_jsonld = open(path + '/' + out_name, 'r+')
 
-        # Write finalDict to json-ld file with dump
-        # Dump outputs into a human-readable json hierarchy
+        # Write finalDict to json-ld file with dump. Dump outputs into a human-readable json hierarchy
         json.dump(dict_out, file_jsonld, indent=4)
 
     return
