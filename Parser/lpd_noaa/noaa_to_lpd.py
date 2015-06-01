@@ -38,8 +38,9 @@ Things to do:
     DONE - account for elevations that are a range and not just a single number
     DONE - parse lat and long data into the new geojson format, include point and multiPoint cases
     DONE - handle multiple publication sections
+    DONE - Test compatibility on all LMR files
+
     ? - need special parsing for any links (don't want to split in form 'http' + '//www.something.com')
-     - Test compatibility on all LMR files
 
     IGNORE KEYS: earliestYear, mostRecentYear, dataLine variables
 
@@ -303,7 +304,7 @@ def geo_point(lat, lon):
 
 # Main parser.
 # Accept the text file. We'll open it, read it, and return a compiled dictionary to write to a json file
-# May write a chronology CSV, and a data CSV, depending on what data is available
+# May write a chronology CSV and a data CSV if those sections are available
 def parse(file, path, filename):
 
     # Strings
@@ -317,12 +318,13 @@ def parse(file, path, filename):
     line_num = 0
 
     # Boolean markers
-    chronology_on = False
-    chron_vars_start = True
-    data_vals_on = False
-    variables_on = False
     description_on = False
     publication_on = False
+    site_info_on = False
+    chronology_on = False
+    chron_vars_start = True
+    variables_on = False
+    data_vals_on = False
     data_on = False
 
     # Lists
@@ -340,8 +342,8 @@ def parse(file, path, filename):
     temp_funding = OrderedDict()
     temp_pub = OrderedDict()
     vars_dict = OrderedDict()
-    geo_properties = OrderedDict()
     coreLen = OrderedDict()
+    geo_properties = OrderedDict()
     chron_dict = OrderedDict()
     data_dict_upper = OrderedDict()
     data_dict_lower = OrderedDict()
@@ -370,13 +372,12 @@ def parse(file, path, filename):
                         'missing variables', 'missing_variables', 'missingvariables']
 
     # Lists for what keys go in specific dictionary blocks
-    geo_keys = {'lat': ['northernmostlatitude', 'northernmost latitude','northernmost_latitude',
+    site_info = {'lat': ['northernmostlatitude', 'northernmost latitude','northernmost_latitude',
                         'southernmostlatitude', 'southernmost latitude', 'southernmost_latitude'],
                 'lon': ['easternmostlongitude', 'easternmost longitude', 'easternmost_longitude',
                         'westernmostlongitude', 'westernmost longitude', 'westernmost_longitude'],
-                'properties': ['location', 'country', 'elevation', 'sitename'],
+                'properties': ['location', 'country', 'elevation', 'site_name', 'region'],
                 }
-
     funding_lst = ['FundingAgencyName', 'Grant']
     pub_lst = ['OnlineResource', 'OriginalSourceUrl', 'Investigators', 'Authors', 'PublishedDateOrYear',
                'PublishedTitle', 'JournalName', 'Volume', 'Doi', 'FullCitation', 'Abstract', 'Pages', 'Edition']
@@ -387,8 +388,62 @@ def parse(file, path, filename):
         for line in iter(f):
             line_num += 1
 
-            # Chronology Section
-            if chronology_on:
+            # PUBLICATION
+            # There can be multiple publications. Create a dictionary for each one.
+            if publication_on:
+
+                # End of the section. Add the dictionary for this one publication to the overall list
+                if '-----' in line:
+                    pub.append(temp_pub.copy())
+                    temp_pub.clear()
+                    publication_on = False
+
+                # Add all info into the current publication dictionary
+                else:
+                    line = str_cleanup(line)
+                    key, value = slice_key_val(line)
+                    temp_pub[key] = value
+
+            # DESCRIPTION
+            # Descriptions are often long paragraphs spanning multiple lines, but don't follow the key/value format
+            elif description_on:
+
+                # End of the section. Turn marker off and combine all the lines in the section
+                if '-------' in line:
+                    description_on = False
+                    value = ''.join(temp_description)
+                    final_dict['description_and_notes'] = value
+
+                # The first line in the section. Split into key, value
+                elif 'Description:' in line:
+                    key, val = slice_key_val(line)
+                    temp_description.append(val)
+
+                # Keep a running list of all lines in the section
+                else:
+                    line = str_cleanup(line)
+                    temp_description.append(line)
+
+            # SITE INFORMATION (Geo)
+            elif site_info_on:
+
+                if '-------' in line:
+                    site_info_on = False
+
+                else:
+                    line = str_cleanup(line)
+                    key, value = slice_key_val(line)
+                    if key.lower() in site_info['lat']:
+                        lat.append(convert_num(value))
+
+                    elif key.lower() in site_info['lon']:
+                        lon.append(convert_num(value))
+
+                    elif key.lower() in site_info['properties']:
+                        geo_properties[key] = value
+
+            # CHRONOLOGY
+            elif chronology_on:
 
                 # When reaching the end of the chron section, set the marker to off and close the CSV file
                 if '-------' in line:
@@ -412,6 +467,8 @@ def parse(file, path, filename):
                     chron_col_ct = 1
                     line = line.lstrip()
                     variables = line.split('|')
+
+                    # Create a dictionary of info for each column
                     for index, var in enumerate(variables):
                         temp_dict = OrderedDict()
                         temp_dict['column'] = chron_col_ct
@@ -429,34 +486,7 @@ def parse(file, path, filename):
                     values = line.split()
                     cw.writerow(values)
 
-            # Publication Section
-            # There can be multiple publications. Create a dictionary for each one.
-            elif publication_on:
-                if '-----' in line:
-                    pub.append(temp_pub.copy())
-                    temp_pub.clear()
-                    publication_on = False
-
-                else:
-                    line = str_cleanup(line)
-                    key, value = slice_key_val(line)
-                    temp_pub[key] = value
-
-            # Description Section
-            # Descriptions are often long paragraphs spanning multiple lines, but don't follow the key/value format
-            elif description_on:
-
-                # End of the section. Turn marker off
-                if '-------' in line:
-                    description_on = False
-                    value = ''.join(temp_description)
-                    final_dict['description_and_notes'] = value
-
-                else:
-                    line = str_cleanup(line)
-                    temp_description.append(line)
-
-            # VARIABLES #
+            # VARIABLES
             # Variables are the only lines that have a double # in front
             elif variables_on:
 
@@ -490,9 +520,11 @@ def parse(file, path, filename):
                     data_col_list.append(data_col_dict)
                     data_col_ct += 1
 
-            # Data Section
+            # DATA
+            # Missing Value, Create data columns, and output Data CSV
             elif data_on:
 
+                # Do not process lines that are blank, template lines, or missing value
                 process_line = True
 
                 for item in ignore_data_lines:
@@ -528,7 +560,7 @@ def parse(file, path, filename):
                             data_csv = open(csv_path, 'w', newline='')
                             dw = csv.writer(data_csv)
 
-            # Metadata section
+            # METADATA
             else:
                 # Line Continuation: Sometimes there are items that span a few lines.
                 # If this happens, we want to combine them all properly into one entry.
@@ -545,59 +577,41 @@ def parse(file, path, filename):
                         # Split the line into key, value pieces
                         key, value = slice_key_val(line)
 
+                        # If there is no value, then we are at a section header.
+                        # Data often has a blank value, so that is a special check.
                         if value is None or key == 'Data':
-                            # Use chronology line as a marker to show if we have hit the Chronology section
-                            if key.lower() == 'chronology':
+
+                            # Turn on markers if we run into section headers
+                            if key.lower() == 'description_and_notes':
+                                description_on = True
+                            elif key.lower() == 'publication':
+                                publication_on = True
+                            elif key.lower() == 'site_information':
+                                site_info_on = True
+                            elif key.lower() == 'chronology':
                                 chronology_on = True
                                 chron_start_line = line_num
                             elif key.lower() == 'variables':
                                 variables_on = True
-                            elif key.lower() == 'publication':
-                                publication_on = True
                             elif key.lower() == 'data':
                                 data_on = True
 
+                        # For all
                         else:
-                            # Use missing value line as a marker to show if we have hit the Data section
-                            # if key.lower() in missing_val_alts:
-                            #     missing_val_on = True
-                            #     final_dict[key] = value
 
                             # Convert naming to camel case
                             key = name_to_camelCase(key)
 
-                            # Ignore any entries that are specified in the skip list, or any that have empty values
+                            # Ignore any entries that are specified in the skip list
                             if key not in ignore_keys:
 
-                                # Insert into the final dictionary
-
-                                # Old method for capturing geo data
-                                if key.lower() in geo_keys['lat']:
-                                    lat.append(convert_num(value))
-
-                                elif key.lower() in geo_keys['lon']:
-                                    lon.append(convert_num(value))
-
-                                elif key.lower() in geo_keys['properties']:
-                                    geo_properties[key] = value
-
-                                elif key in pub_lst:
-                                    last_insert = pub
-                                    if key in numbers:
-                                        pub[key] = convert_num(value)
-                                    else:
-                                        pub[key] = value
-
-                                elif key == 'Description':
-                                    description_on = True
-                                    temp_description.append(value)
-
-                                elif key == 'CoreLength':
+                                if key == 'CoreLength':
                                     val, unit = split_name_unit(value)
                                     coreLen['value'] = val
                                     coreLen['unit'] = unit
                                     last_insert = coreLen
 
+                                # There can be multiple funding agencies and grants. Keep a list of dictionary entries
                                 elif key in funding_lst:
                                     if key == 'FundingAgencyName':
                                         funding_id += 1
@@ -615,6 +629,8 @@ def parse(file, path, filename):
                                 else:
                                     final_dict[key] = value
                                     last_insert = final_dict
+
+                                # Keep track of old key in case we have a line continuation
                                 old_key = key
 
                     # Ignore any errors from NoneTypes that are returned from slice_key_val
@@ -650,6 +666,7 @@ def parse(file, path, filename):
     for k, v in vars_dict.items():
         data_dict_lower[k] = v
 
+    # Return one complete dictionary per text file
     return final_dict
 
 
@@ -666,7 +683,7 @@ def main():
 
     for txts in file_list:
 
-        # Print which file we're currently processing
+        # Print to user which file we're currently processing
         print(txts)
 
         # Cut the extension from the file name
@@ -684,8 +701,6 @@ def main():
         out_name = name + '.jsonld'
         file_jsonld = open(path + '/' + out_name, 'w')
         file_jsonld = open(path + '/' + out_name, 'r+')
-        # file_jsonld = open('output/' + out_name, 'w')
-        # file_jsonld = open('output/' + out_name, 'r+')
 
         # Write finalDict to json-ld file with dump
         # Dump outputs into a human-readable json hierarchy
