@@ -61,9 +61,9 @@ def create_var_col(list_in, col_count):
     for index, item in enumerate(list_in):
         if item != '':
             if index == 0:
-                dict_out['shortName'] = item
+                dict_out['parameter'] = item
             elif index == 1:
-                dict_out['longName'] = item
+                dict_out['description'] = item
             elif index == 2:
                 dict_out['material'] = item
             elif index == 3:
@@ -111,42 +111,18 @@ def convert_num(number):
 
 # Convert underscore naming into camel case naming
 # Accept string, return string
-def name_to_camelCase(strings):
-    strings = strings.lower()
-    split_word = strings.split('_')
+def camelCase(word):
+    word = word.lower()
+    if '_' in word:
+        split_word = word.split('_')
+    else:
+        split_word = word.split()
     if len(split_word) > 0:
         for i, word in enumerate(split_word):
             if i > 0:
                 split_word[i] = word.title()
     strings = ''.join(split_word)
     return strings
-
-
-# Convert formal titles to camelcase json_ld text that matches our context file
-# Accept string, return string
-def name_to_jsonld(title):
-
-    if title == '':
-        out = ''
-
-    # Northernmost_Latitude -> lat:max
-    # Southernmost_Latitude -> lat:min
-    # Easternmost_Longitude -> lon:max
-    # Westernmost_Longitude -> lon:min
-    # Elevation -> elevation:value
-    # Elevation -> elevation:units
-    # Authors -> pub:authors
-    # Date -> pub:date
-    # DOI -> pub:DOI
-    # Collection_Name -> collectionName
-    # NOTES -> comments
-    # Site_Name -> siteName
-    # Missing Values -> missingValue
-    #
-    else:
-        return
-
-    return out
 
 
 # Split a name and unit that are bunched together (i.e. '250m')
@@ -252,7 +228,7 @@ def geo_multipoint(lat, lon):
     geo_dict = OrderedDict()
     geometry_dict = OrderedDict()
     coordinates = []
-    bbox = []
+    # bbox = []
     temp = [None, None]
 
     # if the value pairs are matching, then it's not a real MultiPoint type. Send to other method
@@ -263,10 +239,10 @@ def geo_multipoint(lat, lon):
 
     # 4 unique values
     else:
-        # Creates bounding box
-        for index, point in enumerate(lat):
-            bbox.append(lat[index])
-            bbox.append(lon[index])
+        # # Creates bounding box
+        # for index, point in enumerate(lat):
+        #     bbox.append(lat[index])
+        #     bbox.append(lon[index])
 
         # Creates coordinates list
         for i in lat:
@@ -276,12 +252,12 @@ def geo_multipoint(lat, lon):
                 coordinates.append(copy.copy(temp))
 
         # Create geometry block
-        geometry_dict['type'] = 'MultiPoint'
+        geometry_dict['type'] = 'Polygon'
         geometry_dict['coordinates'] = coordinates
 
         # Create geo block
         geo_dict['type'] = 'Featured'
-        geo_dict['bbox'] = bbox
+        # geo_dict['bbox'] = bbox
         geo_dict['geometry'] = geometry_dict
 
     return geo_dict
@@ -290,17 +266,17 @@ def geo_multipoint(lat, lon):
 # Create a geoJson Point-type dictionary
 def geo_point(lat, lon):
 
-	coordinates = []
-	geo_dict = OrderedDict()
-	geometry_dict = OrderedDict()
-	for index, point in enumerate(lat):
-		coordinates.append(lat[index])
-		coordinates.append(lon[index])
-	geometry_dict['type'] = 'Point'
-	geometry_dict['coordinates'] = coordinates
-	geo_dict['type'] = 'Feature'
-	geo_dict['geometry'] = geometry_dict
-	return geo_dict
+    coordinates = []
+    geo_dict = OrderedDict()
+    geometry_dict = OrderedDict()
+    for index, point in enumerate(lat):
+        coordinates.append(lat[index])
+        coordinates.append(lon[index])
+    geometry_dict['type'] = 'Point'
+    geometry_dict['coordinates'] = coordinates
+    geo_dict['type'] = 'Feature'
+    geo_dict['geometry'] = geometry_dict
+    return geo_dict
 
 
 # Main parser.
@@ -321,6 +297,7 @@ def parse(file, path, filename):
     # Boolean markers
     description_on = False
     publication_on = False
+    abstract_on = False
     site_info_on = False
     chronology_on = False
     chron_vars_start = True
@@ -333,6 +310,7 @@ def parse(file, path, filename):
     lon = []
     pub = []
     funding = []
+    temp_abstract = []
     temp_description = []
     chron_col_list = []
     data_var_names = []
@@ -351,7 +329,7 @@ def parse(file, path, filename):
     final_dict = OrderedDict()
 
     # List of items that we don't want to output
-    ignore_keys = ['EarliestYear', 'MostRecentYear']
+    ignore_keys = ['earliest_year', 'most_recent_year', 'note']
     ignore_var_lines = ['have no #', 'variables',
                         'lines begin with #',
                         'double marker',
@@ -366,7 +344,7 @@ def parse(file, path, filename):
     ignore_blanks = ['\n', '', '#\n', '# \n', ' ']
 
     # List of keys that need their values converted to ints/floats
-    numbers = ['Volume', 'Value', 'Min', 'Max', 'Pages', 'Edition', 'CoreLength']
+    numbers = ['volume', 'value', 'min', 'max', 'pages', 'edition', 'corelength']
 
     # Missing value name appears as many variations. Try to account for all of them
     missing_val_alts = ['missing value', 'missing values', 'missingvalue', 'missingvalues', 'missing_values',
@@ -379,9 +357,7 @@ def parse(file, path, filename):
                         'westernmostlongitude', 'westernmost longitude', 'westernmost_longitude'],
                 'properties': ['location', 'country', 'elevation', 'site_name', 'region'],
                 }
-    funding_lst = ['FundingAgencyName', 'Grant']
-    pub_lst = ['OnlineResource', 'OriginalSourceUrl', 'Investigators', 'Authors', 'PublishedDateOrYear',
-               'PublishedTitle', 'JournalName', 'Volume', 'Doi', 'FullCitation', 'Abstract', 'Pages', 'Edition']
+    funding_lst = ['funding_agency_name', 'grant']
 
     # Open the text file in read mode. We'll read one line at a time until EOF
     with open(file, 'r') as f:
@@ -395,15 +371,24 @@ def parse(file, path, filename):
 
                 # End of the section. Add the dictionary for this one publication to the overall list
                 if '-----' in line:
+                    temp_pub['abstract'] = ''.join(temp_abstract)
                     pub.append(temp_pub.copy())
+                    temp_abstract.clear()
                     temp_pub.clear()
+                    abstract_on = False
                     publication_on = False
+
+                elif abstract_on:
+                    temp_abstract.append(str_cleanup(line))
 
                 # Add all info into the current publication dictionary
                 else:
                     line = str_cleanup(line)
                     key, value = slice_key_val(line)
-                    temp_pub[name_to_camelCase(key)] = value
+                    temp_pub[camelCase(key)] = value
+                    if key == 'Abstract':
+                        abstract_on = True
+                        temp_abstract.append(value)
 
             # DESCRIPTION
             # Descriptions are often long paragraphs spanning multiple lines, but don't follow the key/value format
@@ -441,7 +426,7 @@ def parse(file, path, filename):
                         lon.append(convert_num(value))
 
                     elif key.lower() in site_info['properties']:
-                        geo_properties[name_to_camelCase(key)] = value
+                        geo_properties[camelCase(key)] = value
 
             # CHRONOLOGY
             elif chronology_on:
@@ -474,7 +459,7 @@ def parse(file, path, filename):
                         temp_dict = OrderedDict()
                         temp_dict['column'] = chron_col_ct
                         name, unit = split_name_unit(var.replace('\n', '').lstrip().rstrip())
-                        temp_dict['shortName'] = name
+                        temp_dict['parameter'] = name
                         temp_dict['units'] = unit
                         chron_col_list.append(temp_dict)
                         chron_col_ct += 1
@@ -515,7 +500,7 @@ def parse(file, path, filename):
                     data_col_dict = create_var_col(cleaned_line, data_col_ct)
 
                     # Keep a list of all variable names
-                    data_var_names.append(data_col_dict['shortName'])
+                    data_var_names.append(data_col_dict['parameter'])
 
                     # Add the column dictionary into a final dictionary
                     data_col_list.append(data_col_dict)
@@ -577,47 +562,45 @@ def parse(file, path, filename):
                     try:
                         # Split the line into key, value pieces
                         key, value = slice_key_val(line)
+                        lkey = key.lower()
 
                         # If there is no value, then we are at a section header.
                         # Data often has a blank value, so that is a special check.
-                        if value is None or key == 'Data':
+                        if value is None or lkey == 'data':
 
                             # Turn on markers if we run into section headers
-                            if key.lower() == 'description_and_notes':
+                            if lkey == 'description_and_notes':
                                 description_on = True
-                            elif key.lower() == 'publication':
+                            elif lkey == 'publication':
                                 publication_on = True
-                            elif key.lower() == 'site_information':
+                            elif lkey == 'site_information':
                                 site_info_on = True
-                            elif key.lower() == 'chronology':
+                            elif lkey == 'chronology':
                                 chronology_on = True
                                 chron_start_line = line_num
-                            elif key.lower() == 'variables':
+                            elif lkey == 'variables':
                                 variables_on = True
-                            elif key.lower() == 'data':
+                            elif lkey == 'data':
                                 data_on = True
 
                         # For all
                         else:
 
-                            # Convert naming to camel case
-                            key = name_to_camelCase(key)
-
                             # Ignore any entries that are specified in the skip list
-                            if key not in ignore_keys:
+                            if lkey not in ignore_keys:
 
-                                if key == 'CoreLength':
+                                if lkey == 'core_length':
                                     val, unit = split_name_unit(value)
                                     coreLen['value'] = val
                                     coreLen['unit'] = unit
                                     last_insert = coreLen
 
                                 # There can be multiple funding agencies and grants. Keep a list of dictionary entries
-                                elif key in funding_lst:
-                                    if key == 'FundingAgencyName':
+                                elif lkey in funding_lst:
+                                    if lkey == 'funding_agency_name':
                                         funding_id += 1
                                         key = 'agency'
-                                    elif key == 'Grant':
+                                    elif lkey == 'grant':
                                         grant_id += 1
                                         key = 'grant'
                                     temp_funding[key] = value
@@ -628,7 +611,7 @@ def parse(file, path, filename):
                                         temp_funding.clear()
 
                                 else:
-                                    final_dict[key] = value
+                                    final_dict[camelCase(key)] = value
                                     last_insert = final_dict
 
                                 # Keep track of old key in case we have a line continuation
@@ -646,7 +629,7 @@ def parse(file, path, filename):
 
     # Piece together measurements block
     data_dict_upper['filename'] = data_filename
-    data_dict_upper['measTableName'] = 'Data'
+    data_dict_upper['paleoDataTableName'] = 'Data'
     data_dict_upper['missingValue'] = missing_str
     data_dict_upper['columns'] = data_col_list
     data_tables.append(data_dict_upper)
@@ -661,7 +644,7 @@ def parse(file, path, filename):
     final_dict['geo'] = geo
     final_dict['coreLength'] = coreLen
     final_dict['chronology'] = chron_dict
-    final_dict['measurements'] = data_tables
+    final_dict['paleoData'] = data_tables
 
      # Insert the data dictionaries into the final dictionary
     for k, v in vars_dict.items():

@@ -1,9 +1,11 @@
 __author__ = 'chrisheiser1'
 
-import json
 from collections import OrderedDict
-import re
+import json
 import os
+import csv
+import re
+import copy
 
 from flattener import flatten
 
@@ -11,6 +13,7 @@ from flattener import flatten
 """
 TO DO LIST
 
+    REVISION 0
     DONE - import jsonld file
     DONE - flatten the jsonld data
     DONE - Output new NOAA text file
@@ -21,6 +24,10 @@ TO DO LIST
     DONE - Insert values into matching key values
     DONE - Problem replacing 'Data' in certain lines. Using k = "Data" and v =Variables list, one per line, shortname-..."
     DONE - Add in the data columns at the bottom of the file
+
+    REVISION 1
+    - check for csv data. (either see if chron and data sections are not null in lipd file, or check directory files)
+    -
 
 """
 
@@ -183,7 +190,7 @@ def get_col_dict(dict_in):
 
 
 # The main parser
-def parse(file_in, file_out, template):
+def parse(file_in, c_csv, d_csv, template):
 
 
     # Open the JSON file
@@ -209,14 +216,14 @@ def parse(file_in, file_out, template):
         # Convert LPD naming back to NOAA naming
         new = name_to_underscore(k)
 
-        # Special case for the Funding Agency block. Tricky because there can be multiple blocks
-        if 'Funding_Agency_Name' in new:
-            extension = clean_fund_grant(new)
-            funding[extension] = v
-
-        elif 'Grant' in new:
-            extension = clean_fund_grant(new)
-            grant[extension] = v
+        # # Special case for the Funding Agency block. Tricky because there can be multiple blocks
+        # if 'Funding_Agency_Name' in new:
+        #     extension = clean_fund_grant(new)
+        #     funding[extension] = v
+        #
+        # elif 'Grant' in new:
+        #     extension = clean_fund_grant(new)
+        #     grant[extension] = v
 
         # Any other entry needs the key replaced with the converted key. Value stays the same.
         else:
@@ -300,42 +307,48 @@ def parse(file_in, file_out, template):
 
     # Close the file and end
     file_out.close()
-    return file_out
+    return
 
 
 # Load in the template file, and run through the parser
 def main():
 
-    template = 'noaa-blank.txt'
+    template = 'noaa-template.txt'
     file_list = []
 
-    os.chdir('/Users/chrisheiser1/Desktop/output')
+    os.chdir('/Users/chrisheiser1/Desktop/')
     # os.chdir('/Users/chrisheiser1/Dropbox/GeoChronR/noaa_lpd_files/output/')
+
     for file in os.listdir():
         if file.endswith('.jsonld'):
-            file_list.append(file)
+            file_list.append(os.path.splitext(file)[0])
 
-    for txts in file_list:
+    print(file_list)
 
-        # Cut the extension from the file name
-        if '-lpd.json' in txts:
-            name = txts.split('-')
-        else:
-            name = txts.split(".")
+    for file in file_list:
+        d_csv = False
+        c_csv = False
+
+        # Attempt to open Data CSV
+        try:
+            with open(file + '-data.csv', 'r') as f:
+                d_csv = True
+        except FileNotFoundError:
+            print("Data CSV not found")
+
+        # Attempt to open Chronology CSV
+        try:
+            with open(file + '-chronology.csv', 'r') as f:
+                c_csv = True
+        except FileNotFoundError:
+            print("Chron CSV not found")
+
+        # Run the file through the parser
+        parse(file, c_csv, d_csv, template)
 
         # Creates the directory 'output' if it does not already exist
         if not os.path.exists('output/'):
-              os.makedirs('output/')
-
-        # Naming setup
-        out_name = name[0] + '-noaa.txt'
-
-        # Create a new output text file
-        file_out = open('output/' + out_name, 'w')
-
-        print(txts)
-        # Run the file through the parser
-        parse(txts, file_out, template)
+            os.makedirs('output/')
 
     return
 
