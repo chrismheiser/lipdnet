@@ -1,5 +1,4 @@
 __author__ = 'chrisheiser1'
-
 from collections import OrderedDict
 import json
 import os
@@ -7,12 +6,23 @@ import csv
 import re
 import copy
 
+"""
+README
+
+Accepts files with UTF-8 encoding.
+Convert a NOAA text file into a lipd file. CSV files will output if chronology or data sections are available.
+
+How to use:
+ 1. Run the program
+ 2. Select directory on your computer that contains NOAA text files
+ 3. The console will show all files that are being processed
+ 4. When complete, the output files are in the directory you selected in an "output" folder.
+"""
 
 """
-Be able to convert NOAA format to LPD format
-Be able to convert LPD format to NOAA format
+CHANGE LOG
 
-Things to do:
+    Revision 0
     DONE - Strip the # and the white space on the left and right of strings
     DONE - Try to capture all the info with ":", because that's data we want
     DONE - Figure out how to capture the data cols and maybe put it in a list(?)
@@ -22,6 +32,8 @@ Things to do:
     DONE - get rid of K-V's that are in the dictionary blocks. It's adding duplicates at the root level.
     DONE - Get rid of blank values. Stop them from adding to the dictionary
     DONE - Figure out what to do with coreLength val and unit
+
+    Revision 1
     DONE - Decide what to do with Chron data columns
     DONE - Capture variables section and use it later to cross-check the data section
     DONE - Output Data columns to CSV
@@ -39,10 +51,9 @@ Things to do:
     DONE - parse lat and long data into the new geojson format, include point and multiPoint cases
     DONE - handle multiple publication sections
     DONE - Test compatibility on all LMR files
+    DONE - make sure number values are being converted from str to float
+    - remove "in" when units are in format "in cm" to make it look cleaner
 
-    ? - need special parsing for any links (don't want to split in form 'http' + '//www.something.com')
-
-    IGNORE KEYS: earliestYear, mostRecentYear, dataLine variables
 
     # How to properly loop with enumerate
     for index, val in enumerate(values):
@@ -140,7 +151,7 @@ def contains_digits(word):
 
 # Split a string that has value and unit as one.
 def split_name_unit(line):
-    if line != '':
+    if line != '' or line != ' ':
         # If there are parenthesis, remove them
         line = line.replace('(', '').replace(')', '')
         # When value and units are a range (i.e. '100 m - 200 m').
@@ -351,12 +362,12 @@ def parse(file, path, filename):
                         'missing variables', 'missing_variables', 'missingvariables']
 
     # Lists for what keys go in specific dictionary blocks
-    site_info = {'lat': ['northernmostlatitude', 'northernmost latitude','northernmost_latitude',
-                        'southernmostlatitude', 'southernmost latitude', 'southernmost_latitude'],
-                'lon': ['easternmostlongitude', 'easternmost longitude', 'easternmost_longitude',
-                        'westernmostlongitude', 'westernmost longitude', 'westernmost_longitude'],
-                'properties': ['location', 'country', 'elevation', 'site_name', 'region'],
-                }
+    site_info = {'lat': ['northernmostlatitude', 'northernmost latitude', 'northernmost_latitude',
+                         'southernmostlatitude', 'southernmost latitude', 'southernmost_latitude'],
+                 'lon': ['easternmostlongitude', 'easternmost longitude', 'easternmost_longitude',
+                         'westernmostlongitude', 'westernmost longitude', 'westernmost_longitude'],
+                 'properties': ['location', 'country', 'elevation', 'site_name', 'region'],
+                 }
     funding_lst = ['funding_agency_name', 'grant']
 
     # Open the text file in read mode. We'll read one line at a time until EOF
@@ -426,7 +437,11 @@ def parse(file, path, filename):
                         lon.append(convert_num(value))
 
                     elif key.lower() in site_info['properties']:
-                        geo_properties[camelCase(key)] = value
+                        if key.lower() == 'elevation':
+                            val, unit = split_name_unit(value)
+                            geo_properties['elevation'] = {'value': convert_num(val), 'unit': unit}
+                        else:
+                            geo_properties[camelCase(key)] = value
 
             # CHRONOLOGY
             elif chronology_on:
@@ -591,7 +606,7 @@ def parse(file, path, filename):
 
                                 if lkey == 'core_length':
                                     val, unit = split_name_unit(value)
-                                    coreLen['value'] = val
+                                    coreLen['value'] = convert_num(val)
                                     coreLen['unit'] = unit
                                     last_insert = coreLen
 
@@ -662,7 +677,7 @@ def main():
     os.chdir('/Users/chrisheiser1/Desktop/')
     # os.chdir('/Users/chrisheiser1/Dropbox/GeoChronR/noaa_lipd_files/lmr')
     for file in os.listdir():
-        if file.endswith('.txt'):
+        if file.endswith('.txt') and file != 'noaa-template.txt':
             file_list.append(file)
 
     for txts in file_list:
@@ -682,14 +697,13 @@ def main():
         dict_out = parse(txts, path, name)
 
         # LPD file output
-        out_name = name + '.jsonld'
-        file_jsonld = open(path + '/' + out_name, 'w')
+        out_name = name + '.lipd'
+        # file_jsonld = open(path + '/' + out_name, 'w')
         file_jsonld = open(path + '/' + out_name, 'r+')
 
         # Write finalDict to json-ld file with dump. Dump outputs into a human-readable json hierarchy
         json.dump(dict_out, file_jsonld, indent=4)
 
     return
-
 
 main()

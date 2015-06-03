@@ -11,9 +11,7 @@ from flattener import flatten
 
 
 """
-TO DO LIST
-
-    REVISION 0
+    Revision 0
     DONE - import jsonld file
     DONE - flatten the jsonld data
     DONE - Output new NOAA text file
@@ -31,46 +29,59 @@ TO DO LIST
 
 """
 
+# Global Lists
+section1 = ['onlineResource', 'studyName', 'archive', 'parameterKeywords', 'originalSourceURL']
+section2 = ['date']
+section3 = ['studyName']
+section4 = ['investigators']
+section5 = ['description']
+section6 = ['pub']
+section7 = ['funding']
+section8 = ['geo']
+section9 = ['earliestYear', 'mostRecentYear', 'timeUnit', 'coreLength', 'notes']
+section10 = ['speciesName', 'commonName', 'treeSpeciesCode']
+section11 = ['chronology']
+section12 = ['paleoData']
 
-# Units and value are not always appended in the correct order.
-# Use this to make sure that they are concatenated incorrectly
-def concat_units(list_in):
-    if list_in[0] == 'm':
-        string_out = list_in[1] + ' ' + list_in[0]
-    else:
-        string_out = list_in[0] + ' ' + list_in[1]
 
-    return string_out
+# Check for Chronology and Data CSVs
+def csv_found(filename, datatype):
+    found = False
+
+    # Attempt to open Data CSV
+    try:
+        if open(filename + '-' + datatype + '.csv'):
+            found = True
+            print("{0} - found {1} csv".format(filename, datatype))
+    except FileNotFoundError:
+        print("{0} - no {1} csv".format(filename, datatype))
+
+    return found
 
 
-# Convert CamelCase naming back to Underscore naming
-def name_to_underscore(key):
+# Convert camelCase to underscore
+def underscore(key):
 
-    if key == 'DOI' or key == 'NOTE':
-        string_out = key
+    if key == 'coreLength':
+        print(key)
+        
+    if key == 'doi':
+        string_out = 'DOI'
 
-    elif key == 'PublishedDateorYear':
-        string_out = 'Published_Date_or_Year'
-
-    elif key == ('OriginalSourceURL' or 'Original_Source_URL'):
+    elif key == ('originalSourceURL'):
         string_out = 'Original_Source_URL'
 
     else:
-        extension = False
-        if '-' in key:
-            extension = True
-            ext_split = key.split('-')
-            num_ext = ext_split[1]
         string_split = re.findall('[A-Z][a-z]*', key)
         try:
             string_out = string_split[0]
         except IndexError:
             string_out = key
+
         for word in range(1, len(string_split)):
             string_out = string_out + '_' + string_split[word]
-        if extension:
-            string_out = string_out + '-' + num_ext
 
+    print(string_out)
     return string_out
 
 
@@ -102,26 +113,6 @@ def clean_keys(line):
             key = line[1:position].lstrip().rstrip()
             return key
     return line
-
-
-# Accepts: string, Returns: int
-def clean_fund_grant(key):
-    if '-' in key:
-        position = key.find('-')
-        extension = key[position+1:]
-        return int(extension)
-    return
-
-
-# Writes a Funding Agency block for each Funding and Grant item in the dictionaries
-def write_funding_block(file_in, dict_fund, dict_grant):
-    for i in range(1, len(dict_fund) + 1):
-        file_in.write('# Funding_Agency \n')
-        file_in.write('#       Funding_Agency_Name: ' + str(dict_fund[i]) + ' \n')
-        file_in.write('#       Grant: ' + str(dict_grant[i]) + ' \n')
-        file_in.write('#------------------ \n')
-
-    return file_in
 
 
 # Turns the flattened json list back in to a usable dictionary structure
@@ -175,182 +166,180 @@ def path_context(flat_file):
     return new_dict
 
 
-# Split the input dictionary into two parts: The column data, and the var data.
-def get_col_dict(dict_in):
-    dict_col = OrderedDict()
-    dict_var = OrderedDict()
+def create_blanks(dict_in, section):
+    for key in section:
+        try:
+            dict_in[key]
+        except KeyError:
+            dict_in[key] = ''
+    return dict_in
 
+
+def write_top(file_out, dict_in):
+
+    dict_in = create_blanks(dict_in, section1)
+    file_out.write('# ' + dict_in['studyName'] + '\n\
+#-----------------------------------------------------------------------\n\
+#                World Data Service for Paleoclimatology, Boulder\n\
+#                                  and\n\
+#                     NOAA Paleoclimatology Program\n\
+#             National Centers for Environmental Information (NCEI)\n\
+#-----------------------------------------------------------------------\n\
+# Template Version 2.0\n\
+# NOTE: Please cite Publication, and Online_Resource and date accessed when using these data.\n\
+# If there is no publication information, please cite Investigators, Title, and Online_Resource\n\
+and date accessed.\n\
+# Online_Resource: https://www.ncdc.noaa.gov/paleo/study/999??? (assigned by WDC Paleo)\n\
+# Online_Resource: http://www1.ncdc.noaa.gov/pub/data/paleo/ (assigned by WDC Paleo)\n\
+#\n\
+# Original_Source_URL: ' + dict_in['originalSourceURL'] + '\n\
+#\n\
+# Description/Documentation lines begin with #\n\
+# Data lines have no #\n\
+#\n\
+# Archive: ' + dict_in['archive'] + '\n\
+n\
+# Parameter_Keywords: ' + dict_in['parameterKeywords'] + '\n\
+#--------------------\n')
+
+    return
+
+
+def write_block(file_out, dict_in, header, section):
+    dict_in = create_blanks(dict_in, section)
+    file_out.write('# ' + header + ' \n')
     for k, v in dict_in.items():
-        if k == 'Columns':
-            dict_col[k] = v
-        else:
-            dict_var[k] = v
-
-    return dict_col, dict_var
+        file_out.write('#       ' + underscore(k) + ': ' + str(v) + ' \n')
+    file_out.write('#------------------ \n')
+    return
 
 
-# The main parser
-def parse(file_in, c_csv, d_csv, template):
+def write_pub(file_out, dict_in):
+    return
 
+
+def write_geo(file_out, dict_in):
+    return
+
+
+def write_chron(file_out, dict_in):
+    return
+
+
+def write_paleoData(file_out, dict_in):
+    return
+
+
+def write_funding(file_out, dict_in):
+    return
+
+
+def write_file(file_in, steps_dict):
+
+    file_out = open('output/' + file_in + '.txt', "w")
+
+    write_top(file_out, steps_dict[1])
+    write_block(file_out, steps_dict[2], 'Contribution_Date', section2)
+    write_block(file_out, steps_dict[3], 'Title', section3)
+    write_block(file_out, steps_dict[4], 'Investigators', section4)
+    write_block(file_out, steps_dict[5], 'Description_Notes_and_Keywords', section5)
+    write_pub(file_out, steps_dict[6])
+    write_funding(file_out, steps_dict[7])
+    write_geo(file_out, steps_dict[8])
+    write_block(file_out, steps_dict[9], 'Data_Collection', section9)
+    write_block(file_out, steps_dict[10], 'Species', section10)
+    write_chron(file_out, steps_dict[11])
+    write_paleoData(file_out, steps_dict[12])
+
+    # Close the file and end
+    file_out.close()
+
+    return
+
+
+def restructure(dict_in, key, value):
+
+    # If the key isn't in any list, stash it in number 13 for now
+    number = 13
+
+    if key in section1:
+        # StudyName only triggers once, append to section 3 also
+        if key == 'studyName':
+            dict_in[3][key] = value
+        number = 1
+    elif key in section2:
+        number = 2
+    elif key in section4:
+        number = 4
+    elif key in section5:
+        number = 5
+    elif key in section6:
+        number = 6
+    elif key in section7:
+        number = 7
+    elif key in section8:
+        number = 8
+    elif key in section9:
+        number = 9
+    elif key in section10:
+        number = 10
+    elif key in section11:
+        number = 11
+    elif key in section12:
+        number = 12
+    dict_in[number][key] = value
+
+    return dict_in
+
+
+# Main Parser
+def parse(file_in):
+
+    steps_dict = {1:{},2:{},3:{},4:{},5:{},6:{},7:{},8:{},9:{},10:{},11:{},12:{},13:{}}
 
     # Open the JSON file
-    json_data = open(file_in)
+    json_data = open(file_in + '.lipd')
 
     # Load in the json data from the file
     data = json.load(json_data)
 
-    # Don't want to flatten the column data, so split the data into two different dictionaries
-    col_data, var_data = get_col_dict(data)
+    # Restructure all fields by sections into a new dictionary
+    for k, v in data.items():
+        steps_dict = restructure(steps_dict, k, v)
 
-    # Flatten the json dictionary
-    flat = flatten.run(var_data)
+    # for k, v in steps_dict.items():
+    #     print(k, v)
 
-    # Create a new dictionary with keys matching NOAA template
-    funding = {}
-    grant = {}
-    dict_temp = path_context(flat)
-    dict_out = {}
+    write_file(file_in, steps_dict)
 
-    for k, v in dict_temp.items():
-
-        # Convert LPD naming back to NOAA naming
-        new = name_to_underscore(k)
-
-        # # Special case for the Funding Agency block. Tricky because there can be multiple blocks
-        # if 'Funding_Agency_Name' in new:
-        #     extension = clean_fund_grant(new)
-        #     funding[extension] = v
-        #
-        # elif 'Grant' in new:
-        #     extension = clean_fund_grant(new)
-        #     grant[extension] = v
-
-        # Any other entry needs the key replaced with the converted key. Value stays the same.
-        else:
-            dict_out[new] = v
-
-    # Open the NOAA template file, and read line by line
-    with open(template, 'r') as f:
-        line_num = 0
-        skip = False
-        for line in iter(f):
-
-            # We skip lines 46-48 because they have FundingAgency lines that we don't want
-            if (line_num < 46) or (line_num > 48):
-
-                # Clean the key of all symbols and spaces
-                clean_key = clean_keys(line)
-
-                # When you reach the funding block, write all funding and grant entries at the same time
-                if clean_key == '# Funding_Agency \n':
-                    write_funding_block(file_out, funding, grant)
-                    skip = True
-
-                else:
-                    # Loop through the dictionary to see where the key matches in the template
-                    for k, v in dict_out.items():
-                        if k == clean_key:
-                            position = line.find(':')
-                            line = line[:position+1] + ' ' + v + '\n'
-
-                # After we have made all the changes to the line, write it back to the file
-                if not skip:
-                    file_out.write(line)
-                skip = False
-
-            line_num += 1
-
-    # Write column data back to the file
-    # Need to write col data for each item in the value list.
-    file_out.write(line)
-    var_count = 0
-    var_titles = []
-    data_list = []
-
-    # Collect the number of variables, and the variable names from the col dictionary
-    for k, v in col_data.items():
-        for i, j in v.items():
-            var_count += 1
-            var_titles.append(i)
-
-    # Combine the variable names to make a title row. Write it to the file
-    var_titles.append('\n')
-    line = ' '.join(var_titles)
-    file_out.write(line)
-
-    # Nested loop to add one data item from each variable to the row at a time.
-    for k, v in col_data.items():
-        item = 0
-        max_length = 0
-
-        # Find the max
-        for i, j in v.items():
-            if len(j) > max_length:
-                max_length = len(j)
-
-        # Loop the amount of times of the biggest list
-        while item < max_length:
-            line = ''
-            for i, j in v.items():
-                # If data lists are not the same size, we don't want to go out of bounds.
-                try:
-                    data_list.append(str(j[item]))
-                except IndexError:
-                    data_list.append(j['  '])
-
-            # Increase counter, write line to file, and clear line
-            item += 1
-            data_list.append('\n')
-            line = ' '.join(data_list)
-            file_out.write(line)
-            data_list.clear()
-
-    # Close the file and end
-    file_out.close()
     return
 
 
 # Load in the template file, and run through the parser
 def main():
 
-    template = 'noaa-template.txt'
+    # Initializations
     file_list = []
 
+    # Directories for testing purposes
     os.chdir('/Users/chrisheiser1/Desktop/')
     # os.chdir('/Users/chrisheiser1/Dropbox/GeoChronR/noaa_lpd_files/output/')
 
+    # List of files to process in chosen directory
     for file in os.listdir():
-        if file.endswith('.jsonld'):
+        if file.endswith('.lipd'):
             file_list.append(os.path.splitext(file)[0])
 
-    print(file_list)
+    # Creates the directory 'output' if it does not exist
+    if not os.path.exists('output/'):
+        os.makedirs('output/')
 
+    # Loop parser once for every file
     for file in file_list:
-        d_csv = False
-        c_csv = False
+        print(file)
 
-        # Attempt to open Data CSV
-        try:
-            with open(file + '-data.csv', 'r') as f:
-                d_csv = True
-        except FileNotFoundError:
-            print("Data CSV not found")
-
-        # Attempt to open Chronology CSV
-        try:
-            with open(file + '-chronology.csv', 'r') as f:
-                c_csv = True
-        except FileNotFoundError:
-            print("Chron CSV not found")
-
-        # Run the file through the parser
-        parse(file, c_csv, d_csv, template)
-
-        # Creates the directory 'output' if it does not already exist
-        if not os.path.exists('output/'):
-            os.makedirs('output/')
-
-    return
+        # Run file through parser
+        parse(file)
 
 
 main()
