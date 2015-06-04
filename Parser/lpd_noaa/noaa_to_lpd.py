@@ -70,29 +70,28 @@ def create_var_col(list_in, col_count):
     dict_out = OrderedDict()
     dict_out['column'] = col_count
     for index, item in enumerate(list_in):
-        if item != '':
-            if index == 0:
-                dict_out['parameter'] = item
-            elif index == 1:
-                dict_out['description'] = item
-            elif index == 2:
-                dict_out['material'] = item
-            elif index == 3:
-                dict_out['error'] = item
-            elif index == 4:
-                dict_out['units'] = item
-            elif index == 5:
-                dict_out['seasonality'] = item
-            elif index == 6:
-                dict_out['archive'] = item
-            elif index == 7:
-                dict_out['detail'] = item
-            elif index == 8:
-                dict_out['method'] = item
-            elif index == 9:
-                dict_out['dataType'] = item
-            elif index == 10:
-                dict_out['direction'] = item
+        if index == 0:
+            dict_out['parameter'] = item
+        elif index == 1:
+            dict_out['description'] = item
+        elif index == 2:
+            dict_out['material'] = item
+        elif index == 3:
+            dict_out['error'] = item
+        elif index == 4:
+            dict_out['units'] = item
+        elif index == 5:
+            dict_out['seasonality'] = item
+        elif index == 6:
+            dict_out['archive'] = item
+        elif index == 7:
+            dict_out['detail'] = item
+        elif index == 8:
+            dict_out['method'] = item
+        elif index == 9:
+            dict_out['dataType'] = item
+        elif index == 10:
+            dict_out['direction'] = item
     return dict_out
 
 
@@ -354,9 +353,6 @@ def parse(file, path, filename):
                          'age ensembles archived']
     ignore_blanks = ['\n', '', '#\n', '# \n', ' ']
 
-    # List of keys that need their values converted to ints/floats
-    numbers = ['volume', 'value', 'min', 'max', 'pages', 'edition', 'corelength']
-
     # Missing value name appears as many variations. Try to account for all of them
     missing_val_alts = ['missing value', 'missing values', 'missingvalue', 'missingvalues', 'missing_values',
                         'missing variables', 'missing_variables', 'missingvariables']
@@ -535,8 +531,9 @@ def parse(file, path, filename):
                     if item == line:
                         process_line = False
                 for item in missing_val_alts:
-                    if item in line:
+                    if item in line.lower():
                         process_line = False
+                        line = str_cleanup(line)
                         key, missing_str = slice_key_val(line)
 
                 if process_line:
@@ -674,7 +671,7 @@ def main():
 
     # Store a list of all the txt files in the specified directory. This is what we'll process.
     file_list = []
-    os.chdir('/Users/chrisheiser1/Desktop/')
+    os.chdir('/Users/chrisheiser1/Desktop/forward')
     # os.chdir('/Users/chrisheiser1/Dropbox/GeoChronR/noaa_lipd_files/lmr')
     for file in os.listdir():
         if file.endswith('.txt') and file != 'noaa-template.txt':
@@ -698,8 +695,7 @@ def main():
 
         # LPD file output
         out_name = name + '.lipd'
-        # file_jsonld = open(path + '/' + out_name, 'w')
-        file_jsonld = open(path + '/' + out_name, 'r+')
+        file_jsonld = open(path + '/' + out_name, 'w')
 
         # Write finalDict to json-ld file with dump. Dump outputs into a human-readable json hierarchy
         json.dump(dict_out, file_jsonld, indent=4)
