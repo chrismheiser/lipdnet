@@ -470,8 +470,8 @@ def main():
     file_list = []
 
     # Directories for testing purposes
-    os.chdir('/Users/chrisheiser1/Desktop/reverse/')
-    # os.chdir('/Users/chrisheiser1/Dropbox/GeoChronR/noaa_lpd_files/output/')
+    os.chdir('/Users/chrisheiser1/Desktop/')
+    # os.chdir('/Users/chrisheiser1/Dropbox/GeoChronR/noaa_lpd_files/')
 
     # List of files to process in chosen directory
     for file in os.listdir():

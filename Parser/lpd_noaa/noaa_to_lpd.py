@@ -671,8 +671,8 @@ def main():
 
     # Store a list of all the txt files in the specified directory. This is what we'll process.
     file_list = []
-    os.chdir('/Users/chrisheiser1/Desktop/forward')
-    # os.chdir('/Users/chrisheiser1/Dropbox/GeoChronR/noaa_lipd_files/lmr')
+    # os.chdir('/Users/chrisheiser1/Desktop/')
+    os.chdir('/Users/chrisheiser1/Dropbox/GeoChronR/noaa_lipd_files/lmr')
     for file in os.listdir():
         if file.endswith('.txt') and file != 'noaa-template.txt':
             file_list.append(file)
@@ -686,7 +686,7 @@ def main():
         name = os.path.splitext(txts)[0]
 
         # Creates the directory 'output' if it does not already exist
-        path = 'output/' + name
+        path = 'output/'
         if not os.path.exists(path):
               os.makedirs(path)
 
