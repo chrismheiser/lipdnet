@@ -61,5 +61,4 @@ workspace.xml
 lipd_R/.Rhistory
 
 *.pper
-
-*.pper
+*.sqlite3
