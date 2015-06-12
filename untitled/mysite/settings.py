@@ -1,5 +1,5 @@
 """
-Django settings for website project.
+Django settings for untitled project.
 
 For more information on this file, see
 https://docs.djangoproject.com/en/1.7/topics/settings/
@@ -17,7 +17,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 # See https://docs.djangoproject.com/en/1.7/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '*ol03k%gv-w5n0n%2odj97h!+c+yrk0stw4#)e3a+%p7)%+%+d'
+SECRET_KEY = '@#6+29w0$edtp4^7_)z-i0t1x=l(k03h(46v1ctmn2pom+on(j'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -49,9 +49,9 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 )
 
-ROOT_URLCONF = 'website.urls'
+ROOT_URLCONF = 'mysite.urls'
 
-WSGI_APPLICATION = 'website.wsgi.application'
+WSGI_APPLICATION = 'mysite.wsgi.application'
 
 
 # Database
