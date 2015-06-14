@@ -3,6 +3,8 @@ TO DO LIST
     DONE - google map on about page
     - create models for registration information
     - check that i/o with database works correctly
+    - password strength meter
+    - two password boxes for registration (to confirm correct)
 
     Javascript
         convert page
@@ -14,7 +16,7 @@ TO DO LIST
 
         validate page
         schema page
-            - each category accordian expands to contents within category
+            - each category accordion expands to contents within category
             - each click expands/collapses item
             - OR
             - separate dynamic django pages that track with breadcrumbs
