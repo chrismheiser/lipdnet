@@ -16,10 +16,13 @@ TO DO LIST
 
         validate page
         schema page
+            - Breadcrumbs with mustache template pages or Accordion-style on one page?
+                - Do a mockup of each and show Nick
+            - ACCORDION
             - each category accordion expands to contents within category
             - each click expands/collapses item
-            - OR
-            - separate dynamic django pages that track with breadcrumbs
+            - BREADCRUMBS
+            - separate dynamic django pages that track with breadcrumbs and templating (mustache or jinja?)
 
 WEBSITE VISION
 

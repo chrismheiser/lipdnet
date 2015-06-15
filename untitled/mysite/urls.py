@@ -10,5 +10,6 @@ urlpatterns = patterns('',
                        url(r'^convert', "geo.views.convert", name='convert'),
                        url(r'^login', "geo.views.login", name='login'),
                        url(r'^schema', "geo.views.schema", name='schema'),
-                       url(r'^validate', "geo.views.validate", name='validate')
+                       url(r'^validate', "geo.views.validate", name='validate'),
+                       url(r'^demo', "geo.views.demo", name='demo')
                     )

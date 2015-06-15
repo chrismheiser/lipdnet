@@ -2,13 +2,14 @@
 <html>
     <head>
         <title>{% block title %}GeoChronR{% endblock %}</title>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta charset="utf-8" name="viewport" content="width=device-width, initial-scale=1">
         <link rel="stylesheet" type="text/css" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
         <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootswatch/3.3.4/united/bootstrap.min.css">
-        <link rel="stylesheet" type="text/css" href="http://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.3.0/css/font-awesome.min.css">
-        <link type="text/css" rel="stylesheet" href="{{ STATIC_URL }}css/custom.css" />
+        <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/custom.css">
         {% block css %}{% endblock %}
+        <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js" async></script>
+        <script type="text/javascript" src="http://netdna.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js" async></script>
+        {% block js %}{% endblock %}
     </head>
 
     <body>
@@ -50,8 +51,8 @@
         {%  block content %}
             {#  Main section of the page has all the content.  #}
         {%  endblock %}
-
         <!-- END MAIN -->
+
 
         <!-- FOOTER -->
         <footer class="footer">
@@ -77,9 +78,5 @@
                 </div>
             </div>
         </footer>
-
-        <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
-        <script type="text/javascript" src="http://netdna.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
-        {% block js %}{% endblock %}
     </body>
 </html>

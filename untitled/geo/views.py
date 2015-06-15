@@ -21,3 +21,6 @@ def login(request):
 
 def schema(request):
     return render(request, 'schema.html')
+
+def demo(request):
+    return render(request, 'demo.html')
