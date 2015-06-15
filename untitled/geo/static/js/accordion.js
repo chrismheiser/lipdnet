@@ -1,24 +1,22 @@
-jQuery(document).ready(function() {
-	function close_accordion_section() {
-		jQuery('.accordion .accordion-section-title').removeClass('active');
-		jQuery('.accordion .accordion-section-content').slideUp(300).removeClass('open');
-	}
+$(document).ready(function () {
+    var parentDivs = $('#nestedAccordion div'),
+        childDivs = $('#nestedAccordion h3').siblings('div');
 
-	jQuery('.accordion-section-title').click(function(e) {
-		// Grab current anchor value
-		var currentAttrValue = jQuery(this).attr('href');
+    $('#nestedAccordion h2').click(function () {
+        parentDivs.slideUp();
+        if ($(this).next().is(':hidden')) {
+            $(this).next().slideDown();
+        } else {
+            $(this).next().slideUp();
+        }
+    });
 
-		if(jQuery(e.target).is('.active')) {
-			close_accordion_section();
-		}else {
-			close_accordion_section();
-
-			// Add active class to section title
-			jQuery(this).addClass('active');
-			// Open up the hidden content panel
-			jQuery('.accordion ' + currentAttrValue).slideDown(300).addClass('open'); 
-		}
-
-		e.preventDefault();
-	});
+    $('#nestedAccordion h3').click(function () {
+        childDivs.slideUp();
+        if ($(this).next().is(':hidden')) {
+            $(this).next().slideDown();
+        } else {
+            $(this).next().slideUp();
+        }
+    });
 });
