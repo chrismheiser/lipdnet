@@ -1,43 +1,44 @@
-<!doctype html>
-<html lang="en">
+<!DOCTYPE HTML>
+<html>
 <head>
-  <meta charset="utf-8">
-  <title>accordion demo</title>
-  <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
-  <script src="//code.jquery.com/jquery-1.10.2.js"></script>
-  <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+<meta charset="utf-8">
+<title>jQuery File Upload Example</title>
 </head>
 <body>
- 
-<div id="accordion">
-  <h3>Section 1</h3>
-  <div>
-    <p>Mauris mauris ante, blandit et, ultrices a, suscipit eget.
-    Integer ut neque. Vivamus nisi metus, molestie vel, gravida in,
-    condimentum sit amet, nunc. Nam a nibh. Donec suscipit eros.
-    Nam mi. Proin viverra leo ut odio.</p>
-  </div>
-  <h3>Section 2</h3>
-  <div>
-    <p>Sed non urna. Phasellus eu ligula. Vestibulum sit amet purus.
-    Vivamus hendrerit, dolor aliquet laoreet, mauris turpis velit,
-    faucibus interdum tellus libero ac justo.</p>
-  </div>
-  <h3>Section 3</h3>
-  <div>
-    <p>Nam enim risus, molestie et, porta ac, aliquam ac, risus.
-    Quisque lobortis.Phasellus pellentesque purus in massa.</p>
-    <ul>
-      <li>List item one</li>
-      <li>List item two</li>
-      <li>List item three</li>
-    </ul>
-  </div>
+
+<div id="progress">
+    <div class="bar" style="width: 0%;"></div>
 </div>
- 
+
+<input id="fileupload" type="file" name="files[]" data-url="server/php/" multiple>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script src="{{ STATIC_URL }}js/file_upload/ui.widget.js"></script>
+<script src="{{ STATIC_URL }}js/file_upload/iframe-transport.js"></script>
+<script src="{{ STATIC_URL }}js/file_upload/fileupload.js"></script>
 <script>
-$( "#accordion" ).accordion();
+$(function () {
+    $('#fileupload').fileupload({
+        dataType: 'json',
+        progressall: function (e, data) {
+            var progress = parseInt(data.loaded / data.total * 100, 10);
+            $('#progress .bar').css(
+                'width',
+                progress + '%'
+            );
+        },
+        add: function (e, data) {
+            data.context = $('<button/>').text('Upload')
+                .appendTo(document.body)
+                .click(function () {
+                    data.context = $('<p/>').text('Uploading...').replaceAll($(this));
+                    data.submit();
+                });
+        },
+        done: function (e, data) {
+            data.context.text('Upload finished.');
+        }
+    });
+});
 </script>
- 
-</body>
+</body> 
 </html>
