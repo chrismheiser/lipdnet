@@ -1,5 +1,4 @@
-/* Sticky footer styles
--------------------------------------------------- */
+
 html {
     position: relative;
     min-height: 100%;
@@ -33,16 +32,12 @@ body {
 }
 
 .navbar {
-    margin-bottom: 0px !important;
+    margin-bottom: 0 !important;
 
 }
 
-/* Custom page CSS
--------------------------------------------------- */
-/* Not required for template or sticky footer method. */
-
 body > .container {
-    padding: 60px 15px 0;
+    padding: 0;
 }
 .container .text-muted {
     margin: 20px 0;
@@ -55,4 +50,14 @@ body > .container {
 
 code {
     font-size: 80%;
+}
+
+#login_box {
+    max-width: inherit;
+    margin: inherit;
+
+}
+
+#small_well {
+    margin: 0 auto;
 }

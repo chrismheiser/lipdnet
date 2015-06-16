@@ -1,60 +1,68 @@
 #nestedAccordion{
-	max-width: 90%;
+	max-width: 50%;
+    margin:0 auto;
 }
 #nestedAccordion h2, #nestedAccordion h3, 
 #nestedAccordion div, #nestedAccordion ol, 
 #nestedAccordion li{
 	/* reset styles for accordion */
-	margin:0;
-	padding:0;
-	font-size:1em;
+	margin:1% auto;
+	padding:5%;
+	font-size:1.1em;
 	font-weight:normal;
 	list-style:circle;
 }
 #nestedAccordion div{
-	display:none;
+    display: none;
 	color:#555;
 	overflow:hidden;
+    padding: 2px;
+
+
 }
 #nestedAccordion h2{
-	cursor:pointer;
+    cursor: pointer;
+    width:100%;
+    border-radius: 5px;
+	display:inline-block;
+	border-bottom:1px solid #1a1a1a;
+	background:#333;
+	transition:all linear 0.15s;
+	font-size:1.2em;
+	text-shadow:0px 1px 0px #1a1a1a;
 	color:#fff;
-	font-size:1.1em;
-	moz-border-radius: 5px 5px 0 0;
-	-webkit-border-radius: 5px 5px 0 0;
-	border-radius: 5px 5px 0 0;
-	padding:5px;
-	margin-top:5px;
-	background-color: #DB4923;
-	background-image: -webkit-gradient(linear, left top, left bottom, from(#DB4923), to(#DB4923));
-	background-image: -webkit-linear-gradient(top, #DB4923, #DB4923);
-	background-image: -moz-linear-gradient(top, #DB4923, #DB4923);
-	background-image: -ms-linear-gradient(top, #DB4923, #DB4923);
-	background-image: -o-linear-gradient(top, #DB4923, #DB4923);
-	background-image: linear-gradient(to bottom, #DB4923, #DB4923);
+
 }
 #nestedAccordion h3{
 	cursor:pointer;
-	padding:5px;
-	color: #666;
-	text-shadow: 0 1px 0 rgba(255, 255, 255, .5);
-	background-color: #f5f5f5;
-	background-image: -webkit-gradient(linear, left top, left bottom, from(#f5f5f5), to(#ededed));
-	background-image: -webkit-linear-gradient(top, #f5f5f5, #ededed);
-	background-image: -moz-linear-gradient(top, #f5f5f5, #ededed);
-	background-image: -ms-linear-gradient(top, #f5f5f5, #ededed);
-	background-image: -o-linear-gradient(top, #f5f5f5, #ededed);
-	background-image: linear-gradient(to bottom, #f5f5f5, #ededed);
+	color: #1a1a1a;
+	/*text-shadow: 0 1px 0 rgba(255, 255, 255, .5);*/
+	background-color: #e2e2e2;
 
 }
 #nestedAccordion h3:hover{
-	color:#000;
+    color:#DB4923;
 }
+
 #nestedAccordion h3 + div{
 	background-color:#F5F5F5;
 	padding:5px 5px 5px 30px;
 }
 #nestedAccordion li:hover{
-	color:#000;
-	cursor:pointer;
+    color:#DB4923;
+    cursor:pointer;
+}
+
+#nestedAccordion h2:hover{
+    color:#DB4923;
+}
+
+#nestedAccordion p {
+    margin-left: 5%;
+    max-width: 60%;
+    font-size: 1em;
+    color: black;
+    display: none;
+    overflow: hidden;
+
 }

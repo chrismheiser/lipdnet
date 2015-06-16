@@ -42,18 +42,20 @@ html,body{
 
 #main>.row {
     overflow-y:scroll;
+
 }
 
 #left {
 	height:100%;
-
+    max-width: 40%;
+    margin: 1% 10%;
 }
 
 #map-canvas {
 	width:33.3333%;
     height:calc(100% - 0);
     position:absolute;
-    right:0px;
+    right:10%;
     top:50px;
     bottom:0;
     overflow:hidden;

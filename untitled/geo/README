@@ -5,6 +5,7 @@ TO DO LIST
     - check that i/o with database works correctly
     - password strength meter
     - two password boxes for registration (to confirm correct)
+    - use javascript to validate registration/login on the fly
 
     Javascript
         convert page
