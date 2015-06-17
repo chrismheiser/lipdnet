@@ -15,11 +15,16 @@
     <body>
         <!-- NAV BAR -->
         <div class="navbar navbar-default navbar-static-top">
-            <div class="container">
+            <div class="container-fluid">
                 <div class="navbar-header">
-                    <a class="navbar-brand" href="/"><span>Linked Paleo Data</span><br></a>
+                      <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                      </button>
+                    <a class="navbar-brand" href="/"><img id='brand-img' src="{{ STATIC_URL }}img/lipd_logo1.png"></a>
                 </div>
-                <div class="collapse navbar-collapse" id="navbar-ex-collapse">
+                <div class="collapse navbar-collapse" id="myNavbar">
                     <ul class="nav navbar-nav navbar-right">
                         <li>
                             <a href="/">Home</a>
@@ -55,8 +60,8 @@
 
         <!-- FOOTER -->
         <footer class="footer">
-            <div class="container">
-                <div class="collapse navbar-collapse" id="navbar-ex-collapse">
+            <div class="container-fluid">
+                <div class="collapse navbar-collapse">
 
                     <!-- Left side footer -->
                     <ul class="nav navbar-nav navbar-left">

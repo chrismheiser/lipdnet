@@ -91,3 +91,8 @@ code {
 #slim {
     max-width: 80%;
 }
+
+#brand-img {
+    max-height: 30px;
+    display: inline-block;
+}
