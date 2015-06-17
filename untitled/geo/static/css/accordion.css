@@ -8,7 +8,6 @@
 	/* reset styles for accordion */
 	margin:1% auto;
 	padding:5%;
-	font-size:1.1em;
 	font-weight:normal;
 	list-style:circle;
 }
@@ -28,7 +27,7 @@
 	border-bottom:1px solid #1a1a1a;
 	background:#333;
 	transition:all linear 0.15s;
-	font-size:1.2em;
+	font-size: 20px;
 	text-shadow:0px 1px 0px #1a1a1a;
 	color:#fff;
 
@@ -36,6 +35,7 @@
 #nestedAccordion h3{
 	cursor:pointer;
 	color: #1a1a1a;
+    font-size: 17px;
 	/*text-shadow: 0 1px 0 rgba(255, 255, 255, .5);*/
 	background-color: #e2e2e2;
 
@@ -60,7 +60,7 @@
 #nestedAccordion p {
     margin-left: 5%;
     max-width: 60%;
-    font-size: 1em;
+    font-size: 0.5em;
     color: black;
     display: none;
     overflow: hidden;
