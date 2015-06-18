@@ -7,18 +7,25 @@
 {% endblock %}
 
 {%  block content %}
-<div id="map-canvas"></div>
-<div class="container-fluid" id="main">
-  <div class="row">
-  	<div class="col-xs-8" id="left">
-      <h2>About us</h2>
-      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis pharetra varius quam sit amet vulputate.
-        Quisque mauris augue, molestie tincidunt condimentum vitae, gravida a libero. Aenean sit amet felis
-        dolor, in sagittis nisi. Sed ac orci quis tortor imperdiet venenatis. Duis elementum auctor accumsan.
-        Aliquam in felis sit amet augue.</p>
+    <div id="map-canvas"></div>
+
+    <div class="container-fluid" id="main">
+        <div class="col-xs-8" id="left">
+                <h2>About us</h2>
+                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis pharetra varius quam sit amet vulputate.
+                    Quisque mauris augue, molestie tincidunt condimentum vitae, gravida a libero. Aenean sit amet felis
+                    dolor, in sagittis nisi. Sed ac orci quis tortor imperdiet venenatis. Duis elementum auctor accumsan.
+                    Aliquam in felis sit amet augue.</p>
+            <br>
+            <img class='img-responsive' src="{{ STATIC_URL }}img/person.png" id="employees">
+            <img class='img-responsive' src="{{ STATIC_URL }}img/person.png" id="employees">
+            <img class='img-responsive' src="{{ STATIC_URL }}img/person.png" id="employees">
+            <img class='img-responsive' src="{{ STATIC_URL }}img/person.png" id="employees">
+            <img class='img-responsive' src="{{ STATIC_URL }}img/person.png" id="employees">
+            <img class='img-responsive' src="{{ STATIC_URL }}img/person.png" id="employees">
+        </div>
+        <div class="col-xs-4"><!--map-canvas will be postioned here--></div>
     </div>
-      <div class="col-xs-4"><!--map-canvas will be postioned here--></div>
-  </div>
-</div>
+
 {% endblock %}
 
