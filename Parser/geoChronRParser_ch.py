@@ -126,6 +126,10 @@ def cell_occupied(temp_sheet, row, col):
 # Accepts: String / Returns: String
 def name_to_jsonld(title_in):
 
+    # Float check for debugging. If float gets here, usually means variables are mismatched on the data sheet
+    if type(title_in) is float:
+        print("name_to_jsonld type error: {0}".format(title_in))
+
     # Sheet names
     if title_in == 'Metadata':
         title_out = 'metadata'
@@ -623,7 +627,7 @@ def cells_down_datasheets(filename, workbook, sheet, row, col):
     try:
         while iter_var:
 
-            cell = temp_sheet.cell_value(row, col)
+            cell = temp_sheet.cell_value(row, col).lstrip().rstrip()
             if (cell == 'Data') or (cell == 'Missing Value')\
                     or (cell == 'The value or character string used as a placeholder for missing values'):
                 break
@@ -648,7 +652,6 @@ def cells_down_datasheets(filename, workbook, sheet, row, col):
 
     # Add all our data pieces for this column into a new entry in the Measurement Table Dictionary
     measTableDict['measTableName'] = sheet
-
     measTableDict['filename'] = str(filename) + '-' + str(sheet) + ".csv"
 
     # If comments exist, insert them at table level
@@ -866,6 +869,7 @@ def parser():
 
         # Loop over the data sheets we know exist
         for sheet_str in datasheetNameList:
+            print(sheet_str)
             sheet_str = cells_down_datasheets(name, workbook, sheet_str, 2, 0)
             combined.append(sheet_str)
 
