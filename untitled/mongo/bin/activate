@@ -39,7 +39,7 @@ deactivate () {
 # unset irrelevant variables
 deactivate nondestructive
 
-VIRTUAL_ENV="/Users/chrisheiser1/Documents/Code/geoChronR/untitled/lipd"
+VIRTUAL_ENV="/Users/chrisheiser1/Documents/Code/geoChronR/untitled/mongo"
 export VIRTUAL_ENV
 
 _OLD_VIRTUAL_PATH="$PATH"
