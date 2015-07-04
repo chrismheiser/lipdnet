@@ -8,11 +8,14 @@ import csv
 import json
 import os
 import xlrd
+import copy
+
 from tkinter import filedialog
 import tkinter
 
 """
-Need to determine if multiple chronologies will be combined into one sheet, or separated with one sheet per location
+Determine if multiple chronologies will be combined into one sheet, or separated with one sheet per location
+Reformat based on new context file. Match item names and output structure
 """
 
 # GLOBAL VARIABLES
@@ -98,10 +101,116 @@ def output_csv_chronology(workbook, sheet, name):
     return
 
 
+
+"""
+GEO DATA
+"""
+
+"""
+# GeoJSON Polygon. (One matching pair, and two or more unique pairs)
+def geometry_polygon(lat, lon):
+    polygon_dict = OrderedDict()
+
+    return polygon_dict
+"""
+
+# GeoJSON Linestring. (Two or more unique pairs)
+def geometry_linestring(lat, lon):
+
+    linestring_dict = OrderedDict()
+    coordinates = []
+    temp = [None, None]
+
+    # Point type, Matching pairs.
+    if lat[0] == lat[1] and lon[0] == lon[1]:
+        lat.pop()
+        lon.pop()
+        linestring_dict = geometry_point(lat, lon)
+
+    else:
+        # Creates coordinates list
+        for i in lat:
+            temp[0] = i
+            for j in lon:
+                temp[1] = j
+                coordinates.append(copy.copy(temp))
+
+        # Create geometry block
+        linestring_dict['type'] = 'Linestring'
+        linestring_dict['coordinates'] = coordinates
+
+    return linestring_dict
+
+
+# GeoJSON Point. (One unique pair)
+def geometry_point(lat, lon):
+
+    coordinates = []
+    point_dict = OrderedDict()
+    for index, point in enumerate(lat):
+        coordinates.append(lat[index])
+        coordinates.append(lon[index])
+    point_dict['type'] = 'Point'
+    point_dict['coordinates'] = coordinates
+    return point_dict
+
+
+def compile_geometry(lat, lon):
+
+    # Sort lat an lon in numerical order
+    lat.sort()
+    lon.sort()
+    if len(lat) == 2 and len(lon) == 2:
+        geo_dict = geometry_linestring(lat, lon)
+
+        """
+        # 4 coordinate values
+        if (lat[0] != lat[1]) and (lon[0] != lon[1]):
+            geo_dict = geometry_polygon(lat, lon)
+        # 3 unique coordinates
+        else:
+            geo_dict = geometry_multipoint(lat, lon)
+        """
+
+    # 2 coordinate values
+    elif len(lat) == 1 and len(lon) == 1:
+        geo_dict = geometry_point(lat, lon)
+
+    # Too many points, or no points
+    else:
+        geo_dict = {}
+        print("Compile Geometry Error")
+
+    return geo_dict
+
+
+def compile_geo(dict_in):
+    dict_out = OrderedDict()
+    dict_out['type'] = 'Feature'
+    geometry = compile_geometry([dict_in['latMin'], dict_in['latMax']], [dict_in['lonMin'], dict_in['lonMax']])
+    dict_out['geometry'] = geometry
+    dict_out['properties'] = {'siteName': dict_in['siteName'], 'elevation': {'value': dict_in['elevation'], 'unit': 'm'}}
+
+    return dict_out
+
+
 """
 MISC HELPER METHODS
 """
 
+
+def compile_temp(dict_in, key, value):
+    if single_item(value):
+        dict_in[key] = value[0]
+    else:
+        dict_in[key] = value
+
+    return dict_in
+
+
+def compile_pub(dict_in):
+    dict_out = OrderedDict()
+    return dict_out
 
 # Check an array to see if it is a single item or not
 # Accepts: List / Returns: Boolean
@@ -126,78 +235,112 @@ def cell_occupied(temp_sheet, row, col):
 # Keep a growing list of all titles that are being used in the json_ld context
 # Accepts: String / Returns: String
 def name_to_jsonld(title_in):
+
+    title_in = title_in.lower()
+
     # Float check for debugging. If float gets here, usually means variables are mismatched on the data sheet
     if type(title_in) is float:
         print("name_to_jsonld type error: {0}".format(title_in))
 
     # Sheet names
-    if title_in == 'Metadata':
+    if title_in == 'metadata':
         title_out = 'metadata'
-    elif title_in == 'Chronology':
+    elif title_in == 'mhronology':
         title_out = 'chronology'
-    elif title_in == 'Data (QC)' or title_in == 'Data(QC)':
+    elif title_in == 'data (qc)' or title_in == 'data(qc)':
         title_out = 'dataQC'
-    elif title_in == 'Data (original)' or title_in == 'Data(original)':
+    elif title_in == 'data (original)' or title_in == 'data(original)':
         title_out = 'dataOriginal'
-    elif title_in == 'Data':
+    elif title_in == 'data':
         title_out = 'data'
-    elif title_in == 'ProxyList':
+    elif title_in == 'proxyList':
         title_out = 'proxyList'
-    elif title_in == 'About':
+    elif title_in == 'about':
         title_out = 'about'
 
     # Metadata variables
-    elif title_in == 'DOI':
-        title_out = 'pubDOI'
-    elif title_in == 'Year':
+    elif 'study title' in title_in:
+        title_out = 'studyTitle'
+    elif 'investigators' in title_in:
+        title_out = 'investigators'
+
+    # Pub
+    elif 'authors' in title_in:
+        title_out = 'pubAuthors'
+    elif 'publication title' == title_in:
+        title_out = 'pubTitle'
+    elif title_in == 'journal':
+        title_out = 'pubJournal'
+    elif title_in == 'year':
         title_out = 'pubYear'
-    elif title_in == 'Investigators (Lastname, first; lastname2, first2)':
-        title_out = 'authors'
-    elif title_in == 'Site name':
+    elif title_in == 'volume':
+        title_out = 'pubVolume'
+    elif title_in == 'issue':
+        title_out = 'pubIssue'
+    elif title_in == 'pages':
+        title_out = 'pubPages'
+    elif title_in == 'report number':
+        title_out = 'pubReportNumber'
+    elif title_in == 'doi':
+        title_out = 'pubDOI'
+    elif title_in == 'abstract':
+        title_out = 'pubAbstract'
+    elif 'alternate citation' in title_in:
+        title_out = 'pubAlternateCitation'
+
+    # Geo
+    elif title_in == 'site name':
         title_out = 'siteName'
-    elif 'Northernmost latitude' in title_in:
+    elif 'northernmost latitude' in title_in:
         title_out = 'latMax'
-    elif 'Southernmost latitude' in title_in:
+    elif 'southernmost latitude' in title_in:
         title_out = 'latMin'
-    elif 'Easternmost longitude' in title_in:
-        title_out = 'longMax'
-    elif 'Westernmost longitude' in title_in:
-        title_out = 'longMin'
-    elif title_in == 'elevation (m), below sea level negative':
-        title_out = 'elevationVal'
-    elif title_in == 'Collection_Name (typically a core name)':
+    elif 'easternmost longitude' in title_in:
+        title_out = 'lonMax'
+    elif 'westernmost longitude' in title_in:
+        title_out = 'lonMin'
+    elif 'elevation (m)' in title_in:
+        title_out = 'elevation'
+    elif 'collection_name' in title_in:
         title_out = 'collectionName'
 
+    # Funding
+    elif title_in == "funding_agency_name":
+        title_out = 'agency'
+    elif title_in == "grant":
+        title_out = 'grant'
+
     # Measurement Variables
-    elif title_in == 'Method':
-        title_out = 'method'
-    elif title_in == 'Material':
+    elif title_in == 'short_name':
+        title_out = 'parameter'
+    elif title_in == 'what':
+        title_out = 'description'
+    elif title_in == 'material':
         title_out = 'material'
-    elif title_in == 'Archive':
-        title_out = 'archive'
-    elif title_in == 'Data_Type':
-        title_out = 'dataType'
-    elif title_in == 'Basis of climate relation':
-        title_out = 'basis'
-    elif title_in == 'Detail':
-        title_out = 'detail'
-    elif title_in == 'Error':
+    elif title_in == 'error':
         title_out = 'error'
-    elif title_in == 'Seasonality':
-        title_out = 'seasonality'
-    elif title_in == 'What':
-        title_out = 'longName'
-    elif title_in == 'Climate_intepretation_code':
-        title_out = 'climateInterpretation'
-    elif title_in == 'Climate_interpretation_code':
-        title_out = 'climateInterpretation'
-    elif title_in == 'Short_name':
-        title_out = 'shortName'
-    elif title_in == 'Units':
+
+    elif title_in == 'units':
         title_out = 'units'
-    elif title_in == 'notes' or title_in == 'Notes' \
-            or title_in == 'Comments' or title_in == 'comments':
-        title_out = 'comments'
+    elif title_in == 'seasonality':
+        title_out = 'seasonality'
+    elif title_in == 'archive':
+        title_out = 'archive'
+    elif title_in == 'detail':
+        title_out = 'detail'
+    elif title_in == 'method':
+        title_out = 'method'
+    elif title_in == 'data_type':
+        title_out = 'dataType'
+    elif title_in == 'basis of climate relation':
+        title_out = 'basis'
+
+    elif title_in == 'climate_interpretation_code' or title_in == 'climate_intepretation_code':
+        title_out = 'climateInterpretation'
+
+    elif title_in == 'notes' or title_in == 'comments':
+        title_out = 'notes'
+
     else:
         return
 
@@ -444,18 +587,17 @@ def cells_right_metadata(workbook, sheet, row, col):
 # Check the cell title, and switch it to
 def cells_down_metadata(workbook, sheet, row, col):
     row_loop = 0
-    special_cases = ['latMin', 'longMin', 'longMax', 'latMax', 'elevationVal', 'pubDOI', 'pubYear', 'authors']
+    pub_cases = ['pubDOI', 'pubYear', 'pubAuthors', 'pubJournal', 'pubIssue', 'pubVolume', 'pubTitle', 'pubPages',
+                 'pubReportNumber', 'pubAbstract', 'pubAlternateCitation']
+    geo_cases = ['latMin', 'lonMin', 'lonMax', 'latMax', 'elevation', 'siteName', 'location']
+    funding_cases = ['agency', 'grant']
 
-    # Special dictionaries to make nested block data
-    lon_inner = {}
-    elev_inner = {}
-    lat_inner = {}
-    bottomDict = {}
-    pub_inner = {}
+    # Temp Dictionaries
+    geo_temp = {}
+    general_temp = {}
+    pub_temp = {}
+    funding_temp = OrderedDict()
 
-    lon_inner['units'] = 'decimalDegrees'
-    lat_inner['units'] = 'decimalDegrees'
-    elev_inner['units'] = 'm'
     temp_sheet = workbook.sheet_by_name(sheet)
 
     # Loop until we hit the max rows in the sheet
@@ -464,82 +606,46 @@ def cells_down_metadata(workbook, sheet, row, col):
             # If there is content in the cell...
             if temp_sheet.cell_value(row, col) != xlrd.empty_cell and temp_sheet.cell_value(row, col) != '':
 
-                # Convert title to correct format, and grab all data for that row
+                # Convert title to correct format, and grab the cell data for that row
                 title_formal = temp_sheet.cell_value(row, col)
                 title_json = name_to_jsonld(title_formal)
                 cell_data = cells_right_metadata(workbook, sheet, row, col)
 
                 # If we don't have a title for it, then it's not information we want to grab
-                if not title_json:
-                    pass
+                if title_json:
 
-                # Handle special block of creating GEO dictionary
-                elif title_json in special_cases:
-                    if title_json == 'latMax':
-                        if single_item(cell_data):
-                            lat_inner['max'] = cell_data[0]
-                        else:
-                            lat_inner['max'] = cell_data
-                    elif title_json == 'latMin':
-                        if single_item(cell_data):
-                            lat_inner['min'] = cell_data[0]
-                        else:
-                            lat_inner['min'] = cell_data
-                    elif title_json == 'longMax':
-                        if single_item(cell_data):
-                            lon_inner['max'] = cell_data[0]
-                        else:
-                            lon_inner['max'] = cell_data
-                    elif title_json == 'longMin':
-                        if single_item(cell_data):
-                            lon_inner['min'] = cell_data[0]
-                        else:
-                            lon_inner['min'] = cell_data
-                    elif title_json == 'elevationVal':
-                        if single_item(cell_data):
-                            elev_inner['value'] = cell_data[0]
-                        else:
-                            elev_inner['value'] = cell_data
-                    elif title_json == 'pubDOI':
-                        if single_item(cell_data):
-                            pub_inner['DOI'] = cell_data[0]
-                        else:
-                            pub_inner['DOI'] = cell_data
-                    elif title_json == 'pubYear':
-                        if single_item(cell_data):
-                            pub_inner['year'] = int(cell_data[0])
-                        else:
-                            pub_inner['year'] = cell_data
-                    elif title_json == 'authors':
-                        if single_item(cell_data):
-                            pub_inner['authors'] = cell_data[0]
-                        else:
-                            pub_inner['authors'] = cell_data
+                    # Geo
+                    if title_json in geo_cases:
+                        geo_temp = compile_temp(geo_temp, title_json, cell_data)
 
-                # All other cases do not need fancy structuring
-                else:
-                    if single_item(cell_data):
-                        bottomDict[title_json] = cell_data[0]
-                    elif len(cell_data) == 0:
-                        pass
+                    # Pub
+                    elif title_json in pub_cases:
+                        pub_temp = compile_temp(pub_temp, title_json, cell_data)
+
+                    # Funding
+                    elif title_json in funding_cases:
+                        funding_temp = compile_temp(funding_temp, title_json, cell_data)
+
+                    # All other cases do not need fancy structuring
                     else:
-                        bottomDict[title_json] = cell_data
+                        general_temp = compile_temp(general_temp, title_json, cell_data)
 
         except IndexError:
             continue
         row += 1
         row_loop += 1
 
-    # Wait until all processing is finished, then combine all GEO elements and add to final dictionary
-    geo = {'longitude': lon_inner,
-           'latitude': lat_inner,
-           'elevation': elev_inner}
-    finalDict['@context'] = "context.jsonld"
-    finalDict['geo'] = geo
-    finalDict['pub'] = pub_inner
+    # Geo
+    geo = compile_geo(geo_temp)
+    pub = compile_pub(pub_temp)
 
-    # Add all dict items without adding in all the extra braces
-    for k, v in bottomDict.items():
+    finalDict['@context'] = "context.jsonld"
+    finalDict['pub'] = pub
+    finalDict['funding'] = funding_temp
+    finalDict['geo'] = geo
+
+    # Add remaining general items
+    for k, v in general_temp.items():
         finalDict[k] = v
 
     return
@@ -548,6 +654,7 @@ def cells_down_metadata(workbook, sheet, row, col):
 # Returns an attributes dictionary
 def cells_right_datasheets(workbook, sheet, row, col, colListNum):
     temp_sheet = workbook.sheet_by_name(sheet)
+    empty = ["N/A", " ", xlrd.empty_cell, "", "NA"]
 
     # Iterate over all attributes, and add them to the column if they are not empty
     attrDict = OrderedDict()
@@ -562,18 +669,24 @@ def cells_right_datasheets(workbook, sheet, row, col, colListNum):
     try:
         # Loop until we hit the right-side boundary
         while col < temp_sheet.ncols:
+            cell = temp_sheet.cell_value(row, col)
 
             # If the cell contains any data, grab it
-            if temp_sheet.cell_value(row, col) != ("N/A" and " " and xlrd.empty_cell and ""):
+            if cell not in empty and "Note:" not in cell:
 
                 title_in = name_to_jsonld(temp_sheet.cell_value(1, col))
 
                 # Special case if we need to split the climate interpretation string into 3 parts
                 if title_in == 'climateInterpretation':
-                    cicSplit = temp_sheet.cell_value(row, col).split('.')
-                    climInDict['parameter'] = cicSplit[0]
-                    climInDict['parameterDetail'] = cicSplit[1]
-                    climInDict['interpDirection'] = cicSplit[2]
+                    if cell in empty:
+                        climInDict['parameter'] = ''
+                        climInDict['parameterDetail'] = ''
+                        climInDict['interpDirection'] = ''
+                    else:
+                        cicSplit = cell.split('.')
+                        climInDict['climateParameter'] = cicSplit[0]
+                        climInDict['climateParameterDetail'] = cicSplit[1]
+                        climInDict['interpDirection'] = cicSplit[2]
 
                 # Special case to add these two categories to climateInterpretation
                 elif title_in == 'seasonality' or title_in == 'basis':
@@ -587,20 +700,15 @@ def cells_right_datasheets(workbook, sheet, row, col, colListNum):
                 elif title_in is (None or 'dataType'):
                     pass
 
-                # All other cases, change to json-ld naming
+                # Catch all other cases
                 else:
-                    contents = temp_sheet.cell_value(row, col)
-                    # Inert the variable into the attributes dictionary
-                    attrDict[title_in] = contents
-
-            # Only add climateInterp dict if it's not empty
-            if climInDict:
-                attrDict['climateInterpretation'] = climInDict
+                    attrDict[title_in] = cell
             col += 1
 
     except IndexError:
-        pass
+        print("Cell Right datasheets index error")
 
+    attrDict['climateInterpretation'] = climInDict
     return attrDict
 
 
@@ -608,7 +716,7 @@ def cells_right_datasheets(workbook, sheet, row, col, colListNum):
 # Returns: Dictionary
 def cells_down_datasheets(filename, workbook, sheet, row, col):
     # Create a dictionary to hold each column as a separate entry
-    measTableDict = OrderedDict()
+    paleoDataTableDict = OrderedDict()
 
     # Iterate over all the short_name variables until we hit the "Data" cell, or until we hit an empty cell
     # If we hit either of these, that should mean that we found all the variables
@@ -647,17 +755,18 @@ def cells_down_datasheets(filename, workbook, sheet, row, col):
         pass
 
     # Add all our data pieces for this column into a new entry in the Measurement Table Dictionary
-    measTableDict['measTableName'] = sheet
-    measTableDict['filename'] = str(filename) + '-' + str(sheet) + ".csv"
+    paleoDataTableDict['paleoDataTableName'] = sheet
+    paleoDataTableDict['filename'] = str(filename) + '-' + str(sheet) + ".csv"
+    paleoDataTableDict['missingValue'] = 'NaN'
 
     # If comments exist, insert them at table level
     if commentList:
-        measTableDict['comments'] = commentList[0]
-    measTableDict['columns'] = columnsTop
+        paleoDataTableDict['comments'] = commentList[0]
+    paleoDataTableDict['columns'] = columnsTop
 
     # Reset list back to null for next loop
     commentList = []
-    return measTableDict
+    return paleoDataTableDict
 
 
 """
@@ -859,7 +968,7 @@ def parser():
             data_combine.append(sheet_str)
 
         # Add measurements to the final dictionary
-        finalDict['measurements'] = data_combine
+        finalDict['paleoData'] = data_combine
 
         ###########################
         ## CHRONOLOGY WORKSHEETS ##
@@ -901,7 +1010,7 @@ def parser():
                 output_csv_chronology(workbook, sheet_str, name)
 
         # JSON LD
-        new_file_name_jsonld = str(name) + '/' + str(name) + '.jsonld'
+        new_file_name_jsonld = str(name) + '/' + str(name) + '.lipd'
         file_jsonld = open('output/' + new_file_name_jsonld, 'w')
         file_jsonld = open('output/' + new_file_name_jsonld, 'r+')
 
@@ -911,7 +1020,7 @@ def parser():
         if flat_run == 'y':
             # Flatten the JSON LD file, and output it to its own file
             flattened_file = flatten.run(finalDict)
-            new_file_flat_json = str(name) + '/' + str(name) + '_flat.json'
+            new_file_flat_json = str(name) + '/' + str(name) + '_flat.lipd'
             file_flat_jsonld = open('output/' + new_file_flat_json, 'w')
             file_flat_jsonld = open('output/' + new_file_flat_json, 'r+')
             json.dump(flattened_file, file_flat_jsonld, indent=0)
