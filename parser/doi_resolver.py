@@ -20,10 +20,10 @@ import requests
 import calendar
 
 
-class DOIResolver:
+class DOIResolver(object):
 
     def __init__(self):
-        self.run()
+        self = self
 
     """
     Returns DOI ID reference (i.e. 10.1029/2005pa001215)
@@ -39,7 +39,12 @@ class DOIResolver:
     def compile_pubyear(self, date_parts):
         out = []
         for date in date_parts:
-            out.append(str(date[2]) + ' ' + str(calendar.month_name[date[1]]) + ' ' + str(date[0]))
+            if len(date) == 3:
+                out.append(str(date[2]) + ' ' + str(calendar.month_name[date[1]]) + ' ' + str(date[0]))
+            elif len(date) == 2:
+                out.append(str(calendar.month_name[date[1]]) + ' ' + str(date[0]))
+            else:
+                out.append(date[0])
 
         return out
 
@@ -53,35 +58,65 @@ class DOIResolver:
         return out
 
     """
+    Take in our Excel Pub, and Fetched Pub. For each Fetched entry that has data, overwrite the Excel entry.
+    """
+    def compare_replace(self, pub_dict, fetch_dict):
+        blank = [" ", "", None]
+        for k, v in pub_dict.items():
+            try:
+                if fetch_dict[k] != blank:
+                    pub_dict[k] = fetch_dict[k]
+
+            except KeyError:
+                pass
+
+        return pub_dict
+
+    """
     Resolve DOI and compile all attibutes into one dictionary
     """
-    def get_data(self, doi):
+    def get_data(self, pub_dict):
 
         # Send request to grab metadata at URL
-        url = "http://dx.doi.org/" + doi
+        url = "http://dx.doi.org/" + pub_dict['doi']
         headers = {"accept": "application/rdf+xml;q=0.5, application/citeproc+json;q=1.0"}
         r = requests.get(url, headers=headers)
-        metadata = json.loads(r.text)
+        raw = json.loads(r.text)
+
+        # # Check what items we fetched. Use to debug.
+        # for k, v in raw.items():
+        #     print('k: {0}, v:{1}'.format(k, v))
 
         # Create a new pub dictionary with metadata received
-        new_metadata = OrderedDict()
+        fetch_dict = {}
         # No abstract field??
-        new_metadata['authors'] = self.compile_authors(metadata['author'])
-        new_metadata['title'] = metadata['title']
-        new_metadata['journal'] = metadata['container-title']
-        new_metadata['pubYear'] = self.compile_pubyear(metadata['issued']['date-parts'])
-        new_metadata['volume'] = metadata['volume']
-        new_metadata['publisher'] = metadata['publisher']
-        new_metadata['page'] = metadata['page']
-        new_metadata['DOI'] = doi
-        new_metadata['issue'] = metadata['issue']
+        fetch_dict['authors'] = self.compile_authors(raw['author'])
+        fetch_dict['title'] = raw['title']
+        fetch_dict['journal'] = raw['container-title']
+        fetch_dict['pubYear'] = self.compile_pubyear(raw['issued']['date-parts'])
+        fetch_dict['volume'] = raw['volume']
+        fetch_dict['publisher'] = raw['publisher']
+        fetch_dict['page'] = raw['page']
+        fetch_dict['issue'] = raw['issued']
 
-        return new_metadata
+        pub_dict = self.compare_replace(pub_dict, fetch_dict)
+
+        return pub_dict
 
     """
     Main function that gets files, creates outputs, and runs all operations on files
     """
-    def run(self):
+    def run(self, pub_dict):
+
+        """
+        USE FOR RUNNING AS AN INLINE PROCESS TO THE MAIN PARSER
+        """
+        pub_dict['doi'] = self.clean(pub_dict['doi'])
+        return self.get_data(pub_dict)
+
+    def run_standalone(self):
+        """
+        CODE IRRELEVANT UNLESS RUNNING AS A STANDALONE PROCESS
 
         # Choose the directory that has files. For debugging use only. Production will run script on current file.
         directory = '/Users/chrisheiser1/Desktop/todoi/'
@@ -100,7 +135,7 @@ class DOIResolver:
         # Run process on each file
         for txt in file_list:
             print(txt)
-            self.start = txt
+            # self.start = txt
 
             # Load data in JSON format
             json_data = open(txt)
@@ -122,6 +157,4 @@ class DOIResolver:
                 print("No DOI found")
 
             file_out.close()
-
-# sample doi: 'http://dx.doi.org/10.1029/2002PA000846'
-DOIResolver()
+            """

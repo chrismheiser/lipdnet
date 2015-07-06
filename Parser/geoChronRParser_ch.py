@@ -2,6 +2,8 @@
 # import flattener.flatten
 # import validator.validator_test
 # import validator.validator_test_easy
+# from tkinter import filedialog
+# import tkinter
 from collections import OrderedDict
 from flattener import flatten
 import csv
@@ -9,9 +11,7 @@ import json
 import os
 import xlrd
 import copy
-
-from tkinter import filedialog
-import tkinter
+from doi_resolver import DOIResolver
 
 """
 Determine if multiple chronologies will be combined into one sheet, or separated with one sheet per location
@@ -210,6 +210,15 @@ def compile_temp(dict_in, key, value):
 
 def compile_pub(dict_in):
     dict_out = OrderedDict()
+    dict_out['author'] = dict_in['pubAuthor']
+    dict_out['title'] = dict_in['pubTitle']
+    dict_out['journal'] = dict_in['pubJournal']
+    dict_out['pubYear'] = dict_in['pubYear']
+    dict_out['volume'] = dict_in['pubVolume']
+    dict_out['issue'] = dict_in['pubIssue']
+    dict_out['pages'] = dict_in['pubPages']
+    dict_out['doi'] = dict_in['pubDOI']
+    dict_out['abstract'] = dict_in['pubAbstract']
     return dict_out
 
 # Check an array to see if it is a single item or not
@@ -266,7 +275,7 @@ def name_to_jsonld(title_in):
 
     # Pub
     elif 'authors' in title_in:
-        title_out = 'pubAuthors'
+        title_out = 'pubAuthor'
     elif 'publication title' == title_in:
         title_out = 'pubTitle'
     elif title_in == 'journal':
@@ -585,9 +594,9 @@ def cells_right_metadata(workbook, sheet, row, col):
 
 # Traverse all cells in a column moving downward. Primarily created for the metadata sheet, but may use elsewhere
 # Check the cell title, and switch it to
-def cells_down_metadata(workbook, sheet, row, col):
+def cells_down_metadata(workbook, sheet, row, col, finalDict):
     row_loop = 0
-    pub_cases = ['pubDOI', 'pubYear', 'pubAuthors', 'pubJournal', 'pubIssue', 'pubVolume', 'pubTitle', 'pubPages',
+    pub_cases = ['pubDOI', 'pubYear', 'pubAuthor', 'pubJournal', 'pubIssue', 'pubVolume', 'pubTitle', 'pubPages',
                  'pubReportNumber', 'pubAbstract', 'pubAlternateCitation']
     geo_cases = ['latMin', 'lonMin', 'lonMax', 'latMax', 'elevation', 'siteName', 'location']
     funding_cases = ['agency', 'grant']
@@ -637,7 +646,7 @@ def cells_down_metadata(workbook, sheet, row, col):
 
     # Geo
     geo = compile_geo(geo_temp)
-    pub = compile_pub(pub_temp)
+    pub = DOIResolver().run(compile_pub(pub_temp))
 
     finalDict['@context'] = "context.jsonld"
     finalDict['pub'] = pub
@@ -909,13 +918,11 @@ def parser():
     # os.chdir('/Users/chrisheiser1/Dropbox/GeoChronR/chronologiesToBeFormatted/')
     os.chdir('/Users/chrisheiser1/Desktop/')
 
-
     # Add all excel files from user-specified directory, or from current directory
     # Puts all file names in a list we iterate over
     for file in os.listdir():
         if file.endswith(".xls") or file.endswith(".xlsx"):
             excel_files.append(file)
-
 
     # Loop over all the lines (filenames) that are in the chosen directory
     print("Processing files: ")
@@ -925,6 +932,7 @@ def parser():
         chronsheetNameList = []
         chron_combine = []
         data_combine = []
+        finalDict = OrderedDict()
 
         # File name without extension
         name = os.path.splitext(current_file)[0]
@@ -937,8 +945,8 @@ def parser():
         ## Most common sheets. If find sheet with matching name, set to variable
         for sheet in workbook.sheet_names():
 
-            if sheet == 'Metadata':
-                metadata = workbook.sheet_by_name('Metadata')
+            if 'Metadata' in sheet:
+                metadata = workbook.sheet_by_name(sheet)
                 metadata_str = 'Metadata'
             elif 'Chronology' in sheet:
                 chronsheetNameList.append(sheet)
@@ -958,7 +966,7 @@ def parser():
         ###########################
 
         # Run the method for adding metadata info to finalDict
-        cells_down_metadata(workbook, metadata_str, 0, 0)
+        cells_down_metadata(workbook, metadata_str, 0, 0, finalDict)
 
         ###########################
         ##   DATA WORKSHEETS     ##
