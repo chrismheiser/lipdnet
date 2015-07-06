@@ -843,9 +843,10 @@ def traverse_to_chron_data(temp_sheet):
 
     return traverse_row
 
-
-# Traverse down to the row that has the first variable
-# Accepts: temp_sheet(obj) / Returns: row (int)
+"""
+Traverse down to the row that has the first variable
+Accepts: temp_sheet(obj) / Returns: row (int)
+"""
 def traverse_to_chron_var(temp_sheet):
     row = 0
     while row < temp_sheet.nrows - 1:
@@ -856,9 +857,10 @@ def traverse_to_chron_var(temp_sheet):
 
     return row
 
-
-# Capture all data in for a specific chron data row (for csv output)
-# Accepts: temp_sheet(obj), row(int), total_vars(int) / Returns: data_row(list)
+"""
+Capture all data in for a specific chron data row (for csv output)
+Accepts: temp_sheet(obj), row(int), total_vars(int) / Returns: data_row(list)
+"""
 def get_chron_data(temp_sheet, row, total_vars):
     data_row = []
     missing_val_list = ['none', 'na', '', '-']
@@ -990,6 +992,14 @@ def parser():
 
             # Add chronology into the final dictionary
             finalDict['chronology'] = chron_combine
+
+        ############################
+        ##     DOI RESOLVER       ##
+        ############################
+        """
+        Run the DOI Resolver on the final dictionary. That way, any data we get from the DOI resolver will overwrite
+        what we parser from the file.
+        """
 
         ############################
         ## FILE NAMING AND OUTPUT ##
