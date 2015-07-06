@@ -13,13 +13,10 @@ original .lipd file.
 """
 
 from collections import OrderedDict
-from os import listdir
 from urllib.parse import urlparse
 import json
 import os
-import re
 import requests
-import datetime
 import calendar
 
 
@@ -36,6 +33,9 @@ class DOIResolver:
             doi = urlparse(doi)[2]
         return doi
 
+    """
+    Compiles date into "30 Jul 2015" format
+    """
     def compile_pubyear(self, date_parts):
         out = []
         for date in date_parts:
@@ -57,48 +57,45 @@ class DOIResolver:
     """
     def get_data(self, doi):
 
+        # Send request to grab metadata at URL
         url = "http://dx.doi.org/" + doi
-
-        # Grab Metadata
         headers = {"accept": "application/rdf+xml;q=0.5, application/citeproc+json;q=1.0"}
         r = requests.get(url, headers=headers)
         metadata = json.loads(r.text)
-        for k, v in metadata.items():
-            print(k, v)
 
-        # populate the fields in 'pub' section of new jsonld file
-        populate = OrderedDict()
+        # Create a new pub dictionary with metadata received
+        new_metadata = OrderedDict()
         # No abstract field??
-        populate['authors'] = self.compile_authors(metadata['author'])
-        populate['title'] = metadata['title']
-        populate['journal'] = metadata['container-title']
-        populate['pubYear'] = self.compile_pubyear(metadata['issued']['date-parts'])
-        populate['volume'] = metadata['volume']
-        populate['publisher'] = metadata['publisher']
-        populate['page'] = metadata['page']
-        populate['DOI'] = doi
-        populate['issue'] = metadata['issue']
+        new_metadata['authors'] = self.compile_authors(metadata['author'])
+        new_metadata['title'] = metadata['title']
+        new_metadata['journal'] = metadata['container-title']
+        new_metadata['pubYear'] = self.compile_pubyear(metadata['issued']['date-parts'])
+        new_metadata['volume'] = metadata['volume']
+        new_metadata['publisher'] = metadata['publisher']
+        new_metadata['page'] = metadata['page']
+        new_metadata['DOI'] = doi
+        new_metadata['issue'] = metadata['issue']
 
-        return populate
+        return new_metadata
 
+    """
+    Main function that gets files, creates outputs, and runs all operations on files
+    """
     def run(self):
-        directory = '/Users/chrisheiser1/Desktop/todoi/'
-        file_list = []
 
-        # Change directory to wherever our .lipd files are. In production, this will piggyback on current directory
+        # Choose the directory that has files. For debugging use only. Production will run script on current file.
+        directory = '/Users/chrisheiser1/Desktop/todoi/'
         os.chdir(directory)
 
-        # Delete any doi files that are in the dir. Update files will be made in their place.
+        file_list = []
+
+        # Delete any doi files that are in the dir. New update files will be created in their place.
         for file in os.listdir():
             if file.endswith('.lipd'):
-                # Don't want to run existing doi files again
                 if '-doi' in file:
                     os.remove(file)
                 else:
                     file_list.append(file)
-
-        # check to see which files are added to file_list
-        print('file list: {0}'.format(file_list))
 
         # Run process on each file
         for txt in file_list:
@@ -122,7 +119,7 @@ class DOIResolver:
                 json.dump(output, file_out, indent=4)
 
             except IndexError:
-                print("No ID field")
+                print("No DOI found")
 
             file_out.close()
 
