@@ -17,7 +17,6 @@ import json
 import requests
 import calendar
 
-
 class DOIResolver(object):
 
     def __init__(self):
@@ -35,7 +34,7 @@ class DOIResolver(object):
     """
     Compiles date into "30 Jul 2015" format
     """
-    def compile_pubyear(self, date_parts):
+    def compile_date(self, date_parts):
         out = []
         for date in date_parts:
             if len(date) == 3:
@@ -53,7 +52,7 @@ class DOIResolver(object):
     def compile_authors(self, authors):
         out = []
         for person in authors:
-            out.append(person['family'] + ', ' + person['given'])
+            out.append({'name': person['given'] + " " + person['family']})
         return out
 
     """
@@ -61,7 +60,7 @@ class DOIResolver(object):
     """
     def compare_replace(self, pub_dict, fetch_dict):
         blank = [" ", "", None]
-        for k, v in pub_dict.items():
+        for k, v in fetch_dict.items():
             try:
                 if fetch_dict[k] != blank:
                     pub_dict[k] = fetch_dict[k]
@@ -92,19 +91,20 @@ class DOIResolver(object):
             return pub_dict
 
         # # Check what items we fetched. Use to debug.
-        # for k, v in raw.items():
-        #     print('k: {0}, v:{1}'.format(k, v))
+        for k, v in raw.items():
+            print('k: {0}, v:{1}'.format(k, v))
 
         # Create a new pub dictionary with metadata received
         fetch_dict = {}
-        fetch_dict['authors'] = self.compile_authors(raw['author'])
+        fetch_dict['author'] = self.compile_authors(raw['author'])
         fetch_dict['title'] = raw['title']
         fetch_dict['journal'] = raw['container-title']
-        fetch_dict['pubYear'] = self.compile_pubyear(raw['issued']['date-parts'])
+        fetch_dict['year'] = self.compile_date(raw['issued']['date-parts'])
         fetch_dict['volume'] = raw['volume']
         fetch_dict['publisher'] = raw['publisher']
         fetch_dict['page'] = raw['page']
-        fetch_dict['issue'] = raw['issued']
+        fetch_dict['issue'] = raw['issue']
+        fetch_dict['identifier'] = [{"type": "doi", "id": pub_dict["doi"]}]
 
         pub_dict = self.compare_replace(pub_dict, fetch_dict)
 

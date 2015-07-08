@@ -56,9 +56,9 @@ target/
 
 *.idea
 workspace.xml
-.Rproj.user
-
-lipd_R/.Rhistory
+*.Rproj.user
+*.Rhistory
+*.history
 
 *.pper
 *.sqlite3
