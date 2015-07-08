@@ -12,10 +12,8 @@ original .lipd file.
 
 """
 
-from collections import OrderedDict
 from urllib.parse import urlparse
 import json
-import os
 import requests
 import calendar
 
@@ -29,6 +27,7 @@ class DOIResolver(object):
     Returns DOI ID reference (i.e. 10.1029/2005pa001215)
     """
     def clean(self, doi):
+        doi = doi.replace(" ", "")
         if 'http' in doi:
             doi = urlparse(doi)[2]
         return doi
@@ -81,7 +80,16 @@ class DOIResolver(object):
         url = "http://dx.doi.org/" + pub_dict['doi']
         headers = {"accept": "application/rdf+xml;q=0.5, application/citeproc+json;q=1.0"}
         r = requests.get(url, headers=headers)
+
+        # DOI server error, return the original
+        if r.status_code != 200:
+            return pub_dict
+
         raw = json.loads(r.text)
+
+        # If raw dictionary is empty, return the original
+        if not raw:
+            return pub_dict
 
         # # Check what items we fetched. Use to debug.
         # for k, v in raw.items():
@@ -89,7 +97,6 @@ class DOIResolver(object):
 
         # Create a new pub dictionary with metadata received
         fetch_dict = {}
-        # No abstract field??
         fetch_dict['authors'] = self.compile_authors(raw['author'])
         fetch_dict['title'] = raw['title']
         fetch_dict['journal'] = raw['container-title']
