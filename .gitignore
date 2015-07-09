@@ -56,9 +56,12 @@ target/
 
 *.idea
 workspace.xml
-*.Rproj.user
+*.Rproj.user*
+
 *.Rhistory
 *.history
 
 *.pper
 *.sqlite3
+
+lipd_R/.Rproj.user/C9D5AE89/sdb/prop/INDEX
