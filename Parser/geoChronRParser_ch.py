@@ -1,26 +1,29 @@
-# import flattener.flatten_test
-# import flattener.flatten
-# import validator.validator_test
-# import validator.validator_test_easy
+"""
+Add-on Packages
+"""
 # from tkinter import filedialog
 # import tkinter
-from collections import OrderedDict
+import xlrd
+
+"""
+LOCAL
+"""
 from flattener import flatten
+from doi_resolver import DOIResolver
+
+"""
+STLIB
+"""
+from collections import OrderedDict
 import csv
 import json
 import os
-import xlrd
 import copy
-from doi_resolver import DOIResolver
 
 """
 Determine if multiple chronologies will be combined into one sheet, or separated with one sheet per location
 Reformat based on new context file. Match item names and output structure
 """
-
-# GLOBAL VARIABLES
-finalDict = OrderedDict()
-
 
 # Use this to output data columns to a csv file
 # Accepts: Workbook(Obj), Sheet(str), name(str) / Returns: None
@@ -141,8 +144,9 @@ def geometry_linestring(lat, lon):
 
     return linestring_dict
 
-
-# GeoJSON Point. (One unique pair)
+"""
+GeoJSON Point. (One unique pair)
+"""
 def geometry_point(lat, lon):
 
     coordinates = []
@@ -155,6 +159,9 @@ def geometry_point(lat, lon):
     return point_dict
 
 
+"""
+Take in lists of lat and lon coordinates, and determine what geometry to create
+"""
 def compile_geometry(lat, lon):
 
     # Sort lat an lon in numerical order
@@ -183,7 +190,9 @@ def compile_geometry(lat, lon):
 
     return geo_dict
 
-
+"""
+Compile top-level GEO dictionary.
+"""
 def compile_geo(dict_in):
     dict_out = OrderedDict()
     dict_out['type'] = 'Feature'
@@ -193,11 +202,9 @@ def compile_geo(dict_in):
 
     return dict_out
 
-
 """
 MISC HELPER METHODS
 """
-
 
 def compile_temp(dict_in, key, value):
     if single_item(value):
@@ -208,6 +215,9 @@ def compile_temp(dict_in, key, value):
     return dict_in
 
 
+"""
+Compile the pub section of the metadata sheet
+"""
 def compile_pub(dict_in):
     dict_out = OrderedDict()
     dict_out['author'] = dict_in['pubAuthor']
@@ -221,8 +231,10 @@ def compile_pub(dict_in):
     dict_out['abstract'] = dict_in['pubAbstract']
     return dict_out
 
-# Check an array to see if it is a single item or not
-# Accepts: List / Returns: Boolean
+"""
+Check an array to see if it is a single item or not
+Accepts: List / Returns: Boolean
+"""
 def single_item(array):
     if len(array) == 1:
         return True
@@ -644,7 +656,13 @@ def cells_down_metadata(workbook, sheet, row, col, finalDict):
         row += 1
         row_loop += 1
 
-    # Geo
+    ############################
+    ##     DOI RESOLVER       ##
+    ############################
+    """
+    Run the DOI Resolver on the final dictionary. That way, any data we get from the DOI resolver will overwrite
+    what we parser from the file.
+    """
     geo = compile_geo(geo_temp)
     pub = DOIResolver().run(compile_pub(pub_temp))
 
@@ -1001,13 +1019,6 @@ def parser():
             # Add chronology into the final dictionary
             finalDict['chronology'] = chron_combine
 
-        ############################
-        ##     DOI RESOLVER       ##
-        ############################
-        """
-        Run the DOI Resolver on the final dictionary. That way, any data we get from the DOI resolver will overwrite
-        what we parser from the file.
-        """
 
         ############################
         ## FILE NAMING AND OUTPUT ##
