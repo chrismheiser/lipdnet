@@ -1,0 +1,316 @@
+{
+	"geo" : {
+		"siteName" : "meleze",
+		"latitude" : 65.217,
+		"longitude" : -126.12,
+		"elevation" : 650,
+		"AHT.Region" : "Alaska and Yukon",
+		"type" : "Point"
+	},
+	"archiveType" : "Marine sediment",
+	"investigator" : "macdonald",
+	"pub" : {
+		"pubYear" : "1983"
+	},
+	"dataSetName" : "meleze.macdonald.",
+	"paleoData" : {
+		"s1" : {
+			"notes" : "1Anomaly_Recons_for_MTWA_(mean_temperature_of_the_Warmest_month)_MTCO_(mean_temperature_of_the_coldest_month)_and_ANNP_(annual_precipitation_in_mm).Temperatures_are_an_average_of_the_best_3_estimates_and_the_anomalies_are_relative_to_1961-1990_baseline_period.",
+			"depth" : {
+				"parameter" : "depth",
+				"units" : "mm",
+				"proxy" : "NC ; NC ; pollen ; pollen ; pollen",
+				"values" : [
+					0,
+					100,
+					200,
+					300,
+					400,
+					500,
+					600,
+					700,
+					800,
+					900,
+					1000,
+					1100,
+					1200,
+					1300,
+					1400,
+					1500,
+					1600,
+					1700,
+					1800,
+					1900,
+					2000,
+					2100,
+					2200,
+					2300,
+					2400,
+					2500,
+					2600,
+					2700,
+					2800,
+					2900,
+					3000,
+					3100,
+					3200,
+					3300,
+					3400,
+					3500,
+					3600,
+					3700,
+					3800,
+					3900,
+					4000,
+					4100,
+					4200,
+					4300,
+					4400,
+					4500,
+					4600
+				]
+			},
+			"age" : {
+				"parameter" : "age",
+				"units" : "bp",
+				"proxy" : null,
+				"values" : [
+					-32,
+					268,
+					497,
+					657,
+					854,
+					1109,
+					1337,
+					1572,
+					1863,
+					2153,
+					2325,
+					2444,
+					2671,
+					2776,
+					2866,
+					2994,
+					3188,
+					3329,
+					3443,
+					3562,
+					3739,
+					3929,
+					4130,
+					4360,
+					4538,
+					4783,
+					4921,
+					5227,
+					5459,
+					5639,
+					5835,
+					6042,
+					6268,
+					6427,
+					6644,
+					7089,
+					7851,
+					8632,
+					9647,
+					10590,
+					11163,
+					11640,
+					12311,
+					12791,
+					13030,
+					13319,
+					13699
+				]
+			},
+			"Temp" : {
+				"parameter" : "Temp",
+				"units" : "C",
+				"proxy" : null,
+				"values" : [
+					-0.6,
+					-0.2,
+					-0.13333,
+					-0.4,
+					0.066667,
+					3.5333,
+					1.8333,
+					-0.6,
+					-0.4,
+					-0.6,
+					2.5333,
+					-0.7,
+					-0.6,
+					5.0667,
+					-0.43333,
+					2.5667,
+					3.4333,
+					4.2667,
+					-0.7,
+					1.1333,
+					-0.2,
+					0.9,
+					1.7667,
+					2.7333,
+					2.3,
+					0.83333,
+					3.4,
+					-0.2,
+					-0.13333,
+					-0.13333,
+					0.86667,
+					-0.2,
+					1.3667,
+					3.8333,
+					5.5333,
+					0.9,
+					5.8,
+					4.8,
+					4.8,
+					3.6333,
+					-1.0667,
+					7.4333,
+					16.133,
+					8.4333,
+					9.1333,
+					11.3,
+					3.8
+				],
+				"climateInterpretation" : {
+					"parameter" : "T",
+					"parameterDetail" : "air",
+					"seasonality" : "coldest",
+					"interpDirection" : 1
+				}
+			},
+			"Precip" : {
+				"parameter" : "Precip",
+				"units" : "mm",
+				"proxy" : null,
+				"values" : [
+					-16.333,
+					-18,
+					-19.333,
+					-21,
+					-39.667,
+					331.33,
+					150.67,
+					-16.333,
+					-21,
+					-16.333,
+					196.33,
+					-9,
+					-16.333,
+					371,
+					-7.3333,
+					274,
+					180,
+					356.67,
+					-9,
+					101.67,
+					-22.667,
+					112.33,
+					-74.667,
+					75.667,
+					-15,
+					113.67,
+					-10.667,
+					-22.667,
+					-19.333,
+					-19.333,
+					-36.333,
+					-18,
+					103.33,
+					309,
+					320.33,
+					68.333,
+					321.33,
+					140,
+					140,
+					147.33,
+					-99.333,
+					346.67,
+					805,
+					307.33,
+					247.33,
+					108.33,
+					-49.333
+				],
+				"climateInterpretation" : {
+					"parameter" : "P",
+					"parameterDetail" : "all",
+					"seasonality" : "ANN",
+					"interpDirection" : 1
+				}
+			},
+			"age_type" : {
+				"parameter" : "age_type"
+			},
+			"lab_id" : {
+				"parameter" : "lab_id"
+			},
+			"material_dated" : {
+				"parameter" : "material_dated"
+			},
+			"note" : {
+				"parameter" : "note"
+			},
+			"rejected_dates" : {
+				"parameter" : "rejected_dates"
+			}
+		}
+	},
+	"chronData" : {
+		"c1" : {
+			"depth" : {
+				"parameter" : "depth",
+				"units" : "mm"
+			},
+			"age" : {
+				"parameter" : "age14C",
+				"units" : "bp"
+			},
+			"Temp" : {
+				"parameter" : "age",
+				"units" : "bp"
+			},
+			"age_type" : {
+				"parameter" : "age_type",
+				"values" : [
+					"14C_bulk",
+					"14C_bulk",
+					"14C_bulk",
+					"14C_bulk",
+					"14C_bulk",
+					"14C_bulk",
+					"NA"
+				]
+			},
+			"lab_id" : {
+				"parameter" : "lab_id",
+				"values" : [
+					"GSC-3637",
+					"GSC-3667",
+					"GSC-3651",
+					"GSC-3624",
+					"GSC-3496",
+					"GSC-3536",
+					"NA"
+				]
+			},
+			"material_dated" : {
+				"parameter" : "material_dated",
+				"values" : [
+					"gyttja",
+					"gyttja",
+					"gyttja",
+					"gyttja",
+					"gyttja",
+					"gyttja",
+					"NA"
+				]
+			}
+		}
+	}
+}

@@ -1,0 +1,301 @@
+{
+	"geo" : {
+		"siteName" : "grostjorn",
+		"latitude" : 58.533,
+		"longitude" : 7.7333,
+		"elevation" : 180,
+		"AHT.Region" : "Fennoscandia",
+		"type" : "Point"
+	},
+	"archiveType" : "Marine sediment",
+	"investigator" : "eide",
+	"pub" : {
+		"pubYear" : "2009"
+	},
+	"dataSetName" : "grostjorn.eide.",
+	"paleoData" : {
+		"s1" : {
+			"depth" : {
+				"parameter" : "depth",
+				"units" : "mm",
+				"proxy" : "NC ; NC ; pollen",
+				"values" : [
+					10210,
+					10240,
+					10280,
+					10320,
+					10360,
+					10400,
+					10440,
+					10480,
+					10520,
+					10560,
+					10600,
+					10640,
+					10680,
+					10720,
+					10760,
+					10800,
+					10840,
+					10880,
+					10920,
+					10960,
+					10990,
+					11040,
+					11080,
+					11120,
+					11160,
+					11200,
+					11240,
+					11280,
+					11320,
+					11400,
+					11480,
+					11560,
+					11640,
+					11720,
+					11800,
+					11880,
+					11960,
+					12040,
+					12120,
+					12200,
+					12280,
+					12360,
+					12400,
+					12440,
+					12480,
+					12520,
+					12560,
+					12600,
+					12640,
+					12680,
+					12720,
+					12760,
+					12800,
+					12840,
+					12880,
+					12920,
+					12960
+				]
+			},
+			"age" : {
+				"parameter" : "age",
+				"units" : "bp",
+				"proxy" : null,
+				"values" : [
+					-47,
+					27,
+					135,
+					242,
+					350,
+					458,
+					565,
+					674,
+					782,
+					890,
+					999,
+					1108,
+					1217,
+					1326,
+					1436,
+					1547,
+					1658,
+					1770,
+					1882,
+					1996,
+					2081,
+					2225,
+					2342,
+					2459,
+					2577,
+					2697,
+					2817,
+					2939,
+					3061,
+					3309,
+					3562,
+					3818,
+					4078,
+					4341,
+					4609,
+					4880,
+					5156,
+					5434,
+					5717,
+					6004,
+					6294,
+					6588,
+					6737,
+					6886,
+					7037,
+					7189,
+					7341,
+					7495,
+					7649,
+					7805,
+					7961,
+					8118,
+					8276,
+					8435,
+					8594,
+					8754,
+					8914
+				]
+			},
+			"Temp" : {
+				"parameter" : "Temp",
+				"units" : "deg c",
+				"proxy" : null,
+				"values" : [
+					14.146,
+					13.646,
+					13.743,
+					13.95,
+					14.578,
+					14.772,
+					14.198,
+					14.72,
+					14.89,
+					14.243,
+					14.215,
+					14.422,
+					13.921,
+					14.386,
+					14.967,
+					14.225,
+					15.003,
+					14.97,
+					14.376,
+					14.463,
+					14.364,
+					14.461,
+					14.529,
+					14.386,
+					13.951,
+					14.077,
+					14.639,
+					14.46,
+					14.272,
+					14.034,
+					14.431,
+					15.43,
+					14.719,
+					15.724,
+					14.711,
+					14.937,
+					15.132,
+					14.701,
+					14.189,
+					15.417,
+					14.199,
+					14.993,
+					15.362,
+					14.927,
+					14.395,
+					14.532,
+					15.076,
+					14.831,
+					14.696,
+					14.284,
+					14.801,
+					14.238,
+					14.746,
+					14.573,
+					14.246,
+					14.588,
+					14.339
+				],
+				"climateInterpretation" : {
+					"parameter" : "T",
+					"parameterDetail" : "air",
+					"seasonality" : "JUL",
+					"interpDirection" : 1
+				}
+			},
+			"age_type" : {
+				"parameter" : "age_type"
+			},
+			"material_dated" : {
+				"parameter" : "material_dated"
+			},
+			"rejected_dates" : {
+				"parameter" : "rejected_dates"
+			},
+			"note" : {
+				"parameter" : "note"
+			}
+		}
+	},
+	"chronData" : {
+		"c1" : {
+			"depth" : {
+				"parameter" : "depth_bot",
+				"units" : "mm"
+			},
+			"age" : {
+				"parameter" : "depth_top",
+				"units" : "mm"
+			},
+			"Temp" : {
+				"parameter" : "age14C",
+				"units" : "bp"
+			},
+			"NA" : {
+				"units" : "mm"
+			},
+			"age_type" : {
+				"parameter" : "age_type",
+				"values" : [
+					"surface",
+					"14C_bulk",
+					"14C_bulk",
+					"14C_bulk",
+					"14C_bulk",
+					"14C_bulk",
+					"14C_bulk",
+					"14C_bulk"
+				]
+			},
+			"lab_id" : {
+				"parameter" : "lab_id",
+				"values" : [
+					"NA",
+					"Tua-2463A",
+					"Tua-2464A",
+					"Tua-2465A",
+					"Tua-2466A",
+					"Tua-2467A",
+					"Tua-2468A",
+					"Tua-2469A"
+				]
+			},
+			"material_dated" : {
+				"parameter" : "material_dated",
+				"values" : [
+					"NA",
+					"sediment",
+					"sediment",
+					"sediment",
+					"sediment",
+					"sediment",
+					"sediment",
+					"sediment"
+				]
+			},
+			"note" : {
+				"parameter" : "note",
+				"values" : [
+					"Assumed_top_age_based_on_collection_year_(1997)",
+					"NA",
+					"NA",
+					"NA",
+					"NA",
+					"NA",
+					"NA",
+					"NA"
+				]
+			}
+		}
+	}
+}

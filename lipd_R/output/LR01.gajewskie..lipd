@@ -1,0 +1,203 @@
+{
+	"geo" : {
+		"siteName" : "LR01",
+		"latitude" : 58.583,
+		"longitude" : -75.25,
+		"elevation" : 170,
+		"AHT.Region" : "Mainland Canada",
+		"type" : "Point"
+	},
+	"archiveType" : "Marine sediment",
+	"investigator" : "gajewskie",
+	"pub" : {
+		"pubYear" : "1993"
+	},
+	"dataSetName" : "LR01.gajewskie.",
+	"paleoData" : {
+		"s1" : {
+			"notes" : "1Anomaly_Recons_for_MTWA_(mean_temperature_of_the_Warmest_month)_MTCO_(mean_temperature_of_the_coldest_month)_and_ANNP_(annual_precipitation_in_mm).Temperatures_are_an_average_of_the_best_3_estimates_and_the_anomalies_are_relative_to_1961-1990_baseline_period.",
+			"depth" : {
+				"parameter" : "depth",
+				"units" : "mm",
+				"proxy" : "NC ; NC ; pollen ; pollen ; pollen",
+				"values" : [
+					10,
+					50,
+					100,
+					140,
+					180,
+					200,
+					220,
+					240,
+					260,
+					320,
+					420,
+					500,
+					580,
+					660,
+					740,
+					820,
+					900,
+					980,
+					1060,
+					1140,
+					1240
+				]
+			},
+			"age" : {
+				"parameter" : "age",
+				"units" : "bp",
+				"proxy" : null,
+				"values" : [
+					88,
+					486,
+					797,
+					1164,
+					1616,
+					1960,
+					2325,
+					2741,
+					3037,
+					3680,
+					4007,
+					4313,
+					4567,
+					4859,
+					5121,
+					5424,
+					5745,
+					6214,
+					6606,
+					7112,
+					7562
+				]
+			},
+			"Temp" : {
+				"parameter" : "Temp",
+				"units" : "C",
+				"proxy" : null,
+				"values" : [
+					0,
+					0,
+					0,
+					0,
+					0,
+					0,
+					0,
+					0,
+					0,
+					0,
+					0,
+					0,
+					0,
+					-0.033333,
+					1.8,
+					-0.066667,
+					1.6667,
+					5.1333,
+					-1.0667,
+					0.36667,
+					-1.3
+				],
+				"climateInterpretation" : {
+					"parameter" : "T",
+					"parameterDetail" : "air",
+					"seasonality" : "COLDEST",
+					"interpDirection" : 1
+				}
+			},
+			"Precip" : {
+				"parameter" : "Precip",
+				"units" : "mm",
+				"proxy" : null,
+				"values" : [
+					-25,
+					-12.333,
+					-1.3333,
+					-13.667,
+					-1.3333,
+					-12.333,
+					-12.667,
+					-13.667,
+					-1.3333,
+					-14,
+					9.3333,
+					9.3333,
+					-13.667,
+					1.6667,
+					18.333,
+					-48.667,
+					-20,
+					34,
+					-188.67,
+					-120.33,
+					-86.333
+				],
+				"climateInterpretation" : {
+					"parameter" : "P",
+					"parameterDetail" : "all",
+					"seasonality" : "ANN",
+					"interpDirection" : 1
+				}
+			},
+			"age_type" : {
+				"parameter" : "age_type"
+			},
+			"core_name" : {
+				"parameter" : "core_name"
+			},
+			"lab_id" : {
+				"parameter" : "lab_id"
+			},
+			"material_dated" : {
+				"parameter" : "material_dated"
+			}
+		}
+	},
+	"chronData" : {
+		"c1" : {
+			"depth" : {
+				"parameter" : "depth",
+				"units" : "mm"
+			},
+			"age" : {
+				"parameter" : "age14C",
+				"units" : "bp"
+			},
+			"Temp" : {
+				"parameter" : "age",
+				"units" : "bp"
+			},
+			"age_type" : {
+				"parameter" : "age_type",
+				"values" : [
+					"14C_bulk",
+					"14C_bulk",
+					"14C_bulk",
+					"14C_bulk",
+					"NA"
+				]
+			},
+			"lab_id" : {
+				"parameter" : "lab_id",
+				"values" : [
+					"Beta-34470",
+					"Beta-31542",
+					"Beta-31543",
+					"Beta-31052",
+					"NA"
+				]
+			},
+			"material_dated" : {
+				"parameter" : "material_dated",
+				"values" : [
+					"gyttja",
+					"gyttja",
+					"gyttja",
+					"gyttja",
+					"NA"
+				]
+			}
+		}
+	}
+}

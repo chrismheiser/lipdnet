@@ -1,0 +1,219 @@
+{
+	"geo" : {
+		"siteName" : "hjort",
+		"latitude" : 76.433,
+		"longitude" : -18.767,
+		"elevation" : 114,
+		"AHT.Region" : "Canadian islands and Greenland",
+		"type" : "Point"
+	},
+	"archiveType" : "Marine sediment",
+	"investigator" : "schmidt",
+	"pub" : {
+		"pubYear" : "2011"
+	},
+	"dataSetName" : "hjort.schmidt.",
+	"paleoData" : {
+		"s1" : {
+			"depth" : {
+				"parameter" : "depth",
+				"units" : "mm",
+				"proxy" : "NC ; NC ; chironomids",
+				"values" : [
+					33,
+					100,
+					140,
+					220,
+					260,
+					300,
+					400,
+					520,
+					580,
+					620,
+					660,
+					700,
+					740,
+					780,
+					840,
+					900,
+					940,
+					980,
+					1020,
+					1060,
+					1100,
+					1140,
+					1180,
+					1220,
+					1260,
+					1300,
+					1340,
+					1380,
+					1440,
+					1560,
+					1700,
+					2090
+				]
+			},
+			"age" : {
+				"parameter" : "age",
+				"units" : "bp",
+				"proxy" : null,
+				"values" : [
+					488,
+					931,
+					1059,
+					1215,
+					1289,
+					1379,
+					1709,
+					2240,
+					2552,
+					2769,
+					2989,
+					3211,
+					3433,
+					3655,
+					3987,
+					4322,
+					4547,
+					4776,
+					5009,
+					5247,
+					5490,
+					5739,
+					5993,
+					6251,
+					6513,
+					6778,
+					7042,
+					7305,
+					7736,
+					8397,
+					9069,
+					9773
+				]
+			},
+			"CCA1" : {
+				"parameter" : "CCA1",
+				"units" : "sd units",
+				"proxy" : null,
+				"values" : [
+					0.6831,
+					0.6592,
+					0.3726,
+					0.6339,
+					0.2446,
+					0.6479,
+					0.5709,
+					0.6433,
+					0.4023,
+					0.2305,
+					0.1707,
+					-0.0754,
+					0.2132,
+					0.4705,
+					0.012,
+					-0.1658,
+					0.0574,
+					0.0193,
+					-0.7186,
+					-0.3713,
+					-0.3468,
+					-0.4841,
+					-0.3284,
+					-0.4839,
+					-0.3609,
+					-0.1356,
+					-0.5371,
+					0.1076,
+					-0.0819,
+					0.5674,
+					1.0324,
+					0.5008
+				],
+				"climateInterpretation" : {
+					"parameter" : "T",
+					"parameterDetail" : "air",
+					"seasonality" : "SUMMER",
+					"interpDirection" : -1
+				}
+			},
+			"age_type" : {
+				"parameter" : "age_type"
+			},
+			"material_dated" : {
+				"parameter" : "material_dated"
+			}
+		}
+	},
+	"chronData" : {
+		"c1" : {
+			"depth" : {
+				"parameter" : "depth_bot",
+				"units" : "mm"
+			},
+			"age" : {
+				"parameter" : "depth_top",
+				"units" : "mm"
+			},
+			"CCA1" : {
+				"parameter" : "age14C",
+				"units" : "bp"
+			},
+			"NA" : {
+				"units" : "mm"
+			},
+			"age_type" : {
+				"parameter" : "age_type",
+				"values" : [
+					"14C",
+					"14C",
+					"14C",
+					"14C",
+					"14C",
+					"14C",
+					"14C",
+					"14C",
+					"14C",
+					"14C",
+					"14C",
+					"NA"
+				]
+			},
+			"lab_id" : {
+				"parameter" : "lab_id",
+				"values" : [
+					"KIA27666",
+					"KIA25342",
+					"KIA27667",
+					"Poz-6159",
+					"Poz-6160",
+					"Poz-6161",
+					"Poz-6163",
+					"Poz-6164",
+					"Poz-6165",
+					"Poz-6193",
+					"Poz-6194",
+					"NA"
+				]
+			},
+			"material_dated" : {
+				"parameter" : "material_dated",
+				"values" : [
+					"Salix_arctica",
+					"Dryas_octopetala",
+					"Salix_arctica",
+					"Warnstorfia_exannulata",
+					"Warnstorfia_exannulata",
+					"Dryas_octopetala",
+					"Dryas_octopetala",
+					"Dryas_octopetala",
+					"Warnstorfia_exannulata",
+					"E._nigrum_Polytrichum_sp.",
+					"Warnstorfia_exannulata",
+					"NA"
+				]
+			}
+		}
+	}
+}
