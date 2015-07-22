@@ -215,6 +215,13 @@ def compile_temp(dict_in, key, value):
     return dict_in
 
 
+def compile_fund(d_in):
+    list_out = []
+    for counter, item in enumerate(d_in['agency']):
+        list_out.append({'fundingAgency': d_in['agency'][counter], 'fundingGrant': d_in['grant'][counter]})
+    return list_out
+
+
 """
 Compile the pub section of the metadata sheet
 """
@@ -645,7 +652,7 @@ def cells_down_metadata(workbook, sheet, row, col, finalDict):
 
                     # Funding
                     elif title_json in funding_cases:
-                        funding_temp = compile_temp(funding_temp, title_json, cell_data)
+                        funding_temp[title_json] = cell_data
 
                     # All other cases do not need fancy structuring
                     else:
@@ -663,6 +670,7 @@ def cells_down_metadata(workbook, sheet, row, col, finalDict):
     Run the DOI Resolver on the final dictionary. That way, any data we get from the DOI resolver will overwrite
     what we parser from the file.
     """
+    funding_temp = compile_fund(funding_temp)
     geo = compile_geo(geo_temp)
     pub = DOIResolver().run(compile_pub(pub_temp))
 
@@ -685,7 +693,7 @@ def cells_right_datasheets(workbook, sheet, row, col, colListNum):
 
     # Iterate over all attributes, and add them to the column if they are not empty
     attrDict = OrderedDict()
-    attrDict['column'] = colListNum
+    attrDict['number'] = colListNum
 
     # Get the data type for this column
     attrDict['dataType'] = str(get_data_type(temp_sheet, colListNum))
@@ -840,9 +848,9 @@ def get_chron_var(temp_sheet, start_row):
         long_cell = temp_sheet.cell_value(start_row, 2)
 
         ## Fill the dictionary for this column
-        col_dict['column'] = column
-        col_dict['shortName'] = short_cell
-        col_dict['longName'] = long_cell
+        col_dict['number'] = column
+        col_dict['parameter'] = short_cell
+        col_dict['description'] = long_cell
         col_dict['units'] = units_cell
         out_list.append(col_dict.copy())
         start_row += 1
@@ -1017,7 +1025,7 @@ def parser():
                 chron_combine.append(chron_dict)
 
             # Add chronology into the final dictionary
-            finalDict['chronology'] = chron_combine
+            finalDict['chronData'] = chron_combine
 
 
         ############################
