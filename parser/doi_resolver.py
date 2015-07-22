@@ -1,14 +1,15 @@
 __author__ = 'Chris Heiser, Austin McDowell'
 
 """
+PURPOSE: Runs as a subprocess to the main parser
+
 CHANGELOG
 Version 1.1 Tuesday, July 5, 2015 by Chris
 Version 1.0 Tuesday, June 9, 2015 by Austin
 
-Input:  '.lipd' file
+Input:  pub dictionary
 
-Output: '-doi.lipd' file that has populated 'pub' fields resolved from the DOI (if there is one) parsed from the
-original .lipd file.
+Output: pub dictionary
 
 """
 
@@ -124,8 +125,8 @@ class DOIResolver(object):
             fetch_dict['publisher'] = raw['publisher']
             fetch_dict['page'] = raw['page']
             fetch_dict['issue'] = raw['issue']
-        except KeyError:
-            print("key error")
+        except KeyError as e:
+            print("Key Error : {0}".format(e))
 
         doi_id = self.compare_replace(pub_dict, fetch_dict)
 
@@ -134,62 +135,8 @@ class DOIResolver(object):
     """
     Main function that gets files, creates outputs, and runs all operations on files
     """
-    # def run(self, pub_dict):
-    #
-    #     """
-    #     USE FOR RUNNING AS AN INLINE PROCESS TO THE MAIN PARSER
-    #     """
-    #     pub_dict['doi'] = self.clean(pub_dict['doi'])
-    #     return self.get_data(pub_dict)
+    def run(self, pub_dict):
 
-    def run_standalone(self):
+        pub_dict['doi'] = self.clean(pub_dict['doi'])
+        return self.get_data(pub_dict)
 
-        # CODE IRRELEVANT UNLESS RUNNING AS A STANDALONE PROCESS
-
-        # Choose the directory that has files. For debugging use only. Production will run script on current file.
-        directory = '/Users/chrisheiser1/Desktop/doi/'
-        os.chdir(directory)
-
-        file_list = []
-
-        # Delete any doi files that are in the dir. New update files will be created in their place.
-        for file in os.listdir():
-            if file.endswith('.jsonld'):
-                if '-doi' in file:
-                    os.remove(file)
-                else:
-                    file_list.append(file)
-
-        # Run process on each file
-        for txt in file_list:
-            print(txt)
-            # self.start = txt
-
-            # Load data in JSON format
-            json_data = open(txt)
-            data = json.load(json_data)
-
-            # Cut the extension from the file name
-            name = os.path.splitext(txt)[0]
-
-            if not os.path.exists('output/' + name):
-                os.makedirs('output/' + name)
-
-            # Create a new output text file
-            file_out = open(directory + 'output/' + name + '/' + name +'-doi.lipd', 'w+')
-
-            try:
-                doi = data['pub']['identifier']['id']
-                if type(doi) is str:
-                # runs the program once files are created
-                    output = self.get_data(data['pub'], self.clean(doi))
-                    data['pub'] = output
-                    json.dump(data, file_out, indent=4)
-
-            except IndexError:
-                print("No DOI found")
-
-            file_out.close()
-
-c = DOIResolver()
-c.run_standalone()
