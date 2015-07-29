@@ -1,0 +1,215 @@
+{
+	"geo" : {
+		"siteName" : "whatever",
+		"latitude" : 64.683,
+		"longitude" : -97.05,
+		"elevation" : 138,
+		"AHT.Region" : "Mainland Canada",
+		"type" : "Point"
+	},
+	"archiveType" : "Marine sediment",
+	"investigator" : "wolfe",
+	"pub" : {
+		"pubYear" : "1996"
+	},
+	"dataSetName" : "whatever.wolfe.",
+	"paleoData" : {
+		"s1" : {
+			"depth" : {
+				"parameter" : "depth",
+				"units" : "mm",
+				"proxy" : "NC ; NC ; NC ; d18O.cellulose",
+				"values" : [
+					5,
+					102.5,
+					182.5,
+					292.5,
+					397.5,
+					492.5,
+					602.5,
+					692.5,
+					792.5,
+					902.5,
+					987.5,
+					1042.5,
+					1132.5,
+					1252.5,
+					1352.5,
+					1452.5,
+					1562.5,
+					1682.5,
+					1782.5,
+					1877.5
+				]
+			},
+			"age14C" : {
+				"parameter" : "age14C",
+				"units" : "bp",
+				"proxy" : null,
+				"values" : [
+					33.571,
+					671.43,
+					1242.1,
+					1668.8,
+					1992.2,
+					2331.9,
+					2655.3,
+					2978.8,
+					3302.3,
+					3641.9,
+					3875.5,
+					4064.7,
+					4326.6,
+					4675.8,
+					4952.3,
+					5243.3,
+					5563.4,
+					5912.7,
+					6203.7,
+					6494.7
+				]
+			},
+			"age" : {
+				"parameter" : "age",
+				"units" : "bp",
+				"proxy" : null,
+				"values" : [
+					-31,
+					601,
+					1084,
+					1682,
+					2159,
+					2583,
+					3004,
+					3321,
+					3658,
+					4021,
+					4289,
+					4492,
+					4800,
+					5217,
+					5569,
+					5924,
+					6317,
+					6748,
+					7108,
+					7431
+				]
+			},
+			"d18O" : {
+				"parameter" : "d18O",
+				"units" : "â° vsmow",
+				"proxy" : null,
+				"values" : [
+					-17.924,
+					-18.202,
+					-17.769,
+					-20.307,
+					-16.757,
+					-16.135,
+					-15.739,
+					-13.159,
+					-15.514,
+					-15.843,
+					-15.793,
+					-13.407,
+					-13.273,
+					-14.525,
+					-13.583,
+					-16.757,
+					-12.523,
+					-15.9,
+					-12.687,
+					-13.532
+				],
+				"climateInterpretation" : {
+					"parameter" : "P",
+					"parameterDetail" : "eff",
+					"seasonality" : "ANN",
+					"interpDirection" : -1
+				}
+			},
+			"age_type" : {
+				"parameter" : "age_type"
+			},
+			"material_dated" : {
+				"parameter" : "material_dated"
+			}
+		}
+	},
+	"chronData" : {
+		"c1" : {
+			"depth" : {
+				"parameter" : "depth_bot",
+				"units" : "mm"
+			},
+			"age14C" : {
+				"parameter" : "depth_top",
+				"units" : "mm"
+			},
+			"age" : {
+				"parameter" : "age14C",
+				"units" : "bp"
+			},
+			"d18O" : {
+				"parameter" : "age_error",
+				"units" : "years"
+			},
+			"NA" : {
+				"units" : "mm"
+			},
+			"age_type" : {
+				"parameter" : "age_type",
+				"values" : [
+					"surface",
+					"14C_bulk",
+					"14C_bulk",
+					"14C_bulk",
+					"NA",
+					"NA",
+					"NA",
+					"NA"
+				]
+			},
+			"lab_id" : {
+				"parameter" : "lab_id",
+				"values" : [
+					"NA",
+					"TO-4526",
+					"TO-4527",
+					"TO-4528",
+					"NA",
+					"NA",
+					"NA",
+					"NA"
+				]
+			},
+			"material_dated" : {
+				"parameter" : "material_dated",
+				"values" : [
+					"NA",
+					"organic_sediment",
+					"organic_sediment",
+					"organic_sediment",
+					"NA",
+					"NA",
+					"NA",
+					"NA"
+				]
+			},
+			"note" : {
+				"parameter" : "note",
+				"values" : [
+					"Assumed_top_age_based_on_collection_year_(1985_DK-ASSUMED)",
+					"NA",
+					"NA",
+					"NA",
+					"NA",
+					"NA",
+					"NA",
+					"NA"
+				]
+			}
+		}
+	}
+}

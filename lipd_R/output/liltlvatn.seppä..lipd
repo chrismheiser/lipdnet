@@ -1,0 +1,231 @@
+{
+	"geo" : {
+		"siteName" : "liltlvatn",
+		"latitude" : 68.517,
+		"longitude" : 14.867,
+		"elevation" : 106,
+		"AHT.Region" : "Fennoscandia",
+		"type" : "Point"
+	},
+	"archiveType" : "Marine sediment",
+	"investigator" : "seppä",
+	"pub" : {
+		"pubYear" : "2009"
+	},
+	"dataSetName" : "liltlvatn.seppä.",
+	"paleoData" : {
+		"s1" : {
+			"depth" : {
+				"parameter" : "depth",
+				"units" : "mm",
+				"proxy" : "NC ; NC ; pollen",
+				"values" : [
+					6350,
+					6420,
+					6480,
+					6560,
+					6640,
+					6720,
+					6800,
+					6880,
+					6960,
+					7040,
+					7120,
+					7200,
+					7280,
+					7360,
+					7440,
+					7520,
+					7600,
+					7680,
+					7760,
+					7840,
+					7920,
+					8000,
+					8080,
+					8160,
+					8240,
+					8320,
+					8400,
+					8480,
+					8560,
+					8640,
+					8720,
+					8800,
+					8880,
+					8960,
+					9040,
+					9120,
+					9200,
+					9280
+				]
+			},
+			"age" : {
+				"parameter" : "age",
+				"units" : "bp",
+				"proxy" : null,
+				"values" : [
+					-45,
+					161.6,
+					342.4,
+					583.47,
+					824.54,
+					1065.6,
+					1306.7,
+					1547.8,
+					1788.8,
+					2029.9,
+					2271,
+					2512,
+					2753.1,
+					2994.2,
+					3235.2,
+					3476.3,
+					3717.4,
+					3958.5,
+					4199.5,
+					4440.6,
+					4681.7,
+					4922.7,
+					5163.8,
+					5404.9,
+					5645.9,
+					5887,
+					6128.1,
+					6369.2,
+					6610.2,
+					6851.3,
+					7092.4,
+					7333.4,
+					7574.5,
+					7815.6,
+					8056.6,
+					8297.7,
+					8538.8,
+					8779.9
+				]
+			},
+			"Temp" : {
+				"parameter" : "Temp",
+				"units" : "deg c",
+				"proxy" : null,
+				"values" : [
+					11.118,
+					11.335,
+					10.899,
+					10.829,
+					11.342,
+					11.246,
+					11.166,
+					11.262,
+					11.367,
+					11.118,
+					11.199,
+					11.497,
+					11.306,
+					11.528,
+					11.461,
+					11.197,
+					11.698,
+					11.27,
+					11.767,
+					11.894,
+					11.864,
+					11.731,
+					11.293,
+					11.567,
+					11.167,
+					11.644,
+					11.63,
+					11.683,
+					11.76,
+					11.458,
+					11.498,
+					11.555,
+					11.275,
+					11.717,
+					11.779,
+					11.392,
+					11.959,
+					12.325
+				],
+				"climateInterpretation" : {
+					"parameter" : "T",
+					"parameterDetail" : "air",
+					"seasonality" : "JUL",
+					"interpDirection" : 1
+				}
+			},
+			"age_type" : {
+				"parameter" : "age_type"
+			},
+			"lab_id" : {
+				"parameter" : "lab_id"
+			},
+			"material_dated" : {
+				"parameter" : "material_dated"
+			},
+			"rejected_dates" : {
+				"parameter" : "rejected_dates"
+			},
+			"note" : {
+				"parameter" : "note"
+			}
+		}
+	},
+	"chronData" : {
+		"c1" : {
+			"depth" : {
+				"parameter" : "depth_bot",
+				"units" : "mm"
+			},
+			"age" : {
+				"parameter" : "depth_top",
+				"units" : "mm"
+			},
+			"Temp" : {
+				"parameter" : "age14C",
+				"units" : "bp"
+			},
+			"NA" : {
+				"units" : "mm"
+			},
+			"age_type" : {
+				"parameter" : "age_type",
+				"values" : [
+					"surface",
+					"14C_bulk",
+					"14C_bulk",
+					"14C_bulk",
+					"14C_bulk",
+					"14C_bulk",
+					"14C_bulk"
+				]
+			},
+			"material_dated" : {
+				"parameter" : "material_dated",
+				"values" : [
+					"NA",
+					"gyttja",
+					"gyttja",
+					"gyttja",
+					"gyttja",
+					"gyttja",
+					"gyttja"
+				]
+			},
+			"note" : {
+				"parameter" : "note",
+				"values" : [
+					"assumed_from_record",
+					"NA",
+					"NA",
+					"NA",
+					"NA",
+					"NA",
+					"NA"
+				]
+			}
+		}
+	}
+}

@@ -1,0 +1,291 @@
+{
+	"geo" : {
+		"siteName" : "njakajaure",
+		"latitude" : 68.33,
+		"longitude" : 18.78,
+		"elevation" : 409,
+		"AHT.Region" : "Fennoscandia",
+		"type" : "Point"
+	},
+	"archiveType" : "Marine sediment",
+	"investigator" : "bigler",
+	"pub" : {
+		"pubYear" : "1998"
+	},
+	"dataSetName" : "njakajaure.bigler.",
+	"paleoData" : {
+		"s1" : {
+			"depth" : {
+				"parameter" : "depth",
+				"units" : "mm",
+				"proxy" : "NC ; NC ; diatoms",
+				"values" : [
+					10,
+					90,
+					170,
+					250,
+					330,
+					410,
+					490,
+					570,
+					650,
+					730,
+					810,
+					890,
+					970,
+					1050,
+					1130,
+					1210,
+					1290,
+					1370,
+					1450,
+					1530,
+					1610,
+					1690,
+					1770,
+					1850,
+					1930,
+					2010,
+					2090,
+					2170,
+					2250,
+					2330,
+					2410,
+					2490,
+					2570,
+					2650,
+					2730,
+					2810,
+					2890,
+					2970,
+					3050,
+					3130,
+					3190
+				]
+			},
+			"age" : {
+				"parameter" : "age",
+				"units" : "bp",
+				"proxy" : null,
+				"values" : [
+					111,
+					201,
+					290,
+					379,
+					468,
+					558,
+					647,
+					749,
+					939,
+					1138,
+					1341,
+					1548,
+					1750,
+					1955,
+					2164,
+					2371,
+					2578,
+					2775,
+					2998,
+					3237,
+					3487,
+					3732,
+					3979,
+					4243,
+					4472,
+					4721,
+					4984,
+					5250,
+					5524,
+					5775,
+					6029,
+					6294,
+					6562,
+					6845,
+					7102,
+					7374,
+					7667,
+					7960,
+					8259,
+					8551,
+					8855
+				]
+			},
+			"Temp" : {
+				"parameter" : "Temp",
+				"units" : "deg c",
+				"proxy" : null,
+				"values" : [
+					11.2,
+					12.7,
+					13.2,
+					12.6,
+					12.3,
+					13.2,
+					12.3,
+					12.4,
+					13.5,
+					13.5,
+					13.4,
+					13.1,
+					13.6,
+					12.5,
+					12.6,
+					13.4,
+					13.9,
+					14.8,
+					13.9,
+					14.1,
+					13.7,
+					13.9,
+					14.4,
+					14.4,
+					14.7,
+					14.4,
+					14.1,
+					14.5,
+					14.2,
+					14,
+					13.6,
+					13.8,
+					14.1,
+					13.9,
+					14.2,
+					14.1,
+					14.6,
+					11.9,
+					12.7,
+					13.1,
+					13.3
+				],
+				"climateInterpretation" : {
+					"parameter" : "T",
+					"parameterDetail" : "air",
+					"seasonality" : "JUL",
+					"interpDirection" : 1
+				}
+			},
+			"age_type" : {
+				"parameter" : "age_type"
+			},
+			"lab_id" : {
+				"parameter" : "lab_id"
+			}
+		}
+	},
+	"chronData" : {
+		"c1" : {
+			"depth" : {
+				"parameter" : "depth_bot",
+				"units" : "mm"
+			},
+			"age" : {
+				"parameter" : "depth_top",
+				"units" : "mm"
+			},
+			"Temp" : {
+				"parameter" : "age14C",
+				"units" : "bp"
+			},
+			"NA" : {
+				"units" : "mm"
+			},
+			"age_type" : {
+				"parameter" : "age_type",
+				"values" : [
+					"surface",
+					"14C",
+					"14C",
+					"14C",
+					"14C",
+					"14C",
+					"14C",
+					"14C",
+					"14C",
+					"14C",
+					"14C",
+					"14C",
+					"14C",
+					"14C",
+					"14C",
+					"14C",
+					"14C",
+					"14C",
+					"NA"
+				]
+			},
+			"lab_id" : {
+				"parameter" : "lab_id",
+				"values" : [
+					"NA",
+					"Ua-10461",
+					"Ua-10565",
+					"Ua-10566",
+					"Ua-10462",
+					"Ua-10463",
+					"Ua-10336",
+					"Ua-10338",
+					"Ua-10340",
+					"Ua-10464",
+					"Ua-10342",
+					"Ua-10344",
+					"Ua-10346",
+					"Ua-10348",
+					"Ua-10465",
+					"Ua-10466",
+					"Ua-10350",
+					"Ua-10390",
+					"NA"
+				]
+			},
+			"material_dated" : {
+				"parameter" : "material_dated",
+				"values" : [
+					"NA",
+					"Vegetation_macrofossils",
+					"Vegetation_macrofossils",
+					"Vegetation_macrofossils",
+					"Vegetation_macrofossils",
+					"Vegetation_macrofossils",
+					"Vegetation_macrofossils",
+					"Vegetation_macrofossils",
+					"Vegetation_macrofossils",
+					"Vegetation_macrofossils",
+					"Vegetation_macrofossils",
+					"Vegetation_macrofossils",
+					"Vegetation_macrofossils",
+					"Vegetation_macrofossils",
+					"Vegetation_macrofossils",
+					"Vegetation_macrofossils",
+					"Vegetation_macrofossils",
+					"Vegetation_macrofossils",
+					"NA"
+				]
+			},
+			"note" : {
+				"parameter" : "note",
+				"values" : [
+					"Assumed_top_age_based_on_collection_year_(1995)",
+					"NA",
+					"NA",
+					"NA",
+					"NA",
+					"NA",
+					"NA",
+					"NA",
+					"NA",
+					"NA",
+					"NA",
+					"NA",
+					"NA",
+					"NA",
+					"NA",
+					"NA",
+					"NA",
+					"NA",
+					"NA"
+				]
+			}
+		}
+	}
+}

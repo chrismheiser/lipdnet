@@ -9,8 +9,8 @@
 export_lipd <- function(x){
       curr_path <- getwd()
       out_path <- paste0(curr_path,'/output')
-      if (dir.create(out_path)){
-        dir.create(out_path)
+      if (dir.create(out_path, showWarnings = FALSE)){
+        dir.create(out_path, mode = "0777", showWarnings = FALSE, recursive = FALSE)
       }
       setwd(out_path)
       print(getwd())
@@ -22,5 +22,4 @@ export_lipd <- function(x){
         count <- count + 1
       }
       setwd(curr_path)
-      return
 }

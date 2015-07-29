@@ -1,0 +1,220 @@
+{
+	"geo" : {
+		"siteName" : "JR01",
+		"latitude" : 69.9,
+		"longitude" : -95.07,
+		"elevation" : 120,
+		"AHT.Region" : "Mainland Canada",
+		"type" : "Point"
+	},
+	"archiveType" : "Marine sediment",
+	"investigator" : "zabenskie",
+	"pub" : {
+		"pubYear" : "2007"
+	},
+	"dataSetName" : "JR01.zabenskie.",
+	"paleoData" : {
+		"s1" : {
+			"age" : {
+				"parameter" : "age",
+				"units" : "bp",
+				"proxy" : "NC ; pollen",
+				"values" : [
+					-49,
+					-40.25,
+					-25.25,
+					-21.5,
+					-16.5,
+					-10,
+					13.5,
+					83,
+					164.91,
+					252.08,
+					339.24,
+					426.4,
+					513.57,
+					600.73,
+					720.58,
+					894.91,
+					1069.2,
+					1229.6,
+					1575.4,
+					1852.1,
+					2163.3,
+					2256,
+					2517,
+					2684,
+					3045,
+					3105,
+					3231,
+					3402,
+					3475,
+					3596,
+					3718,
+					3791,
+					3840,
+					3888,
+					3961,
+					4010,
+					4083,
+					4156,
+					4205,
+					4302,
+					4448,
+					4692,
+					4962,
+					4994,
+					5154,
+					5261,
+					5475,
+					5582,
+					5676,
+					5697,
+					5719,
+					5751,
+					5836,
+					6060,
+					6396,
+					6732,
+					6956
+				]
+			},
+			"Temp" : {
+				"parameter" : "Temp",
+				"units" : "deg c",
+				"proxy" : null,
+				"values" : [
+					6.28,
+					6.28,
+					6.14,
+					6.28,
+					6.66,
+					6.9,
+					9.06,
+					5.98,
+					7.28,
+					6.12,
+					7.38,
+					8.08,
+					5.76,
+					6.76,
+					8.28,
+					8.84,
+					8.4,
+					7.94,
+					8.4,
+					8.58,
+					8.4,
+					6.78,
+					7.78,
+					10.24,
+					9.72,
+					7.94,
+					7.3,
+					6.28,
+					6.46,
+					8.84,
+					10.24,
+					8.42,
+					9.74,
+					8.92,
+					9.38,
+					6.92,
+					9.92,
+					7.28,
+					7.46,
+					9.64,
+					8.56,
+					9.34,
+					7.78,
+					7.02,
+					9.68,
+					8.78,
+					7.84,
+					9.42,
+					8.78,
+					6.98,
+					6.76,
+					7.02,
+					7.96,
+					9.42,
+					6.64,
+					8.18,
+					7
+				],
+				"climateInterpretation" : {
+					"parameter" : "T",
+					"parameterDetail" : "air",
+					"seasonality" : "JUL",
+					"interpDirection" : 1
+				}
+			},
+			"age_type" : {
+				"parameter" : "age_type"
+			},
+			"core_name" : {
+				"parameter" : "core_name"
+			},
+			"lab_id" : {
+				"parameter" : "lab_id"
+			},
+			"material_dated" : {
+				"parameter" : "material_dated"
+			},
+			"original_reference" : {
+				"parameter" : "original_reference"
+			},
+			"rejected_dates" : {
+				"parameter" : "rejected_dates"
+			},
+			"note" : {
+				"parameter" : "note"
+			}
+		}
+	},
+	"chronData" : {
+		"c1" : {
+			"age" : {
+				"parameter" : "depth_top",
+				"units" : "mm"
+			},
+			"Temp" : {
+				"parameter" : "depth_bot",
+				"units" : "mm"
+			},
+			"NA" : {
+				"units" : "mm"
+			},
+			"age_type" : {
+				"parameter" : "age_type",
+				"values" : [
+					"14C",
+					"14C",
+					"14C",
+					"14C",
+					"14C",
+					"14C",
+					"14C",
+					"14C",
+					"14C",
+					"14C"
+				]
+			},
+			"material_dated" : {
+				"parameter" : "material_dated",
+				"values" : [
+					"Bryophytes_leaf_and_branch_frags",
+					"Plant_material_and_chironomids",
+					"Bryophytes_leaf_and_branch_frags",
+					"Plant_material_and_chironomids",
+					"Bryophytes_leaf_and_branch_frags",
+					"Bryophytes_leaf_and_branch_frags",
+					"Plant_material_and_chironomids",
+					"Plant_fragments",
+					"Plant_fragments",
+					"Bryophytes_leaf_and_branch_frags"
+				]
+			}
+		}
+	}
+}

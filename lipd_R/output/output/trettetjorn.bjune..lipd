@@ -1,0 +1,315 @@
+{
+	"geo" : {
+		"siteName" : "trettetjorn",
+		"latitude" : 60.72,
+		"longitude" : 7,
+		"elevation" : 810,
+		"AHT.Region" : "Fennoscandia",
+		"type" : "Point"
+	},
+	"archiveType" : "Marine sediment",
+	"investigator" : "bjune",
+	"pub" : {
+		"pubYear" : "2005"
+	},
+	"dataSetName" : "trettetjorn.bjune.",
+	"paleoData" : {
+		"s1" : {
+			"depth" : {
+				"parameter" : "depth",
+				"units" : "mm",
+				"proxy" : "NC ; NC ; pollen",
+				"values" : [
+					2,
+					40,
+					80,
+					120,
+					160,
+					200,
+					240,
+					280,
+					320,
+					365,
+					385,
+					425,
+					505,
+					585,
+					665,
+					745,
+					825,
+					905,
+					985,
+					1085,
+					1165,
+					1245,
+					1325,
+					1405,
+					1485,
+					1565,
+					1645,
+					1725,
+					1805,
+					1885,
+					1925,
+					1965,
+					2005,
+					2045,
+					2085,
+					2125,
+					2165,
+					2205,
+					2245,
+					2285,
+					2325,
+					2365,
+					2405,
+					2445,
+					2485,
+					2525,
+					2565,
+					2585,
+					2605,
+					2625,
+					2645,
+					2665,
+					2685
+				]
+			},
+			"age" : {
+				"parameter" : "age",
+				"units" : "bp",
+				"proxy" : null,
+				"values" : [
+					-52,
+					67.651,
+					195.58,
+					323.51,
+					451.44,
+					579.37,
+					707.3,
+					835.23,
+					963.15,
+					1107.1,
+					1171,
+					1299,
+					1554.8,
+					1810.7,
+					2066.5,
+					2322.4,
+					2578.3,
+					2834.1,
+					3090,
+					3409.8,
+					3665.7,
+					3921.5,
+					4177.4,
+					4433.2,
+					4689.1,
+					4944.9,
+					5200.8,
+					5456.7,
+					5712.5,
+					5968.4,
+					6096.3,
+					6224.2,
+					6352.2,
+					6480.1,
+					6608,
+					6736,
+					6863.9,
+					6991.8,
+					7119.7,
+					7247.7,
+					7375.6,
+					7503.5,
+					7631.5,
+					7759.4,
+					7887.3,
+					8015.2,
+					8143.2,
+					8207.1,
+					8271.1,
+					8335.1,
+					8399,
+					8463,
+					8527
+				]
+			},
+			"Temp" : {
+				"parameter" : "Temp",
+				"units" : "deg c",
+				"proxy" : null,
+				"values" : [
+					11.1,
+					9.89,
+					10.1,
+					8.8,
+					11.9,
+					9.9,
+					8.9,
+					9.4,
+					9.2,
+					9.4,
+					10.3,
+					9.5,
+					8.2,
+					9.4,
+					10,
+					10.5,
+					10,
+					9.5,
+					10.3,
+					9.5,
+					9.3,
+					10.2,
+					12.6,
+					11.6,
+					13.1,
+					12,
+					10.7,
+					12.8,
+					12.3,
+					12.4,
+					12.3,
+					12.9,
+					12.1,
+					12.2,
+					11.2,
+					12.2,
+					12.8,
+					13.2,
+					12.2,
+					13.1,
+					12.7,
+					12.8,
+					12.4,
+					12.3,
+					12.2,
+					12.5,
+					12.6,
+					11,
+					11.8,
+					12.1,
+					11.9,
+					10.5,
+					12.2
+				],
+				"climateInterpretation" : {
+					"parameter" : "T",
+					"parameterDetail" : "air",
+					"seasonality" : "JUL",
+					"interpDirection" : 1
+				}
+			},
+			"age_type" : {
+				"parameter" : "age_type"
+			},
+			"lab_id" : {
+				"parameter" : "lab_id"
+			},
+			"material_dated" : {
+				"parameter" : "material_dated"
+			},
+			"rejected_dates" : {
+				"parameter" : "rejected_dates"
+			},
+			"note" : {
+				"parameter" : "note"
+			}
+		}
+	},
+	"chronData" : {
+		"c1" : {
+			"depth" : {
+				"parameter" : "depth_bot",
+				"units" : "mm"
+			},
+			"age" : {
+				"parameter" : "depth_top",
+				"units" : "mm"
+			},
+			"Temp" : {
+				"parameter" : "age14C",
+				"units" : "bp"
+			},
+			"NA" : {
+				"units" : "mm"
+			},
+			"age_type" : {
+				"parameter" : "age_type",
+				"values" : [
+					"surface",
+					"14C_bulk",
+					"14C_bulk",
+					"14C_bulk",
+					"14C_bulk",
+					"14C_bulk",
+					"14C",
+					"14C_bulk",
+					"14C_bulk",
+					"14C_bulk"
+				]
+			},
+			"lab_id" : {
+				"parameter" : "lab_id",
+				"values" : [
+					"NA",
+					"Poz-807",
+					"Tua-3513A",
+					"Tua-3514A",
+					"Tua-3515A",
+					"Poz-808",
+					"Beta-164122",
+					"Tua-3516A",
+					"Tua-3517A",
+					"Beta-164121"
+				]
+			},
+			"material_dated" : {
+				"parameter" : "material_dated",
+				"values" : [
+					"NA",
+					"bulk_sediments",
+					"bulk_sediments",
+					"bulk_sediments",
+					"bulk_sediments",
+					"bulk_sediments",
+					"plant_macrofossils",
+					"bulk_sediments",
+					"bulk_sediments",
+					"bulk_sediments"
+				]
+			},
+			"rejected_dates" : {
+				"parameter" : "rejected_dates",
+				"values" : [
+					"NA",
+					"NA",
+					"NA",
+					"NA",
+					"NA",
+					"NA",
+					"NA",
+					"NA",
+					"x",
+					"NA"
+				]
+			},
+			"note" : {
+				"parameter" : "note",
+				"values" : [
+					"surface_age_based_on_data",
+					"NA",
+					"NA",
+					"NA",
+					"NA",
+					"NA",
+					"NA",
+					"NA",
+					"rejected",
+					"NA"
+				]
+			}
+		}
+	}
+}

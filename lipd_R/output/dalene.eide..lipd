@@ -1,0 +1,273 @@
+{
+	"geo" : {
+		"siteName" : "dalene",
+		"latitude" : 58.25,
+		"longitude" : 8,
+		"elevation" : 40,
+		"AHT.Region" : "Fennoscandia",
+		"type" : "Point"
+	},
+	"archiveType" : "Marine sediment",
+	"investigator" : "eide",
+	"pub" : {
+		"pubYear" : "2009"
+	},
+	"dataSetName" : "dalene.eide.",
+	"paleoData" : {
+		"s1" : {
+			"depth" : {
+				"parameter" : "depth",
+				"units" : "mm",
+				"proxy" : "NC ; NC ; pollen",
+				"values" : [
+					5160,
+					5230,
+					5310,
+					5390,
+					5470,
+					5550,
+					5630,
+					5710,
+					5790,
+					5870,
+					5950,
+					6030,
+					6110,
+					6190,
+					6270,
+					6350,
+					6430,
+					6510,
+					6590,
+					6670,
+					6750,
+					6830,
+					6910,
+					6990,
+					7070,
+					7150,
+					7230,
+					7310,
+					7390,
+					7470,
+					7550,
+					7630,
+					7710,
+					7790,
+					7870,
+					7950,
+					8030,
+					8110,
+					8190,
+					8270,
+					8350,
+					8430,
+					8510,
+					8590,
+					8670,
+					8750,
+					8830,
+					8910,
+					8990,
+					9070
+				]
+			},
+			"age" : {
+				"parameter" : "age",
+				"units" : "bp",
+				"proxy" : null,
+				"values" : [
+					-56.87,
+					37.46,
+					149.42,
+					261.75,
+					374.65,
+					488.32,
+					602.97,
+					718.87,
+					836.27,
+					955.43,
+					1076.6,
+					1200.1,
+					1326.2,
+					1455,
+					1586.9,
+					1722,
+					1860.5,
+					2002.5,
+					2148.2,
+					2297.7,
+					2451.2,
+					2608.8,
+					2770.6,
+					2936.9,
+					3107.7,
+					3283.2,
+					3463.6,
+					3648.9,
+					3839.2,
+					4034.4,
+					4234.8,
+					4440.3,
+					4650.9,
+					4866.8,
+					5087.9,
+					5314.1,
+					5545.1,
+					5781.1,
+					6021.7,
+					6266.9,
+					6516.6,
+					6770.6,
+					7028.8,
+					7291.1,
+					7557.3,
+					7827.4,
+					8101.1,
+					8378.1,
+					8658,
+					8940.4
+				]
+			},
+			"Temp" : {
+				"parameter" : "Temp",
+				"units" : "deg c",
+				"proxy" : null,
+				"values" : [
+					15.268,
+					14.344,
+					14.279,
+					14.001,
+					14.847,
+					14.349,
+					14.58,
+					14.744,
+					14.899,
+					15.622,
+					15.391,
+					14.921,
+					15.319,
+					14.873,
+					16.214,
+					15.465,
+					16.285,
+					15.33,
+					15.498,
+					15.651,
+					15.108,
+					14.926,
+					15.168,
+					15.107,
+					15.297,
+					15.403,
+					15.652,
+					15.103,
+					15.424,
+					15.749,
+					16.1,
+					15.291,
+					15.896,
+					15.833,
+					15.427,
+					15.548,
+					15.656,
+					15.737,
+					15.531,
+					16.013,
+					15.037,
+					15.486,
+					15.179,
+					14.944,
+					15.273,
+					15.275,
+					14.679,
+					15.22,
+					14.65,
+					14.27
+				],
+				"climateInterpretation" : {
+					"parameter" : "T",
+					"parameterDetail" : "air",
+					"seasonality" : "JUL",
+					"interpDirection" : 1
+				}
+			},
+			"age_type" : {
+				"parameter" : "age_type"
+			},
+			"lab_id" : {
+				"parameter" : "lab_id"
+			},
+			"material_dated" : {
+				"parameter" : "material_dated"
+			}
+		}
+	},
+	"chronData" : {
+		"c1" : {
+			"depth" : {
+				"parameter" : "depth",
+				"units" : "mm"
+			},
+			"age" : {
+				"parameter" : "age14C",
+				"units" : "bp"
+			},
+			"Temp" : {
+				"parameter" : "age_error",
+				"units" : "age_error"
+			},
+			"age_type" : {
+				"parameter" : "age_type",
+				"values" : [
+					"surface",
+					"14C_bulk",
+					"14C_bulk",
+					"14C_bulk",
+					"14C_bulk",
+					"14C_bulk",
+					"14C_bulk",
+					"14C_bulk",
+					"14C_bulk",
+					"NA",
+					"NA",
+					"NA"
+				]
+			},
+			"material_dated" : {
+				"parameter" : "material_dated",
+				"values" : [
+					"NA",
+					"sediment",
+					"sediment",
+					"sediment",
+					"sediment",
+					"sediment",
+					"sediment",
+					"sediment",
+					"sediment",
+					"NA",
+					"NA",
+					"NA"
+				]
+			},
+			"note" : {
+				"parameter" : "note",
+				"values" : [
+					"Assumed_top_ages_based_on_?",
+					"NA",
+					"NA",
+					"NA",
+					"NA",
+					"NA",
+					"NA",
+					"NA",
+					"NA",
+					"NA",
+					"NA",
+					"NA"
+				]
+			}
+		}
+	}
+}

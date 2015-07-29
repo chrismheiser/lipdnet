@@ -1,0 +1,234 @@
+{
+	"geo" : {
+		"siteName" : "DA05",
+		"latitude" : 68.715,
+		"longitude" : -51.107,
+		"elevation" : -335,
+		"AHT.Region" : "Canadian islands and Greenland",
+		"type" : "Point"
+	},
+	"archiveType" : "Marine sediment",
+	"investigator" : "lloyd",
+	"pub" : {
+		"pubYear" : "2007"
+	},
+	"dataSetName" : "DA05.lloyd.",
+	"paleoData" : {
+		"s1" : {
+			"age" : {
+				"parameter" : "age",
+				"units" : "bp",
+				"proxy" : "NC ; diatoms",
+				"values" : [
+					1062.8,
+					1103.5,
+					1153.3,
+					1194.1,
+					1257.4,
+					1298,
+					1383.9,
+					1460.7,
+					1533.1,
+					1682.3,
+					1745.5,
+					1863.2,
+					1967.2,
+					2075.9,
+					2134.6,
+					2179.7,
+					2229.4,
+					2396.9,
+					2487.4,
+					2645.6,
+					2858.2,
+					3034.4,
+					3238,
+					3364.5,
+					3545.5,
+					3572.6,
+					3604.3,
+					3667.6,
+					3699.2,
+					3730.9,
+					3744.5,
+					3803.2,
+					3834.9,
+					3866.5,
+					3907.2,
+					3934.3,
+					3984,
+					4038.4,
+					4110.7,
+					4178.6,
+					4223.8,
+					4336.9,
+					4531.3,
+					4603.7,
+					4793.6,
+					4879.4,
+					5005.9,
+					5110,
+					5232.1,
+					5336.1,
+					5408.5,
+					5489.9,
+					5553.1,
+					5679.8,
+					5824.6,
+					5892.4,
+					5955.7,
+					6068.7,
+					6222.5,
+					6294.8,
+					6376.2,
+					6425.9,
+					6548.1,
+					6647.5,
+					6724.4,
+					6828.5,
+					6882.6
+				]
+			},
+			"sea ice diatoms" : {
+				"parameter" : "sea ice diatoms",
+				"units" : "%",
+				"proxy" : null,
+				"values" : [
+					35.818,
+					37.674,
+					31.97,
+					19.049,
+					21.662,
+					26.954,
+					32.66,
+					43.107,
+					35.41,
+					44.278,
+					54.588,
+					35.139,
+					40.225,
+					8.0616,
+					25.382,
+					47.925,
+					47.926,
+					25.866,
+					17.206,
+					29.854,
+					17.348,
+					29.514,
+					24.293,
+					33.16,
+					23.265,
+					20.585,
+					17.699,
+					17.356,
+					23.541,
+					10.002,
+					16.188,
+					18.732,
+					17.976,
+					28.354,
+					28.423,
+					23.75,
+					36.259,
+					18.047,
+					21.071,
+					16.123,
+					16.124,
+					14.063,
+					16.745,
+					8.9112,
+					17.435,
+					31.044,
+					44.654,
+					30.978,
+					30.979,
+					29.812,
+					27.682,
+					25.071,
+					32.494,
+					29.815,
+					15.521,
+					22.395,
+					22.189,
+					28.651,
+					23.704,
+					27.416,
+					21.712,
+					23.568,
+					21.714,
+					23.227,
+					18.829,
+					14.431,
+					31.339
+				],
+				"climateInterpretation" : {
+					"parameter" : "ICE",
+					"parameterDetail" : "sea",
+					"seasonality" : "ANN",
+					"interpDirection" : 1
+				}
+			},
+			"age_type" : {
+				"parameter" : "age_type"
+			},
+			"lab_id" : {
+				"parameter" : "lab_id"
+			},
+			"material_dated" : {
+				"parameter" : "material_dated"
+			}
+		}
+	},
+	"chronData" : {
+		"c1" : {
+			"age" : {
+				"parameter" : "depth",
+				"units" : "mm"
+			},
+			"sea ice diatoms" : {
+				"parameter" : "age_alt",
+				"units" : "bp"
+			},
+			"NA" : {
+				"units" : "bp"
+			},
+			"age_type" : {
+				"parameter" : "age_type",
+				"values" : [
+					"14C",
+					"14C",
+					"14C",
+					"14C",
+					"14C",
+					"14C",
+					"14C"
+				]
+			},
+			"lab_id" : {
+				"parameter" : "lab_id",
+				"values" : [
+					"AAR-7509",
+					"AAR-7510",
+					"AAR-7511",
+					"AAR-8283",
+					"AAR-6835",
+					"AAR8297",
+					"AAR-6836"
+				]
+			},
+			"material_dated" : {
+				"parameter" : "material_dated",
+				"values" : [
+					"Plant_remains",
+					"Plant_remains",
+					"Plant_remains",
+					"Plant_remains",
+					"Plant_remains",
+					"Plant_remains",
+					"Plant_remains"
+				]
+			}
+		}
+	}
+}

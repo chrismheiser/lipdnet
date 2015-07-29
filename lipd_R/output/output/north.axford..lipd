@@ -1,0 +1,160 @@
+{
+	"geo" : {
+		"siteName" : "north",
+		"latitude" : 69.242,
+		"longitude" : -50.027,
+		"elevation" : 190,
+		"AHT.Region" : "Canadian islands and Greenland",
+		"type" : "Point"
+	},
+	"archiveType" : "Marine sediment",
+	"investigator" : "axford",
+	"pub" : {
+		"pubYear" : "2013"
+	},
+	"dataSetName" : "north.axford.",
+	"paleoData" : {
+		"chironomids" : {
+			"depth" : {
+				"parameter" : "depth",
+				"units" : "mm",
+				"proxy" : "NC ; NC ; chironomids",
+				"values" : [
+					3.8,
+					8.8,
+					18.8,
+					23.8,
+					32.5,
+					52.5,
+					5,
+					77.5,
+					102.5,
+					25,
+					55,
+					105,
+					155,
+					205,
+					255,
+					305,
+					355,
+					405,
+					455,
+					505,
+					555,
+					605,
+					655,
+					705,
+					755,
+					805,
+					855,
+					905,
+					955,
+					1005
+				]
+			},
+			"age" : {
+				"parameter" : "age",
+				"units" : "bp",
+				"proxy" : null,
+				"values" : [
+					-56,
+					-51,
+					-42,
+					-38,
+					-28,
+					-7,
+					0,
+					25,
+					70,
+					298.23,
+					656.1,
+					1252.5,
+					1849,
+					2445.4,
+					2803.2,
+					3001.8,
+					3200.4,
+					3399,
+					3727.2,
+					4055.3,
+					4383.5,
+					4711.7,
+					4985.2,
+					5287.5,
+					5589.9,
+					5892.2,
+					6194.5,
+					6496.9,
+					6799.2,
+					7101.5
+				]
+			},
+			"Temp" : {
+				"parameter" : "Temp",
+				"units" : "c",
+				"proxy" : null,
+				"values" : [
+					0,
+					-0.24685,
+					-0.23069,
+					-0.12321,
+					0.38792,
+					-0.81769,
+					-0.55617,
+					-1.1208,
+					-1.4582,
+					0.29012,
+					0.44872,
+					0.3256,
+					0.56516,
+					0.30418,
+					0.24173,
+					1.4502,
+					1.2723,
+					1.2398,
+					1.6224,
+					2.3342,
+					1.9366,
+					1.9601,
+					1.719,
+					2.8629,
+					1.8591,
+					2.5419,
+					1.2008,
+					1.5074,
+					1.0481,
+					0.62699
+				],
+				"climateInterpretation" : {
+					"parameter" : "T",
+					"parameterDetail" : "air",
+					"seasonality" : "JUL",
+					"interpDirection" : 1
+				}
+			},
+			"age_type" : {
+				"parameter" : "age_type"
+			},
+			"material_dated" : {
+				"parameter" : "material_dated"
+			},
+			"note" : {
+				"parameter" : "note"
+			}
+		}
+	},
+	"chronData" : {
+		"NA" : {
+			"material_dated" : {
+				"values" : [
+					"plant_macrofossils",
+					"plant_macrofossils",
+					"plant_macrofossils",
+					"plant_macrofossils",
+					"plant_macrofossils",
+					"plant_macrofossils"
+				]
+			}
+		}
+	}
+}

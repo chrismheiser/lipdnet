@@ -1,0 +1,202 @@
+{
+	"geo" : {
+		"siteName" : "spaime",
+		"latitude" : 63.12,
+		"longitude" : 12.32,
+		"elevation" : 887,
+		"AHT.Region" : "Fennoscandia",
+		"type" : "Point"
+	},
+	"archiveType" : "Marine sediment",
+	"investigator" : "hammarlund",
+	"pub" : {
+		"pubYear" : "2004"
+	},
+	"dataSetName" : "spaime.hammarlund.",
+	"paleoData" : {
+		"stamour2010" : {
+			"depth" : {
+				"parameter" : "depth",
+				"units" : "mm",
+				"proxy" : "NC ; NC ; d18O.cellulose",
+				"values" : [
+					3409,
+					3477,
+					3603,
+					3666,
+					3728,
+					3789.5,
+					3879.5,
+					3911,
+					4038.5,
+					4101,
+					4218,
+					4281,
+					4311,
+					4399.5,
+					4461,
+					4491,
+					4583,
+					4676,
+					4769.5,
+					4832,
+					4862,
+					4964.5,
+					5026,
+					5057,
+					5142,
+					5206,
+					5276,
+					5351,
+					5401,
+					5492,
+					5555.5,
+					5681,
+					5743.5,
+					5863,
+					5933,
+					5987.8,
+					6062.8,
+					6120.5,
+					6218.5,
+					6297.2,
+					6380.8
+				]
+			},
+			"age" : {
+				"parameter" : "age",
+				"units" : "bp",
+				"proxy" : null,
+				"values" : [
+					46.62,
+					164.62,
+					391.56,
+					510.14,
+					630.58,
+					753.92,
+					941.32,
+					1008.8,
+					1291.7,
+					1435.4,
+					1712.1,
+					1864.4,
+					1937.6,
+					2155.4,
+					2307.9,
+					2382.4,
+					2611.5,
+					2842.5,
+					3073.5,
+					3227,
+					3300.3,
+					3549.4,
+					3698,
+					3772.8,
+					3935.7,
+					4133.4,
+					4305.3,
+					4493,
+					4620.6,
+					4863.6,
+					5042.1,
+					5425.6,
+					5574.8,
+					6090,
+					6392.1,
+					6654.4,
+					7049.8,
+					7437.6,
+					8047.1,
+					8658.3,
+					9403.3
+				]
+			},
+			"d18O" : {
+				"parameter" : "d18O",
+				"units" : "permil v smow",
+				"proxy" : null,
+				"values" : [
+					-19.996,
+					-22.065,
+					-21.272,
+					-20.74,
+					-18.776,
+					-21.346,
+					-19.049,
+					-20.061,
+					-19.83,
+					-20.679,
+					-22.007,
+					-19.314,
+					-20.903,
+					-18.194,
+					-18.071,
+					-19.461,
+					-19.758,
+					-19.648,
+					-20.274,
+					-19.775,
+					-21.153,
+					-21.787,
+					-20.508,
+					-20.05,
+					-21.345,
+					-17.557,
+					-19.652,
+					-19.737,
+					-17.535,
+					-18.743,
+					-19.018,
+					-18.37,
+					-17.276,
+					-19.289,
+					-18.132,
+					-16.721,
+					-15.238,
+					-17.672,
+					-16.881,
+					-17.865,
+					-17.888
+				],
+				"climateInterpretation" : {
+					"parameter" : "MODE",
+					"parameterDetail" : "NAO",
+					"seasonality" : "winter",
+					"interpDirection" : 1
+				}
+			},
+			"age_type" : {
+				"parameter" : "age_type"
+			},
+			"lab_id" : {
+				"parameter" : "lab_id"
+			},
+			"rejected_dates" : {
+				"parameter" : "rejected_dates"
+			},
+			"material_dated" : {
+				"parameter" : "material_dated"
+			},
+			"note" : {
+				"parameter" : "note"
+			}
+		}
+	},
+	"chronData" : {
+		"NA" : {
+			"note" : {
+				"values" : [
+					"Assumed_top_age_based_on_collection_year_(1999)_and_assumed_top_depth_is_3.37m",
+					"NA",
+					"NA",
+					"NA",
+					"NA",
+					"NA",
+					"NA",
+					"NA",
+					"NA"
+				]
+			}
+		}
+	}
+}

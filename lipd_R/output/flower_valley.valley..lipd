@@ -1,0 +1,180 @@
+{
+	"geo" : {
+		"siteName" : "flower_valley",
+		"latitude" : 65.61,
+		"longitude" : -37.69,
+		"elevation" : 73,
+		"AHT.Region" : "Canadian islands and Greenland",
+		"type" : "Point"
+	},
+	"archiveType" : "Marine sediment",
+	"investigator" : "valley",
+	"pub" : {
+		"pubYear" : "2013"
+	},
+	"dataSetName" : "flower_valley.valley.",
+	"paleoData" : {
+		"s1" : {
+			"notes" : "dD_of_n-alkanes_(aq-p)",
+			"depth" : {
+				"parameter" : "depth",
+				"units" : "mm",
+				"proxy" : "NC ; NC ; dD",
+				"values" : [
+					50,
+					100,
+					150,
+					200,
+					550,
+					600,
+					650,
+					700,
+					750,
+					800,
+					850,
+					900,
+					950,
+					1000,
+					1050,
+					1100,
+					1150,
+					1200,
+					1250,
+					1300,
+					1400,
+					1450,
+					1500,
+					1550
+				]
+			},
+			"age" : {
+				"parameter" : "age",
+				"units" : "bp",
+				"proxy" : null,
+				"values" : [
+					308,
+					829,
+					1350,
+					1766,
+					1894,
+					2192,
+					2503,
+					2826,
+					3137,
+					3416,
+					3664,
+					3903,
+					4157,
+					4448,
+					4800,
+					5211,
+					5657,
+					6114,
+					6556,
+					6971,
+					7707,
+					8020,
+					8296,
+					8560
+				]
+			},
+			"dD" : {
+				"parameter" : "dD",
+				"units" : "permil",
+				"proxy" : null,
+				"values" : [
+					-106.41,
+					-113.48,
+					-112.25,
+					-110.48,
+					-129.64,
+					-112.2,
+					-124.88,
+					-107.96,
+					-117.3,
+					-116.33,
+					-110.34,
+					-110.09,
+					-108.4,
+					-105.58,
+					-101.11,
+					-102.87,
+					-101.6,
+					-97.031,
+					-102.96,
+					-99.346,
+					-95.521,
+					-92.972,
+					-94.94,
+					-86.263
+				],
+				"climateInterpretation" : {
+					"parameter" : "P",
+					"parameterDetail" : "eff",
+					"seasonality" : "ANN",
+					"interpDirection" : 1
+				}
+			},
+			"age_type" : {
+				"parameter" : "age_type"
+			},
+			"material_dated" : {
+				"parameter" : "material_dated"
+			},
+			"note" : {
+				"parameter" : "note"
+			}
+		}
+	},
+	"chronData" : {
+		"c1" : {
+			"depth" : {
+				"parameter" : "depth_top",
+				"units" : "mm"
+			},
+			"age" : {
+				"parameter" : "depth_bot",
+				"units" : "mm"
+			},
+			"dD" : {
+				"parameter" : "age",
+				"units" : "bp"
+			},
+			"NA" : {
+				"units" : "mm"
+			},
+			"age_type" : {
+				"parameter" : "age_type",
+				"values" : [
+					"Pb",
+					"14C",
+					"14C",
+					"14C",
+					"14C",
+					"14C",
+					"14C",
+					"14C",
+					"14C",
+					"14C",
+					"14C"
+				]
+			},
+			"lab_id" : {
+				"parameter" : "lab_id",
+				"values" : [
+					"NA",
+					"UCI-89381",
+					"OS-89641___",
+					"UCI-89382",
+					"UCI-87237",
+					"OS-89642",
+					"UCI-87238",
+					"UCI-89383",
+					"UCI-89384",
+					"UCI-87239",
+					"UCI-89385"
+				]
+			}
+		}
+	}
+}
