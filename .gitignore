@@ -62,3 +62,6 @@ workspace.xml
 *.history
 *.pper
 .Rproj.user
+
+#website
+data/*
