@@ -154,7 +154,7 @@ class DOIResolver(object):
     def run_standalone(self):
 
         # Choose the directory that has files. For debugging use only. Production will run script on current file.
-        directory = '/Users/chrisheiser1/Desktop/'
+        directory = '/Users/chrisheiser1/Desktop/doi/'
         os.chdir(directory)
 
         file_list = []
