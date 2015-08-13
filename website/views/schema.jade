@@ -1,28 +1,62 @@
 extends base
 
+block head
+	//- link(href='css/table.css', rel='stylesheet')
+
 block content
-	section#content
-		.container
+	// box with info for testing purposes
+	div(ng-controller='SortCtrl', class='container')
+		div.alert.alert-info
+			p Sort Type: {{ sortType }}
+			p Sort Reverse: {{ sortReverse }}
+			p Search String: {{ searchSchema }}
+			
+		// search box filter
+		form
+			div.form-group
+				div.input-group
+					div.input-group-addon
+						i.fa.fa-search
+					input(type='text', class='form-control', placeholder='Search schema...', ng-model='searchSchema')
+		
+		// table of data
+		table.table.table-bordered.table-striped
+			thead
+				tr
+					td
+						a(href='#', ng-click = "sortType = 'name'; sortReverse = !sortReverse") Name
+							span(ng-show="sortType == 'name' && !sortReverse", class='fa fa-caret-down')
+							span(ng-show="sortType == 'name' && sortReverse", class='fa fa-caret-up')
+					td
+						a(href='#', ng-click = "sortType = 'type'; sortReverse = !sortReverse") Expected Type
+							span(ng-show="sortType == 'type' && !sortReverse", class='fa fa-caret-down')
+							span(ng-show="sortType == 'type' && sortReverse", class='fa fa-caret-up')
+					td Description
+					td
+						a(href='#', ng-click = "sortType = 'link'; sortReverse = !sortReverse") Reference
+							span(ng-show="sortType == 'link' && !sortReverse", class='fa fa-caret-down')
+							span(ng-show="sortType == 'link' && sortReverse", class='fa fa-caret-up')
 
-			// filler columns to center the main table
-			.col-lg-1
-			.col-lg-1
+			tbody
+				tr(ng-repeat='item in schema | orderBy:sortType:sortReverse | filter:searchSchema')
+					td {{ item.name }}
+					td {{ item.type }}
+					td {{ item.description }}
+					td 
+						a(href='{{ item.reference }}') {{ item.link }}
 
-			// schema table 
-			.col-lg-8
-				table#table-bordered
-					.thead
-						tr
-							th Property
-							th Expected Type
-							th Description
-					.tbody
-						tr
-							th Elevation
-							td Meters (m)
-							td Elevation is often measured in meters or feet.
-
-			// more filler columns
-			.col-lg-1
-			.col-lg-1
-
+	//- div(ng-controller='SortCtrl', class='container')
+	//- 	table
+	//- 		thead
+	//- 			tr
+	//- 				th Name
+	//- 				th Expected Type
+	//- 				th Description
+	//- 				th More Info
+	//- 		tbody
+	//- 			tr(ng-repeat='item in schema')
+	//- 				td {{ item.name }}
+	//- 				td {{ item.type }}
+	//- 				td {{ item.description }}
+	//- 				td 
+	//- 					a(href='{{ item.reference }}') {{ item.link }}

@@ -1,36 +1,30 @@
 extends base
 
 block content
-  // This allows for a thin black bar after the nav header
-  //- section#inner-headline
-  //-   .container
-  //-     .row
-  //-       .col-lg-12
-
   section#content
     .container
       .row
         .col-lg-12
           h4
-            | Get in touch with us by filling 
-            strong contact form below
+            | Feel free to send us your questions, comments, and concerns!
+            strong
           form#contactform.validateform(action='contact/contact.php', method='post', name='send-contact')
             #sendmessage
               | Your message has been sent. Thank you!
             .row
               .col-lg-4.field
-                input(type='text', name='name', placeholder='* Enter your full name', data-rule='maxlen:4', data-msg='Please enter at least 4 chars')
+                input(type='text', name='name', placeholder='* Name', data-rule='maxlen:4', data-msg='Please enter at least 4 chars')
                 .validation
               .col-lg-4.field
-                input(type='text', name='email', placeholder='* Enter your email address', data-rule='email', data-msg='Please enter a valid email')
+                input(type='text', name='email', placeholder='* E-mail', data-rule='email', data-msg='Please enter a valid email')
                 .validation
               .col-lg-4.field
-                input(type='text', name='subject', placeholder='Enter your subject', data-rule='maxlen:4', data-msg='Please enter at least 4 chars')
+                input(type='text', name='subject', placeholder='Subject', data-rule='maxlen:4', data-msg='Please enter at least 4 chars')
                 .validation
               .col-lg-12.margintop10.field
-                textarea.input-block-level(rows='12', name='message', placeholder='* Your message here...', data-rule='required', data-msg='Please write something')
+                textarea.input-block-level(rows='12', name='message', placeholder='* Enter your message here...', data-rule='required', data-msg='Please write something')
                 .validation
                 p
                   button.btn.btn-theme.margintop10.pull-left(type='submit') Submit message
-                  span.pull-right.margintop20 * Please fill all required form field, thanks!
+                  span.pull-right.margintop20 * Please fill all required form fields, thanks!
 

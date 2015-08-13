@@ -1,5 +1,5 @@
-var express = require('express');
-var router = express.Router();
+var express = require('express')
+ , router = express.Router();
 
 /* ROUTING TO OUR PROVIDED VIEWS. */
 router.get('/', function(req, res, next) {
@@ -15,12 +15,16 @@ router.get('/contact', function(req, res){
 });
 
 router.get('/schema', function(req, res){
-	res.render('schema', {title: 'Schema'});
+    res.render('schema', {title: 'Schema'});
 });
 
 router.get('/about', function(req, res){
 	res.render('about', {title: 'About Us'});
 });
 
+router.get('/test', function(req, res){
+	res.render('test', {title: "playground"});
+    // res.sendFile('/Users/chrisheiser1/Documents/Code/geoChronR/website/views/test.html', {title: "playground"});
+});
 
 module.exports = router;
