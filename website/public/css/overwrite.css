@@ -476,7 +476,7 @@ dd {
 
 a.btn,.btn:focus {
 	outline:0;
-	
+
 }
 
 .btn-medium {
@@ -620,17 +620,18 @@ font-size: 10px;
 }
 
 .btn-info {
-  background: #5E9FA3;
+  background: #68A4C3;
 }
 .btn-info:hover {
-  background: #569498;
+  background: #D9EDF7;
+  color: #170110;
 }
 
 .btn-success {
-  background: #11766D;
+  background: #9EC5D9;
 }
 .btn-success:hover {
-  background: #0e6a62;
+  background: #B1D1E1;
 }
 
 .btn-warning {
@@ -914,11 +915,11 @@ font-size: 10px;
    background-color: none;
   background-image: none;
   background-repeat: repeat-x;
-  filter: none; 
+  filter: none;
   text-decoration: none;
   -webkit-box-shadow: none;
      -moz-box-shadow: none;
-          box-shadow: none;		  
+          box-shadow: none;
 }
 .navbar .nav > .active > a,
 .navbar .nav > .active > a:hover,
@@ -926,7 +927,7 @@ font-size: 10px;
   color: #fff;
    background-image: none;
   background-image: none;
-  filter: none;  
+  filter: none;
   text-decoration: none;
   -webkit-box-shadow: none;
      -moz-box-shadow: none;
@@ -967,7 +968,7 @@ font-size: 10px;
 
 .dropdown-menu li > a:hover,
 .dropdown-menu li > a:focus,
-.dropdown-submenu:hover > a, 
+.dropdown-submenu:hover > a,
 .dropdown-menu .active > a,
 .dropdown-menu .active > a:hover {
   color: #ffffff;
@@ -1363,15 +1364,3 @@ font-weight:600;
      -moz-border-radius: 2px;
           border-radius: 2px;
 }
-
-
-
-
-
-
-
-
-
-
-
-

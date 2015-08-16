@@ -3,23 +3,21 @@ extends base
 block content
 	section#content
 		.container
-			.row
-				.col-lg-12
-					article
-						.post-image
-							img(src='img/peaks2-thin.jpg')
-			.row(ng-controller='MainCtrl' style='background-color:#B6BAC0')
-				.col-lg-3(style='margin-bottom:40px')
-				
-					h3 Select JSON file
-					input(type='file', on-read-file='showContent($fileContent)')
-					div(ng-if='content')
-						h3 How's it look?
-						p Does the content look correct? 
-						| Do changes need to be made?
-
-				.col-lg-9
-					h3 JSON Content
-					div(ng-if='content')
-						pre.
-							{{ content }}
+			div#white-box
+				h3 Lorem ipsum
+			//- 
+			//- .row(ng-controller='MainCtrl' style='background-color:#B6BAC0')
+			//- 	.col-lg-3(style='margin-bottom:40px')
+			//- 	
+			//- 		h3 Select JSON file
+			//- 		input(type='file', on-read-file='showContent($fileContent)')
+			//- 		div(ng-if='content')
+			//- 			h3 How's it look?
+			//- 			p Does the content look correct? 
+			//- 			| Do changes need to be made?
+			//- 
+			//- 	.col-lg-9
+			//- 		h3 JSON Content
+			//- 		div(ng-if='content')
+			//- 			pre.
+			//- 				{{ content }}

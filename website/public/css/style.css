@@ -13,6 +13,9 @@
 /* ===================================
 1. General
 ==================================== */
+html {
+
+}
 
 body {
 	font-family:'Open Sans', Arial, sans-serif;
@@ -20,8 +23,19 @@ body {
 	font-weight:300;
 	line-height:1.6em;
 	color:#656565;
+    background: url(/img/peaks2-op.jpg) no-repeat center center fixed;
+    background-size: cover;
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
 }
 
+/*html, body {
+    margin:0;
+    padding:0;
+    height: 100%;
+
+}*/
 a:active {
 	outline:0;
 }
@@ -38,19 +52,26 @@ h1,h2, h3, h4, h5, h6 {
 	margin-bottom: 20px;
 }
 
+
+#pre-edit{
+    background-color: #fff;
+}
+
 /* ===================================
 2. layout
 ==================================== */
 
 .container {
-	padding:0 20px 0 20px;
+	padding:0 0 0 0;
 	position:relative;
 }
 
 #wrapper{
-	width:100%;
+	/*width:100%;*/
 	margin:0;
 	padding:0;
+    min-height:100%;
+    position:relative;
 }
 
 
@@ -97,8 +118,6 @@ img.img-polaroid {
 ==================================== */
 
 /* --- header -- */
-
-
 header .navbar {
     margin-bottom: 0;
 }
@@ -125,7 +144,10 @@ header .navbar-collapse  ul.navbar-nav {
 }
 
 header .navbar-default{
-    background-color: #fff;
+    /*background-color: #fff;*/
+    background-color: transparent;
+    background: transparent;
+    border-color: transparent;
 }
 
 header .nav li a:hover,
@@ -301,6 +323,8 @@ ul.nav li.dropdown a {
 	display:none;
 }
 
+
+
 /* ===================================
 5. Section: Featured
 ==================================== */
@@ -313,24 +337,14 @@ ul.nav li.dropdown a {
 	padding:0;
 }
 
-/* ===================================
-6. Sliders
-==================================== */
-/* --- flexslider --- */
 
-#featured .flexslider {
-	padding:0;
-	margin: 50px 0 30px;
-	background: #fff;
-	position: relative;
-	zoom: 1;
+/* This is the white content box that surrounds any content in the body */
+#white-box {
+    background-color: #fff;
+    border-radius: 7px;
+    padding: 15px ;
+    opacity: 0.97;
 }
-
-.flex-caption {background:none; -ms-filter:progid:DXImageTransform.Microsoft.gradient(startColorstr=#4C000000,endColorstr=#4C000000); filter:progid:DXImageTransform.Microsoft.gradient(startColorstr=#4C000000,endColorstr=#4C000000); zoom: 1;}
-.flex-caption { bottom: 35px; background-color: rgba(0, 0, 0, 0.8); color: #fff; margin: 0; padding: 25px 25px 25px 30px; position: absolute; right: 0; width: 295px;}
-.flex-caption h3 {color: #fff; letter-spacing: 1px; margin-bottom: 8px; text-transform: uppercase;}
-.flex-caption p {margin: 0 0 15px;}
-
 
 
 /* ===================================
@@ -350,7 +364,10 @@ section.callaction {
 #content {
 	position:relative;
 	background:#fff;
-	padding:50px 0 40px 0;
+	padding:30px 0 40px 0;
+    background-color: transparent;
+    background: transparent;
+    border-color: transparent;
 }
 
 #content img {
@@ -845,12 +862,12 @@ footer .widget .social-network {
 /* --- Map --- */
 .map{
 	position:relative;
-	margin-top:-50px;
-	margin-bottom:40px;
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
 }
 
 .map iframe{
-	width:100%;
+	width: 100%;
 	height:450px;
 	border:none;
 }
@@ -1515,8 +1532,12 @@ ul.time-post li.time{
 ================================ */
 
 footer{
-	padding:50px 0 0 0;
+	padding:60px 0 0 0;
 	color:#f8f8f8;
+    position:absolute;
+    bottom:0;
+    width:100%;
+    height:30px;   /* Height of the footer */
 }
 
 footer a {
@@ -1816,15 +1837,20 @@ article img.pull-right, article .align-right{
 	}
 }
 
+/* suppress background image for any browser below 767px */
 @media (max-width: 767px) {
 
   body {
     padding-right: 0;
     padding-left: 0;
+    /*background-image: none !important;*/
   }
+
+
 	.navbar-brand {
 		margin-top: 10px;
 		border-bottom: none;
+        color: #111;
 	}
 	.navbar-header {
 		margin-top: 20px;
@@ -1941,6 +1967,15 @@ article img.pull-right, article .align-right{
 }
 
 @media (max-width: 480px) {
+
+    body {
+        background-image: none !important;
+    }
+
+    .navbar-brand{
+        color: #111
+    }
+
 	.bottom-article a.pull-right {
 		float:left;
 		margin-top:20px;
@@ -1971,5 +2006,10 @@ article img.pull-right, article .align-right{
 }
 
 @media (max-width: 360px) {
-
+    body {
+        background-image: none !important;
+    }
+    .navbar-brand{
+        color: #111
+    }
 }

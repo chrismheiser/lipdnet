@@ -5,12 +5,12 @@ block head
 
 block content
 	// box with info for testing purposes
-	div(ng-controller='SortCtrl', class='container')
-		div.alert.alert-info
-			p Sort Type: {{ sortType }}
-			p Sort Reverse: {{ sortReverse }}
-			p Search String: {{ searchSchema }}
-			
+	div#white-box(ng-controller='SortCtrl', class='container')
+		//- div.alert.alert-info
+		//- 	p Sort Type: {{ sortType }}
+		//- 	p Sort Reverse: {{ sortReverse }}
+		//- 	p Search String: {{ searchSchema }}
+		//- 	
 		// search box filter
 		form
 			div.form-group

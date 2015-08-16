@@ -11,8 +11,10 @@
             <!-- add the active class if the state matches our ui-sref -->
             <div id="status-buttons" class="text-center">
                 <a ui-sref-active="active" ui-sref=".upload"><span>1</span> Upload</a>
-                <a ui-sref-active="active" ui-sref=".contents"><span>2</span> Contents</a>
-                <a ui-sref-active="active" ui-sref=".success"><span>3</span> Success</a>
+                <a ui-sref-active="active" ui-sref=".content"><span>2</span> Contents</a>
+                <a ui-sref-active="active" ui-sref=".validate"><span>3</span> Validate</a>
+                <a ui-sref-active="active" ui-sref=".success"><span>4</span> Success</a>
+                <a ui-sref-active="active" ui-sref=".thanks"><span>5</span> Thanks</a>
             </div>
         </div>
 
@@ -26,9 +28,11 @@
     </div>
 
     <!-- show our formData as it is being typed -->
-    <!-- <pre>
+    <h4> Pre Data Preview </h4>
+    <pre>
+        {{ userData }}
         {{ formData }}
-    </pre> -->
+    </pre>
 
 
 </div>

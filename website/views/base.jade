@@ -6,19 +6,18 @@ html(html='en')
 		title=title
 		
 		// Application Dependencies
-		link(href='https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.5/css/bootstrap.min.css', rel='stylesheet')
+		link(rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.5/css/bootstrap.min.css')
 		script(type='text/javascript' src='https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.4.3/angular.js')
-		//- script(type='text/javascript' src='http://nervgh.github.io/js/es5-shim.min.js')
 		// Application Scripts
-		link(href='css/style.css', rel='stylesheet')
-		link(href='css/skin.css', rel='stylesheet')
-		script(src='js/ngApp.js')
-		script(src='js/ngForm.js')
+		link(rel='stylesheet' href='css/skin.css')
+		link(rel='stylesheet' href='css/style.css')
+		script(type='text/javascript' src='js/ngApp.js')
+		script(type='text/javascript' src='js/ngForm.js')
 		
 		block head
 
 	body(ng-app='myApp')
-		#wrapper
+		div#wrapper
 			header
 				.navbar.navbar-default.navbar-static-top
 					.container
@@ -29,7 +28,7 @@ html(html='en')
 								span.icon-bar
 							a.navbar-brand(href='/index')
 								span L
-								| iPD
+									|IPD
 						.navbar-collapse.collapse
 							ul.nav.navbar-nav
 								li
@@ -42,26 +41,25 @@ html(html='en')
 									a(href='/contact') Contact
 								li
 									a(href='/test') Test
+			
 			block content
-
-		footer
-			.containers
-				.row
-					.col-lg-12
-						.copyright
-							p
-								span © The LiPD Project
-									ul.social-network
-										li
-											a(href='https://github.com/cmh553/geoChronR', data-placement='top', title='Github')
-												i.fa.fa-github.fa-6
-		
+			
+			//- footer
+				//- div.container
+				//- 	.copyright
+				//- 		p
+				//- 			span © The LiPD Project
+				//- 				ul.social-network
+				//- 					li
+				//- 						a(href='https://github.com/cmh553/geoChronR', data-placement='top', title='Github')
+				//- 							i.fa.fa-github.fa-6
+			
 		// Application Dependencies
-		script(src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.0.0-alpha1/jquery.min.js')
-		script(src='https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.5/js/bootstrap.min.js')
-		script(src='https://cdnjs.cloudflare.com/ajax/libs/angular-ui-router/0.2.15/angular-ui-router.min.js')
-		script(src='https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.4.3/angular-animate.min.js')
-		script(src='http://html5shim.googlecode.com/svn/trunk/html5.js')
+		script(type='text/javascript' src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.0.0-alpha1/jquery.min.js')
+		script(type='text/javascript' src='https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.5/js/bootstrap.min.js')
+		script(type='text/javascript' src='https://cdnjs.cloudflare.com/ajax/libs/angular-ui-router/0.2.15/angular-ui-router.min.js')
+		script(type='text/javascript' src='https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.4.3/angular-animate.min.js')
+		script(type='text/javascript' src='http://html5shim.googlecode.com/svn/trunk/html5.js')
 	
 		// Firebase.io Testing Server
 		//- script(src='https://cdn.firebase.com/js/client/2.2.1/firebase.js')

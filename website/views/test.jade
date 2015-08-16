@@ -1,8 +1,9 @@
 extends base 
 
 block head
-	script(src='css/form.css')
+	link(rel='stylesheet' href='css/form.css')
 
 block content
 	div.container
-		div(ui-view)
+		div#white-box
+			div(ui-view)
