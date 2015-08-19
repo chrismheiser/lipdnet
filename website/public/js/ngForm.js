@@ -18,6 +18,10 @@ form.config(function($stateProvider, $urlRouterProvider){
             url: '/content',
             templateUrl: 'views/form-content.html'
         })
+        .state('form.location',{
+            url: '/location',
+            templateUrl: 'views/form-location.html'
+        })
         .state('form.validate', {
             url: '/validate',
             templateUrl: 'views/form-validate.html'
@@ -37,10 +41,12 @@ form.config(function($stateProvider, $urlRouterProvider){
 form.controller('FormCtrl', function($scope){
     $scope.formData = {};
     $scope.userData = {};
+    $scope.geoData = {};
     $scope.processForm = function(){
         alert('Sent to Server');
     };
     $scope.showContent = function($fileContent){
         $scope.formData = $fileContent;
+        $scope.geoData = formData.geo;
     };
 });

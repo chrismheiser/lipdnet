@@ -1,62 +1,88 @@
-extends base
-
-block head
-	//- link(href='css/table.css', rel='stylesheet')
-
-block content
-	// box with info for testing purposes
-	div#white-box(ng-controller='SortCtrl', class='container')
-		//- div.alert.alert-info
-		//- 	p Sort Type: {{ sortType }}
-		//- 	p Sort Reverse: {{ sortReverse }}
-		//- 	p Search String: {{ searchSchema }}
-		//- 	
-		// search box filter
-		form
-			div.form-group
-				div.input-group
-					div.input-group-addon
-						i.fa.fa-search
-					input(type='text', class='form-control', placeholder='Search schema...', ng-model='searchSchema')
+doctype html
+html(html='en')
+	head
+		meta(charset='utf-8')
+		meta(name='viewport', content='width=device-width, initial-scale=1.0')
+		title=title
 		
-		// table of data
-		table.table.table-bordered.table-striped
-			thead
-				tr
-					td
-						a(href='#', ng-click = "sortType = 'name'; sortReverse = !sortReverse") Name
-							span(ng-show="sortType == 'name' && !sortReverse", class='fa fa-caret-down')
-							span(ng-show="sortType == 'name' && sortReverse", class='fa fa-caret-up')
-					td
-						a(href='#', ng-click = "sortType = 'type'; sortReverse = !sortReverse") Expected Type
-							span(ng-show="sortType == 'type' && !sortReverse", class='fa fa-caret-down')
-							span(ng-show="sortType == 'type' && sortReverse", class='fa fa-caret-up')
-					td Description
-					td
-						a(href='#', ng-click = "sortType = 'link'; sortReverse = !sortReverse") Reference
-							span(ng-show="sortType == 'link' && !sortReverse", class='fa fa-caret-down')
-							span(ng-show="sortType == 'link' && sortReverse", class='fa fa-caret-up')
+		// Application Dependencies
+		link(rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.5/css/bootstrap.min.css')
+		script(type='text/javascript' src='https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.4.3/angular.js')
+		// Application Scripts
+		link(rel='stylesheet' href='css/skin.css')
+		link(rel='stylesheet' href='css/style.css')
+		script(type='text/javascript' src='js/ngApp.js')
+		script(type='text/javascript' src='js/ngForm.js')
+		
+	body(ng-app='myApp')
+		div#wrapper
+			header
+				.navbar.navbar-default.navbar-static-top
+					.container
+						.navbar-header
+							button.navbar-toggle(type='button', data-toggle='collapse', data-target='.navbar-collapse')
+								span.icon-bar
+								span.icon-bar
+								span.icon-bar
+							a.navbar-brand(href='/index')
+								span L
+									|IPD
+						.navbar-collapse.collapse
+							ul.nav.navbar-nav
+								li
+									a(href='/index') Home
+								li
+									a(href='/schema') Schema
+								li
+									a(href='/about') About Us
+								li
+									a(href='/contact') Contact
+								li
+									a(href='/test') Test
+			// box with info for testing purposes
+			div(ng-controller='SortCtrl', class='container')
+				//- div.alert.alert-info
+				//- 	p Sort Type: {{ sortType }}
+				//- 	p Sort Reverse: {{ sortReverse }}
+				//- 	p Search String: {{ searchSchema }}
+				//- 	
+				// search box filter
+				form
+					div.form-group
+						div.input-group
+							div.input-group-addon
+								i.fa.fa-search
+							input(type='text', class='form-control', placeholder='Search schema...', ng-model='searchSchema')
+				
+				// table of data
+				table.table.table-bordered.table-striped
+					thead
+						tr
+							td
+								a(href='#', ng-click = "sortType = 'name'; sortReverse = !sortReverse") Name
+									span(ng-show="sortType == 'name' && !sortReverse", class='fa fa-caret-down')
+									span(ng-show="sortType == 'name' && sortReverse", class='fa fa-caret-up')
+							td
+								a(href='#', ng-click = "sortType = 'link'; sortReverse = !sortReverse") Reference
+									span(ng-show="sortType == 'link' && !sortReverse", class='fa fa-caret-down')
+									span(ng-show="sortType == 'link' && sortReverse", class='fa fa-caret-up')
 
-			tbody
-				tr(ng-repeat='item in schema | orderBy:sortType:sortReverse | filter:searchSchema')
-					td {{ item.name }}
-					td {{ item.type }}
-					td {{ item.description }}
-					td 
-						a(href='{{ item.reference }}') {{ item.link }}
-
-	//- div(ng-controller='SortCtrl', class='container')
-	//- 	table
-	//- 		thead
-	//- 			tr
-	//- 				th Name
-	//- 				th Expected Type
-	//- 				th Description
-	//- 				th More Info
-	//- 		tbody
-	//- 			tr(ng-repeat='item in schema')
-	//- 				td {{ item.name }}
-	//- 				td {{ item.type }}
-	//- 				td {{ item.description }}
-	//- 				td 
-	//- 					a(href='{{ item.reference }}') {{ item.link }}
+					//- tbody
+					//- 	tr(ng-repeat='item in schema | orderBy:sortType:sortReverse | filter:searchSchema')
+					//- 		td {{ item.name }}
+					//- 		td 
+					//- 			a(href='{{ item.reference }}') {{ item.reference }}
+					tbody
+						tr(ng-repeat='(k, v) in schema | orderBy:sortType:sortReverse | filter:searchSchema')
+							tr(ng-repeat='(name, link) in v | orderBy:sortType:sortReverse | filter:searchSchema')
+								td {{ name }}
+								td 
+									a(href='{{ link }}') {{ link }}
+								
+		// Application Dependencies
+		script(type='text/javascript' src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.0.0-alpha1/jquery.min.js')
+		script(type='text/javascript' src='https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.5/js/bootstrap.min.js')
+		script(type='text/javascript' src='https://cdnjs.cloudflare.com/ajax/libs/angular-ui-router/0.2.15/angular-ui-router.min.js')
+		script(type='text/javascript' src='https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.4.3/angular-animate.min.js')
+		script(type='text/javascript' src='http://html5shim.googlecode.com/svn/trunk/html5.js')
+	

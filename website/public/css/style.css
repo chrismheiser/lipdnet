@@ -1,20 +1,14 @@
-/* ==== Google font ==== */
 @import url('http://fonts.googleapis.com/css?family=Noto+Serif:400,400italic,700|Open+Sans:300,400,600,700');
-
-/* === prettify === */
-/*@import url('../js/google-code-prettify/prettify.css');*/
-/* === fontawesome === */
 @import url('font-awesome.css');
-/* === custom icon === */
 @import url('custom-fonts.css');
-/* ==== overwrite bootstrap standard ==== */
 @import url('overwrite.css');
 
 /* ===================================
 1. General
 ==================================== */
-html {
 
+html{
+	height: 100%
 }
 
 body {
@@ -23,19 +17,20 @@ body {
 	font-weight:300;
 	line-height:1.6em;
 	color:#656565;
-    background: url(/img/peaks2-op.jpg) no-repeat center center fixed;
-    background-size: cover;
-    -webkit-background-size: cover;
-    -moz-background-size: cover;
-    -o-background-size: cover;
+	min-height: 100%;
 }
 
-/*html, body {
-    margin:0;
-    padding:0;
-    height: 100%;
+#bg-img{
+	background: url(/img/peaks-lower.jpg) no-repeat fixed;
+	background-attachment: scroll;
+	background-position: center bottom;
+	background-size: cover;
+	-webkit-background-size: cover;
+	-moz-background-size: cover;
+	-o-background-size: cover;
 
-}*/
+}
+
 a:active {
 	outline:0;
 }
@@ -144,7 +139,7 @@ header .navbar-collapse  ul.navbar-nav {
 }
 
 header .navbar-default{
-    /*background-color: #fff;*/
+    /*background-color: #111;*/
     background-color: transparent;
     background: transparent;
     border-color: transparent;

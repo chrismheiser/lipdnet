@@ -12,7 +12,7 @@ myapp.controller('SortCtrl', function ($scope, $http) {
     $scope.searchSchema = '';
     $scope.schema = [];
     // grab all the schema data from the local file
-    $http.get('schema_l.json').success(function(data){
+    $http.get('context.lipd').success(function(data){
         $scope.schema = data;
     });
 });

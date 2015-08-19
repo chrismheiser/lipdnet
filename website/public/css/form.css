@@ -80,3 +80,32 @@ body                            { padding-top:20px; }
     from    { -webkit-transform:translateX(200%); }
     to      { -webkit-transform: translateX(0); }
 }
+
+
+
+/* NG - ANIMATE TRANSITIONS
+============================================================================= */
+
+.animate-enter, 
+.animate-leave
+{
+    -webkit-transition: 1075ms cubic-bezier(0.645, 0.045, 0.355, 1.000) all;
+    -moz-transition: 1075ms cubic-bezier(0.645, 0.045, 0.355, 1.000) all;
+    -ms-transition: 1075ms cubic-bezier(0.645, 0.045, 0.355, 1.000) all;
+    -o-transition: 1075ms cubic-bezier(0.645, 0.045, 0.355, 1.000) all;
+    transition: 1075ms cubic-bezier(0.645, 0.045, 0.355, 1.000) all;
+}
+
+.animate-enter {
+    left: 100%;
+}
+.animate-enter.animate-enter-active {
+    left: 0;
+}
+
+.animate-leave {
+    left: 0;
+}
+.animate-leave.animate-leave-active{
+    left: -100%;
+}

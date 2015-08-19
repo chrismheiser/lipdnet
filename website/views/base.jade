@@ -16,7 +16,7 @@ html(html='en')
 		
 		block head
 
-	body(ng-app='myApp')
+	body#bg-img(ng-app='myApp')
 		div#wrapper
 			header
 				.navbar.navbar-default.navbar-static-top
@@ -26,9 +26,8 @@ html(html='en')
 								span.icon-bar
 								span.icon-bar
 								span.icon-bar
-							a.navbar-brand(href='/index')
-								span L
-									|IPD
+							a.navbar-brand(href='/index')     
+								img(src='img/lipd-nav-brand.jpg')
 						.navbar-collapse.collapse
 							ul.nav.navbar-nav
 								li
