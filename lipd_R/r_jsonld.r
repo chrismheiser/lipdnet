@@ -279,14 +279,12 @@ make_climateInterpretation <- function(count, climInterp){
 
 get_longest_column <- function(bind){
   longest_length <- 0
-  #print("did it work?")
   for(i in 1:length(bind)){
     if(longest_length < length(bind[[i]])){
       longest_length <- length(bind[[i]])
     }
   }
   return(longest_length)
-  #print("worked")
 }
 
 run <- function(){
