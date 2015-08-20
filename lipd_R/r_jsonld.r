@@ -115,6 +115,7 @@ jsonld_out <- function(current, num){
   print(file_name)
 }
 
+# make_columns will return the correct amount of paleoData columns
 make_columns <- function(count){
   num <- count
   index <- 0
@@ -166,6 +167,7 @@ make_columns <- function(count){
   
 }
 
+# make_pub will return all of the DOI information if there is any
 make_pub <- function(count, doi){
   num <- count
   DOI <- doi
@@ -224,6 +226,8 @@ make_pub <- function(count, doi){
   }
 }
 
+# make_climateInterpretation will eventually return the correct 
+# climateInterpretation information
 make_climateInterpretation <- function(count, climInterp){
   num <- count
   ci <- climInterp
@@ -277,6 +281,8 @@ make_climateInterpretation <- function(count, climInterp){
 }
   }
 
+# get_longest_column returns the length of the longest columns
+# of the csv columns. May be unneeded now
 get_longest_column <- function(bind){
   longest_length <- 0
   for(i in 1:length(bind)){
