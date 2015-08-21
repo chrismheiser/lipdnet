@@ -15,6 +15,9 @@
     "serve-favicon": "~2.3.0",
     "mongodb": "~2.0.33",
     "monk": "~1.0.1",
-    "stylus": "*"
+    "stylus": "*",
+    "nib": "*",
+    "angular-formly": "*",
+    "angular-formly-templates-bootstrap": "*"
   }
 }

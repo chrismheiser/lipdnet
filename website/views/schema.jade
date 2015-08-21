@@ -1,28 +1,87 @@
-extends base
-
-block content
-	section#content
-		.container
-
-			// filler columns to center the main table
-			.col-lg-1
-			.col-lg-1
-
-			// schema table 
-			.col-lg-8
-				table#table-bordered
-					.thead
+doctype html
+html(html='en')
+	head
+		meta(charset='utf-8')
+		meta(name='viewport', content='width=device-width, initial-scale=1.0')
+		title=title
+		
+		// Application Remote
+		link(rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.5/css/bootstrap.min.css')
+		script(type='text/javascript' src='https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.4.3/angular.js')
+		// Application Local
+		link(rel='stylesheet' href='css/skin.css')
+		link(rel='stylesheet' href='css/style.css')
+		script(type='text/javascript' src='js/ngForm.js')
+		script(type='text/javascript' src='js/ngApp.js')
+		
+	body(ng-app='myApp')
+		div#wrapper
+			header
+				.navbar.navbar-default.navbar-static-top
+					.container
+						.navbar-header
+							button.navbar-toggle(type='button', data-toggle='collapse', data-target='.navbar-collapse')
+								span.icon-bar
+								span.icon-bar
+								span.icon-bar
+							a.navbar-brand(href='/index')     
+								img(src='img/lipd-nav-brand.jpg')
+						.navbar-collapse.collapse
+							ul.nav.navbar-nav
+								li
+									a(href='/index') Home
+								li
+									a(href='/schema') Schema
+								li
+									a(href='/about') About Us
+								li
+									a(href='/contact') Contact
+								li
+									a(href='/test') Test
+			// box with info for testing purposes
+			div(ng-controller='SortCtrl', class='container')
+				//- div.alert.alert-info
+				//- 	p Sort Type: {{ sortType }}
+				//- 	p Sort Reverse: {{ sortReverse }}
+				//- 	p Search String: {{ searchSchema }}
+				//- 	
+				// search box filter
+				form
+					div.form-group
+						div.input-group
+							div.input-group-addon
+								i.fa.fa-search
+							input(type='text', class='form-control', placeholder='Search schema...', ng-model='searchSchema')
+				
+				// table of data
+				table.table.table-bordered.table-striped
+					thead
 						tr
-							th Property
-							th Expected Type
-							th Description
-					.tbody
-						tr
-							th Elevation
-							td Meters (m)
-							td Elevation is often measured in meters or feet.
+							td
+								a(href='#', ng-click = "sortType = 'name'; sortReverse = !sortReverse") Name
+									span(ng-show="sortType == 'name' && !sortReverse", class='fa fa-caret-down')
+									span(ng-show="sortType == 'name' && sortReverse", class='fa fa-caret-up')
+							td
+								a(href='#', ng-click = "sortType = 'link'; sortReverse = !sortReverse") Reference
+									span(ng-show="sortType == 'link' && !sortReverse", class='fa fa-caret-down')
+									span(ng-show="sortType == 'link' && sortReverse", class='fa fa-caret-up')
 
-			// more filler columns
-			.col-lg-1
-			.col-lg-1
-
+					//- tbody
+					//- 	tr(ng-repeat='item in schema | orderBy:sortType:sortReverse | filter:searchSchema')
+					//- 		td {{ item.name }}
+					//- 		td 
+					//- 			a(href='{{ item.reference }}') {{ item.reference }}
+					tbody
+						tr(ng-repeat='i in schema | orderBy:sortType:sortReverse | filter:searchSchema')
+							td {{ i.name }}
+							td {{ i.link }}
+								
+		// Application Remote
+		script(type='text/javascript' src='https://cdnjs.cloudflare.com/ajax/libs/api-check/7.5.0/api-check.min.js')
+		script(type='text/javascript' src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.0.0-alpha1/jquery.min.js')
+		script(type='text/javascript' src='https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.5/js/bootstrap.min.js')
+		script(type='text/javascript' src='https://cdnjs.cloudflare.com/ajax/libs/angular-ui-router/0.2.15/angular-ui-router.min.js')
+		script(type='text/javascript' src='https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.4.3/angular-animate.min.js')
+		script(type='text/javascript' src='https://cdnjs.cloudflare.com/ajax/libs/angular-formly/6.23.6/formly.js')
+		script(type='text/javascript' src='https://cdnjs.cloudflare.com/ajax/libs/angular-formly-templates-bootstrap/6.0.0/angular-formly-templates-bootstrap.min.js')
+		script(type='text/javascript' src='http://html5shim.googlecode.com/svn/trunk/html5.js')

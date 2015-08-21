@@ -1,5 +1,5 @@
-var express = require('express');
-var router = express.Router();
+var express = require('express')
+ , router = express.Router();
 
 /* ROUTING TO OUR PROVIDED VIEWS. */
 router.get('/', function(req, res, next) {
@@ -15,12 +15,15 @@ router.get('/contact', function(req, res){
 });
 
 router.get('/schema', function(req, res){
-	res.render('schema', {title: 'Schema'});
+    res.render('schema', {title: 'Schema'});
 });
 
 router.get('/about', function(req, res){
 	res.render('about', {title: 'About Us'});
 });
 
+router.get('/upload', function(req, res){
+	res.render('upload', {title: "Upload"});
+});
 
 module.exports = router;

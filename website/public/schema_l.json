@@ -1,0 +1,567 @@
+[
+  {
+    "description": "",
+    "reference": "http://purl.org/dc/terms/",
+    "link": "PURL",
+    "name": "purl",
+    "type": "Schema"
+  },
+  {
+    "description": "",
+    "reference": "http://ld.geojson.org",
+    "link": "GeoJSON",
+    "name": "geo",
+    "type": "Set"
+  },
+  {
+    "description": "",
+    "reference": "schema:contentUrl",
+    "link": "Schema",
+    "name": "filename",
+    "type": "String"
+  },
+  {
+    "description": "",
+    "reference": "http://purl.org/dc/elements/1.1/title",
+    "link": "PURL",
+    "name": "title",
+    "type": "Stirng"
+  },
+  {
+    "description": "",
+    "reference": "purl:Title",
+    "link": "PURL",
+    "name": "chronTableName",
+    "type": "String"
+  },
+  {
+    "description": "",
+    "reference": "http://www.w3.org/2001/XMLSchema#",
+    "link": "w3",
+    "name": "xsd",
+    "type": "Schema"
+  },
+  {
+    "description": "",
+    "reference": "geojson:MultiLineString",
+    "link": "GeoJSON",
+    "name": "multiLineString",
+    "type": "Set"
+  },
+  {
+    "description": "",
+    "reference": "http://lipd.net/",
+    "link": "LiPD",
+    "name": "lipd",
+    "type": "Schema"
+  },
+  {
+    "description": "",
+    "reference": "csvw:header",
+    "link": "csvw",
+    "name": "header",
+    "type": "String"
+  },
+  {
+    "description": "",
+    "reference": "schema:instrument",
+    "link": "Schema",
+    "name": "instrument",
+    "type": "String"
+  },
+  {
+    "description": "",
+    "reference": "lipd:climateParameterDetail",
+    "link": "LiPD",
+    "name": "climateParameterDetail",
+    "type": "String"
+  },
+  {
+    "description": "",
+    "reference": "http://purl.org/ontology/bibo/pageEnd",
+    "link": "PURL",
+    "name": "pageEnd",
+    "type": "Integer"
+  },
+  {
+    "description": "",
+    "reference": "geojson:LineString",
+    "link": "GeoJSON",
+    "name": "lineString",
+    "type": "Set"
+  },
+  {
+    "description": "",
+    "reference": "lipd:archiveModel",
+    "link": "LiPD",
+    "name": "archiveModel",
+    "type": "String"
+  },
+  {
+    "description": "",
+    "reference": "lipd:interpDirection",
+    "link": "LiPD",
+    "name": "interpDirection",
+    "type": "String"
+  },
+  {
+    "description": "",
+    "reference": "purl:Creator",
+    "link": "PURL",
+    "name": "investigators",
+    "type": "List"
+  },
+  {
+    "description": "",
+    "reference": "lipd:calibrationReference",
+    "link": "LiPD",
+    "name": "reference",
+    "type": "String"
+  },
+  {
+    "description": "",
+    "reference": "lipd:paleoData",
+    "link": "LiPD",
+    "name": "paleoData",
+    "type": "Set"
+  },
+  {
+    "description": "",
+    "reference": "lipd:PSM",
+    "link": "LiPD",
+    "name": "proxySystemModel",
+    "type": "List"
+  },
+  {
+    "description": "",
+    "reference": "geojson:coordinates",
+    "link": "GeoJSON",
+    "name": "features",
+    "type": "Set"
+  },
+  {
+    "description": "",
+    "reference": "http://xmlns.com/foaf/0.1/Person",
+    "link": "xmlns",
+    "name": "name",
+    "type": "String"
+  },
+  {
+    "description": "",
+    "reference": "lipd:calibrationUncertaintyType",
+    "link": "LiPD",
+    "name": "uncertaintyType",
+    "type": "String"
+  },
+  {
+    "description": "",
+    "reference": "@id",
+    "name": "id",
+    "type": "Integer"
+  },
+  {
+    "description": "",
+    "reference": "geojson:Polygon",
+    "link": "GeoJSON",
+    "name": "polygon",
+    "type": "Set"
+  },
+  {
+    "description": "",
+    "reference": "geojson:MultiPoint",
+    "link": "GeoJSON",
+    "name": "multiPoint",
+    "type": "Set"
+  },
+  {
+    "description": "",
+    "reference": "purl:description",
+    "link": "PURL",
+    "name": "description",
+    "type": "String"
+  },
+  {
+    "description": "",
+    "reference": "lipd:fundingAgency",
+    "link": "LiPD",
+    "name": "fundingAgency",
+    "type": "String"
+  },
+  {
+    "description": "",
+    "reference": "lipd:sensorModel",
+    "link": "LiPD",
+    "name": "sensorModel",
+    "type": "String"
+  },
+  {
+    "description": "",
+    "reference": "@type",
+    "name": "type",
+    "type": "String"
+  },
+  {
+    "description": "",
+    "reference": "http://purl.org/ontology/bibo/issue",
+    "link": "PURL",
+    "name": "issue",
+    "type": "Integer"
+  },
+  {
+    "description": "",
+    "reference": "csvw:note",
+    "link": "csvw",
+    "name": "notes",
+    "type": "String"
+  },
+  {
+    "description": "",
+    "reference": "http://purl.org/dc/elements/1.1/link",
+    "link": "PURL",
+    "name": "link",
+    "type": "Set"
+  },
+  {
+    "description": "",
+    "reference": "lipd:interpretationBasis",
+    "link": "LiPD",
+    "name": "basis",
+    "type": "String"
+  },
+  {
+    "description": "",
+    "reference": "geojson:GeometryCollection",
+    "link": "GeoJSON",
+    "name": "geometryCollection",
+    "type": "Set"
+  },
+  {
+    "description": "",
+    "reference": "http://purl.org/ontology/bibo/Journal",
+    "link": "PURL",
+    "name": "journal",
+    "type": "String"
+  },
+  {
+    "description": "",
+    "reference": "http://purl.org/ontology/bibo/authorList",
+    "link": "PURL",
+    "name": "author",
+    "type": "Set"
+  },
+  {
+    "description": "",
+    "reference": "purl:Title",
+    "link": "PURL",
+    "name": "paleoDataTableName",
+    "type": "String"
+  },
+  {
+    "description": "",
+    "reference": "lipd:method",
+    "link": "LiPD",
+    "name": "method",
+    "type": "String"
+  },
+  {
+    "description": "",
+    "reference": "purl:Title",
+    "link": "PURL",
+    "name": "dataSetName",
+    "type": "String"
+  },
+  {
+    "description": "",
+    "reference": "schema:units",
+    "link": "Schema",
+    "name": "units",
+    "type": "String"
+  },
+  {
+    "description": "",
+    "reference": "purl:Location",
+    "link": "PURL",
+    "name": "siteName",
+    "type": "String"
+  },
+  {
+    "description": "",
+    "reference": "lipd:chronData",
+    "link": "LiPD",
+    "name": "chronData",
+    "type": "Set"
+  },
+  {
+    "description": "",
+    "reference": "http://purl.org/ontology/bibo/volume",
+    "link": "PURL",
+    "name": "volume",
+    "type": "Integer"
+  },
+  {
+    "description": "",
+    "reference": "http://ld.geojson.org/vocab#",
+    "link": "GeoJSON",
+    "name": "geojson",
+    "type": "Set"
+  },
+  {
+    "description": "",
+    "reference": "geojson:properties",
+    "link": "GeoJSON",
+    "name": "properties",
+    "type": "Set"
+  },
+  {
+    "description": "",
+    "reference": "lipd:inferredMaterial",
+    "link": "LiPD",
+    "name": "inferredMaterial",
+    "type": "String"
+  },
+  {
+    "description": "",
+    "reference": "lipd:observationModel",
+    "link": "LiPD",
+    "name": "observationModel",
+    "type": "String"
+  },
+  {
+    "description": "",
+    "reference": "lipd:fundingGrant",
+    "link": "LiPD",
+    "name": "fundingGrant",
+    "type": "String"
+  },
+  {
+    "description": "",
+    "reference": "http://okfnlabs.org/bibjson/",
+    "link": "okfnlabs",
+    "name": "pub",
+    "type": "Set"
+  },
+  {
+    "description": "",
+    "reference": "schema:version",
+    "link": "Schema",
+    "name": "version",
+    "type": "Float"
+  },
+  {
+    "description": "",
+    "reference": "lipd:parameterType",
+    "link": "LiPD",
+    "name": "parameterType",
+    "type": "String"
+  },
+  {
+    "description": "",
+    "reference": "http://purl.org/ontology/bibo/Article",
+    "link": "PURL",
+    "name": "article",
+    "type": "String"
+  },
+  {
+    "description": "",
+    "reference": "geojson:Feature",
+    "link": "GeoJSON",
+    "name": "feature",
+    "type": "String"
+  },
+  {
+    "description": "",
+    "reference": "lipd:seasonality",
+    "link": "LiPD",
+    "name": "seasonality",
+    "type": "String"
+  },
+  {
+    "description": "",
+    "reference": "lipd:proxy",
+    "link": "LiPD",
+    "name": "proxy",
+    "type": "String"
+  },
+  {
+    "description": "",
+    "reference": "http://purl.org/ontology/bibo/pageStart",
+    "link": "PURL",
+    "name": "pageStart",
+    "type": "Integer"
+  },
+  {
+    "description": "",
+    "reference": "geojson:FeatureCollection",
+    "link": "GeoJSON",
+    "name": "featureCollection",
+    "type": "Set"
+  },
+  {
+    "description": "",
+    "reference": "lipd:errorLevel",
+    "link": "LiPD",
+    "name": "errorLevel",
+    "type": "String"
+  },
+  {
+    "description": "",
+    "reference": "lipd:calibrationEquation",
+    "link": "LiPD",
+    "name": "equation",
+    "type": "String"
+  },
+  {
+    "description": "",
+    "reference": "http://schema.org/",
+    "link": "Schema",
+    "name": "schema",
+    "type": "Schema"
+  },
+  {
+    "description": "",
+    "reference": "csvw:number",
+    "link": "csvw",
+    "name": "number",
+    "type": "Integer"
+  },
+  {
+    "description": "",
+    "reference": "geojson:coordinates",
+    "link": "GeoJSON",
+    "name": "coordinates",
+    "type": "List"
+  },
+  {
+    "description": "",
+    "reference": "purl:Standard",
+    "link": "PURL",
+    "name": "standard",
+    "type": "String"
+  },
+  {
+    "description": "",
+    "reference": "geojson:Point",
+    "link": "GeoJSON",
+    "name": "point",
+    "type": "Set"
+  },
+  {
+    "description": "",
+    "reference": "csvw:Column",
+    "link": "csvw",
+    "name": "columns",
+    "type": "Set"
+  },
+  {
+    "description": "",
+    "reference": "https://www.datacite.org/",
+    "link": "DataCite",
+    "name": "dataDOI",
+    "type": "String"
+  },
+  {
+    "description": "",
+    "reference": "csvw:name",
+    "link": "csvw",
+    "name": "parameter",
+    "type": "String"
+  },
+  {
+    "description": "",
+    "reference": "http://purl.org/ontology/bibo/doi",
+    "link": "PURL",
+    "name": "doi",
+    "type": "Set"
+  },
+  {
+    "description": "",
+    "reference": "geojson:geometry",
+    "link": "GeoJSON",
+    "name": "geometry",
+    "type": "Set"
+  },
+  {
+    "description": "",
+    "reference": "geojson:bbox",
+    "link": "GeoJSON",
+    "name": "bbox",
+    "type": "List"
+  },
+  {
+    "description": "",
+    "reference": "lipd:archiveType",
+    "link": "LiPD",
+    "name": "archiveType",
+    "type": "String"
+  },
+  {
+    "description": "",
+    "reference": "lipd:climateInterpretation",
+    "link": "LiPD",
+    "name": "climateInterpretation",
+    "type": "List"
+  },
+  {
+    "description": "",
+    "reference": "lipd:climateParameter",
+    "link": "LiPD",
+    "name": "climateParameter",
+    "type": "String"
+  },
+  {
+    "description": "",
+    "reference": "http://www.w3.org/ns/csvw#",
+    "link": "w3",
+    "name": "csvw",
+    "type": "String"
+  },
+  {
+    "description": "",
+    "reference": "lipd:calibration",
+    "link": "LiPD",
+    "name": "calibration",
+    "type": "List"
+  },
+  {
+    "description": "",
+    "reference": "lipd:funding",
+    "link": "LiPD",
+    "name": "funding",
+    "type": "Set"
+  },
+  {
+    "description": "",
+    "reference": "lipd:calibrationUncertainty",
+    "link": "LiPD",
+    "name": "uncertainty",
+    "type": "String"
+  },
+  {
+    "description": "",
+    "reference": "lipd:measuredMaterial",
+    "link": "LiPD",
+    "name": "measuredMaterial",
+    "type": "String"
+  },
+  {
+    "description": "",
+    "reference": "csvw:datatype",
+    "link": "csvw",
+    "name": "datatype",
+    "type": "String"
+  },
+  {
+    "description": "",
+    "reference": "http://purl.org/dc/elements/1.1/date",
+    "link": "PURL",
+    "name": "pubYear",
+    "type": "Integer"
+  },
+  {
+    "description": "",
+    "reference": "geojson:MultiPolygon",
+    "link": "GeoJSON",
+    "name": "multiPolygon",
+    "type": "Set"
+  }
+]
