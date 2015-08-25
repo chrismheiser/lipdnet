@@ -41,32 +41,83 @@ f.config(function($stateProvider, $urlRouterProvider){
 
         $urlRouterProvider.otherwise('/form/start');
 });
+//
+// f.factory('formData', function(){
+//     var allData = {};
+//     var _geo = '';
+//     var _user = '';
+//
+//     service.setGeo = function(allData){
+//
+//     }
+//
+//     service.getGeo = function(){
+//
+//     }
+//
+//     service.setUser = function(allData){
+//
+//     }
+//
+//     service.setData = function(allData){
+//
+//     }
+//
+//     return allData;
+// });
 
-f.factory('formData', function(){
-    var allData = {};
-    var _geo = '';
-    var _user = '';
+f.controller('FormlyCtrl', function($scope){
 
-    service.setGeo = function(allData){
-
-    }
-
-    service.getGeo = function(){
-
-    }
-
-    service.setUser = function(allData){
-
-    }
-
-    service.setData = function(allData){
-
-    }
-
-    return allData;
+    var fc = this;
+    fc.initial = {};
+    fc.initialFields = [
+        {
+            key: 'exist',
+            type: 'radio',
+            defaultValue: false,
+            templateOptions: {
+                label: 'Upload existing file?',
+                valueProp: "name",
+                options: [{"name": "Yes", "value": "yes"}, {"name": "No", "value": "no"}],
+                required: true
+            }
+        },
+        {
+            key: 'filetype',
+            type: 'select',
+            defaultValue: false,
+            templateOptions: {
+                label: 'What type of file do you have?',
+                valueProp: "name",
+                options: [
+                    {
+                        "name": "Excel"
+                    },
+                    {
+                        "name": "NOAA"
+                    },
+                    {
+                        "name": "CSV with headers"
+                    },
+                    {
+                        "name": "CSV without headers"
+                    }
+                ],
+                required: true
+            },
+            hideExpression: "!model.exist"
+        },
+        {
+            key:"browsefile",
+            type:'file',
+            templateOptions: {
+            },
+            hideExpression: "!model.exist.yes"
+        }
+    ];
 });
 
-f.controller('FormCtrl', function($scope, formData){
+f.controller('FormCtrl', function($scope){
     $scope.formData = {};
     $scope.userData = {};
     $scope.geoData = {};
@@ -78,29 +129,4 @@ f.controller('FormCtrl', function($scope, formData){
         $scope.geoData = formData.geo;
     };
 
-    var fm = this;
-    fm.initial = {};
-    fm.initialFields = [
-        {
-            key: 'exist',
-            type: 'radio',
-            templateOptions: {
-                type: 'radio',
-                label: 'Upload existing file?',
-                options: ['Yes', 'No']
-                required: true
-            }
-        },
-        {
-            key: 'filetype',
-            type: 'select',
-            templateOptions: {
-                label: 'What type of file do you have?',
-                placeholder: 'Excel',
-                required: true,
-                options: ['Excel', 'NOAA', 'CSV with headers', 'CSV without headers']
-            },
-            hideExpression: '!model.exist'
-        }
-    ];
 });

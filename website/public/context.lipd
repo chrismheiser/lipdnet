@@ -6,7 +6,7 @@
         "csvw": "http://www.w3.org/ns/csvw#",
         "purl": "http://purl.org/dc/terms/",
         "doi": "http://www.doi.org/",
-        "lipd": "http://lipd.net/",
+        "lipd": "http://lipd.net/schema/",
 
 
         "type": "@type",
@@ -43,8 +43,8 @@
             "@container": "@set"
         },
         "doi": {
-        "@id":"http://purl.org/ontology/bibo/doi",
-        "@container": "@set"
+            "@id":"http://purl.org/ontology/bibo/doi",
+            "@container": "@set"
         },
         "pubYear": "http://purl.org/dc/elements/1.1/date",
         "article": "http://purl.org/ontology/bibo/Article",

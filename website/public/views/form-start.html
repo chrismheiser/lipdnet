@@ -1,19 +1,9 @@
-<!-- form-start.html -->
 
-<label>Walk-through</label>
-
-<div class="form-group row">
+<div class="form-group row" ng-controller='FormlyCtrl as fc'>
     <form novalidate>
-        <h3> Tell us about your upload. </h3>
-        <formly-form model="fm.intial" fields='fm.initialFields' form='fm.initialForm'>
-            <button type='submit' class='btn btn-primary' ng-disabled='fm.intialForm.$invalid'> Submit</button>
-</div>
-
-<!-- button at the end to go next -->
-<div class="form-group row">
-    <div class="col-xs-6 col-xs-offset-3">
-        <a ui-sref="form.contents" class="btn btn-block btn-info">
-        Next <span class="glyphicon glyphicon-circle-arrow-right"></span>
-        </a>
-    </div>
+        <formly-form model="fc.intial" fields='fc.initialFields' form='fc.initialForm'>
+            <button ui-sref='form.content' type='submit' class='btn btn-block btn-info' ng-disabled='fc.intialForm.$invalid'>
+                Next</button>
+        </formly-form>
+    </form>
 </div>
