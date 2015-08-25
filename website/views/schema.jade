@@ -12,6 +12,7 @@ html(html='en')
 		link(rel='stylesheet' href='css/skin.css')
 		link(rel='stylesheet' href='css/style.css')
 		script(type='text/javascript' src='js/ngForm.js')
+		script(type='text/javascript' src='js/ngSchema.js')
 		script(type='text/javascript' src='js/ngApp.js')
 		
 	body(ng-app='myApp')
@@ -38,13 +39,9 @@ html(html='en')
 									a(href='/contact') Contact
 								li
 									a(href='/test') Test
-			// box with info for testing purposes
+
 			div(ng-controller='SortCtrl', class='container')
-				//- div.alert.alert-info
-				//- 	p Sort Type: {{ sortType }}
-				//- 	p Sort Reverse: {{ sortReverse }}
-				//- 	p Search String: {{ searchSchema }}
-				//- 	
+			
 				// search box filter
 				form
 					div.form-group
@@ -65,16 +62,11 @@ html(html='en')
 								a(href='#', ng-click = "sortType = 'link'; sortReverse = !sortReverse") Reference
 									span(ng-show="sortType == 'link' && !sortReverse", class='fa fa-caret-down')
 									span(ng-show="sortType == 'link' && sortReverse", class='fa fa-caret-up')
-
-					//- tbody
-					//- 	tr(ng-repeat='item in schema | orderBy:sortType:sortReverse | filter:searchSchema')
-					//- 		td {{ item.name }}
-					//- 		td 
-					//- 			a(href='{{ item.reference }}') {{ item.reference }}
 					tbody
-						tr(ng-repeat='i in schema | orderBy:sortType:sortReverse | filter:searchSchema')
-							td {{ i.name }}
-							td {{ i.link }}
+						tr(ng-repeat='item in schema | orderBy:sortType:sortReverse | filter:searchSchema')
+							td {{ item.name }}
+							td 
+								a(href='{{ item.link }}') {{ item.link }}
 								
 		// Application Remote
 		script(type='text/javascript' src='https://cdnjs.cloudflare.com/ajax/libs/api-check/7.5.0/api-check.min.js')

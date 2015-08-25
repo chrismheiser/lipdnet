@@ -1,7 +1,7 @@
-var form = angular.module('myApp.form', ['ui.router', 'ngAnimate', 'formly', 'formlyBootstrap']);
+var f = angular.module('myApp.form', ['ui.router', 'ngAnimate', 'formly', 'formlyBootstrap']);
 
 
-form.config(function($stateProvider, $urlRouterProvider){
+f.config(function($stateProvider, $urlRouterProvider){
 
     $stateProvider
 
@@ -42,7 +42,31 @@ form.config(function($stateProvider, $urlRouterProvider){
         $urlRouterProvider.otherwise('/form/start');
 });
 
-form.controller('FormCtrl', function($scope){
+f.factory('formData', function(){
+    var allData = {};
+    var _geo = '';
+    var _user = '';
+
+    service.setGeo = function(allData){
+
+    }
+
+    service.getGeo = function(){
+
+    }
+
+    service.setUser = function(allData){
+
+    }
+
+    service.setData = function(allData){
+
+    }
+
+    return allData;
+});
+
+f.controller('FormCtrl', function($scope, formData){
     $scope.formData = {};
     $scope.userData = {};
     $scope.geoData = {};
@@ -53,4 +77,30 @@ form.controller('FormCtrl', function($scope){
         $scope.formData = $fileContent;
         $scope.geoData = formData.geo;
     };
+
+    var fm = this;
+    fm.initial = {};
+    fm.initialFields = [
+        {
+            key: 'exist',
+            type: 'radio',
+            templateOptions: {
+                type: 'radio',
+                label: 'Upload existing file?',
+                options: ['Yes', 'No']
+                required: true
+            }
+        },
+        {
+            key: 'filetype',
+            type: 'select',
+            templateOptions: {
+                label: 'What type of file do you have?',
+                placeholder: 'Excel',
+                required: true,
+                options: ['Excel', 'NOAA', 'CSV with headers', 'CSV without headers']
+            },
+            hideExpression: '!model.exist'
+        }
+    ];
 });
