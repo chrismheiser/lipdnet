@@ -63,17 +63,28 @@ html(html='en')
 									span(ng-show="sortType == 'link' && !sortReverse", class='fa fa-caret-down')
 									span(ng-show="sortType == 'link' && sortReverse", class='fa fa-caret-up')
 					tbody
-					
+						// loop through each item in context file and fill the table
 						tr(ng-repeat-start='item in schema | orderBy:sortType:sortReverse | filter:searchSchema')								
 							td
-								a(href='#{{ item.name }}' ng-if='item.expanded' ng-click='item.expanded=false'){{ item.name }}
-								a(href='#' ng-if='!item.expanded' ng-click='item.expanded=true'){{ item.name }}
+								// item is collapsed 
+								a(href='#' ng-if='item.expanded' ng-click='item.expanded=false') {{ item.name }}
+								// item is expanded
+								a(href='#{{ item.name }}' ng-if='!item.expanded' ng-click='item.expanded=true') {{ item.name }}
 							td 
 								a(href='{{ item.link }}') {{ item.link }}
+						// row that activates to show definition
 						tr(ng-if='item.expanded' ng-repeat-end='')
 							td.schema-def(colspan='3')
-								p Lorem Ipsum definition!!!
-							
+								h3 Lorem Ipsum
+								p Lorem Ipsum is simply dummy text of the printing and typesetting 
+									| industry. Lorem Ipsum has been the industry's standard 
+									| dummy text ever since the 1500s, when an unknown printer 
+									| took a galley of type and scrambled it to make a type specimen 
+									| book. It has survived not only five centuries, but also the leap 
+									| into electronic typesetting, remaining essentially unchanged.
+									| It was popularised in the 1960s with the release of Letraset sheets 
+									| containing Lorem Ipsum passages, and more recently with desktop 
+									| publishing software like Aldus PageMaker including versions of Lorem Ipsum.
 								
 		// Application Remote
 		script(src='https://cdnjs.cloudflare.com/ajax/libs/api-check/7.5.0/api-check.min.js')

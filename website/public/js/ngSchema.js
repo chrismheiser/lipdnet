@@ -9,16 +9,26 @@ s.controller('SortCtrl', function ($scope, $http) {
     $scope.schema = [];
     // grab all the schema data from the local file
     $http.get('context.lipd').success(function(data){
-        for(var item in data['@context']){
-            var t={};
-            if (typeof data['@context'][item]==='object'){
-                t['link'] = (data['@context'][item]['@id']);
+        var o = [];
+        var links = ['xsd', 'schema', 'purl', 'csvw', 'lipd', 'doi', 'geojson', 'dataDOI', 'id', 'type'];
+        for (var item in data['@context']) {
+            var t = {};
+            var curr = '';
+            // if the current item is not in the listed links array, then use it.
+            if (links.indexOf(item) == -1) {
+                if (typeof data['@context'][item] === 'object') {
+                    curr = (data['@context'][item]['@id']);
+                } else {
+                    curr = (data['@context'][item]);
+                }
+                if (curr.indexOf(':') > -1  && curr.indexOf('http') == -1) {
+                    var spl = curr.split(':');
+                    curr = data['@context'][spl[0]] + spl[1];
+                }
+                t.link = curr;
+                t.name = (item);
+                $scope.schema.push(t);
             }
-            else{
-                t['link'] = (data['@context'][item]);
-            }
-            t['name'] = (item);
-            $scope.schema.push(t);
-        };
+        }
     });
 });

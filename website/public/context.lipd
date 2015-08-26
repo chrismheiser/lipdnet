@@ -6,7 +6,7 @@
         "csvw": "http://www.w3.org/ns/csvw#",
         "purl": "http://purl.org/dc/terms/",
         "doi": "http://www.doi.org/",
-        "lipd": "http://lipd.net/schema/",
+        "lipd": "localhost:3000/schema#",
 
 
         "type": "@type",
@@ -150,7 +150,7 @@
             "@container": "@set"
         },
         "chronTableName": "purl:Title",
-        "errorLevel" : "lpd:errorLevel"
+        "errorLevel" : "lipd:errorLevel"
 
     }
 
