@@ -52,6 +52,13 @@ h1,h2, h3, h4, h5, h6 {
     background-color: #fff;
 }
 
+.schema-def {
+	background-color: #D9EDF7;
+	-webkit-transition: 1s ease all;
+	-moz-transition: 1s ease all;
+	transition: 1s ease all;
+}
+
 /* ===================================
 2. layout
 ==================================== */

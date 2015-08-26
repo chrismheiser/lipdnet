@@ -1,4 +1,4 @@
- var s = angular.module('myApp.schema', []);
+ var s = angular.module('myApp.schema', ['ui.bootstrap']);
 
 // schema table
 s.controller('SortCtrl', function ($scope, $http) {

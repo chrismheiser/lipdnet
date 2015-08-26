@@ -7,13 +7,13 @@ html(html='en')
 		
 		// Application Remote
 		link(rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.5/css/bootstrap.min.css')
-		script(type='text/javascript' src='https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.4.3/angular.js')
+		script(src='https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.4.3/angular.js')
 		// Application Local
 		link(rel='stylesheet' href='css/skin.css')
 		link(rel='stylesheet' href='css/style.css')
-		script(type='text/javascript' src='js/ngForm.js')
-		script(type='text/javascript' src='js/ngSchema.js')
-		script(type='text/javascript' src='js/ngApp.js')
+		script(src='js/ngForm.js')
+		script(src='js/ngSchema.js')
+		script(src='js/ngApp.js')
 		
 	body(ng-app='myApp')
 		div#wrapper
@@ -63,17 +63,25 @@ html(html='en')
 									span(ng-show="sortType == 'link' && !sortReverse", class='fa fa-caret-down')
 									span(ng-show="sortType == 'link' && sortReverse", class='fa fa-caret-up')
 					tbody
-						tr(ng-repeat='item in schema | orderBy:sortType:sortReverse | filter:searchSchema')
-							td {{ item.name }}
+					
+						tr(ng-repeat-start='item in schema | orderBy:sortType:sortReverse | filter:searchSchema')								
+							td
+								a(href='#{{ item.name }}' ng-if='item.expanded' ng-click='item.expanded=false'){{ item.name }}
+								a(href='#' ng-if='!item.expanded' ng-click='item.expanded=true'){{ item.name }}
 							td 
 								a(href='{{ item.link }}') {{ item.link }}
+						tr(ng-if='item.expanded' ng-repeat-end='')
+							td.schema-def(colspan='3')
+								p Lorem Ipsum definition!!!
+							
 								
 		// Application Remote
-		script(type='text/javascript' src='https://cdnjs.cloudflare.com/ajax/libs/api-check/7.5.0/api-check.min.js')
-		script(type='text/javascript' src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.0.0-alpha1/jquery.min.js')
-		script(type='text/javascript' src='https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.5/js/bootstrap.min.js')
-		script(type='text/javascript' src='https://cdnjs.cloudflare.com/ajax/libs/angular-ui-router/0.2.15/angular-ui-router.min.js')
-		script(type='text/javascript' src='https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.4.3/angular-animate.min.js')
-		script(type='text/javascript' src='https://cdnjs.cloudflare.com/ajax/libs/angular-formly/6.23.6/formly.js')
-		script(type='text/javascript' src='https://cdnjs.cloudflare.com/ajax/libs/angular-formly-templates-bootstrap/6.0.0/angular-formly-templates-bootstrap.min.js')
-		script(type='text/javascript' src='http://html5shim.googlecode.com/svn/trunk/html5.js')
+		script(src='https://cdnjs.cloudflare.com/ajax/libs/api-check/7.5.0/api-check.min.js')
+		script(src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.0.0-alpha1/jquery.min.js')
+		script(src='https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.5/js/bootstrap.min.js')
+		script(src='https://cdnjs.cloudflare.com/ajax/libs/angular-ui-router/0.2.15/angular-ui-router.min.js')
+		script(src='https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.4.3/angular-animate.min.js')
+		script(src='https://cdnjs.cloudflare.com/ajax/libs/angular-formly/6.23.6/formly.js')
+		script(src='https://cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/0.13.3/ui-bootstrap.min.js')
+		script(src='https://cdnjs.cloudflare.com/ajax/libs/angular-formly-templates-bootstrap/6.0.0/angular-formly-templates-bootstrap.min.js')
+		script(src='http://html5shim.googlecode.com/svn/trunk/html5.js')

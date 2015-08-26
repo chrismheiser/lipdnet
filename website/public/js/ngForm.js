@@ -112,7 +112,6 @@ f.controller('FormlyCtrl', function($scope){
             type:'file',
             templateOptions: {
             },
-            hideExpression: "!model.exist.yes"
         }
     ];
 });
