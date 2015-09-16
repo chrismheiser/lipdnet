@@ -1,7 +1,6 @@
 <!-- form.html -->
 <div class="row">
 <div class="col-sm-8 col-sm-offset-2">
-
     <div id="form-container">
 
         <div class="page-header text-center">
@@ -18,22 +17,21 @@
                 <a ui-sref-active="active" ui-sref=".thanks"><span>6</span> Thanks</a>
             </div>
         </div>
-
+        <!-- show our formData as it is being typed -->
+        <h4> Form Data Preview </h4>
+        <pre>
+            {{ userData }}
+            {{ markers }}
+        </pre>
         <!-- use ng-submit to catch the form submission and use our Angular function -->
-        <form id="signup-form" ng-submit="processForm()">
-
+        <form id="upload-form" ng-submit="processForm()">
             <!-- our nested state views will be injected here -->
             <div id="form-views" ui-view></div>
         </form>
 
     </div>
 
-    <!-- show our formData as it is being typed -->
-    <!-- <h4> Pre Data Preview </h4>
-    <pre>
-        {{ userData }}
-        {{ formData }}
-    </pre> -->
+
 
 
 </div>

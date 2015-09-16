@@ -1,0 +1,10 @@
+<div class="switch">
+	<input ng-model="model[options.key]"
+	       type="checkbox"
+	       role="checkbox"
+	       class="switch__input"/>
+	<label for={{::id}} class="switch__label" aria-label="{{::to.label}}">{{to.label}}</label>
+	<span ng-if="::to.description"
+	      class="switch__help">{{::to.description}}</span>
+</div>
+

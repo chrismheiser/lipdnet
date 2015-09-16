@@ -1,7 +1,6 @@
 /* form.css */
 
 
-
 /* BASIC STYLINGS
 ============================================================================= */
 body                            { padding-top:20px; }
@@ -22,13 +21,13 @@ body                            { padding-top:20px; }
     border-radius:50%; }
 
 /* active buttons turn light green-blue*/
-#status-buttons a.active span   { background:#68A4C3; color:#fff }
+#status-buttons a.active span   { background:#97BFFE; color:#fff }
 
 
 
 /* ANIMATION STYLINGS
 ============================================================================= */
-#signup-form            { position:relative; min-height:300px; overflow:hidden; padding:30px; }
+#upload-form            { position:relative; min-height:300px; overflow:hidden; padding:30px; }
 #form-views             { width:auto; }
 
 /* basic styling for entering and leaving */
@@ -86,7 +85,7 @@ body                            { padding-top:20px; }
 /* NG - ANIMATE TRANSITIONS
 ============================================================================= */
 
-.animate-enter, 
+.animate-enter,
 .animate-leave
 {
     -webkit-transition: 1075ms cubic-bezier(0.645, 0.045, 0.355, 1.000) all;
@@ -109,3 +108,14 @@ body                            { padding-top:20px; }
 .animate-leave.animate-leave-active{
     left: -100%;
 }
+
+.datepickerdemoBasicUsage {
+  /** Demo styles for mdCalendar. */ }
+  .datepickerdemoBasicUsage md-content {
+    padding-bottom: 200px; }
+
+.x-button {
+    height: 20px;
+    width: 20px;
+    position:relative;
+    margin-top:5%;}

@@ -1,10 +1,7 @@
 @import url('http://fonts.googleapis.com/css?family=Noto+Serif:400,400italic,700|Open+Sans:300,400,600,700');
-@import url('font-awesome.css');
-@import url('custom-fonts.css');
-@import url('overwrite.css');
 
 /* ===================================
-1. General
+	GENERAL
 ==================================== */
 
 html{
@@ -21,8 +18,9 @@ body {
 }
 
 #bg-img{
-	background: url(/img/peaks-lower.jpg) no-repeat fixed;
-	background-attachment: scroll;
+	background: url(/img/peaks-lower.jpg);
+	background-attachment: fixed;
+	background-repeat: no-repeat;
 	background-position: center bottom;
 	background-size: cover;
 	-webkit-background-size: cover;
@@ -30,6 +28,7 @@ body {
 	-o-background-size: cover;
 
 }
+
 
 a:active {
 	outline:0;
@@ -52,15 +51,30 @@ h1,h2, h3, h4, h5, h6 {
     background-color: #fff;
 }
 
-.schema-def {
-	background-color: #EAEAEA;
-	-webkit-transition: 1s ease all;
-	-moz-transition: 1s ease all;
-	transition: 1s ease all;
+
+
+
+/* ===================================
+	SCHEMA TABLE
+==================================== */
+
+/* remove borders from all table elements */
+table, tr, td{
+	border : none !important;
+}
+
+/* change highlight color of hover on table elements */
+tr:hover td {
+	background:#EEF8FF;
+}
+
+tbody tr:hover td.nohover {
+	background: none;
+	background-color: #fff;
 }
 
 /* ===================================
-2. layout
+	LAYOUT
 ==================================== */
 
 .container {
@@ -1490,9 +1504,6 @@ ul.time-post li{
 
 ul.time-post li a img:hover{
 	opacity: 0.8;
-	/* For IE 5-7 */
-	filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=80);
-	/* For IE 8 8 */
 	-MS-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=80)";
 }
 
@@ -1802,7 +1813,7 @@ article img.pull-right, article .align-right{
 
 
 /* =============================
-21. Media queries
+media
 ============================= */
 
 @media (min-width: 768px) and (max-width: 979px) {
@@ -2014,4 +2025,42 @@ article img.pull-right, article .align-right{
     .navbar-brand{
         color: #111
     }
+}
+
+
+/* =============================
+map
+============================= */
+
+.angular-google-map-container {
+	height:400px;
+	border:none;
+}
+
+#map_canvas label { width: auto; display:inline; }
+#map_canvas img { max-width: none; }
+
+/*.middle {
+	display: table;
+	width: 50%;
+	margin-left: auto;
+	margin-right: auto;
+}*/
+
+
+/* =============================
+upload tabs
+============================= */
+.tabsdemoDynamicHeight md-content {
+  background-color: transparent !important; }
+  .tabsdemoDynamicHeight md-content md-tabs {
+    background: #f6f6f6;
+    border: 1px solid #e1e1e1; }
+    .tabsdemoDynamicHeight md-content md-tabs md-tabs-wrapper {
+      background: white; }
+  .tabsdemoDynamicHeight md-content h1:first-child {
+    margin-top: 0; }
+
+.md-toolbar-tools {
+	color: white !important;
 }

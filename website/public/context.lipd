@@ -1,12 +1,12 @@
 {
 "@context" : {
-        "xsd": "http://www.w3.org/2001/XMLSchema#",
+        "xsd": "http://w3.org/2001/XMLSchema#",
         "schema" : "http://schema.org/",
         "geojson": "http://ld.geojson.org/vocab#",
-        "csvw": "http://www.w3.org/ns/csvw#",
+        "csvw": "http://w3.org/ns/csvw#",
         "purl": "http://purl.org/dc/terms/",
-        "doi": "http://www.doi.org/",
-        "lipd": "localhost:3000/schema#",
+        "doi": "http://doi.org/",
+        "lipd": "http://lipd.net/schema#",
 
 
         "type": "@type",

@@ -1,0 +1,12 @@
+<lx-text-field model="::model[options.key]"
+               fixed-label="::to.fixedLabel"
+               icon="{{::to.icon}}"
+               theme="{{::to.theme}}"
+               label="{{to.label}} {{::to.required ? '*' : ''}}"
+               valid="fc.$valid && fc.$touched"
+               error="fc.$invalid && fc.$touched">
+    <textarea ng-model="model[options.key]"
+              aria-label="{{::to.label}}"
+              rows="{{::to.rows}}" cols="{{::to.cols}}">
+    </textarea>
+</lx-text-field>

@@ -1,0 +1,13 @@
+<lx-text-field model="::model[options.key]"
+               icon="{{::to.icon}}"
+               fixed-label="::to.fixedLabel"
+               theme="{{::to.theme}}"
+               disabled="to.disabled"
+               label="{{to.label}} {{::to.required ? '*' : ''}}"
+               valid="fc.$valid && fc.$touched"
+               error="fc.$invalid && fc.$touched">
+	<input ng-model="model[options.key]"
+	       type="{{::to.type}}"
+	       aria-label="{{::to.label}}"
+	       ng-class="::to.className"/>
+</lx-text-field>

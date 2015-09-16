@@ -1,47 +1,10 @@
-doctype html
-html(html='en')
-	head
-		meta(charset='utf-8')
-		meta(name='viewport', content='width=device-width, initial-scale=1.0')
-		title=title
+extends layout
 		
-		// Application Remote
-		link(rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.5/css/bootstrap.min.css')
-		script(src='https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.4.3/angular.js')
-		// Application Local
-		link(rel='stylesheet' href='css/skin.css')
-		link(rel='stylesheet' href='css/style.css')
-		script(src='js/ngForm.js')
-		script(src='js/ngSchema.js')
-		script(src='js/ngApp.js')
-		
-	body(ng-app='myApp')
+block body
+	body(ng-app='schemaApp')
 		div#wrapper
-			header
-				.navbar.navbar-default.navbar-static-top
-					.container
-						.navbar-header
-							button.navbar-toggle(type='button', data-toggle='collapse', data-target='.navbar-collapse')
-								span.icon-bar
-								span.icon-bar
-								span.icon-bar
-							a.navbar-brand(href='/index')     
-								img(src='img/lipd-nav-brand.jpg')
-						.navbar-collapse.collapse
-							ul.nav.navbar-nav
-								li
-									a(href='/index') Home
-								li
-									a(href='/schema') Schema
-								li
-									a(href='/about') About Us
-								li
-									a(href='/contact') Contact
-								li
-									a(href='/test') Test
-
+			include ./include/navbar.jade
 			div(ng-controller='SortCtrl', class='container')
-			
 				// search box filter
 				form
 					div.form-group
@@ -51,7 +14,7 @@ html(html='en')
 							input(type='text', class='form-control', placeholder='Search schema...', ng-model='searchSchema')
 				
 				// table of data
-				table.table.table-bordered.table-striped
+				table.table.table-bordered.table-striped.table-hover
 					thead
 						tr
 							td
@@ -66,33 +29,13 @@ html(html='en')
 						// loop through each item in context file and fill the table
 						tr(ng-repeat-start='item in schema | orderBy:sortType:sortReverse | filter:searchSchema')								
 							td
-								// item is collapsed 
-								a(href='#' ng-if='item.expanded' ng-click='item.expanded=false') {{ item.name }}
-								// item is expanded
-								a(href='#{{ item.name }}' ng-if='!item.expanded' ng-click='item.expanded=true') {{ item.name }}
+								a(ng-href='#' slide-toggle='#{{ item.name }}') {{ item.name }}
 							td 
-								a(href='{{ item.link }}') {{ item.link }}
+								a(ng-href='{{ item.link }}') {{ item.link }}
 						// row that activates to show definition
-						tr(ng-if='item.expanded' ng-repeat-end='')
-							td.schema-def(colspan='3')
-								h3 Lorem Ipsum
-								p Lorem Ipsum is simply dummy text of the printing and typesetting 
-									| industry. Lorem Ipsum has been the industry's standard 
-									| dummy text ever since the 1500s, when an unknown printer 
-									| took a galley of type and scrambled it to make a type specimen 
-									| book. It has survived not only five centuries, but also the leap 
-									| into electronic typesetting, remaining essentially unchanged.
-									| It was popularised in the 1960s with the release of Letraset sheets 
-									| containing Lorem Ipsum passages, and more recently with desktop 
-									| publishing software like Aldus PageMaker including versions of Lorem Ipsum.
-								
-		// Application Remote
-		script(src='https://cdnjs.cloudflare.com/ajax/libs/api-check/7.5.0/api-check.min.js')
-		script(src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.0.0-alpha1/jquery.min.js')
-		script(src='https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.5/js/bootstrap.min.js')
-		script(src='https://cdnjs.cloudflare.com/ajax/libs/angular-ui-router/0.2.15/angular-ui-router.min.js')
-		script(src='https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.4.3/angular-animate.min.js')
-		script(src='https://cdnjs.cloudflare.com/ajax/libs/angular-formly/6.23.6/formly.js')
-		script(src='https://cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/0.13.3/ui-bootstrap.min.js')
-		script(src='https://cdnjs.cloudflare.com/ajax/libs/angular-formly-templates-bootstrap/6.0.0/angular-formly-templates-bootstrap.min.js')
-		script(src='http://html5shim.googlecode.com/svn/trunk/html5.js')
+						tr(ng-repeat-end)
+							td.nohover(colspan='3')
+								div(class= 'slideable' id= '{{ item.name }}')
+									h3{{ item.name }}
+									p(ng-if='def[item.name] != ""') {{ def[item.name] }}
+									p(ng-if='def[item.name] == ""') Please use the reference link for more information!
