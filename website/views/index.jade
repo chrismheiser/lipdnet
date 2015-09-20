@@ -1,20 +1,48 @@
 extends layout
 
 block body
-	body#bg-img(ng-app='mainApp')
+	// add #bg-img to body for photo background
+	body(ng-app='ngMap')
 		div#wrapper
 			include ./include/navbar.jade
 			section#content
 				.container
-					div
-						div.text-center
-							h3 Lorem Ipsum
-							p Lorem Ipsum is simply dummy text of the printing and typesetting 
-								| industry. Lorem Ipsum has been the industry's standard 
-								| dummy text ever since the 1500s, when an unknown printer 
-								| took a galley of type and scrambled it to make a type specimen 
-								| book. It has survived not only five centuries, but also the leap 
-								| into electronic typesetting, remaining essentially unchanged.
-								| It was popularised in the 1960s with the release of Letraset sheets 
-								| containing Lorem Ipsum passages, and more recently with desktop 
-								| publishing software like Aldus PageMaker including versions of Lorem Ipsum.
+					div.text-center
+						h1.md-display-3 Lorem Ipsum
+						p.md-subhead Lorem Ipsum is simply dummy text of the printing and typesetting 
+							| industry. Lorem Ipsum has been the industry's standard 
+							| dummy text ever since the 1500s, when an unknown printer 
+							| took a galley of type and scrambled it to make a type specimen 
+							| book. It has survived not only five centuries, but also the leap 
+							| into electronic typesetting, remaining essentially unchanged.
+							| It was popularised in the 1960s with the release of Letraset sheets 
+							| containing Lorem Ipsum passages, and more recently with desktop 
+							| publishing software like Aldus PageMaker including versions of Lorem Ipsum.
+					.text-center
+						a.smoothScroll(href="#about")
+							i.fa.fa-angle-double-down.fa-4x
+	.container.cf#about
+		.animation-element.bounce-up.cf
+			h1.md-display-3.subject(layout layout-align="center center") About Us
+			.subject.g
+				.category-color
+				.icon
+					i.fa.fa-globe
+				.header.cf
+				h3.title Location
+				.content
+					div(ng-controller='MapCtrl')
+						ui-gmap-google-map(center="map.center" zoom="map.zoom" options="options")
+	
+	.container.cf#contact
+		.animation-element.bounce-up.cf
+			h1.md-display-3.subject(layout layout-align="center center") Contact
+			.subject.g
+				.category-color
+				.icon
+					i.fa.fa-envelope
+				.header.cf
+				h3.title Questions, comments, concerns...
+				.content
+					.container
+						// PUT ALL COMMENT BOX ELEMENTS HERE

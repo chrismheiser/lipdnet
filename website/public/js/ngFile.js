@@ -1,14 +1,14 @@
-var myapp = angular.module('mainApp', ['formApp']);
+var u = angular.module('ngFile', ['ngForm']);
 
 // text file upload/display
-myapp.controller('MainCtrl', function ($scope) {
+u.controller('MainCtrl', function ($scope) {
     $scope.showContent = function($fileContent){
         $scope.content = $fileContent;
     };
 });
 
 // text file upload/display
-myapp.directive('onReadFile', function ($parse) {
+u.directive('onReadFile', function ($parse) {
 	return {
 		restrict: 'A',
 		scope: false,

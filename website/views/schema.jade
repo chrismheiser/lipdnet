@@ -1,41 +1,81 @@
 extends layout
-		
+
 block body
-	body(ng-app='schemaApp')
+	body(ng-app='ngSchema')
 		div#wrapper
 			include ./include/navbar.jade
 			div(ng-controller='SortCtrl', class='container')
+			
+				//demo MD table
+				.main-fab
+					md-toolbar.md-tall(layout='column')
+						span(flex)
+						.md-toolbar-tools
+							.fill-height(layout='row',flex)
+								.md-toolbar-item.md-breadcrumb(ng-hide='toggleSearch')
+									span Schema
+								span(flex,ng-hide='toggleSearch')
+								md-input-container(flex,style='padding-left:88px;',ng-show='toggleSearch')
+									input(type='text',ng-model='search')
+								.md-toolbar-item.md-tools(layout='row')
+									a.md-button.md-default-theme(href, ng-click='toggleSearch = !toggleSearch')
+										i.ion-android-search
+					md-content(layout='column',flex,ng-click='toggleSearch=false')
+						md-table(headers="headers", content="content", sortable="sortable", filters="search", custom-class="custom", thumbs="thumbs", count="count")
+						
+					// md-table jade template
+					#md-table-template(ng-hide='true')
+					table.md-table(md-colresize)
+						thead
+								tr.md-table-headers-row
+										th
+										th.md-table-header(ng-repeat='h in headers')
+												a(href='#',ng-if='handleSort(h.field)',ng-click='reverse=!reverse;order(h.field,reverse)') {{h.name}} 
+														i.ion-android-arrow-dropup(ng-show='reverse && h.field == predicate')
+														i.ion-android-arrow-dropdown(ng-show='!reverse && h.field == predicate')
+												span(ng-if='!handleSort(h.field)') {{h.name}}
+										th.md-table-header
+						tbody
+								tr.md-table-content-row(ng-repeat='c in content | filter:filters')
+										td
+										td.md-table-content(ng-repeat='h in headers',ng-class='customClass[h.field]',ng-if='h.field != thumbs') {{(h.field.indexOf('date') > 0) ? $filter('date')(c[h.field]) : c[h.field];}}
+										td.md-table-td-more
+												md-button(aria-label='Info')
+														i.ion-android-more-vertical
+														
+														
+														
 				// search box filter
-				form
-					div.form-group
-						div.input-group
-							div.input-group-addon
-								i.fa.fa-search
-							input(type='text', class='form-control', placeholder='Search schema...', ng-model='searchSchema')
-				
-				// table of data
-				table.table.table-bordered.table-striped.table-hover
-					thead
-						tr
-							td
-								a(href='#', ng-click = "sortType = 'name'; sortReverse = !sortReverse") Name
-									span(ng-show="sortType == 'name' && !sortReverse", class='fa fa-caret-down')
-									span(ng-show="sortType == 'name' && sortReverse", class='fa fa-caret-up')
-							td
-								a(href='#', ng-click = "sortType = 'link'; sortReverse = !sortReverse") Reference
-									span(ng-show="sortType == 'link' && !sortReverse", class='fa fa-caret-down')
-									span(ng-show="sortType == 'link' && sortReverse", class='fa fa-caret-up')
-					tbody
-						// loop through each item in context file and fill the table
-						tr(ng-repeat-start='item in schema | orderBy:sortType:sortReverse | filter:searchSchema')								
-							td
-								a(ng-href='#' slide-toggle='#{{ item.name }}') {{ item.name }}
-							td 
-								a(ng-href='{{ item.link }}') {{ item.link }}
-						// row that activates to show definition
-						tr(ng-repeat-end)
-							td.nohover(colspan='3')
-								div(class= 'slideable' id= '{{ item.name }}')
-									h3{{ item.name }}
-									p(ng-if='def[item.name] != ""') {{ def[item.name] }}
-									p(ng-if='def[item.name] == ""') Please use the reference link for more information!
+				//- form
+				//- 	div.form-group
+				//- 		div.input-group
+				//- 			div.input-group-addon
+				//- 				i.fa.fa-search
+				//- 			input(type='text', class='form-control', placeholder='Search schema...', ng-model='searchSchema')
+				//- 
+				//- // table of data
+				//- table.table.table-bordered.table-striped.table-hover
+				//- 	thead
+				//- 		tr
+				//- 			td
+				//- 				a(href='#', ng-click = "sortType = 'name'; sortReverse = !sortReverse") Name
+				//- 					span(ng-show="sortType == 'name' && !sortReverse", class='fa fa-caret-down')
+				//- 					span(ng-show="sortType == 'name' && sortReverse", class='fa fa-caret-up')
+				//- 			td
+				//- 				a(href='#', ng-click = "sortType = 'link'; sortReverse = !sortReverse") Reference
+				//- 					span(ng-show="sortType == 'link' && !sortReverse", class='fa fa-caret-down')
+				//- 					span(ng-show="sortType == 'link' && sortReverse", class='fa fa-caret-up')
+				//- 	tbody
+				//- 		// loop through each item in context file and fill the table
+				//- 		tr(ng-repeat-start='item in schema | orderBy:sortType:sortReverse | filter:searchSchema')								
+				//- 			td
+				//- 				a(ng-href='#' slide-toggle='#{{ item.name }}') {{ item.name }}
+				//- 			td 
+				//- 				a(ng-href='{{ item.link }}') {{ item.link }}
+				//- 		// row that activates to show definition
+				//- 		tr(ng-repeat-end)
+				//- 			td.nohover(colspan='3')
+				//- 				div(class= 'slideable' id= '{{ item.name }}')
+				//- 					h3{{ item.name }}
+				//- 					p(ng-if='def[item.name] != ""') {{ def[item.name] }}
+				//- 					p(ng-if='def[item.name] == ""') Please use the reference link for more information!

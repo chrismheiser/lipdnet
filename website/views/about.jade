@@ -9,5 +9,5 @@ block body
 				div#map_canvas
 					//- .map
 					//- 	iframe(src="https://www.google.com/maps/embed/v1/place?q=Northern%20Arizona%20University%2C%20South%20San%20Francisco%20Street%2C%20Flagstaff%2C%20AZ%2C%20United%20States&key=AIzaSyB8nllB0zwraQo5qJMGdtcxulsTPJOnd8U")
-					ui-gmap-google-map(center="map.center" zoom="map.zoom" draggable="true" options="options")
-						ui-gmap-marker(coords="marker.coords" options="marker.options" events="marker.events" idkey="marker.id")
+					ui-gmap-google-map(center="map.center" zoom="14" draggable="true" options="{scrollwheel: false}")
+						ui-gmap-marker(idKey="0" coords="flagstaff")

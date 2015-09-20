@@ -1,12 +1,23 @@
+
+HEADER
+
+link(rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css")
+link(rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.5/css/bootstrap.min.css')
+link(rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/angular-material/0.10.1/angular-material.min.css')
+link(rel='stylesheet' href='css/skin.css')
+link(rel='stylesheet' href='css/style.css')
+link(rel='stylesheet' href='css/form.css')
+link(rel='stylesheet' href='css/s_animate.css')
+
+FOOTER
 script(src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.0.0-alpha1/jquery.min.js')
 script(src='https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.4.5/angular.js')
 script(src='js/ngForm.js')
 script(src='js/ngSchema.js')
 script(src='js/ngFile.js')
 script(src='js/ngMap.js')
-script(src='js/ngColors.js')
-script(src='js/animate.js')
-script(src='js/smooth.js')
+script(src='js/s_animate.js')
+script(src='js/s_smooth.js')
 script(src='https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.4.5/angular-aria.min.js')
 script(src='https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.4.3/angular-animate.min.js')
 script(src='https://cdnjs.cloudflare.com/ajax/libs/angular-material/0.10.1/angular-material.min.js')

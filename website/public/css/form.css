@@ -8,7 +8,7 @@ body                            { padding-top:20px; }
 /* form styling */
 #form-container                { background:#fff; margin-bottom:20px;
     border-radius:5px; }
-#form-container .page-header   { background:#eee; margin:0; padding:30px;
+#form-container .page-header   { background: transparent; margin:0; padding:30px;
     border-top-left-radius:5px; border-top-right-radius:5px; }
 
 /* numbered buttons */
@@ -16,12 +16,12 @@ body                            { padding-top:20px; }
 #status-buttons a               { color:#111; display:inline-block; font-size:12px; margin-right:10px; text-align:center; text-transform:uppercase; }
 #status-buttons a:hover         { text-decoration:none; }
 
-/* we will style the span as the circled number */
+/* span as the circled number */
 #status-buttons span            { background:#fff; display:block; height:30px; margin:0 auto 10px; padding-top:5px; width:30px;
     border-radius:50%; }
 
-/* active buttons turn light green-blue*/
-#status-buttons a.active span   { background:#97BFFE; color:#fff }
+/* active buttons*/
+#status-buttons a.active span   { background:#16a085; color:#fff }
 
 
 

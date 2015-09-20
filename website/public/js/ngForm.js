@@ -1,4 +1,4 @@
-var f = angular.module('formApp', ['ngMaterial', 'ui.router', 'formly', 'ngAnimate', 'uiGmapgoogle-maps']);
+var f = angular.module('ngForm', ['ngMaterial', 'ui.router', 'ngAnimate', 'uiGmapgoogle-maps', 'ngColors']);
 
 f.config(function(uiGmapGoogleMapApiProvider) {
     uiGmapGoogleMapApiProvider.configure({
@@ -6,38 +6,6 @@ f.config(function(uiGmapGoogleMapApiProvider) {
         v: '3.20',
         libraries: 'weather,geometry,visualization'
     });
-});
-
-// Angular Material Color Scheme
-f.config(function($mdThemingProvider) {
-    $mdThemingProvider.definePalette('blues', {
-        "50": "f0f6f9",
-        "100": "d2e4ed",
-        "200": "b4d2e1",
-        "300": "9ac2d7",
-        "400": "81b3cd",
-        "500": "97BFFE",
-        "600": "5b90ab",
-        "700": "4e7b92",
-        "800": "41677a",
-        "900": "345262",
-        "A100": "d2e4ed",
-        "A200": "b4d2e1",
-        "A400": "81b3cd",
-        "A700": "4e7b92",
-        'contrastDefaultColor': 'light', // whether, by default, text (contrast)
-        // on this palette should be dark or light
-        'contrastDarkColors': ['50', '100', //hues which contrast should be 'dark' by default
-            '200', '300', '400', 'A100'
-        ],
-        'contrastLightColors': undefined // could also specify this if default was 'dark'
-    });
-
-    // $mdThemingProvider.theme('docs-dark', 'default')
-    //    .primaryPalette('yellow')
-    //    .dark();
-    $mdThemingProvider.theme('default')
-        .primaryPalette('blues');
 });
 
 // CONFIGURE for each view in the ui-router
@@ -171,16 +139,18 @@ f.controller('FormCtrl', function($scope, $log, $timeout) {
     };
 
     // INITIALIZE MAP
+    $scope.flagstaff ={ latitude: 35.185, longitude: -111.6526};
     $scope.map = {
         center: {
-            latitude: 35,
-            longitude: -111
+            latitude: 38.2,
+            longitude: -98
         },
         zoom: 4,
         bounds: {}
     };
     $scope.options = {
-        scrollwheel: false
+        scrollwheel: false,
+        streetViewControl: false,
     };
     $scope.markers = [];
 
@@ -195,10 +165,10 @@ f.controller('FormCtrl', function($scope, $log, $timeout) {
                 draggable: true
             },
             events: {
-                dragend: function(markers, eventName, args) {
-                    $scope.markers[newID].options = {
+                dragend: function(marker, eventName, args) {
+                    $scope.marker.options = {
                         draggable: true,
-                        labelContent: "lat: " + $scope.markers[newID].latitude + ' ' + 'lon: ' + $scope.markers[newID].longitude,
+                        labelContent: "lat: " + $scope.marker.latitude + ' ' + 'lon: ' + $scope.marker.longitude,
                         labelAnchor: "100 0",
                         labelClass: "marker-labels"
                     };
