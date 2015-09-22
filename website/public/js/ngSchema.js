@@ -1,24 +1,24 @@
- var s = angular.module('ngSchema', ['ui.bootstrap']);
+ var s = angular.module('ngSchema', ['ui.bootstrap', 'ngMaterial', 'ngColors','md.data.table']);
 
 // CONTROLLER for populating and sorting schema table
-s.controller('SortCtrl', function ($scope, $http) {
+s.controller('SortCtrl', function ($q, $scope, $timeout, $http) {
     // able to sort and search table by attributes
-    $scope.sortType = 'name';
-    $scope.sortReverse = false;
-    $scope.toggleSearch = false;
-    $scope.searchSchema = '';
-    $scope.schema = [];
+    $scope.content = [];
     $scope.def = {};
-    $scope.custom = {name: 'bold', description:'grey',last_modified: 'grey'};
-    $scope.sortable = ['name', 'description', 'last_modified'];
-    $scope.thumbs = 'thumb';
-    $scope.count = 3;
-
+    $scope.query = {
+      order: 'name',
+    };
+    $scope.onorderchange = function(order) {
+      var deferred = $q.defer();
+      $timeout(function () {
+        deferred.resolve();
+      }, 2000);
+      return deferred.promise;
+    };
     // Grab data from local files
     $http.get('def.json').success(function(data){
         $scope.def = data;
     });
-
     $http.get('context.lipd').success(function(data){
         var o = [];
         var links = ['xsd', 'schema', 'purl', 'csvw', 'lipd', 'doi', 'geojson', 'dataDOI', 'id', 'type'];
@@ -36,9 +36,9 @@ s.controller('SortCtrl', function ($scope, $http) {
                     var spl = curr.split(':');
                     curr = data['@context'][spl[0]] + spl[1];
                 }
-                t.link = curr;
+                t.reference = curr;
                 t.name = (item);
-                $scope.schema.push(t);
+                $scope.content.push(t);
             }
         }
     });
@@ -96,54 +96,3 @@ s.controller('SortCtrl', function ($scope, $http) {
 //         }
 //     }
 // });
-
-s.directive('mdTable', function () {
-  return {
-    restrict: 'E',
-    scope: {
-      headers: '=',
-      content: '=',
-      sortable: '=',
-      filters: '=',
-      customClass: '=customClass',
-      thumbs:'=',
-      count: '='
-    },
-    controller: function ($scope,$filter,$window) {
-      var orderBy = $filter('orderBy');
-      $scope.tablePage = 0;
-      $scope.nbOfPages = function () {
-        return Math.ceil($scope.content.length / $scope.count);
-      },
-      	$scope.handleSort = function (field) {
-          if ($scope.sortable.indexOf(field) > -1) { return true; } else { return false; }
-      };
-      $scope.order = function(predicate, reverse) {
-          $scope.content = orderBy($scope.content, predicate, reverse);
-          $scope.predicate = predicate;
-      };
-      $scope.order($scope.sortable[0],false);
-      $scope.getNumber = function (num) {
-      			    return new Array(num);
-      };
-      $scope.goToPage = function (page) {
-        $scope.tablePage = page;
-      };
-    },
-    template: angular.element(document.querySelector('#md-table-template')).html()
-  }
-});
-
-s.directive('mdColresize', function ($timeout) {
-  return {
-    restrict: 'A',
-    link: function (scope, element, attrs) {
-      scope.$evalAsync(function () {
-        $timeout(function(){ $(element).colResizable({
-          liveDrag: true,
-          fixed: true
-        });},100);
-      });
-    }
-  }
-});

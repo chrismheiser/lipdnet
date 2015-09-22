@@ -1,50 +1,33 @@
 extends layout
 
 block body
-	body(ng-app='ngSchema')
+	body(ng-app='ngSchema' layout='column' ng-cloak)
 		div#wrapper
 			include ./include/navbar.jade
-			div(ng-controller='SortCtrl', class='container')
-			
-				//demo MD table
-				.main-fab
-					md-toolbar.md-tall(layout='column')
-						span(flex)
-						.md-toolbar-tools
-							.fill-height(layout='row',flex)
-								.md-toolbar-item.md-breadcrumb(ng-hide='toggleSearch')
-									span Schema
-								span(flex,ng-hide='toggleSearch')
-								md-input-container(flex,style='padding-left:88px;',ng-show='toggleSearch')
-									input(type='text',ng-model='search')
-								.md-toolbar-item.md-tools(layout='row')
-									a.md-button.md-default-theme(href, ng-click='toggleSearch = !toggleSearch')
-										i.ion-android-search
-					md-content(layout='column',flex,ng-click='toggleSearch=false')
-						md-table(headers="headers", content="content", sortable="sortable", filters="search", custom-class="custom", thumbs="thumbs", count="count")
-						
-					// md-table jade template
-					#md-table-template(ng-hide='true')
-					table.md-table(md-colresize)
-						thead
-								tr.md-table-headers-row
-										th
-										th.md-table-header(ng-repeat='h in headers')
-												a(href='#',ng-if='handleSort(h.field)',ng-click='reverse=!reverse;order(h.field,reverse)') {{h.name}} 
-														i.ion-android-arrow-dropup(ng-show='reverse && h.field == predicate')
-														i.ion-android-arrow-dropdown(ng-show='!reverse && h.field == predicate')
-												span(ng-if='!handleSort(h.field)') {{h.name}}
-										th.md-table-header
-						tbody
-								tr.md-table-content-row(ng-repeat='c in content | filter:filters')
-										td
-										td.md-table-content(ng-repeat='h in headers',ng-class='customClass[h.field]',ng-if='h.field != thumbs') {{(h.field.indexOf('date') > 0) ? $filter('date')(c[h.field]) : c[h.field];}}
-										td.md-table-td-more
-												md-button(aria-label='Info')
-														i.ion-android-more-vertical
-														
-														
-														
+			md-toolbar
+				.md-toolbar-tools
+					.md-title Schema
+					
+			md-content(layout="column" layout-padding flex)
+				md-card(ng-controller='SortCtrl')
+					//- md-data-table-toolbar
+					//- 	h2.md-title Schema
+
+					md-data-table-container
+						table.md-primary(md-data-table md-progress="deferred")
+							thead(md-order="query.order" md-trigger="onorderchange")
+								tr
+									th(order-by="name" name="Name")
+									th(order-by="reference" name="Reference")
+									//- th(order-by="description" name="Description")
+							tbody
+								tr(ng-repeat="i in content | orderBy: query.order")
+									td {{i.name}}
+									td 
+										a(href='{{i.reference}}'){{i.reference}}
+									//- td {{i.description}}
+									
+									
 				// search box filter
 				//- form
 				//- 	div.form-group

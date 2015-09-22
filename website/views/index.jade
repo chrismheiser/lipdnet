@@ -2,12 +2,12 @@ extends layout
 
 block body
 	// add #bg-img to body for photo background
-	body(ng-app='ngMap')
+	body#bg-img(ng-app='indexApp' ng-cloak)
 		div#wrapper
 			include ./include/navbar.jade
 			section#content
 				.container
-					div.text-center
+					.text-center
 						h1.md-display-3 Lorem Ipsum
 						p.md-subhead Lorem Ipsum is simply dummy text of the printing and typesetting 
 							| industry. Lorem Ipsum has been the industry's standard 
@@ -18,13 +18,38 @@ block body
 							| It was popularised in the 1960s with the release of Letraset sheets 
 							| containing Lorem Ipsum passages, and more recently with desktop 
 							| publishing software like Aldus PageMaker including versions of Lorem Ipsum.
-					.text-center
-						a.smoothScroll(href="#about")
-							i.fa.fa-angle-double-down.fa-4x
+			a.right.smoothScroll(href="#about")
+				i.fa.fa-angle-double-down.fa-5x
 	.container.cf#about
 		.animation-element.bounce-up.cf
-			h1.md-display-3.subject(layout layout-align="center center") About Us
-			.subject.g
+			h1.subject.md-display-3(layout layout-align="center center") About Us
+			.subject.first
+				.category-color
+				.icon
+					i.fa.fa-users
+				.header.cf
+				h3.title Team
+				.content(layout-sm='column' layout='row' layout-align='space-around center')
+					.flex.layout-margin
+						md-card
+							img.md-card-image(ng-src="img/heiser.jpg")
+							md-card-content
+								h2.md-title Christopher Heiser
+								p Lorem Ipsum is simply dummy text of the printing and typesetting industry.
+					.flex.layout-margin
+						md-card
+							img.md-card-image(ng-src="img/mckay.jpg")
+							md-card-content
+								h2.md-title Nicholas McKay
+								p Lorem Ipsum is simply dummy text of the printing and typesetting industry.
+					.flex.layout-margin
+						md-card
+							img.md-card-image(ng-src="img/mcdowell.png")
+							md-card-content
+								h2.md-title Austin McDowell
+								p Lorem Ipsum is simply dummy text of the printing and typesetting industry.
+				
+			.subject.second
 				.category-color
 				.icon
 					i.fa.fa-globe
@@ -34,15 +59,28 @@ block body
 					div(ng-controller='MapCtrl')
 						ui-gmap-google-map(center="map.center" zoom="map.zoom" options="options")
 	
+
+	
 	.container.cf#contact
 		.animation-element.bounce-up.cf
-			h1.md-display-3.subject(layout layout-align="center center") Contact
-			.subject.g
+			h1.subject.md-display-3(layout layout-align="center center") Contact
+			.subject.third
 				.category-color
 				.icon
 					i.fa.fa-envelope
 				.header.cf
 				h3.title Questions, comments, concerns...
-				.content
-					.container
-						// PUT ALL COMMENT BOX ELEMENTS HERE
+				.content(ng-controller='FormCtrl' layout-sm='row' layout='row' layout-align="space-around center")
+					div(flex='30')
+						h4 We'd love to hear from you!
+						p Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book
+					div(flex='50')
+						md-input-container
+							label Name
+							input(type="text" ng-model='name')
+						md-input-container
+							label E-Mail
+							input(type="email" ng-model='email')
+						md-input-container
+							label Message
+							textarea(type="text" ng-model='message')

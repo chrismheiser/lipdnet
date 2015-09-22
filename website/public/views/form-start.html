@@ -1,5 +1,5 @@
 <div>
-    <md-toolbar>
+    <md-toolbar class='md-hue-1'>
         <h2 class="md-toolbar-tools">
             <span>How would you like to start?</span>
         </h2>
@@ -108,23 +108,23 @@
 </div>
 
 <div layout layout-padding layout-wrap layout-sm="column">
-    <md-input-container flex='66'>
+    <md-input-container flex>
         <label>DOI</label>
         <input ng-model="userData.pubDoi">
     </md-input-container>
-    <md-input-container flex='33'>
+    <md-input-container flex>
         <label>Year</label>
         <input ng-model="userData.pubYear">
     </md-input-container>
-    <md-input-container flex='33'>
+    <md-input-container flex>
         <label>Volume</label>
         <input ng-model="userData.pubVolume">
     </md-input-container>
-    <md-input-container flex='33'>
+    <md-input-container flex>
         <label>Edition</label>
         <input ng-model="userData.pubEdition">
     </md-input-container>
-    <md-input-container flex='33'>
+    <md-input-container flex>
         <label>Issue</label>
         <input ng-model="userData.pubIssue">
     </md-input-container>
@@ -156,7 +156,7 @@
 
 <!-- GOOGLE MAP -->
 <!-- ng-if="userData.geo.geometry.coordinates" -->
-<div id='map_canvas'>
+<div>
     <ui-gmap-google-map center="map.center" zoom="map.zoom" draggable="true" options="options" bounds="map.bounds">
         <ui-gmap-markers models="markers" coords="'self'" events="events" options="options">
         </ui-gmap-markers>

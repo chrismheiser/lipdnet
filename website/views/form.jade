@@ -1,7 +1,10 @@
 extends layout
 
 block body
-	body#bg-img(ng-app='ngForm' ng-controller="FormCtrl as f")
+	body(ng-app='ngForm' ng-controller="FormCtrl as f" ng-cloak)
 		div#wrapper
 			include ./include/navbar.jade
+			md-toolbar
+				.md-toolbar-tools
+					.md-title Upload
 			div(ui-view)

@@ -1,12 +1,8 @@
-/*These styles contain basic styles for fomatting along with our animation css*/
+/* Controls the Fade up "Cards" animation on the index page */
 
 strong,
 b {
   font-weight: 600
-}
-
-i.fa {
-  color: #333;
 }
 
 *,
@@ -18,7 +14,6 @@ i.fa {
 }
 
 /*clearfixes*/
-
 .cf:before,
 .cf:after {
   content: " ";
@@ -30,7 +25,7 @@ i.fa {
 }
 
 .main-container {
-  background: #fff;
+  background: transparent;
   max-width: 1000px;
   margin: 25px 25px auto;
   position: relative;
@@ -44,8 +39,8 @@ i.fa {
 .container:last-of-type {
   padding-top: 0px;
 }
-/*animation element*/
 
+/*animation element*/
 .animation-element {
   position: relative;
   width: 99%;
@@ -53,8 +48,7 @@ i.fa {
   float: left;
 }
 
-/*bounce up animation for the subject*/
-
+/* bounce up animation for the subject */
 .bounce-up .subject {
   opacity: 0;
   -moz-transition: all 700ms ease-out;
@@ -70,7 +64,6 @@ i.fa {
   -moz-backface-visibility: hidden;
   backface-visibility: hidden;
 }
-
 .bounce-up.in-view .subject {
   opacity: 1;
   -moz-transform: translate3d(0px, 0px, 0px);
@@ -85,15 +78,20 @@ i.fa {
   text-align: center;
   width: 100%;
   margin: 0% 1.33% 2.66% 1.33%;
-/*  background: #F5F5F5;
-*/  padding: 15px;
-/*  box-shadow: 0px 1px 1px 0px rgba(0, 0, 0, 0.2);
-  border: solid 1px #EAEAEA;*/
+  padding: 15px;
 }
 
 .subject:hover,
 .subject:active {
   box-shadow: 0px 2px 6px 0px rgba(0, 0, 0, 0.25);
+  background: #F4F4F4;
+}
+
+/* Override box shadow for section subject header */
+.md-display-3:hover,
+.md-display-3:active {
+  box-shadow: none !important;
+  background: none !important;
 }
 
 .subject .header {
@@ -117,24 +115,13 @@ i.fa {
   transition: all 400ms linear;
 }
 
-.subject .header .date {
-  float: left;
-  text-align: left;
-}
-
-.subject .header .category {
-  float: right;
-  text-align: right;
-}
-/*subject icon at top*/
-
+/*Subject icon at the top of each category */
 .subject .icon {
   position: absolute;
   top: -20px;
   left: 50%;
   left: calc(50% - 20px);
 }
-
 .subject .icon i {
   width: 40px;
   height: 40px;
@@ -144,8 +131,8 @@ i.fa {
   text-align: center;
   padding: 7px;
 }
-/*Category color / icon color*/
 
+/* Category strip color / FA icon color*/
 .subject .category-color {
   height: 7px;
   position: absolute;
@@ -153,45 +140,45 @@ i.fa {
   left: 0px;
   width: 100%;
 }
-
-.subject.r .category-color,
-.subject.r .icon i {
-  background: #c0392b;
+.subject.first .category-color,
+.subject.first .icon i {
+  background: #577d2a;
+}
+.subject.second .category-color,
+.subject.second .icon i {
+  background: #8BC34A;
+}
+.subject.third .category-color,
+.subject.third .icon i {
+  background: #c8e3aa;
 }
 
-.subject.g .category-color,
-.subject.g .icon i {
-  background: #16a085;
+
+/* Hovering over Subject */
+.subject.first:hover .header i {
+  color: #4CAF50;
+}
+.subject.second:hover .header i {
+  color: #5cb860;
+}
+.subject.third:hover .header i {
+  color: #6ec071;
 }
 
-.subject.b .category-color,
-.subject.b .icon i {
-  background: #2980b9;
-}
-/*hovering over subject*/
-
-.subject.g:hover .header i {
-  color: #16a085;
-}
-
-.subject.r:hover .header i {
-  color: #c0392b;
-}
-
-.subject.b:hover .header i {
-  color: #2980b9;
-}
-
+/* Subheader Title (Team, Location, Questions..)*/
 .subject .title {
   margin: 12px 0px;
   border-bottom: dashed 1px #ccc;
   padding-bottom: 10px;
 }
 
+/* Override the text-align from "subject" so that input boxes aren't messed up*/
 .subject .content {
   margin-bottom: 8px;
+  text-align: left !important;
 }
 
+/* Subject background */
 .subject .bk {
   position: relative;
   color: #333;
@@ -205,14 +192,13 @@ i.fa {
   -o-transition: all 400ms linear;
   transition: all 400ms linear;
 }
-
 .subject .bk:hover,
 .subject .bk:active {
   background: #222;
   color: #fff;
 }
-/*media queries for small devices*/
 
+/* Small Devices */
 @media screen and (max-width: 678px) {
   .main-container {
     margin: 20px 15px;
