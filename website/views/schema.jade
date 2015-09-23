@@ -2,63 +2,26 @@ extends layout
 
 block body
 	body(ng-app='ngSchema' layout='column' ng-cloak)
-		div#wrapper
-			include ./include/navbar.jade
+		#wrapper
+			include ./include/navbar.jade		
 			md-toolbar
 				.md-toolbar-tools
 					.md-title Schema
-					
+
 			md-content(layout="column" layout-padding flex)
 				md-card(ng-controller='SortCtrl')
-					//- md-data-table-toolbar
-					//- 	h2.md-title Schema
-
 					md-data-table-container
 						table.md-primary(md-data-table md-progress="deferred")
 							thead(md-order="query.order" md-trigger="onorderchange")
 								tr
 									th(order-by="name" name="Name")
 									th(order-by="reference" name="Reference")
-									//- th(order-by="description" name="Description")
+									th(name="Definition")
 							tbody
 								tr(ng-repeat="i in content | orderBy: query.order")
-									td {{i.name}}
+									td
+										h5 {{i.name}}
 									td 
 										a(href='{{i.reference}}'){{i.reference}}
-									//- td {{i.description}}
-									
-									
-				// search box filter
-				//- form
-				//- 	div.form-group
-				//- 		div.input-group
-				//- 			div.input-group-addon
-				//- 				i.fa.fa-search
-				//- 			input(type='text', class='form-control', placeholder='Search schema...', ng-model='searchSchema')
-				//- 
-				//- // table of data
-				//- table.table.table-bordered.table-striped.table-hover
-				//- 	thead
-				//- 		tr
-				//- 			td
-				//- 				a(href='#', ng-click = "sortType = 'name'; sortReverse = !sortReverse") Name
-				//- 					span(ng-show="sortType == 'name' && !sortReverse", class='fa fa-caret-down')
-				//- 					span(ng-show="sortType == 'name' && sortReverse", class='fa fa-caret-up')
-				//- 			td
-				//- 				a(href='#', ng-click = "sortType = 'link'; sortReverse = !sortReverse") Reference
-				//- 					span(ng-show="sortType == 'link' && !sortReverse", class='fa fa-caret-down')
-				//- 					span(ng-show="sortType == 'link' && sortReverse", class='fa fa-caret-up')
-				//- 	tbody
-				//- 		// loop through each item in context file and fill the table
-				//- 		tr(ng-repeat-start='item in schema | orderBy:sortType:sortReverse | filter:searchSchema')								
-				//- 			td
-				//- 				a(ng-href='#' slide-toggle='#{{ item.name }}') {{ item.name }}
-				//- 			td 
-				//- 				a(ng-href='{{ item.link }}') {{ item.link }}
-				//- 		// row that activates to show definition
-				//- 		tr(ng-repeat-end)
-				//- 			td.nohover(colspan='3')
-				//- 				div(class= 'slideable' id= '{{ item.name }}')
-				//- 					h3{{ item.name }}
-				//- 					p(ng-if='def[item.name] != ""') {{ def[item.name] }}
-				//- 					p(ng-if='def[item.name] == ""') Please use the reference link for more information!
+									td
+										p {{def[i.name]}}
