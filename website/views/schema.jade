@@ -1,7 +1,10 @@
 extends layout
+block css
+	link(rel='stylesheet' href='css/schema.css')
+	link(rel='stylesheet' href="http://rawgit.com/daniel-nagy/md-data-table/master/dist/md-data-table.css")
 
 block body
-	body(ng-app='ngSchema' layout='column' ng-cloak)
+	body(ng-app='schemaApp' layout='column')
 		#wrapper
 			include ./include/navbar.jade		
 			md-toolbar
@@ -9,7 +12,7 @@ block body
 					.md-title Schema
 
 			md-content(layout="column" layout-padding flex)
-				md-card(ng-controller='SortCtrl')
+				md-card(ng-controller='TableCtrl' ng-cloak)
 					md-data-table-container
 						table.md-primary(md-data-table md-progress="deferred")
 							thead(md-order="query.order" md-trigger="onorderchange")
@@ -25,3 +28,8 @@ block body
 										a(href='{{i.reference}}'){{i.reference}}
 									td
 										p {{def[i.name]}}
+
+block js
+	script(src='js/schemaApp.js')
+	script(src='js/ngTable.js')
+	script(src="http://rawgit.com/daniel-nagy/md-data-table/master/dist/md-data-table.js")

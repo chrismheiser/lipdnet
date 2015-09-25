@@ -1,4 +1,4 @@
-var f = angular.module('ngForm', ['ngMaterial', 'ui.router', 'ngAnimate', 'uiGmapgoogle-maps', 'ngColors']);
+var f = angular.module('ngForm', ['ngMaterial', 'ui.router', 'ngAnimate', 'ngColors', 'uiGmapgoogle-maps']);
 
 f.config(function(uiGmapGoogleMapApiProvider) {
     uiGmapGoogleMapApiProvider.configure({

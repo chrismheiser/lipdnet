@@ -1,7 +1,9 @@
 // Layout.jade
-// Layout -> Includes Files -> block Body 
+
 doctype html
-html(html='en')
+html(lang='en')
 	include ./include/head.jade
-	block body 	
+	block css
+	block body
 	include ./include/footer.jade
+	block js

@@ -1,1 +1,1 @@
-var index = angular.module('indexApp', ['ngMap', 'ngForm']);
+var index = angular.module('indexApp', ['ngMap', 'ngContact']);

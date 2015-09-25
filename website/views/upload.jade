@@ -1,0 +1,20 @@
+extends layout
+
+block css
+	link(rel='stylesheet' href='css/upload.css')
+
+block body
+	body(ng-app='uploadApp' ng-controller="FormCtrl as f" ng-cloak)
+		#wrapper
+			include ./include/navbar.jade
+			md-toolbar
+				.md-toolbar-tools
+					.md-title Upload
+			div(ui-view)
+			
+block js
+	script(src='js/uploadApp.js')
+	script(src='js/ngForm.js')
+	script(src='https://cdnjs.cloudflare.com/ajax/libs/angular-ui-router/0.2.15/angular-ui-router.min.js')
+	script(src='https://cdnjs.cloudflare.com/ajax/libs/angular-google-maps/2.2.0/angular-google-maps.min.js')
+	script(src='//maps.googleapis.com/maps/api/js?sensor=false')

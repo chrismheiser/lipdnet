@@ -1,5 +1,15 @@
 /* Controls the Fade up "Cards" animation on the index page */
 
+.send {
+  float:right;
+  color: #fff;
+  background: #a4d070;
+}
+.send:hover,
+.send:active {
+  color: #577d2a;
+}
+
 strong,
 b {
   font-weight: 600

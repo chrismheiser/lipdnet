@@ -39,14 +39,12 @@ app.use(express.static(path.join(__dirname, 'bower_components')));
 app.use('/', routes);
 app.use('/users', users);
 
+// error handlers
+
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
-  var err = new Error('Not Found');
-  err.status = 404;
-  next(err);
+  res.status(404).render('404.jade');
 });
-
-// error handlers
 
 // development error handler
 // will print stacktrace
@@ -69,7 +67,6 @@ app.use(function(err, req, res, next) {
     error: {}
   });
 });
-
 
 app.listen(app.get('port'), function() {
   console.log('Node app is running on port', app.get('port'));

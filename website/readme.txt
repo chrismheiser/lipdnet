@@ -21,6 +21,10 @@ OR
 app.set('port', process.env.PORT || 8080);
 
 
+You have access to the filesystem via ssh/sftp to linux.cefns.nau.edu.
+The path is /www/sites/cefns/seses/lipd/.
+There's a directory there called nodejs and inside are the contents of your two zip files.
+
 Uploading files to website server:
 1. Upload files to "webapp" folder on cmh553 cefns home
 2. Set new permissions:

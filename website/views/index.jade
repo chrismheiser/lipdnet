@@ -1,9 +1,12 @@
 extends layout
 
+block css
+	link(rel='stylesheet' href='css/index.css')
+
 block body
 	// add #bg-img to body for photo background
-	body(ng-app='indexApp' ng-cloak)
-		div#wrapper
+	body(ng-app='indexApp')
+		#wrapper
 			include ./include/navbar.jade
 			section#content
 				.container
@@ -44,7 +47,7 @@ block body
 								p Lorem Ipsum is simply dummy text of the printing and typesetting industry.
 					.flex.layout-margin
 						md-card
-							img.md-card-image(ng-src="img/mcdowell.png")
+							img.md-card-image(ng-src="img/mcdowell.jpg")
 							md-card-content
 								h2.md-title Austin McDowell
 								p Lorem Ipsum is simply dummy text of the printing and typesetting industry.
@@ -56,7 +59,7 @@ block body
 				.header.cf
 				h3.title Location
 				.content
-					div(ng-controller='MapCtrl')
+					div(ng-controller='MapCtrl' ng-cloak)
 						ui-gmap-google-map(center="map.center" zoom="map.zoom" options="options")
 	
 
@@ -70,9 +73,9 @@ block body
 					i.fa.fa-envelope
 				.header.cf
 				h3.title Questions, comments, concerns...
-				.content(ng-controller='FormCtrl' layout-sm='row' layout='row' layout-align="space-around center")
+				.content(ng-controller='ContactCtrl' layout-sm='row' layout='row' layout-align="space-around center" ng-cloak)
 					div(flex='30')
-						h4 We'd love to hear from you!
+						h4 We'd love to hear from ryou!
 						p Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book
 					div(flex='50')
 						md-input-container
@@ -84,3 +87,13 @@ block body
 						md-input-container
 							label Message
 							textarea(type="text" ng-model='message')
+						md-button.send Send
+
+block js
+	script(src='https://cdnjs.cloudflare.com/ajax/libs/angular-google-maps/2.2.0/angular-google-maps.min.js')
+	script(src='https://maps.googleapis.com/maps/api/js?sensor=false')
+	script(src='js/indexApp.js')
+	script(src='js/ngMap.js')
+	script(src='js/ngContact.js')
+	script(src='js/animate.js')
+	script(src='js/smooth.js')

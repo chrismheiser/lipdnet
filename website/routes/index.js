@@ -10,12 +10,12 @@ router.get('/index', function(req, res, next) {
   res.render('index', { title: 'LiPD' });
 });
 
-router.get('/schema', function(req, res){
+router.get('/schema', function(req, res, next){
     res.render('schema', {title: 'Schema'});
 });
 
-router.get('/upload', function(req, res){
-	res.render('form', {title: "Walk-through"});
+router.get('/upload', function(req, res, next){
+    res.render('upload', {title: 'Upload'});
 });
 
 module.exports = router;
