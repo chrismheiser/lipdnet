@@ -19,7 +19,7 @@ block body
 						#[a(href='http://www.clim-past-discuss.net/11/4309/2015/cpd-11-4309-2015-discussion.html') here.]
 						The development of LiPD is funded by the National Science Foundation   
 						#[img(ng-src='img/nsf.jpg' style='width:50px')]
-			div(layout='row' ng-cloak)
+			div#buttons(layout='row' ng-cloak)
 				div(flex='20')
 					.md-button.schematic-btn.left(ng-click="schematic = !schematic" ng-class="{ active: schematic }") Schematic
 				.text-center(flex='60')
@@ -41,21 +41,45 @@ block body
 						md-card
 							img.md-card-image(ng-src="img/heiser.jpg")
 							md-card-content
+								div(layout='row' layout-align='space-around center')
+									a(href="https://instagram.com/chrisheiser")
+										i.fa.fa-instagram
+									a(href="http://chrismheiser.github.io")
+										i.fa.fa-coffee
+									a(href="https://github.com/chrismheiser")
+										i.fa.fa-code
+									a(href="https://www.linkedin.com/in/chrismheiser")
+										i.fa.fa-linkedin
 								h2.md-title Christopher Heiser
 								p Lorem Ipsum is simply dummy text of the printing and typesetting industry.
 					.flex.layout-margin
 						md-card
 							img.md-card-image(ng-src="img/mckay.jpg")
 							md-card-content
+								div(layout='row' layout-align='space-around center')
+									a(href="#")
+										i.fa.fa-instagram
+									a(href="#")
+										i.fa.fa-code
+									a(href="#")
+										i.fa.fa-linkedin
 								h2.md-title Nicholas McKay
 								p Lorem Ipsum is simply dummy text of the printing and typesetting industry.
+
 					.flex.layout-margin
 						md-card
 							img.md-card-image(ng-src="img/mcdowell.jpg")
 							md-card-content
+								div(layout='row' layout-align='space-around center')
+									a(href="#")
+										i.fa.fa-instagram
+									a(href="#")
+										i.fa.fa-code
+									a(href="#")
+										i.fa.fa-linkedin
 								h2.md-title Austin McDowell
 								p Lorem Ipsum is simply dummy text of the printing and typesetting industry.
-				
+
 			.subject.second
 				.category-color
 				.icon
