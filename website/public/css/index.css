@@ -1,14 +1,39 @@
-/* Controls the Fade up "Cards" animation on the index page */
 
+#intro {
+  padding: 0;
+}
+
+/* BUTTONS */
+
+/* Animate showing and hiding the schematic image */
+.ng-hide-add         { animation:1.2s fadeOut ease; }
+.ng-hide-remove      { animation:1.2s fadeIn ease; }
+
+/* Schematic image toggle button */
+.schematic-btn {
+  float:left;
+  color: #fff;
+  background: #a4d070;
+}
+.schematic-btn.left {
+	left: 50px;
+	bottom: 15px;
+	position: absolute;
+}
+
+/* Contact "Send" Button */
 .send {
   float:right;
   color: #fff;
   background: #a4d070;
 }
-.send:hover,
-.send:active {
+
+.schematic-btn:hover,
+.schematic-btn:active,.send:hover,
+.send:active{
   color: #577d2a;
 }
+/* END BUTTONS */
 
 strong,
 b {
@@ -34,53 +59,27 @@ b {
   clear: both;
 }
 
+/* Containers */
 .main-container {
   background: transparent;
   max-width: 1000px;
   margin: 25px 25px auto;
   position: relative;
 }
-
 .container {
   position: relative;
   padding: 25px;
 }
-
 .container:last-of-type {
   padding-top: 0px;
 }
 
-/*animation element*/
+/* Cards Styling */
 .animation-element {
   position: relative;
   width: 99%;
   margin: 0% 1.33 2.66% 1.33%;
   float: left;
-}
-
-/* bounce up animation for the subject */
-.bounce-up .subject {
-  opacity: 0;
-  -moz-transition: all 700ms ease-out;
-  -webkit-transition: all 700ms ease-out;
-  -o-transition: all 700ms ease-out;
-  transition: all 700ms ease-out;
-  -moz-transform: translate3d(0px, 200px, 0px);
-  -webkit-transform: translate3d(0px, 200px, 0px);
-  -o-transform: translate(0px, 200px);
-  -ms-transform: translate(0px, 200px);
-  transform: translate3d(0px, 200, 0px);
-  -webkit-backface-visibility: hidden;
-  -moz-backface-visibility: hidden;
-  backface-visibility: hidden;
-}
-.bounce-up.in-view .subject {
-  opacity: 1;
-  -moz-transform: translate3d(0px, 0px, 0px);
-  -webkit-transform: translate3d(0px, 0px, 0px);
-  -o-transform: translate(0px, 0px);
-  -ms-transform: translate(0px, 0px);
-  transform: translate3d(0px, 0px, 0px);
 }
 
 .subject {
@@ -207,8 +206,88 @@ b {
   background: #222;
   color: #fff;
 }
+/* END CARDS STYLING */
 
-/* Small Devices */
+
+
+/* ANIMATIONS */
+@-webkit-keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+.fadeIn {
+  -webkit-animation-name: fadeIn;
+  animation-name: fadeIn;
+}
+
+@-webkit-keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
+}
+
+.fadeOut {
+  -webkit-animation-name: fadeOut;
+  animation-name: fadeOut;
+}
+
+.bounce-up .subject {
+  opacity: 0;
+  -moz-transition: all 700ms ease-out;
+  -webkit-transition: all 700ms ease-out;
+  -o-transition: all 700ms ease-out;
+  transition: all 700ms ease-out;
+  -moz-transform: translate3d(0px, 200px, 0px);
+  -webkit-transform: translate3d(0px, 200px, 0px);
+  -o-transform: translate(0px, 200px);
+  -ms-transform: translate(0px, 200px);
+  transform: translate3d(0px, 200, 0px);
+  -webkit-backface-visibility: hidden;
+  -moz-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+.bounce-up.in-view .subject {
+  opacity: 1;
+  -moz-transform: translate3d(0px, 0px, 0px);
+  -webkit-transform: translate3d(0px, 0px, 0px);
+  -o-transform: translate(0px, 0px);
+  -ms-transform: translate(0px, 0px);
+  transform: translate3d(0px, 0px, 0px);
+}
+
+/* END ANIMATIONS */
+
+/* MEDIA */
 @media screen and (max-width: 678px) {
   .main-container {
     margin: 20px 15px;

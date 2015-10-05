@@ -303,7 +303,7 @@ header ul.nav li ul li ul {
 #content {
 	position:relative;
 	background: transparent;
-	padding:30px 0 40px 0;
+	padding:30px 0 10px 0;
   border-color: transparent;
 }
 
@@ -321,12 +321,13 @@ header ul.nav li ul li ul {
 /* Forms  */
 
 /* --- button --- */
+/*
 .btn-theme {
 	color: #fff;
 }
 .btn-theme:hover {
 	color: #eee;
-}
+}*/
 
 /* --- list style --- */
 

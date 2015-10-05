@@ -6,23 +6,27 @@ block css
 block body
 	// add #bg-img to body for photo background
 	body(ng-app='indexApp')
-		#wrapper
+		#wrapper(ng-controller='toggle')
 			include ./include/navbar.jade
 			section#content
-				.container
-					.text-center
-						h1.md-display-3 Lorem Ipsum
-						p.md-subhead Lorem Ipsum is simply dummy text of the printing and typesetting 
-							| industry. Lorem Ipsum has been the industry's standard 
-							| dummy text ever since the 1500s, when an unknown printer 
-							| took a galley of type and scrambled it to make a type specimen 
-							| book. It has survived not only five centuries, but also the leap 
-							| into electronic typesetting, remaining essentially unchanged.
-							| It was popularised in the 1960s with the release of Letraset sheets 
-							| containing Lorem Ipsum passages, and more recently with desktop 
-							| publishing software like Aldus PageMaker including versions of Lorem Ipsum.
-			a.right.smoothScroll(href="#about")
-				i.fa.fa-angle-double-down.fa-5x
+				.container#intro
+					h1.md-display-3.text-center Linked Paleo Data
+					p.md-subhead Linked Paleo Data (LiPD) is a community data framework being designed to simplify the sharing, reuse and analysis of paleoclimate data. By combining a flexible, hierarchical data container with linked data concepts, LiPD lets paleoscientists spend less time wrangling data, and more time doing science.
+					p.md-subhead We’re currently working hard to develop more and better utilities for interacting with LiPD, both for the creation and validation of LiPD datasets, and for tools to interact with LiPD data in Python, R, and Matlab. We’re always looking for more people interested in  
+						a(href='#contact') contributing to the effort.
+					p.md-subhead.
+						A technical description of the LiPD framework is available
+						#[a(href='http://www.clim-past-discuss.net/11/4309/2015/cpd-11-4309-2015-discussion.html') here.]
+						The development of LiPD is funded by the National Science Foundation   
+						#[img(ng-src='img/nsf.jpg' style='width:50px')]
+			div(layout='row' ng-cloak)
+				div(flex='20')
+					.md-button.schematic-btn.left(ng-click="schematic = !schematic" ng-class="{ active: schematic }") Schematic
+				.text-center(flex='60')
+					img(ng-show="schematic" ng-src="img/schematic.jpg" style='height:280px;float:left;')
+				div(flex='20')
+					a.right.smoothScroll(href="#about")
+						i.fa.fa-angle-double-down.fa-5x
 	.container.cf#about
 		.animation-element.bounce-up.cf
 			h1.subject.md-display-3(layout layout-align="center center") About Us
@@ -75,7 +79,7 @@ block body
 				h3.title Questions, comments, concerns...
 				.content(ng-controller='ContactCtrl' layout-sm='row' layout='row' layout-align="space-around center" ng-cloak)
 					div(flex='30')
-						h4 We'd love to hear from ryou!
+						h4 We'd love to hear from you!
 						p Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book
 					div(flex='50')
 						md-input-container
