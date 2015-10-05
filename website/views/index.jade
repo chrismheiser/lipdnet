@@ -17,8 +17,6 @@ block body
 					p.md-subhead.
 						A technical description of the LiPD framework is available
 						#[a(href='http://www.clim-past-discuss.net/11/4309/2015/cpd-11-4309-2015-discussion.html') here.]
-						The development of LiPD is funded by the National Science Foundation   
-						#[img(ng-src='img/nsf.jpg' style='width:50px')]
 			div#buttons(layout='row' ng-cloak)
 				div(flex='20')
 					.md-button.schematic-btn.left(ng-click="schematic = !schematic" ng-class="{ active: schematic }") Schematic
@@ -59,23 +57,35 @@ block body
 								div(layout='row' layout-align='space-around center')
 									a(href="#")
 										i.fa.fa-instagram
-									a(href="#")
-										i.fa.fa-code
+									a(href="https://www.cefns.nau.edu/~npm4/")
+										i.fa.fa-coffee
 									a(href="#")
 										i.fa.fa-linkedin
 								h2.md-title Nicholas McKay
 								p Lorem Ipsum is simply dummy text of the printing and typesetting industry.
-
+					.flex.layout-margin
+						md-card
+							img.md-card-image(ng-src="img/emile.jpg")
+							md-card-content
+								div(layout='row' layout-align='space-around center')
+									a(href="https://twitter.com/el_nino_waves")
+										i.fa.fa-twitter
+									a(href="http://climdyn.usc.edu/People.html")
+										i.fa.fa-coffee
+									a(href="https://www.linkedin.com/in/elnino")
+										i.fa.fa-linkedin
+								h2.md-title Julien Emile-Geay
+								p Lorem Ipsum is simply dummy text of the printing and typesetting industry.
 					.flex.layout-margin
 						md-card
 							img.md-card-image(ng-src="img/mcdowell.jpg")
 							md-card-content
 								div(layout='row' layout-align='space-around center')
-									a(href="#")
+									a(href="https://instagram.com/austinpatrick/")
 										i.fa.fa-instagram
-									a(href="#")
+									a(href="https://github.com/austinpatrick")
 										i.fa.fa-code
-									a(href="#")
+									a(href="https://www.linkedin.com/pub/austin-mcdowell/b9/b1a/3")
 										i.fa.fa-linkedin
 								h2.md-title Austin McDowell
 								p Lorem Ipsum is simply dummy text of the printing and typesetting industry.
@@ -116,6 +126,11 @@ block body
 							label Message
 							textarea(type="text" ng-model='message')
 						md-button.send Send
+	footer
+		p#nsf.
+			The development of LiPD is funded by the National Science Foundation   
+			#[img(ng-src='img/nsf.jpg' style='width:50px')]
+			
 
 block js
 	script(src='https://cdnjs.cloudflare.com/ajax/libs/angular-google-maps/2.2.0/angular-google-maps.min.js')
