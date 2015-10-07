@@ -1,1 +1,1 @@
-var u = angular.module('uploadApp', ['ngForm']);
+var u = angular.module('uploadApp', ['ngForm', 'ngFile']);

@@ -2,10 +2,28 @@ extends layout
 
 block body
   body(ng-app='upload' ng-controller='ctrl')
-    pre {{upl}}
-
+    form#uploadForm(action="/test" enctype="multipart/form-data" method='post')
+      label Upload File Here
+      .button(ngf-select="upload($file)" ng-model="file" name="file" ngf-max-size="1MB") Select      
+      button(type="submit" ng-click="submit()") Submit
+    
+    // ajax status of file upload
+    pre#status
+    
+    // k,v pairs in the response object
+    pre(ng-repeat='(k,v) in obj')
+      p {{k}}
+      p {{v}}
+      
+    // content from the current uploaded file
+    div(ng-if='obj.path' ng-init='pull()')
+      pre(ng-repeat='(k,v) in content') 
+        p {{k}}
+        p {{v}}
+      
       
 block js
   script(src='https://cdnjs.cloudflare.com/ajax/libs/danialfarid-angular-file-upload/8.0.1/ng-file-upload-shim.min.js')
   script(src='https://cdnjs.cloudflare.com/ajax/libs/danialfarid-angular-file-upload/8.0.1/ng-file-upload.min.js')
+  script(src='https://cdnjs.cloudflare.com/ajax/libs/jquery.form/3.51/jquery.form.min.js')
   script(src='js/uploadApp-test.js')

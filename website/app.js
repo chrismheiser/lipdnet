@@ -23,9 +23,7 @@ var storage = multer.diskStorage({
   onFileUploadComplete: function (file) {
       console.log(file.fieldname + ' uploaded to  ' + file.path)
   }
-  // filename: function (req, file, cb) {
-  //   cb(null, file.originalname + "%" + Date.now())
-  // }
+
 });
 
 // view engine setup

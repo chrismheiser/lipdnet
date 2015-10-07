@@ -1,4 +1,4 @@
-var f = angular.module('ngForm', ['ngMaterial', 'ui.router', 'ngAnimate', 'ngColors', 'uiGmapgoogle-maps']);
+var f = angular.module('ngForm', ['ngMaterial', 'ngAnimate', 'ngColors', 'uiGmapgoogle-maps']);
 
 f.config(function(uiGmapGoogleMapApiProvider) {
     uiGmapGoogleMapApiProvider.configure({
@@ -6,48 +6,6 @@ f.config(function(uiGmapGoogleMapApiProvider) {
         v: '3.20',
         libraries: 'weather,geometry,visualization'
     });
-});
-
-// CONFIGURE for each view in the ui-router
-f.config(function($stateProvider, $urlRouterProvider) {
-
-    $stateProvider
-
-        .state('form', {
-            url: '/form',
-            templateUrl: 'views/form.html',
-            controller: 'FormCtrl'
-        })
-        .state('form.start', {
-            url: '/start',
-            templateUrl: 'views/form-start.html'
-        })
-        .state('form.upload', {
-            url: '/upload',
-            templateUrl: 'views/form-upload.html'
-        })
-        .state('form.content', {
-            url: '/content',
-            templateUrl: 'views/form-content.html'
-        })
-        .state('form.location', {
-            url: '/location',
-            templateUrl: 'views/form-location.html'
-        })
-        .state('form.validate', {
-            url: '/validate',
-            templateUrl: 'views/form-validate.html'
-        })
-        .state('form.success', {
-            url: '/success',
-            templateUrl: 'views/form-success.html'
-        })
-        .state('form.thanks', {
-            url: '/thanks',
-            templateUrl: 'views/form-thanks.html'
-        });
-
-    $urlRouterProvider.otherwise('/form/start');
 });
 
 // Controller for the Upload form

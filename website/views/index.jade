@@ -102,7 +102,7 @@ block body
 	
 
 	
-	.container.cf#contact
+	.container.cf#contact(ng-controller='ContactCtrl')
 		.animation-element.bounce-up.cf
 			h1.subject.md-display-3(layout layout-align="center center") Contact
 			.subject.third
@@ -111,21 +111,27 @@ block body
 					i.fa.fa-envelope
 				.header.cf
 				h3.title Questions, comments, concerns...
-				.content(ng-controller='ContactCtrl' layout-sm='row' layout='row' layout-align="space-around center" ng-cloak)
+				.content(ng-show='!sent' layout='row' layout-align='space-around center' ng-cloak)
 					div(flex='30')
 						h4 We'd love to hear from you!
 						p Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book
-					div(flex='50')
+					form(flex='60' ng-model='mailer')
 						md-input-container
 							label Name
-							input(type="text" ng-model='name')
+							input(type="text" name='name' ng-model='mailer.name' required)
 						md-input-container
 							label E-Mail
-							input(type="email" ng-model='email')
+							input(type="email" name='email' ng-model='mailer.email' required)
 						md-input-container
 							label Message
-							textarea(type="text" ng-model='message')
-						md-button.send Send
+							textarea(type="text" name='message' ng-model='mailer.message' required)
+						md-button.send(type='submit' ng-click="contactSubmit(mailer)") Send
+					// object that contains all contact form info
+					//- pre {{mailer}}
+					
+				// Shows a success message overlay when the form is submitted
+				.content(ng-show='sent')
+
 	footer
 		p#nsf.
 			The development of LiPD is funded by the National Science Foundation   
@@ -140,3 +146,4 @@ block js
 	script(src='js/ngContact.js')
 	script(src='js/animate.js')
 	script(src='js/smooth.js')
+	script(src='js/mailer.js')

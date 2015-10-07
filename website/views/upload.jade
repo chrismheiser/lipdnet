@@ -4,17 +4,207 @@ block css
 	link(rel='stylesheet' href='css/upload.css')
 
 block body
-	body(ng-app='uploadApp' ng-controller="FormCtrl as f" ng-cloak)
+	body(ng-app='uploadApp' ng-cloak)
 		#wrapper
 			include ./include/navbar.jade
 			md-toolbar
 				.md-toolbar-tools
 					.md-title Upload
-			div(ui-view)
-			
+
+			.col-sm-8.col-sm-offset-2
+				#form-container(ng-controller='FormCtrl')
+					h4 Form Data Preview
+					p userData
+					pre {{ userData }}
+					p markers
+					pre {{ markers }}
+					p
+					form#upload-form(ng-submit='')
+						div(ng-controller="FileCtrl")
+							md-toolbar.md-hue-1
+								h2.md-toolbar-tools
+									span How would you like to start?
+							div(layout='row')
+								md-input-container(style='margin-right: 10px;')
+									md-radio-group(ng-model='data.group1')
+										md-radio-button.md-primary(value='file') Upload an existing file
+										md-radio-button(value='scratch')  Start from scratch 
+										md-checkbox(ng-model='demo.showTooltip') Show Tooltips
+							// File Upload Button
+							form#uploadForm(action="/upload" enctype="multipart/form-data" method='post')
+								md-button(ngf-select="upload($file)" ng-model="file" name="file" ngf-max-size="1MB") Select File     							
+							// k,v pairs in the response object
+							p Response Object
+							pre(ng-if="obj !='none'") {{obj}}
+							// content from the current uploaded file
+							p Uploaded Content
+							pre(ng-if="obj.path" ng-init='pull()') {{content}}
+								
+						// FORM INPUT
+						div
+							// METADATA
+							md-toolbar.md-hue-1
+								h2.md-toolbar-tools
+									span Metadata
+							md-content(layout-padding='', layout='row', layout-sm='column')
+								md-input-container(flex='')
+									label Site Name
+									input(ng-model='userData.siteName')
+								md-input-container(flex='')
+									label Collection Name
+									input(ng-model='userData.collectionName')
+							div(layout='', layout-padding='', layout-sm='column')
+								md-input-container(flex='')
+									label Archive Type
+									input(ng-model='userData.archiveType')
+								md-input-container(flex='')
+									label Investigators
+									input(ng-model='userData.investigators')
+								md-input-container(flex='')
+									label Data Set Name
+									input(ng-model='userData.dataSetName')
+							div(layout='', layout-padding='', layout-sm='column')
+								md-input-container(flex='')
+									label Notes
+									textarea(ng-model='userData.notes', columns='1', md-maxlength='150')
+							// FUNDING
+							md-toolbar.md-hue-1
+								h2.md-toolbar-tools
+									span Funding
+							div(layout='', layout-padding='', layout-sm='column', ng-repeat='item in funding')
+								md-input-container(flex='')
+									label Agency Name
+									input(ng-model='userData.funding[item.id][item.a]')
+								md-input-container(flex='')
+									label Grant
+									input(ng-model='userData.funding[item.id][item.f]')
+							div(layout='', layout-padding='', layout-sm='column')
+								md-button(ng-click='addFunding()')  + Additional Funding
+							// PUBLICATION
+							md-toolbar.md-hue-1
+								h2.md-toolbar-tools
+									span Publication
+							// AUTHORS
+							div(layout='', layout-padding='', layout-sm='column', ng-repeat='item in authors')
+								md-input-container(flex='')
+									label Author Name
+									input(ng-model='userData.authors[item.id]')
+							div(layout='', layout-padding='', layout-sm='column')
+								md-button(ng-click='addAuthor()')  + Add Author
+							div(layout='', layout-padding='', layout-wrap='', layout-sm='column')
+								md-input-container(flex='')
+									label DOI
+									input(ng-model='userData.pubDoi')
+								md-input-container(flex='')
+									label Year
+									input(ng-model='userData.pubYear')
+								md-input-container(flex='')
+									label Volume
+									input(ng-model='userData.pubVolume')
+								md-input-container(flex='')
+									label Edition
+									input(ng-model='userData.pubEdition')
+								md-input-container(flex='')
+									label Issue
+									input(ng-model='userData.pubIssue')
+							// GEOGRAPHY
+							md-toolbar.md-hue-1
+								h2.md-toolbar-tools
+									span Geography
+							div(layout='', layout-padding='', layout-sm='column')
+								md-input-container
+									label Type
+									md-select(ng-model='userData.geo.type')
+										md-option(default='Feature', ng-repeat='t in geoType', value='{{t}}') {{t}}
+							md-subheader.md-primary Geometry
+							div(layout='', layout-padding='', layout-sm='column')
+								md-input-container
+									label Type
+									md-select(ng-model='userData.geo.geometry.type')
+										md-option(ng-repeat='t in geoGeometryType', value='{{t}}') {{t}}
+							// GOOGLE MAP
+							// ng-if="userData.geo.geometry.coordinates"
+							div
+								ui-gmap-google-map(center='map.center', zoom='map.zoom', draggable='true', options='options', bounds='map.bounds')
+									ui-gmap-markers(models='markers', coords="'self'", events='events', options='options')
+							// COORDINATES
+							div(layout='', layout-padding='', layout-sm='column', ng-repeat='obj in markers')
+								md-input-container(flex='')
+									md-tooltip -90 to 90
+									label Latitude
+									input(ng-model='markers[$index].latitude', required='', type='number', min='-90', max='90')
+								md-input-container(flex='')
+									md-tooltip -180 to 180
+									label Longitude
+									input(ng-model='markers[$index].longitude', required='', type='number', min='-180', max='180')
+								md-button(ng-click='removeCoords($index)')  Remove 
+							div(layout='', layout-padding='', layout-sm='column')
+								md-button(ng-click='addCoordinates()')  + Additional Coordinates
+								md-button(ng-click='pushMarkers()')  Save 
+							md-subheader.md-primary Properties
+							div(layout='', layout-padding='', layout-sm='column')
+								md-input-container(flex='')
+									label Site Name
+									input(ng-model='userData.geo.properties.siteName')
+								md-input-container(flex='')
+									label Location
+									input(ng-model='userData.geo.properties.location')
+								md-input-container(flex='')
+									label Country
+									input(ng-model='userData.geo.properties.country')
+							md-subheader.md-primary Elevation
+							div(layout='', layout-padding='', layout-sm='column')
+								md-input-container(flex='')
+									label Value
+									input(type='number', ng-model='userData.elevation.value')
+								md-input-container(flex='')
+									label Units
+									md-select(ng-model='userData.elevation.unit')
+										md-option(ng-repeat='u in unitsDistance', value='{{u.short}}') {{u.long}}
+							// DATA
+							md-toolbar.md-hue-1
+								h2.md-toolbar-tools
+									span Data
+							md-subheader.md-primary Core Length
+							div(layout='', layout-padding='', layout-sm='column')
+								md-input-container(flex='66')
+									label Value
+									input(type='number', ng-model='userData.core.value')
+								md-input-container(flex='')
+									label Units
+									md-select(ng-model='userData.core.unit')
+										md-option(ng-repeat='u in unitsDistance', value='{{u.short}}') {{u.long}}
+							div(layout='', layout-padding='', layout-sm='column')
+								md-input-container(flex='')
+									md-tooltip(md-visible='demo.showTooltip') Here is some more helpful information
+									label Table Name
+									input(ng-model='userData.dataTableName')
+								md-input-container(flex='')
+									label File Name
+									input(ng-model='userData.dataFileName')
+							div(layout='', layout-padding='', layout-sm='column', ng-model='f.columns', ng-repeat='i in columns')
+								md-subheader.md-primary Column {{i.column}}
+								md-input-container(flex='', ng-repeat='(k,v) in i')
+									label {{k}}
+									input(value='{{v}}')
+							div(layout='', layout-padding='', layout-sm='column')
+								md-button(ng-click='addColumn()')  + Add Column
+							// CHRONOLOGY
+							md-toolbar.md-hue-1
+								h2.md-toolbar-tools
+									span Chronology
+							div(layout='', layout-padding='', layout-sm='column')
+
+
+
+
+
 block js
 	script(src='js/uploadApp.js')
 	script(src='js/ngForm.js')
+	script(src='js/ngFile.js')
 	script(src='https://cdnjs.cloudflare.com/ajax/libs/angular-ui-router/0.2.15/angular-ui-router.min.js')
 	script(src='https://cdnjs.cloudflare.com/ajax/libs/angular-google-maps/2.2.0/angular-google-maps.min.js')
+	script(src='https://cdnjs.cloudflare.com/ajax/libs/danialfarid-angular-file-upload/8.0.1/ng-file-upload-shim.min.js')
+	script(src='https://cdnjs.cloudflare.com/ajax/libs/danialfarid-angular-file-upload/8.0.1/ng-file-upload.min.js')
 	script(src='//maps.googleapis.com/maps/api/js?sensor=false')

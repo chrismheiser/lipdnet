@@ -1,7 +1,7 @@
 extends layout
 
 block body
-  body(ng-app='upload' ng-controller='ctrl')
+  body(ng-app='ngFile' ng-controller='FileCtrl')
     form#uploadForm(action="/test" enctype="multipart/form-data" method='post')
       label Upload File Here
       .button(ngf-select="upload($file)" ng-model="file" name="file" ngf-max-size="1MB") Select      
@@ -19,6 +19,4 @@ block body
 block js
   script(src='https://cdnjs.cloudflare.com/ajax/libs/danialfarid-angular-file-upload/8.0.1/ng-file-upload-shim.min.js')
   script(src='https://cdnjs.cloudflare.com/ajax/libs/danialfarid-angular-file-upload/8.0.1/ng-file-upload.min.js')
-  script(src='https://cdnjs.cloudflare.com/ajax/libs/jquery.form/3.51/jquery.form.min.js')
-  script(src='js/uploadApp-test.js')
-  //- script(src='js/test.js')
+  script(src='js/ngFile.js')
