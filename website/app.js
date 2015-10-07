@@ -38,7 +38,8 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 // app.use(express.bodyParser( { keepExtensions: true, uploadDir: __dirname + '/photos' } ));
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(express.static(path.join(__dirname, 'bower_components')));
+// app.use(express.static(path.join(__dirname, 'bower_components')));
+app.use(express.static(path.join(__dirname, 'tmp')));
 app.use(multer({ storage: storage }).single('file'));
 app.use('/', routes);
 app.use('/users', users);
@@ -78,7 +79,7 @@ app.use(function(err, req, res, next) {
 });
 
 app.listen(app.get('port'), function() {
-  console.log('Node app is running on port', app.get('port'));
+  console.log('Node port: ', app.get('port'));
 });
 
 

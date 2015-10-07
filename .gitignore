@@ -65,3 +65,5 @@ workspace.xml
 
 #website
 data/*
+
+website/tmp/*
