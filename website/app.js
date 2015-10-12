@@ -36,7 +36,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 // app.use(express.bodyParser( { keepExtensions: true, uploadDir: __dirname + '/photos' } ));
 app.use(express.static(path.join(__dirname, 'public')));
-// app.use(express.static(path.join(__dirname, 'bower_components')));
+app.use(express.static(path.join(__dirname, 'bower_components')));
 app.use(express.static(path.join(__dirname, 'tmp')));
 app.use(multer({ storage: storage }).single('file'));
 app.use('/', routes);

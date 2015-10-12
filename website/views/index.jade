@@ -8,23 +8,33 @@ block body
 	body(ng-app='indexApp')
 		#wrapper(ng-controller='toggle')
 			include ./include/navbar.jade
-			section#content
-				.container#intro
-					h1.md-display-3.text-center Linked Paleo Data
-					p.md-subhead Linked Paleo Data (LiPD) is a community data framework being designed to simplify the sharing, reuse and analysis of paleoclimate data. By combining a flexible, hierarchical data container with linked data concepts, LiPD lets paleoscientists spend less time wrangling data, and more time doing science.
-					p.md-subhead We’re currently working hard to develop more and better utilities for interacting with LiPD, both for the creation and validation of LiPD datasets, and for tools to interact with LiPD data in Python, R, and Matlab. We’re always looking for more people interested in  
-						a(href='#contact') contributing to the effort.
-					p.md-subhead.
-						A technical description of the LiPD framework is available
-						#[a(href='http://www.clim-past-discuss.net/11/4309/2015/cpd-11-4309-2015-discussion.html') here.]
-			div#buttons(layout='row' ng-cloak)
-				div(flex='20')
-					.md-button.schematic-btn.left(ng-click="schematic = !schematic" ng-class="{ active: schematic }") Schematic
-				.text-center(flex='60')
-					img(ng-show="schematic" ng-src="img/schematic.jpg" style='height:280px;float:left;')
-				div(flex='20')
-					a.right.smoothScroll(href="#about")
-						i.fa.fa-angle-double-down.fa-5x
+			//- md-toolbar(id='buttons' layout='row' layout-align='space-around center')
+			//- 	md-button(href='#schematic') Schematic
+			//- 	md-button(href='#about') About Us
+			//- 	md-button(href='#contact') Contact
+			section#content(ng-cloak)
+				.container#intro.text-center
+					div
+						h1.md-display-3 { Linked Paleo Data }
+						br
+						p.md-subhead Linked Paleo Data (LiPD) is a community data framework being designed to simplify the sharing, reuse and analysis of paleoclimate data. By combining a flexible, hierarchical data container with linked data concepts, LiPD lets paleoscientists spend less time wrangling data, and more time doing science.
+						p.md-subhead We’re currently working hard to develop more and better utilities for interacting with LiPD, both for the creation and validation of LiPD datasets, and for tools to interact with LiPD data in Python, R, and Matlab. We’re always looking for more people interested in  
+							a(href='#contact') contributing to the effort.
+						p.md-subhead.
+							A technical description of the LiPD framework is available
+							#[a(href='http://www.clim-past-discuss.net/11/4309/2015/cpd-11-4309-2015-discussion.html') here.]
+			#buttons(layout='row')
+				//- .md-button.schematic-btn.left(ng-mouseenter="sch=true" ng-mouseleave="sch=false") Schematic
+				a.right.smoothScroll(href="#schematic")
+					i.fa.fa-angle-double-down.fa-5x
+			
+	.container.cf#schematic
+		.animation-element.bounce-up.cf
+			h1.subject.md-display-3(layout layout-align="center center") { Schematic }
+			.subject.third
+				.content(layout='row' layout-align='space-around center' ng-cloak)
+					img(ng-src="img/schematic.jpg" style='width:100%;')
+
 	.container.cf#about
 		.animation-element.bounce-up.cf
 			h1.subject.md-display-3(layout layout-align="center center") About Us
@@ -111,23 +121,30 @@ block body
 					i.fa.fa-envelope
 				.header.cf
 				h3.title Questions, comments, concerns...
-				.content(ng-show='!sent' layout='row' layout-align='space-around center' ng-cloak)
+				
+				// show this when form has not been submitted yet
+				.content(layout='row' layout-align='space-around center' ng-cloak)
 					div(flex='30')
 						h4 We'd love to hear from you!
 						p Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book
-					form(flex='60' ng-model='mailer')
+						//- pre {{mailer}}
+					form(method='post' flex='60' ng-model='mailer')
 						md-input-container
 							label Name
-							input(type="text" name='name' ng-model='mailer.name' required)
+							input(type="text" name='name' ng-model='mailer.name' required max-length='10')
+						md-input-container
+							label Organization
+							input(type="text" name='org' ng-model='mailer.org' required max-length='10')
 						md-input-container
 							label E-Mail
-							input(type="email" name='email' ng-model='mailer.email' required)
+							input(type="email" name='email' ng-model='mailer.email' required max-length='10')
+						md-input-container
+							label Subject
+							input(type="text" name='subject' ng-model='mailer.subject' required max-length='10')
 						md-input-container
 							label Message
-							textarea(type="text" name='message' ng-model='mailer.message' required)
-						md-button.send(type='submit' ng-click="contactSubmit(mailer)") Send
-					// object that contains all contact form info
-					//- pre {{mailer}}
+							textarea(type="text" name='message' ng-model='mailer.message' required max-length='10')
+						md-button.send(type='submit' ng-click='sendMail(mailer)') Send
 					
 				// Shows a success message overlay when the form is submitted
 				.content(ng-show='sent')
@@ -141,9 +158,8 @@ block body
 block js
 	script(src='https://cdnjs.cloudflare.com/ajax/libs/angular-google-maps/2.2.0/angular-google-maps.min.js')
 	script(src='https://maps.googleapis.com/maps/api/js?sensor=false')
-	script(src='js/indexApp.js')
+	script(src='apps/indexApp.js')
 	script(src='js/ngMap.js')
 	script(src='js/ngContact.js')
-	script(src='js/animate.js')
-	script(src='js/smooth.js')
-	script(src='js/mailer.js')
+	script(src='modules/animate.js')
+	script(src='modules/smooth.js')

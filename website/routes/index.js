@@ -1,6 +1,16 @@
 var express = require('express');
+var nodemailer = require('nodemailer');
 var app = express();
 var router = express.Router();
+
+// Nodemailer reusable transport object
+var transporter = nodemailer.createTransport({
+    service: 'Gmail',
+    auth: {
+        user: 'cheiser22@gmail.com',
+        pass: '122993HEelflip'
+    }
+});
 
 // Home page
 router.get('/', function(req, res, next) {
@@ -9,8 +19,22 @@ router.get('/', function(req, res, next) {
 
 // Receive a POST from the contact form on the home page
 router.post('/', function(req, res, next){
-  console.log(req);
-  res.end("END");
+  console.log(req.body);
+  // use req data from contact form to build email object
+  var mailOptions = {
+      from: req.body.name + ' <' + req.body.email + '>',
+      to: "LiPD Contact Form <" + req.body.email + '>',
+      subject: "Message from " + req.body.name,
+      text: "Organization:\n" + req.body.org + "\n\nSubject:\n" +
+      req.body.subject + "\n\nMessage:\n" + req.body.message
+  };
+  // send mail with transport object and defined mail options
+  transporter.sendMail(mailOptions, function(error, info){
+      if(error){
+          return console.log(error);
+      }
+      console.log('Message sent: ' + info.response);
+  });
 });
 
 // Schema page

@@ -6,10 +6,12 @@
 /* BUTTONS */
 
 /* Animate showing and hiding the schematic image */
-.ng-hide-add         { animation:1.2s fadeOut ease; }
-.ng-hide-remove      { animation:1.2s fadeIn ease; }
+.ng-hide-add         { animation:1.0s fadeIn ease; }
+.ng-hide-remove      { animation:1.0s fadeOut ease; }
 
 /* Schematic image toggle button */
+
+
 .schematic-btn {
   float:left;
   color: #fff;
@@ -260,6 +262,7 @@ b {
   -webkit-animation-name: fadeOut;
   animation-name: fadeOut;
 }
+
 
 .bounce-up .subject {
   opacity: 0;
