@@ -45,7 +45,7 @@ block body
 				.header.cf
 				h3.title Team
 				.content(layout-sm='column' layout='row' layout-align='space-around center')
-					.flex.layout-margin
+					.layout-margin(flex='25')
 						md-card
 							img.md-card-image(ng-src="img/heiser.jpg")
 							md-card-content
@@ -59,8 +59,12 @@ block body
 									a(href="https://www.linkedin.com/in/chrismheiser")
 										i.fa.fa-linkedin
 								h2.md-title Christopher Heiser
-								p Lorem Ipsum is simply dummy text of the printing and typesetting industry.
-					.flex.layout-margin
+								p.
+									Chris holds a B.S. in Computer Science and primarily focuses 
+									on writing code for the LiPD project. His tasks have been 
+									building the website and writing data parsers for converting 
+									between the LiPD format. 
+					.layout-margin(flex='25')
 						md-card
 							img.md-card-image(ng-src="img/mckay.jpg")
 							md-card-content
@@ -73,7 +77,7 @@ block body
 										i.fa.fa-linkedin
 								h2.md-title Nicholas McKay
 								p Lorem Ipsum is simply dummy text of the printing and typesetting industry.
-					.flex.layout-margin
+					.layout-margin(flex='25')
 						md-card
 							img.md-card-image(ng-src="img/emile.jpg")
 							md-card-content
@@ -86,7 +90,7 @@ block body
 										i.fa.fa-linkedin
 								h2.md-title Julien Emile-Geay
 								p Lorem Ipsum is simply dummy text of the printing and typesetting industry.
-					.flex.layout-margin
+					.layout-margin(flex='25')
 						md-card
 							img.md-card-image(ng-src="img/mcdowell.jpg")
 							md-card-content
@@ -113,7 +117,7 @@ block body
 
 	
 	.container.cf#contact(ng-controller='ContactCtrl')
-		.animation-element.bounce-up.cf
+		.animation-element.bounce-up.cf(ng-init="sent=false")
 			h1.subject.md-display-3(layout layout-align="center center") Contact
 			.subject.third
 				.category-color
@@ -123,31 +127,32 @@ block body
 				h3.title Questions, comments, concerns...
 				
 				// show this when form has not been submitted yet
-				.content(layout='row' layout-align='space-around center' ng-cloak)
-					div(flex='30')
+				.content(layout='row' layout-align='space-around center' ng-cloak ng-switch='sent')
+					.f(ng-switch-when="false" flex='30')
 						h4 We'd love to hear from you!
 						p Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book
 						//- pre {{mailer}}
-					form(method='post' flex='60' ng-model='mailer')
-						md-input-container
-							label Name
-							input(type="text" name='name' ng-model='mailer.name' required max-length='10')
-						md-input-container
-							label Organization
-							input(type="text" name='org' ng-model='mailer.org' required max-length='10')
-						md-input-container
-							label E-Mail
-							input(type="email" name='email' ng-model='mailer.email' required max-length='10')
-						md-input-container
-							label Subject
-							input(type="text" name='subject' ng-model='mailer.subject' required max-length='10')
-						md-input-container
-							label Message
-							textarea(type="text" name='message' ng-model='mailer.message' required max-length='10')
-						md-button.send(type='submit' ng-click='sendMail(mailer)') Send
-					
-				// Shows a success message overlay when the form is submitted
-				.content(ng-show='sent')
+					form.f(ng-switch-when="false" flex='60' method='post' ng-model='mailer')
+						//- md-input-container
+						//- 	label Name
+						//- 	input(type="text" name='name' ng-model='mailer.name' required max-length='10')
+						//- md-input-container
+						//- 	label Organization
+						//- 	input(type="text" name='org' ng-model='mailer.org' required max-length='10')
+						//- md-input-container
+						//- 	label E-Mail
+						//- 	input(type="email" name='email' ng-model='mailer.email' required max-length='10')
+						//- md-input-container
+						//- 	label Subject
+						//- 	input(type="text" name='subject' ng-model='mailer.subject' required max-length='10')
+						//- md-input-container
+						//- 	label Message
+						//- 	textarea(type="text" name='message' ng-model='mailer.message' required max-length='10')
+						md-button.send(type='submit' ng-click='sendMail(mailer)' ng-model='sent') Send
+					.f(ng-switch-when="true")
+						h1(style='font-weight:500;') Message Sent!
+						p We'll get back to you as soon as possible. 
+
 
 	footer
 		p#nsf.

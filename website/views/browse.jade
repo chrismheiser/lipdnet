@@ -1,0 +1,42 @@
+extends layout
+
+block body
+  body(ng-app='browseApp' ng-controller='dbCtrl' layout="column" ng-cloak)
+    #wrapper
+      include ./include/navbar.jade
+      md-toolbar
+        .md-toolbar-tools
+          .md-title Browse the Database
+      // Autocomplete form with current files in db
+      md-content
+        form(ng-submit='$event.preventDefault()')
+          md-autocomplete(
+            ng-disabled="isDisabled"
+            md-no-cache="noCache"
+            md-selected-item="selectedItem"
+            md-search-text-change="searchTextChange(searchText)"
+            md-search-text="searchText"
+            md-selected-item-change="selectedItemChange(item)"
+            md-items="i in querySearch(searchText)"
+            md-item-text="i.filename"
+            md-min-length="0"
+            placeholder="Choose an existing file..."
+            md-menu-class="ac-db")
+            md-item-template
+              span.item-title
+                md-icon.fa.fa-file
+                span {{i.filename}}
+              span.item-metadata
+                span.item-metastat
+                  strong Name: 
+                  {{i.originalname}}   
+                span.item-metastat
+                  md-icon.fa.fa-calendar-o
+                  {{i.time | amCalendar}} 
+        
+        
+block js
+  script(src='js/ngDB.js')
+  script(src='apps/browseApp.js')
+  script(src='https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.6/moment.min.js')
+  script(src='https://cdnjs.cloudflare.com/ajax/libs/angular-moment/1.0.0-beta.2/angular-moment.min.js')

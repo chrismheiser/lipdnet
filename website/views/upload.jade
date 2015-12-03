@@ -18,27 +18,28 @@ block body
 					pre {{ userData }}
 					p markers
 					pre {{ markers }}
-					p
 					form#upload-form(ng-submit='')
+
 						div(ng-controller="FileCtrl")
+
 							md-toolbar.md-hue-1
 								h2.md-toolbar-tools
-									span How would you like to start?
-							div(layout='row')
-								md-input-container(style='margin-right: 10px;')
-									md-radio-group(ng-model='data.group1')
-										md-radio-button.md-primary(value='file') Upload an existing file
-										md-radio-button(value='scratch')  Start from scratch 
-										md-checkbox(ng-model='demo.showTooltip') Show Tooltips
+									span File
+									
 							// File Upload Button
 							form#uploadForm(action="/upload" enctype="multipart/form-data" method='post')
-								md-button(ngf-select="upload($file)" ng-model="file" name="file" ngf-max-size="1MB") Select File     							
-							// k,v pairs in the response object
-							p Response Object
-							pre(ng-if="obj !='none'") {{obj}}
-							// content from the current uploaded file
-							p Uploaded Content
-							pre(ng-if="obj.path" ng-init='pull()') {{content}}
+								//- md-input-container
+								//- 	label File type
+								//- 	md-select(ng-model='upload.type')
+								//- 		md-option(ng-repeat='i in uploadType' value='{{i}}') {{i}}
+								md-button(ngf-select="upload($file)" ng-model='file' name='file' ngf-max-size="1MB") Select File    
+
+							pre
+								p Response Object
+								p(ng-if="obj.path") {{obj}}
+							pre
+								p Uploaded Content
+								p(ng-if="obj.path" ng-init='pull()') {{content}}
 								
 						// FORM INPUT
 						div
@@ -194,9 +195,6 @@ block body
 								h2.md-toolbar-tools
 									span Chronology
 							div(layout='', layout-padding='', layout-sm='column')
-
-
-
 
 
 block js

@@ -1,4 +1,4 @@
-var f = angular.module('ngForm', ['ngMaterial', 'ngAnimate', 'ngColors', 'uiGmapgoogle-maps']);
+var f = angular.module('ngForm', ['uiGmapgoogle-maps']);
 
 f.config(function(uiGmapGoogleMapApiProvider) {
     uiGmapGoogleMapApiProvider.configure({
@@ -14,6 +14,7 @@ f.controller('FormCtrl', function($scope, $log, $timeout) {
     // User data holds all the user selected
     $scope.userData = {};
 
+    $scope.uploadType = ['CSV (headerless)', 'Excel', 'NOAA', 'LiPD'];
     // Predefined form data
     $scope.unitsDistance = [{
         "short": "m",

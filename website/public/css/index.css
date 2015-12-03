@@ -3,15 +3,10 @@
   padding-bottom: 0;
 }
 
+
 /* BUTTONS */
 
-/* Animate showing and hiding the schematic image */
-.ng-hide-add         { animation:1.0s fadeIn ease; }
-.ng-hide-remove      { animation:1.0s fadeOut ease; }
-
 /* Schematic image toggle button */
-
-
 .schematic-btn {
   float:left;
   color: #fff;
@@ -213,55 +208,48 @@ b {
 
 
 /* ANIMATIONS */
-@-webkit-keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
 
-  to {
-    opacity: 1;
-  }
+
+/* contact box success animation */
+.f {
+  -webkit-transition: 0.2s linear all;
+	transition: 0.2s linear all;
+	transition-delay: 0.5s;
+}
+.f.ng-enter {
+  transition-delay: 2s;
+  opacity: 0;
+}
+.f.ng-enter-active {
+	opacity: 1;
+}
+.f.ng-leave {
+  opacity: 1;
+}
+.f.ng-leave-active {
+	opacity: 0;
+}
+/*.fade-in {
+  transition: 2s linear all;
+  transition-delay: 1.2s;
+  animation-delay: 1.2s;
+  opacity: 1;
+}
+.fade-in.ng-hide {
+  transition-delay: 1.2s;
+  animation-delay: 1.2s;
+  opacity: 0;
 }
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-
-  to {
-    opacity: 1;
-  }
+.fade-out {
+  transition: 500ms linear all;
+  opacity: 1;
 }
 
-.fadeIn {
-  -webkit-animation-name: fadeIn;
-  animation-name: fadeIn;
-}
-
-@-webkit-keyframes fadeOut {
-  from {
-    opacity: 1;
-  }
-
-  to {
-    opacity: 0;
-  }
-}
-
-@keyframes fadeOut {
-  from {
-    opacity: 1;
-  }
-
-  to {
-    opacity: 0;
-  }
-}
-
-.fadeOut {
-  -webkit-animation-name: fadeOut;
-  animation-name: fadeOut;
-}
+.fade-out.ng-hide {
+  opacity: 0;
+}*/
+/* end contact box success animation */
 
 
 .bounce-up .subject {

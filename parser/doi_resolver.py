@@ -14,10 +14,12 @@ Output: pub dictionary
 """
 
 from urllib.parse import urlparse
+from collections import OrderedDict
 import json
 import requests
 import calendar
 import os
+import zipfile
 
 class DOIResolver(object):
 
@@ -70,6 +72,7 @@ class DOIResolver(object):
     """
     def compare_replace(self, pub_dict, fetch_dict):
         blank = [" ", "", None]
+
         for k, v in fetch_dict.items():
             try:
                 if fetch_dict[k] != blank:
@@ -81,6 +84,30 @@ class DOIResolver(object):
         return pub_dict
 
     """
+    Loop over Raw and add selected items to Fetch with proper formatting
+    """
+    def compile_fetch(self, raw, doi_id):
+        fetch_dict = OrderedDict()
+        order = {'author': 'author', 'type': 'type', 'identifier': '', 'title': 'title', 'journal': 'container-title',
+                'pubYear': '', 'volume': 'volume', 'publisher': 'publisher', 'page':'page', 'issue': 'issue'}
+
+        for k, v in order.items():
+            try:
+                if k == 'identifier':
+                    fetch_dict[k] = [{"type": "doi", "id": doi_id, "url": "http://dx.doi.org/" + doi_id}]
+                elif k == 'author':
+                    fetch_dict[k] = self.compile_authors(raw[v])
+                elif k == 'pubYear':
+                    fetch_dict[k] = self.compile_date(raw['issued']['date-parts'])
+                else:
+                    fetch_dict[k] = raw[v]
+            except KeyError as e:
+                # If we try to add a key that doesn't exist in the raw dict, then just keep going.
+                pass
+
+        return fetch_dict
+
+    """
     Resolve DOI and compile all attibutes into one dictionary
     """
     def get_data(self, pub_dict, doi_id):
@@ -89,54 +116,41 @@ class DOIResolver(object):
         url = "http://dx.doi.org/" + doi_id
         headers = {"accept": "application/rdf+xml;q=0.5, application/citeproc+json;q=1.0"}
         r = requests.get(url, headers=headers)
-
-        # DOI server error, return the original
-        if r.status_code != 200:
-            return pub_dict
-
         raw = json.loads(r.text)
 
-        # If raw dictionary is empty, return the original
-        if not raw:
+        # DOI server error or empty raw dictionary, return the original pub. No new data retreived
+        if r.status_code != 200 or not raw:
             return pub_dict
 
-        # # Check what items we fetched. Use to debug.
-
-        # print(" EXCEL PUB _____________________")
-        # for k, v in pub_dict.items():
-        #     print('k: {0}, v:{1}'.format(k, v))
-        #
-        # print(" DOI PUB _____________________")
-        # for k, v in raw.items():
-        #     print('k: {0}, v:{1}'.format(k, v))
-
         # Create a new pub dictionary with metadata received
-        fetch_dict = {}
-        try:
-            fetch_dict['author'] = self.compile_authors(raw['author'])
-            fetch_dict['type'] = raw['type']
-            fetch_dict['identifier'] = [{"type": "doi",
-                                 "id": doi_id,
-                                 "url": "http://dx.doi.org/" + doi_id}]
-            fetch_dict['title'] = raw['title']
-            fetch_dict['journal'] = raw['container-title']
-            fetch_dict['pubYear'] = self.compile_date(raw['issued']['date-parts'])
-            fetch_dict['volume'] = raw['volume']
-            fetch_dict['publisher'] = raw['publisher']
-            fetch_dict['page'] = raw['page']
-            fetch_dict['issue'] = raw['issue']
-        except KeyError as e:
-            print("Key Error : {0}".format(e))
+        fetch_dict = self.compile_fetch(raw, doi_id)
 
-        doi_id = self.compare_replace(pub_dict, fetch_dict)
+        # Compare the two pubs. Overwrite old data with new data where applicable
+        out = self.compare_replace(pub_dict, fetch_dict)
 
-        return doi_id
+        return out
+
+
+    """
+    Recursively search the file for the DOI id. More taxing, but more flexible when dictionary structuring isn't absolute
+    """
+    def find_doi(self, curr_dict):
+        if 'id' in curr_dict:
+            print(curr_dict['id'])
+            return curr_dict['id']
+        elif isinstance(curr_dict, list):
+            for i in curr_dict:
+                return self.find_doi(i)
+        elif isinstance(curr_dict, dict):
+            for k, v in curr_dict.items():
+                if k == 'identifier':
+                    return self.find_doi(v)
 
     """
     Main function that gets files, creates outputs, and runs all operations on files
     """
     def run(self, pub_dict):
 
-        pub_dict['doi'] = self.clean(pub_dict['doi'])
-        return self.get_data(pub_dict)
+        doi_id = self.find_doi(pub_dict['pub'])
+        return self.get_data(pub_dict, doi_id)
 

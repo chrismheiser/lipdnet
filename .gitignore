@@ -63,7 +63,7 @@ workspace.xml
 *.pper
 .Rproj.user
 
-#website
+# mongo database
 data/*
 
 website/tmp/*
