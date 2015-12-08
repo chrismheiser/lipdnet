@@ -64,11 +64,11 @@ def cleanup(path_bag, path_data):
 
 def validate_md5(bag):
     if bag.is_valid():
-        print("Valid md5 :)")
+        print("Valid md5")
         # for path, fixity in bag.entries.items():
         #     print("path:{}\nmd5:{}\n".format(path, fixity["md5"]))
     else:
-        print("Invalid md5 :(")
+        print("Invalid md5")
     return
 
 
@@ -90,7 +90,7 @@ def update_changelog():
 
 def process_files(name, path_tmp):
 
-    path_root = os.getcwd()
+    # path_root = os.getcwd()
     path_bag = os.path.join(path_tmp, name)
     path_data = os.path.join(path_bag, 'data')
 
@@ -104,7 +104,7 @@ def process_files(name, path_tmp):
     # open and load data from jLD file
     jld_file = open(os.path.join(path_data, name + '.jsonld'), 'r+')
     jld_data = json.load(jld_file)
-    resolved = DOIResolver().run(jld_data)
+    resolved = DOIResolver().run(jld_data, name)
 
     # execute DOI resolver script, and overwrite contents into jLD file. close file
     json.dump(resolved, jld_file, indent=4)
@@ -159,7 +159,7 @@ def unzip(root, lpd_name):
 
 def main():
     # take in user-chosen directory path
-    root = '/Users/chrisheiser1/Desktop/lpd-library-copy'
+    root = '/Users/chrisheiser1/Desktop/lpd_test'
 
     # find all .lpd files in current directory
     # dir change -> root
