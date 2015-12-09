@@ -1,140 +1,142 @@
-__author__ = 'Chris Heiser, Austin McDowell'
-
-"""
-PURPOSE: Runs as a subprocess to the main parser. Use DOI ID to pull updated publication info from doi.org and overwrite file data.
-
-CHANGELOG
-Version 1.2 / Dec 6, 2015 / Chris
-Version 1.1 / July 5, 2015 / Chris
-Version 1.0 / June 9, 2015 / Austin
-
-Input:  pub dictionary
-Output: pub dictionary
-
-"""
-
-from urllib.parse import urlparse
 from collections import OrderedDict
 import json
 import requests
-import calendar
 import os
 import re
+import urllib.error
+
+__author__ = 'Chris Heiser, Austin McDowell'
+"""
+PURPOSE: Runs as a subprocess to the main parser. Use DOI id(s) to pull updated publication
+info from doi.org and overwrite file data.
+
+CHANGELOG
+Version 1.2 / 12.06.2015 / Chris
+Version 1.1 / 07.05.2015 / Chris
+Version 1.0 / 06.09.2015 / Austin
+
+Input:  Original publication dictionary
+Output: Updated publication dictionary (success), original publication dictionary (fail)
+
+"""
 
 
 class DOIResolver(object):
 
-    def __init__(self):
-        self = self
+    def __init__(self, root_dir, name, root_dict):
+        """
+        :param root_dir: (str) Path to dir containing all .lpd files
+        :param name: (str) Name of current .lpd file
+        :param root_dict: (dict) Full dict loaded from jsonld file
+        """
+        self.root_dir = root_dir
+        self.name = name
+        self.root_dict = root_dict
 
-    """
-    Returns DOI ID reference (i.e. 10.1029/2005pa001215)
-    """
-    def clean(self, doi_string):
-
-        regex = re.compile(r'\b(10[.][0-9]{3,}(?:[.][0-9]+)*/(?:(?!["&\'<>])\S)+)\b')
-        # Returns a list of matching strings
+    @staticmethod
+    def clean(doi_string):
+        """
+        Use regex to extract all DOI ids from string (i.e. 10.1029/2005pa001215)
+        :param doi_string: (str) Raw DOI string value from input file. Often not properly formatted.
+        :return: (list) DOI ids. May contain 0, 1, or multiple ids.
+        """
+        regex = re.compile(r'\b(10[.][0-9]{3,}(?:[.][0-9]+)*/(?:(?!["&\'<>,])\S)+)\b')
         try:
+            # Returns a list of matching strings
             m = re.findall(regex, doi_string)
-        # If doi_string is None type, catch error
         except TypeError:
+            # If doi_string is None type, return empty list
             m = []
-        print(m)
         return m
 
-    def quarantine(self, pub_dict, doi_string, name):
-        # Create a text file
-        #
-        return
-
-    def noaa_citation(self, root_dict, doi_string):
-        # Append location 1
-        if 'link' in root_dict['pub'][0]:
-            root_dict['pub'][0]['link'].append({"url": doi_string})
-        else:
-            root_dict['pub'][0]['link'] = [{"url": doi_string}]
-
-        # Append location 2
-        root_dict['dataURL'] = doi_string
-
-        return
-
-
-    """
-    DOI string did not match the regex. Determine what the data is.
-    """
-    def illegal_doi(self, root_dict, doi_string, name):
-        # empty DOI string, check if length of string less than 5
-        # ignore and return original dict as-is
-        # if len(doi_string) < 5:
-        #     pass
-
-        # NOAA string
-        if 'noaa' in doi_string.lower():
-            self.noaa_citation(root_dict, doi_string)
-
-        # Paragraph citation / Manual citation
-        elif doi_string.count(' ') > 3:
-            root_dict['pub'][0]['citation'] = doi_string
-
-        # Strange Links or Other, send to quarantine
-        else:
-            self.dev_logger_txt("quarantine.txt", name, "Unexpected DOI String: " + doi_string)
-
-        return
-
-    """
-    Compiles date only using the year
-    """
-    def compile_date(self, date_parts):
+    @staticmethod
+    def compile_date(date_parts):
+        """
+        Compiles date only using the year
+        :param date_parts: List of date parts retrieved from doi.org
+        :return: Date string or NaN
+        """
         if date_parts[0][0]:
             return date_parts[0][0]
         return 'NaN'
 
-    """
-    Compiles date [year, month, day] into "30 Jul 2015" format
-    """
-    def compile_date_old(self, date_parts):
-        out = []
-        for date in date_parts:
-            if len(date) == 3:
-                out.append(str(date[2]) + ' ' + str(calendar.month_name[date[1]]) + ' ' + str(date[0]))
-            elif len(date) == 2:
-                out.append(str(calendar.month_name[date[1]]) + ' ' + str(date[0]))
-            else:
-                out.append(date[0])
-
-        return out
-
-    """
-    Compiles authors "Last, First" into a single list
-    """
-    def compile_authors(self, authors):
-        out = []
+    @staticmethod
+    def compile_authors(authors):
+        """
+        Compiles authors "Last, First" into a single list
+        :param authors: (list) Raw author data retrieved from doi.org
+        :return: (list) Author objects
+        """
+        author_list = []
         for person in authors:
-            out.append({'name': person['family'] + ", " + person['given']})
-        return out
+            author_list.append({'name': person['family'] + ", " + person['given']})
+        return author_list
 
-    """
-    Take in our Original Pub, and Fetched Pub. For each Fetched entry that has data, overwrite the Original entry.
-    """
-    def compare_replace(self, pub_dict, fetch_dict):
+    @staticmethod
+    def compare_replace(pub_dict, fetch_dict):
+        """
+        Take in our Original Pub, and Fetched Pub. For each Fetched entry that has data, overwrite the Original entry
+        :param pub_dict: (dict) Original pub dictionary
+        :param fetch_dict: (dict) Fetched pub dictionary from doi.org
+        :return: (dict) Updated pub dictionary, with fetched data taking precedence
+        """
         blank = [" ", "", None]
-
         for k, v in fetch_dict.items():
             try:
                 if fetch_dict[k] != blank:
                     pub_dict[k] = fetch_dict[k]
-
             except KeyError:
                 pass
-
         return pub_dict
 
-    """
-    Loop over Raw and add selected items to Fetch with proper formatting
-    """
+    def noaa_citation(self, doi_string):
+        """
+        Special instructions for moving noaa data to the correct fields
+        :param doi_string: (str) NOAA url
+        :return: None
+        """
+        # Append location 1
+        if 'link' in self.root_dict['pub'][0]:
+            self.root_dict['pub'][0]['link'].append({"url": doi_string})
+        else:
+            self.root_dict['pub'][0]['link'] = [{"url": doi_string}]
+
+        # Append location 2
+        self.root_dict['dataURL'] = doi_string
+
+        return
+
+    def illegal_doi(self, doi_string):
+        """
+        DOI string did not match the regex. Determine what the data is.
+        :param doi_string: (str) Malformed DOI string
+        :return: None
+        """
+
+        # Ignores empty or irrelevant strings (blank, spaces, na, nan, ', others)
+        if len(doi_string) > 5:
+
+            # NOAA string
+            if 'noaa' in doi_string.lower():
+                self.noaa_citation(doi_string)
+
+            # Paragraph citation / Manual citation
+            elif doi_string.count(' ') > 3:
+                self.root_dict['pub'][0]['citation'] = doi_string
+
+            # Strange Links or Other, send to quarantine
+            else:
+                self.dev_logger_txt("quarantine.txt", "Malformed DOI: " + doi_string)
+
+        return
+
     def compile_fetch(self, raw, doi_id):
+        """
+        Loop over Raw and add selected items to Fetch with proper formatting
+        :param raw: (dict) JSON data from doi.org
+        :param doi_id: (str)
+        :return:
+        """
         fetch_dict = OrderedDict()
         order = {'author': 'author', 'type': 'type', 'identifier': '', 'title': 'title', 'journal': 'container-title',
                 'pubYear': '', 'volume': 'volume', 'publisher': 'publisher', 'page':'page', 'issue': 'issue'}
@@ -155,54 +157,68 @@ class DOIResolver(object):
 
         return fetch_dict
 
-    """
-    Resolve DOI and compile all attibutes into one dictionary
-    """
-    def get_data(self, name, pub_dict, doi_id):
+    def get_data(self, pub_dict, doi_id):
+        """
+        Resolve DOI and compile all attibutes into one dictionary
+        :param pub_dict: (dict) Original publication dictioanry
+        :param doi_id: (str)
+        :return: (dict) Update publication dictionary
+        """
 
         try:
             # Send request to grab metadata at URL
             url = "http://dx.doi.org/" + doi_id
             headers = {"accept": "application/rdf+xml;q=0.5, application/citeproc+json;q=1.0"}
             r = requests.get(url, headers=headers)
-            raw = json.loads(r.text)
 
-            # DOI server error or empty raw dictionary, return the original pub. No new data retreived
-            if r.status_code != 200 or not raw:
-                return pub_dict
+            # DOI 404. Data not retrieved. Log and return original pub
+            if r.status_code == 400:
+                self.dev_logger_txt("quarantine.txt", "DOI.org 404 response: " + doi_id)
 
-            # Create a new pub dictionary with metadata received
-            fetch_dict = self.compile_fetch(raw, doi_id)
+            # Ignore other status codes. Run when status is 200 (good response)
+            elif r.status_code == 200:
 
-            # Compare the two pubs. Overwrite old data with new data where applicable
-            pub_dict = self.compare_replace(pub_dict, fetch_dict)
-            pub_dict['PubDataUrl'] = 'doi.org'
+                # Load data from http response
+                raw = json.loads(r.text)
 
-        # Log DOI ids that were not able to fetch
-        except:
-            self.dev_logger_txt("quarantine.txt", name, "Unable to fetch with DOI: " + doi_id)
+                # Create a new pub dictionary with metadata received
+                fetch_dict = self.compile_fetch(raw, doi_id)
+
+                # Compare the two pubs. Overwrite old data with new data where applicable
+                pub_dict = self.compare_replace(pub_dict, fetch_dict)
+                pub_dict['PubDataUrl'] = 'doi.org'
+
+        except urllib.error.URLError:
+            self.dev_logger_txt("quarantine.txt", "Malformed DOI: " + doi_id)
 
         return pub_dict
 
-    """
-    Debug Log. Log names and error of problematic files to a txt file
-    """
-    def dev_logger_txt(self, txt_file, name, info):
-        org = os.getcwd()
-        os.chdir('/Users/chrisheiser1/Desktop/')
+    def dev_logger_txt(self, txt_file, info):
+        """
+        Debug Log. Log names and error of problematic files to a txt file
+        :param txt_file: (str) Name of the txt file to write to
+        :param info: (str) Description of error being logged
+        :return: None
+        """
+
+        org_dir = os.getcwd()
+        os.chdir(self.root_dir)
         with open(txt_file, 'a+') as f:
             # write update line
             try:
-                f.write("File: " + name + "\n" + "Error: " + info + "\n\n")
+                f.write("File: " + self.name + "\n" + "Error: " + info + "\n\n")
             except KeyError:
                 print("Debug Log Error")
-        os.chdir(org)
+        os.chdir(org_dir)
         return
 
-    """
-    Recursively search the file for the DOI id. More taxing, but more flexible when dictionary structuring isn't absolute
-    """
     def find_doi(self, curr_dict):
+        """
+        Recursively search the file for the DOI id. More taxing, but more flexible when dictionary structuring isn't absolute
+        :param curr_dict: (dict) Current dictionary being searched
+        :recursive return: (dict) Current dictionary, (bool) False flag that DOI was not found
+        :final return: (str) DOI id, (bool) True flag that DOI was found
+        """
         try:
             if 'id' in curr_dict:
                 return curr_dict['id'], True
@@ -220,32 +236,31 @@ class DOIResolver(object):
         except TypeError:
             return curr_dict, False
 
-    """
-    Main function that gets files, creates outputs, and runs all operations on files
-    """
-    def run(self, root_dict, name):
+    def run(self):
+        """
+        Main function that gets file(s), creates outputs, and runs all operations.
+        :return: (dict) Updated or original data for jsonld file
+        """
 
         # Retrieve DOI id key-value from the root_dict
-        doi_string, doi_found = self.find_doi(root_dict['pub'])
+        doi_string, doi_found = self.find_doi(self.root_dict['pub'])
 
         if doi_found:
-            print("doi found")
 
             # Empty list for no match, or list of 1+ matching DOI id strings
             doi_list = self.clean(doi_string)
 
             if not doi_list:
-                self.illegal_doi(root_dict, doi_string, name)
+                self.illegal_doi(doi_string)
 
             else:
                 for doi_id in doi_list:
-                    root_dict['pub'].append(self.get_data(name, root_dict['pub'][0], doi_id))
+                    self.root_dict['pub'].append(self.get_data(self.root_dict['pub'][0], doi_id))
 
         else:
-            print("doi not found")
             # Quarantine the flagged file and log it
-            self.dev_logger_txt("quarantine.txt", name, "No DOI id found")
-            root_dict['pub'][0]['PubDataUrl'] = 'Manually Entered'
+            self.dev_logger_txt("quarantine.txt", "DOI not provided")
+            self.root_dict['pub'][0]['PubDataUrl'] = 'Manually Entered'
 
-        return root_dict
+        return self.root_dict
 
