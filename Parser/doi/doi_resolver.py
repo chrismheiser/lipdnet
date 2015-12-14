@@ -1,9 +1,9 @@
 from collections import OrderedDict
 import json
 import requests
-import os
 import re
 import urllib.error
+from geoChronR.Parser.misc.loggers import *
 
 __author__ = 'Chris Heiser, Austin McDowell'
 """
@@ -23,13 +23,13 @@ Output: Updated publication dictionary (success), original publication dictionar
 
 class DOIResolver(object):
 
-    def __init__(self, root_dir, name, root_dict):
+    def __init__(self, dir_root, name, root_dict):
         """
-        :param root_dir: (str) Path to dir containing all .lpd files
+        :param dir_root: (str) Path to dir containing all .lpd files
         :param name: (str) Name of current .lpd file
         :param root_dict: (dict) Full dict loaded from jsonld file
         """
-        self.root_dir = root_dir
+        self.dir_root = dir_root
         self.name = name
         self.root_dict = root_dict
 
@@ -126,7 +126,7 @@ class DOIResolver(object):
 
             # Strange Links or Other, send to quarantine
             else:
-                self.dev_logger_txt("quarantine.txt", "Malformed DOI: " + doi_string)
+                txt_log(self.dir_root, self.name, "quarantine.txt", "Malformed DOI: " + doi_string)
 
         return
 
@@ -157,14 +157,15 @@ class DOIResolver(object):
 
         return fetch_dict
 
-    def get_data(self, pub_dict, doi_id):
+    def get_data(self, doi_id):
         """
-        Resolve DOI and compile all attibutes into one dictionary
-        :param pub_dict: (dict) Original publication dictioanry
+        Resolve DOI and compile all attributes into one dictionary
+        :param pub_dict: (dict) Original publication dictionary
         :param doi_id: (str)
         :return: (dict) Update publication dictionary
         """
 
+        tmp_dict = self.root_dict['pub'][0].copy()
         try:
             # Send request to grab metadata at URL
             url = "http://dx.doi.org/" + doi_id
@@ -173,7 +174,7 @@ class DOIResolver(object):
 
             # DOI 404. Data not retrieved. Log and return original pub
             if r.status_code == 400:
-                self.dev_logger_txt("quarantine.txt", "DOI.org 404 response: " + doi_id)
+                txt_log(self.dir_root, self.name, "quarantine.txt", "DOI.org 404 response: " + doi_id)
 
             # Ignore other status codes. Run when status is 200 (good response)
             elif r.status_code == 200:
@@ -185,31 +186,13 @@ class DOIResolver(object):
                 fetch_dict = self.compile_fetch(raw, doi_id)
 
                 # Compare the two pubs. Overwrite old data with new data where applicable
-                pub_dict = self.compare_replace(pub_dict, fetch_dict)
-                pub_dict['PubDataUrl'] = 'doi.org'
+                tmp_dict = self.compare_replace(tmp_dict, fetch_dict)
+                tmp_dict['pubDataUrl'] = 'doi.org'
+                self.root_dict['pub'].append(tmp_dict)
 
         except urllib.error.URLError:
-            self.dev_logger_txt("quarantine.txt", "Malformed DOI: " + doi_id)
+            txt_log(self.dir_root, self.name, "quarantine.txt", "Malformed DOI: " + doi_id)
 
-        return pub_dict
-
-    def dev_logger_txt(self, txt_file, info):
-        """
-        Debug Log. Log names and error of problematic files to a txt file
-        :param txt_file: (str) Name of the txt file to write to
-        :param info: (str) Description of error being logged
-        :return: None
-        """
-
-        org_dir = os.getcwd()
-        os.chdir(self.root_dir)
-        with open(txt_file, 'a+') as f:
-            # write update line
-            try:
-                f.write("File: " + self.name + "\n" + "Error: " + info + "\n\n")
-            except KeyError:
-                print("Debug Log Error")
-        os.chdir(org_dir)
         return
 
     def find_doi(self, curr_dict):
@@ -236,7 +219,7 @@ class DOIResolver(object):
         except TypeError:
             return curr_dict, False
 
-    def run(self):
+    def start(self):
         """
         Main function that gets file(s), creates outputs, and runs all operations.
         :return: (dict) Updated or original data for jsonld file
@@ -255,12 +238,12 @@ class DOIResolver(object):
 
             else:
                 for doi_id in doi_list:
-                    self.root_dict['pub'].append(self.get_data(self.root_dict['pub'][0], doi_id))
+                    self.get_data(doi_id)
 
         else:
             # Quarantine the flagged file and log it
-            self.dev_logger_txt("quarantine.txt", "DOI not provided")
-            self.root_dict['pub'][0]['PubDataUrl'] = 'Manually Entered'
+            txt_log(self.dir_root, self.name, "quarantine.txt", "DOI not provided")
+            self.root_dict['pub'][0]['pubDataUrl'] = 'Manually Entered'
 
         return self.root_dict
 
