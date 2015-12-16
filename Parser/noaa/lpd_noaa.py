@@ -1,4 +1,8 @@
-from geoChronR.Parser.doi.doi_resolver import *
+from geoChronR.Parser.misc.directory import *
+import os
+import re
+import shutil
+
 
 __author__ = 'chrisheiser1'
 
@@ -45,7 +49,7 @@ ordering = {1: ['studyName', 'onlineResource', 'originalSourceUrl', 'archive', '
             4: ['investigators'],
             5: ['description'],
             6: ['authors', 'publishedDateOrYear', 'publishedTitle', 'journalName', 'volume', 'edition', 'issue',
-                'pages', 'doi', 'onlineResource', 'fullCitation', 'abstract'],
+                'pages', 'doi', 'onlineResource', 'fullCitation', 'abstract', 'identifier'],
             7: ['agency', 'grant'],
             8: ['siteName', 'location', 'country', 'northernmostLatitude', 'southernmostLatitude',
                 'easternmostLongitude', 'westernmostLongitude', 'elevation'],
@@ -67,7 +71,150 @@ class NOAA(object):
         self.name = name
         self.root_dict = root_dict
         self.steps_dict = {1:{},2:{},3:{},4:{},5:{},6:{},7:{},8:{},9:{},10:{},11:{},12:{},13:{}}
-        self.name_ext = name + '.txt'
+        self.name_txt = name + '.txt'
+
+    def csv_found(self, csv_type):
+        """
+        Check for Chronology or Data CSV file
+        :param csv_type: (str) 'data' or 'chron'
+        :return found: (bool) File found or not found
+        """
+        found = False
+
+        # AT THIS POINT WE ARE IN THE tmp/filename/data FOLDER (access to jsonld, changelog, etc)
+
+        # After you determine file naming convention for CSVs, then use csv_type to look for file
+
+        try:
+            # Attempt to open csv
+            if open(self.name + '.csv'):
+                found = True
+                # print("{0} - found {1} csv".format(filename, datatype))
+        except FileNotFoundError:
+            # print("{0} - no {1} csv".format(filename, datatype))
+            pass
+        return found
+
+    @staticmethod
+    def get_mv(d):
+        """
+        Get missing value from root of data table dictionary.
+        :param d: (dict) Data table
+        :return: (str) Missing value or empty str.
+        """
+        if 'missingValue' in d:
+            return d['missingValue']
+        return ''
+
+    @staticmethod
+    def underscore(key):
+        """
+        Convert camelCase to underscore
+        :param key: (str) Key or title name
+        """
+
+        # Special keys that need a specific key change
+        if key == 'doi':
+            key_o = 'DOI'
+
+        elif key == 'agency':
+            key_o = 'Funding_Agency_Name'
+
+        elif key == 'originalSourceURL':
+            key_o = 'Original_Source_URL'
+
+        # Use regex to split and add underscore at each capital letter
+        else:
+            s = first_cap_re.sub(r'\1_\2', key)
+            key_o = all_cap_re.sub(r'\1_\2', s).title()
+
+        return key_o
+
+    @staticmethod
+    def split_path(string):
+        """
+        Used in the path_context function. Split the full path into a list of steps
+        :param string: (str) Path string ("geo-elevation-height")
+        :return out: (list) Path as a list of strings. One entry per path step.(["geo", "elevation", "height"])
+        """
+        out = []
+        position = string.find(':')
+        if position != -1:
+            # A position of 0+ means that ":" was found in the string
+            key = string[:position]
+            val = string[position+1:]
+            out.append(key)
+            out.append(val)
+            if ('-' in key) and ('Funding' not in key) and ('Grant' not in key):
+                out = key.split('-')
+                out.append(val)
+        return out
+
+    @staticmethod
+    def get_corelength(d):
+        """
+        Get the value and unit to write the Core Length line
+        :param d:
+        :return val, unit:(int) Value (str) Unit
+        """
+        # If d is a string, it'll throw a type error
+        if not isinstance(d, str):
+            try:
+                val = d['coreLength']['value']
+            except KeyError:
+                val = ''
+            try:
+                unit = d['coreLength']['unit']
+            except KeyError:
+                unit = ''
+            return val, unit
+        return '', ''
+
+    @staticmethod
+    def get_identifier(d):
+        """
+        Get DOI id and url from identifier dictionary.
+        :param d: (list) Identifier list. (Should only have one dictionary in it)
+        :return: (str) DOI id, (str) DOI url
+        """
+        if not isinstance(d, str):
+            try:
+                doi_id = d[0]['id']
+            except KeyError:
+                doi_id = ''
+            try:
+                doi_url = d[0]['url']
+            except KeyError:
+                doi_url = ''
+            return doi_id, doi_url
+        return '', ''
+
+    @staticmethod
+    def coordinates(l, d):
+        """
+        Reorganize coordinates based on how many values are available.
+        :param l: (list of float) Coordinate values
+        :param d: (dict) Location with cooresponding values
+        :return:
+        """
+
+        length = len(l)
+        locations = ['northernmostLatitude', 'easternmostLongitude', 'southernmostLatitude', 'westernmostLongitude']
+
+        if length == 0:
+            for location in locations:
+                d[location] = ' '
+        elif length == 2:
+            d[locations[0]] = l[0]
+            d[locations[1]] = l[1]
+            d[locations[2]] = l[0]
+            d[locations[3]] = l[1]
+
+        elif length == 4:
+            for index, location in enumerate(locations):
+                d[locations[index]] = l[index]
+
+        return d
 
     def start(self):
         """
@@ -75,13 +222,11 @@ class NOAA(object):
         :return:
         """
 
-        # Create the output folder
-        if not os.path.exists(os.path.join(self.dir_root, 'noaa_files')):
-            os.makedirs(os.path.join(self.dir_root, 'noaa_files/'))
+        # Starting Directory: dir_tmp/dir_bag/data/
 
-        # NOAA files are organized in sections, but jsonld is not. Reorganize to match NOAA template.
+        # NOAA files are organized in sections, but jld is not. Reorganize to match NOAA template.
         for k, v in self.root_dict.items():
-            self.steps_dict = self.reorganize(self.steps_dict, k, v)
+            self.reorganize(k, v)
 
         # Use data in steps_dict to write to
         self.write_file()
@@ -90,28 +235,26 @@ class NOAA(object):
 
     def write_file(self):
         """
-        Final step. Takes all previous data and writes to txt file one section at a time.
+        Open text file. Write one section at a time. Close text file. Move completed file to dir_root/noaa/
         :return: none
         """
 
-        noaa_txt = open(os.path.join('noaa_files', self.name_ext), "w+")
-
+        noaa_txt = open(self.name_txt, "w+")
         self.write_top(noaa_txt, 1)
-        self.write_generic(noaa_txt, 'Contribution_Date', 2)
-        self.write_generic(noaa_txt, 'Title', 3)
-        self.write_generic(noaa_txt, 'Investigators', 4)
-        self.write_generic(noaa_txt, 'Description_Notes_and_Keywords', 5)
-        self.write_pub(noaa_txt, 6)
+        self.write_generic(noaa_txt, 'Contribution_Date', 2, self.steps_dict[2])
+        self.write_generic(noaa_txt, 'Title', 3, self.steps_dict[3])
+        self.write_generic(noaa_txt, 'Investigators', 4, self.steps_dict[4])
+        self.write_generic(noaa_txt, 'Description_Notes_and_Keywords', 5, self.steps_dict[5])
+        self.write_pub(noaa_txt, self.steps_dict[6]['pub'])
         self.write_funding(noaa_txt, self.steps_dict[7])
         self.write_geo(noaa_txt, self.steps_dict[8])
-        self.write_generic(noaa_txt, self.steps_dict[9], 'Data_Collection', 9)
-        self.write_generic(noaa_txt, self.steps_dict[10], 'Species', 10)
-        self.write_chron(self.name, noaa_txt, self.steps_dict[11])
+        self.write_generic(noaa_txt, 'Data_Collection', 9, self.steps_dict[9])
+        self.write_generic(noaa_txt, 'Species', 10, self.steps_dict[10])
+        self.write_chron(noaa_txt, self.steps_dict[11])
         self.write_variables(noaa_txt, self.steps_dict[12])
-        self.write_paleodata(self.name, noaa_txt, self.steps_dict[12])
-
-        # Close the text file
+        self.write_paleodata(noaa_txt, self.steps_dict[12])
         noaa_txt.close()
+        shutil.copy(os.path.join(os.getcwd(), self.name_txt), os.path.join(self.dir_root, 'noaa'))
         return
 
     def write_top(self, noaa_txt, section_num):
@@ -121,7 +264,7 @@ class NOAA(object):
         :param section_num: (int) Section number
         :return: none
         """
-        self.create_blanks(section_num)
+        self.create_blanks(section_num, self.steps_dict[section_num])
         noaa_txt.write('# ' + self.steps_dict[section_num]['studyName'] + '\n\
             #-----------------------------------------------------------------------\n\
             #                World Data Service for Paleoclimatology, Boulder\n\
@@ -147,244 +290,244 @@ class NOAA(object):
 
         return
 
-    def write_generic(self, noaa_txt, header, section_num):
+    def write_generic(self, noaa_txt, header, section_num, d):
         """
         Write a generic section to the .txt. This function is reused for multiple sections.
         :param noaa_txt: (obj) Output .txt file that is being written to.
         :param header: (str) Header title for this section
-        :param section_num: (int) Section number
+        :param section_num: (int)
+        :param d: (dict) Section from steps_dict
         :return: none
         """
-        self.create_blanks(section_num)
+        self.create_blanks(section_num, d)
         noaa_txt.write('# ' + header + ' \n')
         for entry in ordering[section_num]:
             if entry == 'coreLength':
-                val, unit = self.get_corelength(self.steps_dict[section_num])
+                val, unit = self.get_corelength(d[entry])
                 noaa_txt.write('#   ' + self.underscore(entry) + ': ' + str(val) + ' ' + str(unit) + '\n')
+            elif entry == 'identifier':
+                doi_id, doi_url = self.get_identifier(d[entry])
+                noaa_txt.write('#   DOI_id: ' + doi_id + '\n')
+                noaa_txt.write('#   DOI_url: ' + doi_url + '\n')
             else:
-                noaa_txt.write('#   ' + self.underscore(entry) + ': ' + str(self.steps_dict[section_num][entry]) + '\n')
+                noaa_txt.write('#   ' + self.underscore(entry) + ': ' + str(d[entry]) + '\n')
         noaa_txt.write('#------------------\n')
         return
 
-    def write_pub(self, noaa_txt, section_num):
+    def write_pub(self, noaa_txt, pub_root):
         """
         Write pub section. There may be multiple, so write a generic section for each one.
         :param noaa_txt: (obj) Output .txt file that is being written to.
-        :param section_num: (int) Section number
+        :param pub_root: (list) One or more pub dictionaries.
         :return: none
         """
-        for key, pub_list in self.steps_dict[section_num].items():
-            for pub in pub_list:
-                self.write_generic(noaa_txt, 'Publication', 6)
+        for pub in pub_root:
+            self.write_generic(noaa_txt, 'Publication', 6, pub)
         return
 
-    def write_funding(self, file_out, dict_in):
+    def write_funding(self, noaa_txt, d):
         """
 
-        :param file_out:
-        :param dict_in:
+        :param noaa_txt:
+        :param d:
         :return:
         """
-        for key, fund_list in dict_in.items():
+        for key, fund_list in d.items():
             for fund in fund_list:
-                self.write_generic(file_out, fund, 'Funding_Agency', 7)
+                self.write_generic(noaa_txt, fund, 'Funding_Agency', 7)
         return
 
-    def write_geo(self, file_out, dict_in):
+    def write_geo(self, noaa_txt, d):
         """
 
-        :param file_out:
-        :param dict_in:
+        :param noaa_txt:
+        :param d:
         :return:
         """
-        for k, v in dict_in.items():
-            dict_in = self.reorganize_geo(v)
-        self.write_generic(file_out, dict_in, 'Site_Information', 8)
+        for k, v in d.items():
+            d = self.reorganize_geo(v)
+        self.write_generic(noaa_txt, 'Site_Information', 8, d)
         return
 
-    def write_chron(self, file_in, file_out, dict_in):
+    def write_chron(self, noaa_txt, d):
         """
 
         :param file_in:
-        :param file_out:
-        :param dict_in:
+        :param noaa_txt:
+        :param d:
         :return:
         """
-        file_out.write('# Chronology:\n#\n')
+        noaa_txt.write('# Chronology:\n#\n')
 
-        if self.csv_found(file_in, 'chronology'):
-            cols = dict_in['chronology']['columns']
+        if self.csv_found('chron'):
+            cols = d['chronology']['columns']
             # Write variables line from dict_in
             for index, col in enumerate(cols):
                 if index == 0:
-                    file_out.write('#       ' + col['parameter'] + ' (' + col['units'] + ')  | ')
+                    noaa_txt.write('#       ' + col['parameter'] + ' (' + col['units'] + ')  | ')
                 elif index == len(cols)-1:
-                    file_out.write(col['parameter'] + ' (' + col['units'] + ')\n')
+                    noaa_txt.write(col['parameter'] + ' (' + col['units'] + ')\n')
                 else:
-                    file_out.write(col['parameter'] + ' (' + col['units'] + ')  | ')
+                    noaa_txt.write(col['parameter'] + ' (' + col['units'] + ')  | ')
             # Iter over CSV and write line for line
-            with open(file_in + '-chronology.csv', 'r') as f:
+            with open(self.name + '-chronology.csv', 'r') as f:
                 for line in iter(f):
                     line = line.split(',')
                     for index, value in enumerate(line):
                         if index == 0:
-                            file_out.write('#          ' + str(value) + '              ')
-
+                            noaa_txt.write('#          ' + str(value) + '              ')
                         elif index == len(line) - 1:
-                            file_out.write(str(value))
+                            noaa_txt.write(str(value))
                         else:
-                            file_out.write(str(value) + '                 ')
-
-        file_out.write('#------------------\n')
-
+                            noaa_txt.write(str(value) + '                 ')
+        noaa_txt.write('#------------------\n')
         return
 
-    def write_variables(self, file_out, dict_in):
+    @staticmethod
+    def write_variables(noaa_txt, d):
         """
-
-        :param file_out:
-        :param dict_in:
-        :return:
+        Retrieve variables from data table(s) and write to Variables section of txt file.
+        :param noaa_txt:(obj) Output text file
+        :param d: (dict) Paleodata dictionary
+        :return: none
         """
-        cols = dict_in['paleoData'][0]['columns']
-        file_out.write('# Variables\n\
-    #\n\
-    # Data variables follow that are preceded by "##" in columns one and two.\n\
-    # Data line variables format:  Variables list, one per line, shortname-tab-longname-tab-longname components\
-     ( 9 components: what, material, error, units, seasonality, archive, detail, method, C or N for Character or\
-      Numeric data)\n#\n')
-        for col in cols:
-            for entry in ordering[11]:
-                # Need TAB after a parameter
-                if entry == 'parameter':
-                    file_out.write('##' + col[entry] + '    ')
-                # No space after last entry
-                elif entry == 'dataType':
-                    file_out.write(col[entry])
-                # Space and comma after normal entries
-                else:
-                    file_out.write(col[entry] + ', ')
-            file_out.write('\n')
-        file_out.write('#\n#------------------\n')
-
-        return
-
-    def write_paleodata(self, file_in, file_out, dict_in):
-        """
-
-        :param file_in:
-        :param file_out:
-        :param dict_in:
-        :return:
-        """
-        # Find out why noaa_to_lpd is not getting missing value
-        file_out.write('# Data: \n\
-    # Data lines follow (have no #) \n\
-    # Data line format - tab-delimited text, variable short name as header) \n\
-    # Missing_Values: ' + dict_in['paleoData'][0]['missingValue'] + '\n#\n')
-
-        if self.csv_found(file_in, 'data'):
-            # Write variables line from dict_in
-            cols = dict_in['paleoData'][0]['columns']
-            for col in cols:
+        noaa_txt.write('# Variables\n\#\n\# Data variables follow that are preceded by "##" in columns one and two.\n\
+        # Data line variables format:  Variables list, one per line, shortname-tab-longname-tab-longname components\
+         ( 9 components: what, material, error, units, seasonality, archive, detail, method, C or N for Character or\
+          Numeric data)\n#\n')
+        for table in d['paleoData']:
+            for col in table['columns']:
+                # Write one line for each column. One line has all metadata for one column.
                 for entry in ordering[11]:
-                    if entry == 'parameter':
-                        file_out.write(col[entry] + '       ')
-            file_out.write('\n')
-            # Iter over CSV and write line for line
-            with open(file_in + '-data.csv', 'r') as f:
-                for line in iter(f):
-                    line = line.split(',')
-                    for index, value in enumerate(line):
-                        if index == len(line) - 1:
-                            file_out.write(str(value))
+                    # ---FIX--------FIX--------FIX--------FIX--------FIX-----
+                    # May need a better way of handling this in the future. Need a strict list for this section.
+                    try:
+                        if entry == 'parameter':
+                            # First entry: Double hash and tab
+                            noaa_txt.write('##' + col[entry] + '    ')
+                        elif entry == 'dataType':
+                            # Last entry: No space or comma
+                            noaa_txt.write(col[entry])
                         else:
-                            file_out.write(str(value) + '   ')
-
+                            # Space and comma after middle entries
+                            noaa_txt.write(col[entry] + ', ')
+                    except KeyError:
+                        noaa_txt.write(' ,')
+                noaa_txt.write('\n')
+            noaa_txt.write('#\n#------------------\n')
         return
 
-    def create_blanks(self, section_num):
+    def write_paleodata(self, noaa_txt, d):
+        """
+        Read numeric data from csv and write to the bottom section of the txt file.
+        :param noaa_txt:(obj) Output text file
+        :param d: (dict) Paleodata dictionary
+        :return: none
+        """
+
+        # Run once for each table
+        for table in d['paleoData']:
+            mv = self.get_mv(table)
+            noaa_txt.write('# Data: \n\# Data lines follow (have no #) \n\
+            # Data line format - tab-delimited text, variable short name as header) \n\
+            # Missing_Values: ' + mv + '\n#\n')
+
+            if self.csv_found('data'):
+                # Write variables line from dict_in
+                for col in table['columns']:
+                    for entry in ordering[11]:
+                        if entry == 'parameter':
+                            noaa_txt.write(col[entry] + '       ')
+                noaa_txt.write('\n')
+                # Iter over CSV and write line for line ---FIX--------FIX--------FIX--------FIX--------FIX-----
+                with open(self.name + '-data.csv', 'r') as f:
+                    for line in iter(f):
+                        line = line.split(',')
+                        for index, value in enumerate(line):
+                            if index == len(line) - 1:
+                                noaa_txt.write(str(value))
+                            else:
+                                noaa_txt.write(str(value) + '   ')
+        return
+
+    @staticmethod
+    def create_blanks(section_num, d):
         """
         All keys need to be written to the output, with or without a value. Furthermore, only keys that have values
         exist at this point. We need to manually insert the other keys with a blank value. Loop through the global list
         to see what's missing in our dict.
         :param section_num: (int) Retrieve data from global dict for this number.
+        :param d: (dict) Section of steps_dict
         :return: none
         """
         for key in ordering[section_num]:
-            if key not in self.steps_dict and key not in sections[13]:
+            if key not in d and key not in sections[13]:
                 # Key not in our dict. Create the blank entry.
-                self.steps_dict[key] = ''
+                d[key] = ''
         return
 
-    @staticmethod
-    def csv_found(self, filename, datatype):
+    def reorganize_geo(self, d):
         """
-        Check for Chronology and Data CSVs
-        :param filename: (str)
-        :param datatype: (str)
-        :return found: (bool) File found or not found
-        """
-        found = False
-
-        # Attempt to open Data CSV
-        try:
-            if open(filename + '-' + datatype + '.csv'):
-                found = True
-                # print("{0} - found {1} csv".format(filename, datatype))
-        except FileNotFoundError:
-            # print("{0} - no {1} csv".format(filename, datatype))
-            pass
-
-        return found
-
-    @staticmethod
-    def underscore(self, key):
-        """
-        Convert camelCase to underscore
-        :param key: (str) Key or title name
-        :return s2: (str) Underscore formatted word
+        Concat geo value and units, and reorganize the rest
+        :param d:
+        :return:
         """
 
-        # Special keys that need a specific key change
-        if key == 'doi':
-            s2 = 'DOI'
+        # The new dict that will be returned
+        d_tmp = {}
 
-        elif key == 'agency':
-            s2 = 'Funding_Agency_Name'
+        # Properties
+        for k, v in d['properties'].items():
+            if k == 'elevation':
+                d_tmp['elevation'] = str(v['value']) + ' ' + str(v['unit'])
+            else:
+                d_tmp[k] = v
 
-        elif key == 'originalSourceURL':
-            s2 = 'Original_Source_URL'
+        # Geometry
+        d_tmp = self.coordinates(d['geometry']['coordinates'], d_tmp)
 
-        # Use regex to split and add underscore at each capital letter
-        else:
-            s1 = first_cap_re.sub(r'\1_\2', key)
-            s2 = all_cap_re.sub(r'\1_\2', key).title()
+        return d_tmp
 
-        return s2
-
-    @staticmethod
-    def split_path(self, string):
+    def reorganize(self, key, value):
         """
-        Used in the path_context function. Split the full path into a list of steps
-        :param string: (str) Path string ("geo-elevation-height")
-        :return out: (list) Path as a list of strings. One entry per path step.(["geo", "elevation", "height"])
+
+        :param dict_in:
+        :param key:
+        :param value:
+        :return:
         """
-        out = []
-        position = string.find(':')
 
-        if position != -1:
-            # A position of 0+ means that ":" was found in the string
-            key = string[:position]
-            val = string[position+1:]
-            out.append(key)
-            out.append(val)
+        # If the key isn't in any list, stash it in number 13 for now
+        number = 13
 
-            if ('-' in key) and ('Funding' not in key) and ('Grant' not in key):
-                out = key.split('-')
-                out.append(val)
+        if key in sections[1]:
+            # StudyName only triggers once, append to section 3 also
+            if key == 'studyName':
+                self.steps_dict[3][key] = value
+            number = 1
+        elif key in sections[2]:
+            number = 2
+        elif key in sections[4]:
+            number = 4
+        elif key in sections[5]:
+            number = 5
+        elif key in sections[6]:
+            number = 6
+        elif key in sections[7]:
+            number = 7
+        elif key in sections[8]:
+            number = 8
+        elif key in sections[9]:
+            number = 9
+        elif key in sections[10]:
+            number = 10
+        elif key in sections[11]:
+            number = 11
+        elif key in sections[12]:
+            number = 12
+        self.steps_dict[number][key] = value
 
-        return out
+        return
 
     def path_context(self, flat_file):
         """
@@ -439,116 +582,3 @@ class NOAA(object):
             new_dict['Elevation'] = self.concat_units(elev)
 
         return new_dict
-
-    @staticmethod
-    def get_corelength(self, dict_in):
-        """
-        Get the value and unit to write the Core Length line
-        :param dict_in:
-        :return val, unit:(int) Value (str) Unit
-        """
-        try:
-            val = dict_in['coreLength']['value']
-        except KeyError:
-            val = ''
-        try:
-            unit = dict_in['coreLength']['unit']
-        except KeyError:
-            unit = ''
-        return val, unit
-
-
-    @staticmethod
-    def coordinates(self, list_in, dict_temp):
-        """
-        Reorganize coordinates based on how many values are available.
-        :param list_in: (list of float) Coordinate values
-        :param dict_temp: (dict) Location with cooresponding values
-        :return:
-        """
-
-        length = len(list_in)
-        locations = ['northernmostLatitude', 'easternmostLongitude', 'southernmostLatitude', 'westernmostLongitude']
-
-        if length == 0:
-            for location in locations:
-                dict_temp[location] = ' '
-        elif length == 2:
-            dict_temp[locations[0]] = list_in[0]
-            dict_temp[locations[1]] = list_in[1]
-            dict_temp[locations[2]] = list_in[0]
-            dict_temp[locations[3]] = list_in[1]
-
-        elif length == 4:
-            for index, location in enumerate(locations):
-                dict_temp[locations[index]] = list_in[index]
-
-        return dict_temp
-
-    def reorganize_geo(self, dict_in):
-        """
-        Concat geo value and units, and reorganize the rest
-        :param dict_in:
-        :return:
-        """
-
-        # The new dict that will be returned
-        dict_temp = {}
-
-        # Properties
-        for k, v in dict_in['properties'].items():
-            if k == 'elevation':
-                dict_temp['elevation'] = str(v['value']) + ' ' + str(v['unit'])
-            else:
-                dict_temp[k] = v
-
-        # Geometry
-        dict_temp = self.coordinates(dict_in['geometry']['coordinates'], dict_temp)
-
-        return dict_temp
-
-    @staticmethod
-    def reorganize(self, dict_in, key, value):
-        """
-
-        :param dict_in:
-        :param key:
-        :param value:
-        :return:
-        """
-
-        # If the key isn't in any list, stash it in number 13 for now
-        number = 13
-
-        if key in sections[1]:
-            # StudyName only triggers once, append to section 3 also
-            if key == 'studyName':
-                dict_in[3][key] = value
-            number = 1
-        elif key in sections[2]:
-            number = 2
-        elif key in sections[4]:
-            number = 4
-        elif key in sections[5]:
-            number = 5
-        elif key in sections[6]:
-            number = 6
-        elif key in sections[7]:
-            number = 7
-        elif key in sections[8]:
-            number = 8
-        elif key in sections[9]:
-            number = 9
-        elif key in sections[10]:
-            number = 10
-        elif key in sections[11]:
-            number = 11
-        elif key in sections[12]:
-            number = 12
-        dict_in[number][key] = value
-
-        return dict_in
-
-
-
-

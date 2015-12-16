@@ -47,6 +47,10 @@ def unzip(name_ext):
     path_tmp = create_tmp_dir()
 
     # Unzip contents to the tmp directory
-    with zipfile.ZipFile(name_ext) as f:
-        f.extractall(path_tmp)
+    try:
+        with zipfile.ZipFile(name_ext) as f:
+            f.extractall(path_tmp)
+    except FileNotFoundError:
+        shutil.rmtree(path_tmp)
+        return None
     return path_tmp

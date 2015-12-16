@@ -98,7 +98,7 @@ def main():
     :return: None
     """
     # Take in user-chosen directory path
-    dir_root = '/Users/chrisheiser1/Desktop/lpd'
+    dir_root = '/Users/chrisheiser1/Desktop/test'
 
     # Find all .lpd files in current directory
     # dir: ? -> dir_root
