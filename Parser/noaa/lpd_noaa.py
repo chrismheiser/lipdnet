@@ -426,16 +426,16 @@ class NOAA(object):
 
         if self.csv_found(filename):
             # Write variables line from dict_in
-            count = len(table)
+            count = len(table['columns'])
             for col in table['columns']:
                 try:
                     param = col['parameter']
                 except KeyError:
                     param = 'N/A'
                 if count == 1:
-                    noaa_txt.write("{:<0.10}".format(param))
+                    noaa_txt.write("{:<0}".format(param))
                 else:
-                    noaa_txt.write("{:<20.10}".format(param))
+                    noaa_txt.write("{:<15}".format(param))
                     count -= 1
             noaa_txt.write('\n')
             # Iter over CSV and write line for line
@@ -444,9 +444,9 @@ class NOAA(object):
                     line = line.split(',')
                     for index, value in enumerate(line):
                         if index == len(line) - 1:
-                            noaa_txt.write("{:<0.10}".format(str(value)))
+                            noaa_txt.write("{:<0}".format(str(value)))
                         else:
-                            noaa_txt.write("{:<20.10}".format(str(value)))
+                            noaa_txt.write("{:<15.10}".format(str(value)))
         noaa_txt.write('\n#\n#------------------\n')
         return
 
