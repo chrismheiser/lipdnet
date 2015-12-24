@@ -3,7 +3,6 @@ import os
 import re
 import shutil
 
-
 __author__ = 'chrisheiser1'
 
 """
@@ -73,21 +72,21 @@ class NOAA(object):
         self.steps_dict = {1:{},2:{},3:{},4:{},5:{},6:{},7:{},8:{},9:{},10:{},11:{},12:{},13:{}}
         self.name_txt = name + '.txt'
 
-    def csv_found(self, csv_type):
+    @staticmethod
+    def csv_found(filename):
         """
-        Check for Chronology or Data CSV file
-        :param csv_type: (str) 'data' or 'chron'
-        :return found: (bool) File found or not found
+        Check for CSV file. Make sure it exists before we try to open it.
+        :param filename: (str) Name of the file to open.
+        :return: none
         """
         found = False
 
-        # AT THIS POINT WE ARE IN THE tmp/filename/data FOLDER (access to jsonld, changelog, etc)
-
-        # After you determine file naming convention for CSVs, then use csv_type to look for file
+        # Current Directory
+        # tmp/filename/data (access to jsonld, changelog, csv, etc)
 
         try:
             # Attempt to open csv
-            if open(self.name + '.csv'):
+            if open(filename):
                 found = True
                 # print("{0} - found {1} csv".format(filename, datatype))
         except FileNotFoundError:
@@ -190,6 +189,30 @@ class NOAA(object):
         return '', ''
 
     @staticmethod
+    def create_blanks(section_num, d):
+        """
+        All keys need to be written to the output, with or without a value. Furthermore, only keys that have values
+        exist at this point. We need to manually insert the other keys with a blank value. Loop through the global list
+        to see what's missing in our dict.
+        :param section_num: (int) Retrieve data from global dict for this number.
+        :param d: (dict) Section of steps_dict
+        :return: none
+        """
+        for key in ordering[section_num]:
+            if key not in d and key not in sections[13]:
+                # Key not in our dict. Create the blank entry.
+                d[key] = ''
+        return
+
+    @staticmethod
+    def get_filename(table):
+        try:
+            filename = table['filename']
+        except KeyError:
+            filename = ''
+        return filename
+
+    @staticmethod
     def coordinates(l, d):
         """
         Reorganize coordinates based on how many values are available.
@@ -250,9 +273,12 @@ class NOAA(object):
         self.write_geo(noaa_txt, self.steps_dict[8])
         self.write_generic(noaa_txt, 'Data_Collection', 9, self.steps_dict[9])
         self.write_generic(noaa_txt, 'Species', 10, self.steps_dict[10])
-        self.write_chron(noaa_txt, self.steps_dict[11])
-        self.write_variables(noaa_txt, self.steps_dict[12])
-        self.write_paleodata(noaa_txt, self.steps_dict[12])
+        # self.write_chron(noaa_txt, self.steps_dict[11])
+
+        # Run once for each table. Keep variables and related data grouped
+        for table in self.steps_dict[12]['paleoData']:
+            self.write_variables(noaa_txt, table)
+            self.write_numbers(noaa_txt, table)
         noaa_txt.close()
         shutil.copy(os.path.join(os.getcwd(), self.name_txt), os.path.join(self.dir_root, 'noaa'))
         return
@@ -265,28 +291,28 @@ class NOAA(object):
         :return: none
         """
         self.create_blanks(section_num, self.steps_dict[section_num])
-        noaa_txt.write('# ' + self.steps_dict[section_num]['studyName'] + '\n\
-            #-----------------------------------------------------------------------\n\
-            #                World Data Service for Paleoclimatology, Boulder\n\
-            #                                  and\n\
-            #                     NOAA Paleoclimatology Program\n\
-            #             National Centers for Environmental Information (NCEI)\n\
-            #-----------------------------------------------------------------------\n\
-            # Template Version 2.0\n\
-            # NOTE: Please cite Publication, and Online_Resource and date accessed when using these data.\n\
-            # If there is no publication information, please cite Investigators, Title, and Online_Resource\
-            and date accessed.\n\
-            # Online_Resource: ' +  self.steps_dict[section_num]['onlineResource'] + '\n\
-            #\n\
-            # Original_Source_URL: ' + self.steps_dict[section_num]['originalSourceUrl'] + '\n\
-            #\n\
-            # Description/Documentation lines begin with #\n\
-            # Data lines have no #\n\
-            #\n\
-            # Archive: ' + self.steps_dict[section_num]['archive'] + '\n\
-            #\n\
-            # Parameter_Keywords: ' + self.steps_dict[section_num]['parameterKeywords'] + '\n\
-            #--------------------\n')
+        noaa_txt.write(
+            '# ' + self.steps_dict[section_num]['studyName'] +
+            '\n#-----------------------------------------------------------------------\
+            \n#                World Data Service for Paleoclimatology, Boulder\
+            \n#                                  and\
+            \n#                     NOAA Paleoclimatology Program\
+            \n#             National Centers for Environmental Information (NCEI)\
+            \n#-----------------------------------------------------------------------\
+            \n# Template Version 2.0\
+            \n# NOTE: Please cite Publication, and Online_Resource and date accessed when using these data.\
+            \n# If there is no publication information, please cite Investigators, Title, and Online_Resource and date accessed.\
+            \n# Online_Resource: ' + self.steps_dict[section_num]['onlineResource'] + '\
+            \n#\
+            \n# Original_Source_URL: ' + self.steps_dict[section_num]['originalSourceUrl'] + '\
+            \n#\
+            \n# Description/Documentation lines begin with #\
+            \n# Data lines have no #\
+            \n#\
+            \n# Archive: ' + self.steps_dict[section_num]['archive'] + '\
+            \n#\
+            \n# Parameter_Keywords: ' + self.steps_dict[section_num]['parameterKeywords'] + '\
+            \n#--------------------\n')
 
         return
 
@@ -383,87 +409,78 @@ class NOAA(object):
         noaa_txt.write('#------------------\n')
         return
 
-    @staticmethod
-    def write_variables(noaa_txt, d):
-        """
-        Retrieve variables from data table(s) and write to Variables section of txt file.
-        :param noaa_txt:(obj) Output text file
-        :param d: (dict) Paleodata dictionary
-        :return: none
-        """
-        noaa_txt.write('# Variables\n\#\n\# Data variables follow that are preceded by "##" in columns one and two.\n\
-        # Data line variables format:  Variables list, one per line, shortname-tab-longname-tab-longname components\
-         ( 9 components: what, material, error, units, seasonality, archive, detail, method, C or N for Character or\
-          Numeric data)\n#\n')
-        for table in d['paleoData']:
-            for col in table['columns']:
-                # Write one line for each column. One line has all metadata for one column.
-                for entry in ordering[11]:
-                    # ---FIX--------FIX--------FIX--------FIX--------FIX-----
-                    # May need a better way of handling this in the future. Need a strict list for this section.
-                    try:
-                        if entry == 'parameter':
-                            # First entry: Double hash and tab
-                            noaa_txt.write('##' + col[entry] + '    ')
-                        elif entry == 'dataType':
-                            # Last entry: No space or comma
-                            noaa_txt.write(col[entry])
-                        else:
-                            # Space and comma after middle entries
-                            noaa_txt.write(col[entry] + ', ')
-                    except KeyError:
-                        noaa_txt.write(' ,')
-                noaa_txt.write('\n')
-            noaa_txt.write('#\n#------------------\n')
-        return
-
-    def write_paleodata(self, noaa_txt, d):
+    def write_numbers(self, noaa_txt, table):
         """
         Read numeric data from csv and write to the bottom section of the txt file.
         :param noaa_txt:(obj) Output text file
-        :param d: (dict) Paleodata dictionary
+        :param table: (dict) Paleodata dictionary
         :return: none
         """
 
-        # Run once for each table
-        for table in d['paleoData']:
-            mv = self.get_mv(table)
-            noaa_txt.write('# Data: \n\# Data lines follow (have no #) \n\
-            # Data line format - tab-delimited text, variable short name as header) \n\
-            # Missing_Values: ' + mv + '\n#\n')
+        filename = self.get_filename(table)
+        mv = self.get_mv(table)
+        noaa_txt.write('# Data:\
+        \n# Data lines follow (have no #)\
+        \n# Data line format - tab-delimited text, variable short name as header)\
+        \n# Missing_Values: ' + mv + '\n#\n')
 
-            if self.csv_found('data'):
-                # Write variables line from dict_in
-                for col in table['columns']:
-                    for entry in ordering[11]:
-                        if entry == 'parameter':
-                            noaa_txt.write(col[entry] + '       ')
-                noaa_txt.write('\n')
-                # Iter over CSV and write line for line ---FIX--------FIX--------FIX--------FIX--------FIX-----
-                with open(self.name + '-data.csv', 'r') as f:
-                    for line in iter(f):
-                        line = line.split(',')
-                        for index, value in enumerate(line):
-                            if index == len(line) - 1:
-                                noaa_txt.write(str(value))
-                            else:
-                                noaa_txt.write(str(value) + '   ')
+        if self.csv_found(filename):
+            # Write variables line from dict_in
+            count = len(table)
+            for col in table['columns']:
+                try:
+                    param = col['parameter']
+                except KeyError:
+                    param = 'N/A'
+                if count == 1:
+                    noaa_txt.write("{:<0.10}".format(param))
+                else:
+                    noaa_txt.write("{:<20.10}".format(param))
+                    count -= 1
+            noaa_txt.write('\n')
+            # Iter over CSV and write line for line
+            with open(filename, 'r') as f:
+                for line in iter(f):
+                    line = line.split(',')
+                    for index, value in enumerate(line):
+                        if index == len(line) - 1:
+                            noaa_txt.write("{:<0.10}".format(str(value)))
+                        else:
+                            noaa_txt.write("{:<20.10}".format(str(value)))
+        noaa_txt.write('\n#\n#------------------\n')
         return
 
-    @staticmethod
-    def create_blanks(section_num, d):
+    def write_variables(self, noaa_txt, table):
         """
-        All keys need to be written to the output, with or without a value. Furthermore, only keys that have values
-        exist at this point. We need to manually insert the other keys with a blank value. Loop through the global list
-        to see what's missing in our dict.
-        :param section_num: (int) Retrieve data from global dict for this number.
-        :param d: (dict) Section of steps_dict
+        Retrieve variables from data table(s) and write to Variables section of txt file.
+        :param noaa_txt:(obj) Output text file
+        :param table: (dict) Paleodata dictionary
         :return: none
         """
-        for key in ordering[section_num]:
-            if key not in d and key not in sections[13]:
-                # Key not in our dict. Create the blank entry.
-                d[key] = ''
+        filename = self.get_filename(table)
+        noaa_txt.write('# Variables\n#\
+            \n# Filename: ' + filename +
+            '\n#\n# Data variables follow that are preceded by "##" in columns one and two.\
+            \n# Data line variables format:  Variables list, one per line, shortname-tab-longname-tab-longname components ( 9 components: what, material, error, units, seasonality, archive, detail, method, C or N for Character or Numeric data)\n#\n')
+        for col in table['columns']:
+            # Write one line for each column. One line has all metadata for one column.
+            for entry in ordering[11]:
+                # ---FIX--------FIX--------FIX--------FIX--------FIX-----
+                # May need a better way of handling this in the future. Need a strict list for this section.
+                try:
+                    if entry == 'parameter':
+                        # First entry: Double hash and tab
+                        noaa_txt.write('{:<20}'.format('##' + col[entry]))
+                    elif entry == 'dataType':
+                        # Last entry: No space or comma
+                        noaa_txt.write('{:<0}'.format(col[entry]))
+                    else:
+                        # Space and comma after middle entries
+                        noaa_txt.write('{:<3}'.format(col[entry] + ', '))
+                except KeyError:
+                    noaa_txt.write('{:<3}'.format(', '))
+            noaa_txt.write('\n')
+        noaa_txt.write('#\n#------------------\n')
         return
 
     def reorganize_geo(self, d):
