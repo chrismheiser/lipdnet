@@ -1,6 +1,6 @@
-from geoChronR.Parser.misc.bag import *
-from geoChronR.Parser.misc.directory import *
-from geoChronR.Parser.misc.zips import *
+from geoChronR.Parser.modules.bag import *
+from geoChronR.Parser.modules.directory import *
+from geoChronR.Parser.modules.zips import *
 from geoChronR.Parser.doi.doi_resolver import *
 
 __author__ = 'Chris Heiser'

@@ -1,4 +1,4 @@
-from geoChronR.Parser.misc.zips import *
+from geoChronR.Parser.modules.zips import *
 from geoChronR.Parser.noaa.lpd_noaa import *
 import json
 
