@@ -4,19 +4,57 @@ from geoChronR.Parser.misc.zips import *
 from geoChronR.Parser.doi.doi_resolver import *
 
 __author__ = 'Chris Heiser'
+
 """
-PURPOSE: Take .lpd file(s) that have been bagged with Bagit, and compressed (zip). Uncompress and unbag,
+Basic Process:
+Take .lpd file(s) that have been bagged with Bagit, and compressed (zip). Uncompress and unbag,
 read in the DOI from the jsonld file, invoke DOI resolver script, retrieve doi.org info with given DOI,
 update jsonld file, Bag the files, and compress the Bag. Output a txt log file with names and errors of
 problematic files.
 
-CHANGELOG
-Version 1.0 / 12.08.2015 / Chris
-
-Input:  .lpd file (Zip containing a Bag)
-Output: .lpd file (Zip containing a Bag)
-
 """
+
+
+def main():
+    """
+    Main function that controls the script. Take in directory containing the .lpd file(s). Loop for each file.
+    :return: None
+    """
+    # Take in user-chosen directory path
+    dir_root = 'ENTER_FOLDER_PATH_HERE'
+
+    # Find all .lpd files in current directory
+    # dir: ? -> dir_root
+    os.chdir(dir_root)
+    f_list = list_files('.lpd')
+
+    for name_ext in f_list:
+        print('processing: {}'.format(name_ext))
+
+        # .lpd name w/o extension
+        name = os.path.splitext(name_ext)[0]
+
+        # Unzip file and get tmp directory path
+        dir_tmp = unzip(name_ext)
+
+        # Unbag and check resolved flag. Don't run if flag exists
+        if resolved_flag(open_bag(os.path.join(dir_tmp, name))):
+            print("DOI previously resolved. Next file...")
+            shutil.rmtree(dir_tmp)
+
+        # Process file if flag does not exist
+        else:
+            # dir: dir_root -> dir_tmp
+            process_lpd(name, dir_tmp)
+            # dir: dir_tmp -> dir_root
+            os.chdir(dir_root)
+            # Zip the directory containing the updated files. Created in dir_root directory
+            re_zip(dir_tmp, name, name_ext)
+            os.rename(name_ext + '.zip', name_ext)
+            # Cleanup and remove tmp directory
+            shutil.rmtree(dir_tmp)
+    print("Remember: Quarantine.txt contains a list of errors that may have happened during processing.")
+    return
 
 
 def dir_cleanup(dir_bag, dir_data):
@@ -92,45 +130,5 @@ def process_lpd(name, path_tmp):
     return
 
 
-def main():
-    """
-    Main function that controls the script. Take in directory containing the .lpd file(s). Loop for each file.
-    :return: None
-    """
-    # Take in user-chosen directory path
-    dir_root = '/Users/chrisheiser1/Desktop/test'
-
-    # Find all .lpd files in current directory
-    # dir: ? -> dir_root
-    os.chdir(dir_root)
-    f_list = list_files('.lpd')
-
-    for name_ext in f_list:
-        print('processing: {}'.format(name_ext))
-
-        # .lpd name w/o extension
-        name = os.path.splitext(name_ext)[0]
-
-        # Unzip file and get tmp directory path
-        dir_tmp = unzip(name_ext)
-
-        # Unbag and check resolved flag. Don't run if flag exists
-        if resolved_flag(open_bag(os.path.join(dir_tmp, name))):
-            print("DOI previously resolved. Next file...")
-            shutil.rmtree(dir_tmp)
-
-        # Process file if flag does not exist
-        else:
-            # dir: dir_root -> dir_tmp
-            process_lpd(name, dir_tmp)
-            # dir: dir_tmp -> dir_root
-            os.chdir(dir_root)
-            # Zip the directory containing the updated files. Created in dir_root directory
-            re_zip(dir_tmp, name, name_ext)
-            os.rename(name_ext + '.zip', name_ext)
-            # Cleanup and remove tmp directory
-            shutil.rmtree(dir_tmp)
-    print("Remember: Quarantine.txt contains a list of errors that may have happened during processing.")
-    return
-
-main()
+if __name__ == '__main__':
+    main()
