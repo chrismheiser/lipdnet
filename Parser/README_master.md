@@ -24,6 +24,17 @@ These programs, external modules, and libraries were all tested and built with P
 
 There is not a dedicated installer package currently.
 
+Modules
+------
+An internal set of modules is used for miscellaneous functions that are used throughout each program. For this reason, keep the modules directory intact for uninterrupted use. 
+```
+modules
+  | bag.py
+  | directory.py
+  | loggers.py
+  | zips.py
+```
+
 External Packages
 ------
 ###### [XLRD](https://github.com/python-excel/xlrd)
