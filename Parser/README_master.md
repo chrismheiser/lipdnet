@@ -1,4 +1,4 @@
-# ![LiPD Logo](https://www.dropbox.com/s/ywkm8kabznitzwf/favicon.png?raw=1) LiPD
+# ![LiPD Logo](https://www.dropbox.com/s/tnt1d10vwx4zlla/lipd_rm_trans.png?raw=1) LiPD
 
 Summary
 ------
@@ -9,13 +9,20 @@ Overview
 ------
 
 ###### Excel to LPD
->Convert a Microsoft Excel (.xslx) file to LPD (.lpd) file.
+>Convert Microsoft Excel (.xslx) format to LPD (.lpd) format.
 
 ###### LPD to NOAA
->Convert a LPD (.lpd) file to a NOAA text (.txt) file.
+>Convert LPD (.lpd) format to NOAA text (.txt) format.
 
 ###### LPD DOI Resolver
 >Uses Digital Object Identifier (DOI) name to fetch the most current online data for your record and updates your local copy.
+
+
+Installation
+------
+These programs, external modules, and libraries were all tested and built with Python 3.4. Functionality cannot be guaranteed with other versions of Python.
+
+There is not a dedicated installer package currently.
 
 External Packages
 ------
@@ -27,12 +34,9 @@ Version:  0.9.3
 Version: 1.5.4
 "BagIt is a minimalist packaging format for digital preservation."
 
-
-Installation
+Bug Reports
 ------
-These programs, external modules, and libraries were all tested and built with Python 3.4. Functionality cannot be guaranteed with other versions of Python.
-
-There is not a single installer package at the moment.
+If you happen to run into a bug with any of the tools, please feel free to contact us through the LiPD website. Provide a short description of the problem, and a way for us to access the file(s) that caused the error. We'll do our best to get a fix pushed quickly!
 
 Contributors
 ------

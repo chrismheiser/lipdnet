@@ -20,8 +20,8 @@ def main():
     Main function that controls the script. Take in directory containing the .lpd file(s). Loop for each file.
     :return: None
     """
-    # Take in user-chosen directory path
-    dir_root = 'ENTER_FOLDER_PATH_HERE'
+    # Enter user-chosen directory path
+    dir_root = 'ENTER_DIRECTORY_PATH_HERE'
 
     # Find all .lpd files in current directory
     # dir: ? -> dir_root

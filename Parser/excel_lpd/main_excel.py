@@ -1,19 +1,10 @@
-"""
-Add-on Packages
-"""
 # from tkinter import filedialog
 # import tkinter
 import xlrd
 
-"""
-LOCAL
-"""
 from flattener import flatten
 from doi_resolver import DOIResolver
 
-"""
-STLIB
-"""
 from collections import OrderedDict
 import csv
 import json
@@ -24,6 +15,156 @@ import copy
 Determine if multiple chronologies will be combined into one sheet, or separated with one sheet per location
 Reformat based on new context file. Match item names and output structure
 """
+
+def main():
+
+    dir_root = 'ENTER_DIRECTORY_PATH_HERE'
+    excel_files = []
+
+    # Ask user if they want to run the Chronology sheets or flatten the JSON files.
+    # This is an all or nothing choice
+    # need_response = True
+    # while need_response:
+    #     chron_run = input("Run Chronology? (y/n)\n")
+    #     if chron_run == 'y' or 'n':
+    #         flat_run = input("Flatten JSON? (y/n)\n")
+    #         if flat_run == 'y' or 'n':
+    #             need_response = False
+
+    # For testing, assume we don't want to run these to make things easier for now.
+    chron_run = 'y'
+    flat_run = 'n'
+
+    # Display a dialog box that let's the user browse for the directory with all their excel files.
+    # root = tkinter.Tk()
+    # root.withdraw()
+    # currdir = os.getcwd()
+    # tempdir = tkinter.filedialog.askdirectory(parent=root, initialdir='/Users/chrisheiser1/Dropbox/GeoChronR/', title='Please select a directory')
+
+    # if len(tempdir) > 0:
+    #     print("Directory: " + tempdir)
+    # os.chdir(tempdir)
+    # os.chdir('/Users/chrisheiser1/Dropbox/GeoChronR/chronologiesToBeFormatted/')
+    os.chdir(dir_root)
+
+    # Add all excel files from user-specified directory, or from current directory
+    # Puts all file names in a list we iterate over
+    for file in os.listdir():
+        if file.endswith(".xls") or file.endswith(".xlsx"):
+            excel_files.append(file)
+
+    # Loop over all the lines (filenames) that are in the chosen directory
+    print("Processing files: ")
+    for current_file in excel_files:
+
+        datasheetNameList = []
+        chronsheetNameList = []
+        chron_combine = []
+        data_combine = []
+        finalDict = OrderedDict()
+
+        # File name without extension
+        name = os.path.splitext(current_file)[0]
+        print(name)
+
+        # For our current excel workbook, set each worksheet to a variable
+        # Set worksheet variables dynamically, based on the worksheet name
+        workbook = xlrd.open_workbook(current_file)
+
+        ## Most common sheets. If find sheet with matching name, set to variable
+        for sheet in workbook.sheet_names():
+
+            if 'Metadata' in sheet:
+                metadata = workbook.sheet_by_name(sheet)
+                metadata_str = 'Metadata'
+            elif 'Chronology' in sheet:
+                chronsheetNameList.append(sheet)
+            elif 'Data' in sheet:
+                datasheetNameList.append(sheet)
+
+                # These sheets exist, but are not being used so far
+                # elif new_name == 'ProxyList':
+                #     proxyList = workbook.sheet_by_index(workbook.sheet_names().index('ProxyList'))
+                #     proxyList_str = 'ProxyList'
+                # elif sheet == 'About':
+                #     about = workbook.sheet_by_index(workbook.sheet_names().index('About'))
+                #     about_str = 'About'
+
+        ###########################
+        ## METADATA WORKSHEETS   ##
+        ###########################
+
+        # Run the method for adding metadata info to finalDict
+        cells_down_metadata(workbook, metadata_str, 0, 0, finalDict)
+
+        ###########################
+        ##   DATA WORKSHEETS     ##
+        ###########################
+
+        # Loop over the data sheets we know exist
+        for sheet_str in datasheetNameList:
+            sheet_str = cells_down_datasheets(name, workbook, sheet_str, 2, 0)
+            data_combine.append(sheet_str)
+
+        # Add measurements to the final dictionary
+        finalDict['paleoData'] = data_combine
+
+        ###########################
+        ## CHRONOLOGY WORKSHEETS ##
+        ###########################
+
+        chron_dict = OrderedDict()
+
+        # Check if the user opted to run the chronology sheet
+        if chron_run == 'y':
+            for sheet_str in chronsheetNameList:
+                temp_sheet = workbook.sheet_by_name(sheet_str)
+                chron_dict['filename'] = str(name) + '-' + str(sheet_str) + '.csv'
+
+                # Create a dictionary that has a list of all the columns in the sheet
+                start_row = traverse_to_chron_var(temp_sheet)
+                columns_list_chron = get_chron_var(temp_sheet, start_row)
+                chron_dict['columns'] = columns_list_chron
+                chron_combine.append(chron_dict)
+
+            # Add chronology into the final dictionary
+            finalDict['chronData'] = chron_combine
+
+
+        ############################
+        ## FILE NAMING AND OUTPUT ##
+        ############################
+
+        # Creates the directory 'output' if it does not already exist
+        if not os.path.exists('output/' + str(name)):
+            os.makedirs('output/' + str(name))
+
+        # CSV - DATA
+        for sheet_str in datasheetNameList:
+            output_csv_datasheet(workbook, sheet_str, name)
+        del datasheetNameList[:]
+
+        # CSV - CHRONOLOGY
+        if chron_run == 'y':
+            for sheet_str in chronsheetNameList:
+                output_csv_chronology(workbook, sheet_str, name)
+
+        # JSON LD
+        new_file_name_jsonld = str(name) + '/' + str(name) + '.lipd'
+        file_jsonld = open('output/' + new_file_name_jsonld, 'w')
+        file_jsonld = open('output/' + new_file_name_jsonld, 'r+')
+
+        # Write finalDict to json-ld file with dump. Dump outputs a readable json hierarchy
+        json.dump(finalDict, file_jsonld, indent=4)
+
+        if flat_run == 'y':
+            # Flatten the JSON LD file, and output it to its own file
+            flattened_file = flatten.run(finalDict)
+            new_file_flat_json = str(name) + '/' + str(name) + '_flat.lipd'
+            file_flat_jsonld = open('output/' + new_file_flat_json, 'w')
+            file_flat_jsonld = open('output/' + new_file_flat_json, 'r+')
+            json.dump(flattened_file, file_flat_jsonld, indent=0)
+            # validate_flat = validator_test.run('output/' + new_file_flat_json)
 
 # Use this to output data columns to a csv file
 # Accepts: Workbook(Obj), Sheet(str), name(str) / Returns: None
@@ -102,7 +243,6 @@ def output_csv_chronology(workbook, sheet, name):
 
     file_csv.close()
     return
-
 
 
 """
@@ -878,11 +1018,12 @@ def traverse_to_chron_data(temp_sheet):
 
     return traverse_row
 
-"""
-Traverse down to the row that has the first variable
-Accepts: temp_sheet(obj) / Returns: row (int)
-"""
+
 def traverse_to_chron_var(temp_sheet):
+    """
+    Traverse down to the row that has the first variable
+    Accepts: temp_sheet(obj) / Returns: row (int)
+    """
     row = 0
     while row < temp_sheet.nrows - 1:
         if 'Parameter' in temp_sheet.cell_value(row, 0):
@@ -892,11 +1033,12 @@ def traverse_to_chron_var(temp_sheet):
 
     return row
 
-"""
-Capture all data in for a specific chron data row (for csv output)
-Accepts: temp_sheet(obj), row(int), total_vars(int) / Returns: data_row(list)
-"""
+
 def get_chron_data(temp_sheet, row, total_vars):
+    """
+    Capture all data in for a specific chron data row (for csv output)
+    Accepts: temp_sheet(obj), row(int), total_vars(int) / Returns: data_row(list)
+    """
     data_row = []
     missing_val_list = ['none', 'na', '', '-']
     for i in range(0, total_vars):
@@ -909,159 +1051,5 @@ def get_chron_data(temp_sheet, row, total_vars):
     return data_row
 
 
-"""
-PARSER
-"""
-
-
-def parser():
-
-    excel_files = []
-
-    # Ask user if they want to run the Chronology sheets or flatten the JSON files.
-    # This is an all or nothing choice
-    # need_response = True
-    # while need_response:
-    #     chron_run = input("Run Chronology? (y/n)\n")
-    #     if chron_run == 'y' or 'n':
-    #         flat_run = input("Flatten JSON? (y/n)\n")
-    #         if flat_run == 'y' or 'n':
-    #             need_response = False
-
-    # For testing, assume we don't want to run these to make things easier for now.
-    chron_run = 'y'
-    flat_run = 'n'
-
-    # Display a dialog box that let's the user browse for the directory with all their excel files.
-    # root = tkinter.Tk()
-    # root.withdraw()
-    # currdir = os.getcwd()
-    # tempdir = tkinter.filedialog.askdirectory(parent=root, initialdir='/Users/chrisheiser1/Dropbox/GeoChronR/', title='Please select a directory')
-
-    # if len(tempdir) > 0:
-    #     print("Directory: " + tempdir)
-    # os.chdir(tempdir)
-    # os.chdir('/Users/chrisheiser1/Dropbox/GeoChronR/chronologiesToBeFormatted/')
-    os.chdir('/Users/chrisheiser1/Desktop/')
-
-    # Add all excel files from user-specified directory, or from current directory
-    # Puts all file names in a list we iterate over
-    for file in os.listdir():
-        if file.endswith(".xls") or file.endswith(".xlsx"):
-            excel_files.append(file)
-
-    # Loop over all the lines (filenames) that are in the chosen directory
-    print("Processing files: ")
-    for current_file in excel_files:
-
-        datasheetNameList = []
-        chronsheetNameList = []
-        chron_combine = []
-        data_combine = []
-        finalDict = OrderedDict()
-
-        # File name without extension
-        name = os.path.splitext(current_file)[0]
-        print(name)
-
-        # For our current excel workbook, set each worksheet to a variable
-        # Set worksheet variables dynamically, based on the worksheet name
-        workbook = xlrd.open_workbook(current_file)
-
-        ## Most common sheets. If find sheet with matching name, set to variable
-        for sheet in workbook.sheet_names():
-
-            if 'Metadata' in sheet:
-                metadata = workbook.sheet_by_name(sheet)
-                metadata_str = 'Metadata'
-            elif 'Chronology' in sheet:
-                chronsheetNameList.append(sheet)
-            elif 'Data' in sheet:
-                datasheetNameList.append(sheet)
-
-                # These sheets exist, but are not being used so far
-                # elif new_name == 'ProxyList':
-                #     proxyList = workbook.sheet_by_index(workbook.sheet_names().index('ProxyList'))
-                #     proxyList_str = 'ProxyList'
-                # elif sheet == 'About':
-                #     about = workbook.sheet_by_index(workbook.sheet_names().index('About'))
-                #     about_str = 'About'
-
-        ###########################
-        ## METADATA WORKSHEETS   ##
-        ###########################
-
-        # Run the method for adding metadata info to finalDict
-        cells_down_metadata(workbook, metadata_str, 0, 0, finalDict)
-
-        ###########################
-        ##   DATA WORKSHEETS     ##
-        ###########################
-
-        # Loop over the data sheets we know exist
-        for sheet_str in datasheetNameList:
-            sheet_str = cells_down_datasheets(name, workbook, sheet_str, 2, 0)
-            data_combine.append(sheet_str)
-
-        # Add measurements to the final dictionary
-        finalDict['paleoData'] = data_combine
-
-        ###########################
-        ## CHRONOLOGY WORKSHEETS ##
-        ###########################
-
-        chron_dict = OrderedDict()
-
-        # Check if the user opted to run the chronology sheet
-        if chron_run == 'y':
-            for sheet_str in chronsheetNameList:
-                temp_sheet = workbook.sheet_by_name(sheet_str)
-                chron_dict['filename'] = str(name) + '-' + str(sheet_str) + '.csv'
-
-                # Create a dictionary that has a list of all the columns in the sheet
-                start_row = traverse_to_chron_var(temp_sheet)
-                columns_list_chron = get_chron_var(temp_sheet, start_row)
-                chron_dict['columns'] = columns_list_chron
-                chron_combine.append(chron_dict)
-
-            # Add chronology into the final dictionary
-            finalDict['chronData'] = chron_combine
-
-
-        ############################
-        ## FILE NAMING AND OUTPUT ##
-        ############################
-
-        # Creates the directory 'output' if it does not already exist
-        if not os.path.exists('output/' + str(name)):
-            os.makedirs('output/' + str(name))
-
-        # CSV - DATA
-        for sheet_str in datasheetNameList:
-            output_csv_datasheet(workbook, sheet_str, name)
-        del datasheetNameList[:]
-
-        # CSV - CHRONOLOGY
-        if chron_run == 'y':
-            for sheet_str in chronsheetNameList:
-                output_csv_chronology(workbook, sheet_str, name)
-
-        # JSON LD
-        new_file_name_jsonld = str(name) + '/' + str(name) + '.lipd'
-        file_jsonld = open('output/' + new_file_name_jsonld, 'w')
-        file_jsonld = open('output/' + new_file_name_jsonld, 'r+')
-
-        # Write finalDict to json-ld file with dump. Dump outputs a readable json hierarchy
-        json.dump(finalDict, file_jsonld, indent=4)
-
-        if flat_run == 'y':
-            # Flatten the JSON LD file, and output it to its own file
-            flattened_file = flatten.run(finalDict)
-            new_file_flat_json = str(name) + '/' + str(name) + '_flat.lipd'
-            file_flat_jsonld = open('output/' + new_file_flat_json, 'w')
-            file_flat_jsonld = open('output/' + new_file_flat_json, 'r+')
-            json.dump(flattened_file, file_flat_jsonld, indent=0)
-            # validate_flat = validator_test.run('output/' + new_file_flat_json)
-
-
-parser()
+if __name__ == '__main__':
+    main()

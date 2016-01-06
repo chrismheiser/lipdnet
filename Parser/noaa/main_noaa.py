@@ -4,21 +4,10 @@ import json
 
 __author__ = 'Chris Heiser'
 
-"""
-PURPOSE: Convert a .lpd file (specifically the jsonld JSON data) into a NOAA formatted txt file.
-
-CHANGELOG
-Version 1.0 / 12.09.2015 / Chris
-
-Input: .lpd file (Zip containing a Bag)
-Output: NOAA formatted .txt file
-
-"""
-
 
 def main():
-    # Enter user-chosen directory path (i.e. '/Users/johnscott/lpd_library/')
-    dir_root = 'ENTER_FILE_PATH_HERE'
+    # Enter user-chosen directory path
+    dir_root = 'ENTER_DIRECTORY_PATH_HERE'
     os.chdir(dir_root)
 
     # Run lpd_noaa or noaa_lpd ?
