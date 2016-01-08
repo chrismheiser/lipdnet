@@ -1,23 +1,23 @@
 import os
+import tempfile
 
 __author__ = 'Chris Heiser'
 
-"""
-PURPOSE:
 
-CHANGELOG
-Version 1.0 / 12.09.2015 / Chris
+def create_tmp_dir():
+    """
+    Creates tmp working directory somewhere in OS.
+    :return: (str) Path to tmp directory
+    """
 
-Input:
-Output:
-
-"""
+    path_tmp = tempfile.mkdtemp()
+    # os.makedirs(os.path.join(path, 'tmp'), exist_ok=True)
+    return path_tmp
 
 
 def list_files(x):
     """
     Lists file(s) in given path of the X type.
-    :param path_root: (str or list) Traverse current path and find all files of X type.
     :param x: (str) File extension that we are interested in.
     :return: (list of str) File name(s) to be worked on
     """

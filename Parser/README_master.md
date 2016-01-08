@@ -17,6 +17,9 @@ Overview
 ###### LPD DOI Resolver
 >Uses Digital Object Identifier (DOI) name to fetch the most current online data for your record and updates your local copy.
 
+##### Modules
+>Internal set of modules used for miscellaneous functions throughout each program. Keep the modules directory intact for uninterrupted use. 
+
 
 Installation
 ------
@@ -24,16 +27,6 @@ These programs, external modules, and libraries were all tested and built with P
 
 There is not a dedicated installer package currently.
 
-Modules
-------
-An internal set of modules is used for miscellaneous functions that are used throughout each program. For this reason, keep the modules directory intact for uninterrupted use. 
-```
-modules
-  | bag.py
-  | directory.py
-  | loggers.py
-  | zips.py
-```
 
 External Packages
 ------

@@ -35,6 +35,8 @@ def main():
 
     # Compile list of excel files (both types)
     f_list = list_files('.xls') + list_files('.xlsx')
+    # Create a temporary folder
+
 
     # Run once for each file
     print("Processing files: ")

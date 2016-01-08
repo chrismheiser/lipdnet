@@ -1,28 +1,8 @@
 import zipfile
 import shutil
-import tempfile
+from geoChronR.Parser.modules.directory import create_tmp_dir
 
 __author__ = 'Chris Heiser'
-
-"""
-PURPOSE: Functions related to zipping and unzipping .lpd (or other) files. Also responsible for making tmp directory to
-use as a temporary workspace while each file is being processed.
-
-CHANGELOG
-Version 1.0 / 12.09.2015 / Chris
-
-"""
-
-
-def create_tmp_dir():
-    """
-    Creates tmp working directory somewhere in OS.
-    :return: (str) Path to tmp directory
-    """
-
-    path_tmp = tempfile.mkdtemp()
-    # os.makedirs(os.path.join(path, 'tmp'), exist_ok=True)
-    return path_tmp
 
 
 def re_zip(path_tmp, name, name_ext):

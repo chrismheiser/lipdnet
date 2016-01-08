@@ -3,15 +3,6 @@ import datetime
 
 __author__ = 'Chris Heiser'
 
-"""
-PURPOSE: Functions that log errors to text files or modify changelog files so future users know the history of the file.
-
-CHANGELOG
-Version 1.0 / 12.09.2015 / Chris
-
-
-"""
-
 
 def update_changelog():
     """

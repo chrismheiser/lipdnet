@@ -2,17 +2,6 @@ import bagit
 
 __author__ = 'Chris Heiser'
 
-"""
-PURPOSE: All functions related to the Bagit module.
-
-CHANGELOG
-Version 1.0 / 12.09.2015 / Chris
-
-Input:
-Output:
-
-"""
-
 
 def create_bag(path_bag):
     """
