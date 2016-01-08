@@ -1,4 +1,5 @@
 from geoChronR.Parser.modules.zips import *
+from geoChronR.Parser.modules.directory import *
 from geoChronR.Parser.noaa.lpd_noaa import *
 import json
 
@@ -71,7 +72,7 @@ def process_lpd(name, dir_tmp):
     # Open file and execute conversion script
     with open(os.path.join(dir_data, name + '.jsonld'), 'r+') as jld_file:
         jld_data = json.load(jld_file)
-        NOAA(dir_root, name, jld_data).start()
+        NOAA(dir_root, name, jld_data).main()
 
     # except ValueError:
     #     txt_log(dir_root, 'quarantine.txt', name, "Invalid Unicode characters. Unable to load file.")

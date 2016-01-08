@@ -2,7 +2,7 @@
 
 NOAA Converter
 ------
-Convert between NOAA and LiPD file formats. NOAA to LiPD, and LiPD to NOAA.
+Convert between NOAA and LiPD file formats. NOAA to LiPD, and LiPD to NOAA. User will be prompted to choose which conversion to execute.
 
 Overview
 ------

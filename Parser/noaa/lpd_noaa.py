@@ -239,7 +239,7 @@ class NOAA(object):
 
         return d
 
-    def start(self):
+    def main(self):
         """
         Load in the template file, and run through the parser
         :return:

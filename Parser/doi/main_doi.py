@@ -103,7 +103,8 @@ def process_lpd(name, path_tmp):
     with open(os.path.join(dir_data, name + '.jsonld'), 'r') as jld_file:
         jld_data = json.load(jld_file)
 
-    DOIResolver(dir_root, name, jld_data).start()
+    # IS THIS EVEN RETURNING THE UPDATED JSON ??
+    jld_data = DOIResolver(dir_root, name, jld_data).main()
 
     # Open the jld file and overwrite the contents with the new data.
     with open(os.path.join(dir_data, name + '.jsonld'), 'w+') as jld_file:

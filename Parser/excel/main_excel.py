@@ -1,9 +1,11 @@
 # from tkinter import filedialog
 # import tkinter
 import xlrd
+import logging
 
-from flattener import flatten
-from doi_resolver import DOIResolver
+from geoChronR.Parser.under_construction.flattener.flatten import *
+from geoChronR.Parser.doi.doi_resolver import *
+from geoChronR.Parser.modules.directory import *
 
 from collections import OrderedDict
 import csv
@@ -11,15 +13,11 @@ import json
 import os
 import copy
 
-"""
-Determine if multiple chronologies will be combined into one sheet, or separated with one sheet per location
-Reformat based on new context file. Match item names and output structure
-"""
 
 def main():
 
     dir_root = 'ENTER_DIRECTORY_PATH_HERE'
-    excel_files = []
+    os.chdir(dir_root)
 
     # Ask user if they want to run the Chronology sheets or flatten the JSON files.
     # This is an all or nothing choice
@@ -32,94 +30,60 @@ def main():
     #             need_response = False
 
     # For testing, assume we don't want to run these to make things easier for now.
-    chron_run = 'y'
+    chron_run = 'n'
     flat_run = 'n'
 
-    # Display a dialog box that let's the user browse for the directory with all their excel files.
-    # root = tkinter.Tk()
-    # root.withdraw()
-    # currdir = os.getcwd()
-    # tempdir = tkinter.filedialog.askdirectory(parent=root, initialdir='/Users/chrisheiser1/Dropbox/GeoChronR/', title='Please select a directory')
+    # Compile list of excel files (both types)
+    f_list = list_files('.xls') + list_files('.xlsx')
 
-    # if len(tempdir) > 0:
-    #     print("Directory: " + tempdir)
-    # os.chdir(tempdir)
-    # os.chdir('/Users/chrisheiser1/Dropbox/GeoChronR/chronologiesToBeFormatted/')
-    os.chdir(dir_root)
-
-    # Add all excel files from user-specified directory, or from current directory
-    # Puts all file names in a list we iterate over
-    for file in os.listdir():
-        if file.endswith(".xls") or file.endswith(".xlsx"):
-            excel_files.append(file)
-
-    # Loop over all the lines (filenames) that are in the chosen directory
+    # Run once for each file
     print("Processing files: ")
-    for current_file in excel_files:
+    for filename_ext in f_list:
 
-        datasheetNameList = []
-        chronsheetNameList = []
+        data_sheets = []
+        chron_sheets = []
         chron_combine = []
         data_combine = []
         finalDict = OrderedDict()
 
         # File name without extension
-        name = os.path.splitext(current_file)[0]
-        print(name)
+        filename = os.path.splitext(filename_ext)[0]
+        print(filename)
 
-        # For our current excel workbook, set each worksheet to a variable
-        # Set worksheet variables dynamically, based on the worksheet name
-        workbook = xlrd.open_workbook(current_file)
+        # Open excel workbook with filename
+        workbook = xlrd.open_workbook(filename_ext)
 
-        ## Most common sheets. If find sheet with matching name, set to variable
+        # Check what worksheets are available, so we know how to proceed.
         for sheet in workbook.sheet_names():
-
             if 'Metadata' in sheet:
                 metadata = workbook.sheet_by_name(sheet)
                 metadata_str = 'Metadata'
             elif 'Chronology' in sheet:
-                chronsheetNameList.append(sheet)
+                chron_sheets.append(sheet)
             elif 'Data' in sheet:
-                datasheetNameList.append(sheet)
+                data_sheets.append(sheet)
 
-                # These sheets exist, but are not being used so far
-                # elif new_name == 'ProxyList':
-                #     proxyList = workbook.sheet_by_index(workbook.sheet_names().index('ProxyList'))
-                #     proxyList_str = 'ProxyList'
-                # elif sheet == 'About':
-                #     about = workbook.sheet_by_index(workbook.sheet_names().index('About'))
-                #     about_str = 'About'
+        # METADATA WORKSHEETS
+        # Parse Metadata sheet and add to output dictionary
+        if metadata_str:
+            cells_down_metadata(workbook, metadata_str, 0, 0, finalDict)
 
-        ###########################
-        ## METADATA WORKSHEETS   ##
-        ###########################
-
-        # Run the method for adding metadata info to finalDict
-        cells_down_metadata(workbook, metadata_str, 0, 0, finalDict)
-
-        ###########################
-        ##   DATA WORKSHEETS     ##
-        ###########################
-
-        # Loop over the data sheets we know exist
-        for sheet_str in datasheetNameList:
-            sheet_str = cells_down_datasheets(name, workbook, sheet_str, 2, 0)
+        # DATA WORKSHEETS
+        for sheet_str in data_sheets:
+            # Parse each Data sheet. Combine into one dictionary
+            sheet_str = cells_down_datasheets(filename, workbook, sheet_str, 2, 0)
             data_combine.append(sheet_str)
 
-        # Add measurements to the final dictionary
+        # Add data dictionary to output dictionary
         finalDict['paleoData'] = data_combine
 
-        ###########################
-        ## CHRONOLOGY WORKSHEETS ##
-        ###########################
-
+        # CHRONOLOGY WORKSHEETS
         chron_dict = OrderedDict()
-
-        # Check if the user opted to run the chronology sheet
         if chron_run == 'y':
-            for sheet_str in chronsheetNameList:
+            for sheet_str in chron_sheets:
+                # Parse each chronology sheet. Combine into one dictionary
                 temp_sheet = workbook.sheet_by_name(sheet_str)
-                chron_dict['filename'] = str(name) + '-' + str(sheet_str) + '.csv'
+                chron_dict['filename'] = str(filename) + '-' + str(sheet_str) + '.csv'
 
                 # Create a dictionary that has a list of all the columns in the sheet
                 start_row = traverse_to_chron_var(temp_sheet)
@@ -127,48 +91,53 @@ def main():
                 chron_dict['columns'] = columns_list_chron
                 chron_combine.append(chron_dict)
 
-            # Add chronology into the final dictionary
+            # Add chronology dictionary to output dictionary
             finalDict['chronData'] = chron_combine
 
-
-        ############################
-        ## FILE NAMING AND OUTPUT ##
-        ############################
-
+        # FILE NAMING AND OUTPUT
         # Creates the directory 'output' if it does not already exist
-        if not os.path.exists('output/' + str(name)):
-            os.makedirs('output/' + str(name))
+        if not os.path.exists('output/' + str(filename)):
+            os.makedirs('output/' + str(filename))
 
         # CSV - DATA
-        for sheet_str in datasheetNameList:
-            output_csv_datasheet(workbook, sheet_str, name)
-        del datasheetNameList[:]
+        for sheet_str in data_sheets:
+            output_csv_datasheet(workbook, sheet_str, filename)
+        del data_sheets[:]
 
         # CSV - CHRONOLOGY
         if chron_run == 'y':
-            for sheet_str in chronsheetNameList:
-                output_csv_chronology(workbook, sheet_str, name)
+            for sheet_str in chron_sheets:
+                output_csv_chronology(workbook, sheet_str, filename)
 
         # JSON LD
-        new_file_name_jsonld = str(name) + '/' + str(name) + '.lipd'
+        new_file_name_jsonld = str(filename) + '/' + str(filename) + '.lipd'
         file_jsonld = open('output/' + new_file_name_jsonld, 'w')
         file_jsonld = open('output/' + new_file_name_jsonld, 'r+')
 
-        # Write finalDict to json-ld file with dump. Dump outputs a readable json hierarchy
+        # Dump finalDict to a json file.
+        ## THIS WOULD BE A GOOD SPOT TO CALL THE DOI RESOLVER! NEED A ROOT FOLDER TO PASS
+        finalDict = DOIResolver(dir_root,filename,finalDict).main()
+
         json.dump(finalDict, file_jsonld, indent=4)
 
-        if flat_run == 'y':
+        # if flat_run == 'y':
             # Flatten the JSON LD file, and output it to its own file
-            flattened_file = flatten.run(finalDict)
-            new_file_flat_json = str(name) + '/' + str(name) + '_flat.lipd'
-            file_flat_jsonld = open('output/' + new_file_flat_json, 'w')
-            file_flat_jsonld = open('output/' + new_file_flat_json, 'r+')
-            json.dump(flattened_file, file_flat_jsonld, indent=0)
+            # flattened_file = flatten.run(finalDict)
+            # new_file_flat_json = str(filename) + '/' + str(filename) + '_flat.lipd'
+            # file_flat_jsonld = open('output/' + new_file_flat_json, 'w')
+            # file_flat_jsonld = open('output/' + new_file_flat_json, 'r+')
+            # json.dump(flattened_file, file_flat_jsonld, indent=0)
             # validate_flat = validator_test.run('output/' + new_file_flat_json)
 
-# Use this to output data columns to a csv file
-# Accepts: Workbook(Obj), Sheet(str), name(str) / Returns: None
+
 def output_csv_datasheet(workbook, sheet, name):
+    """
+    Output data columns to a csv file
+    :param workbook: (obj)
+    :param sheet: (str)
+    :param name: (str)
+    :return: (none)
+    """
     temp_sheet = workbook.sheet_by_name(sheet)
     csv_folder_and_name = str(name) + '/' + str(name) + '-' + str(sheet) + '.csv'
     csv_full_path = 'output/' + csv_folder_and_name
@@ -220,15 +189,19 @@ def output_csv_datasheet(workbook, sheet, name):
     return
 
 
-# Output the data columns from chronology sheet to csv file
-# Accepts: Workbook(obj), sheet(str), name(str) / Returns: None
 def output_csv_chronology(workbook, sheet, name):
+    """
+    Output the data columns from chronology sheet to csv file
+    :param workbook: (obj)
+    :param sheet: (str)
+    :param name: (str)
+    :return: (none)
+    """
     temp_sheet = workbook.sheet_by_name(sheet)
     csv_folder_and_name = str(name) + '/' + str(name) + '-' + str(sheet) + '.csv'
     csv_full_path = 'output/' + csv_folder_and_name
     file_csv = open(csv_full_path, 'w', newline='')
     w = csv.writer(file_csv)
-
     try:
         total_vars = count_chron_variables(temp_sheet)
         row = traverse_to_chron_data(temp_sheet)
@@ -239,28 +212,22 @@ def output_csv_chronology(workbook, sheet, name):
             row += 1
 
     except IndexError:
-        pass
+        logging.exception("IndexError: output_csv_chronology()")
 
     file_csv.close()
     return
 
 
-"""
-GEO DATA
-"""
+# GEO DATA METHODS
 
-"""
-# GeoJSON Polygon. (One matching pair, and two or more unique pairs)
-def geometry_polygon(lat, lon):
-    polygon_dict = OrderedDict()
-
-    return polygon_dict
-"""
-
-# GeoJSON Linestring. (Two or more unique pairs)
 def geometry_linestring(lat, lon):
-
-    linestring_dict = OrderedDict()
+    """
+    GeoJSON Linestring. Latitude and Longitude have 2 values each.
+    :param lat: (list) Latitude values
+    :param lon: (list) Longitude values
+    :return: (dict)
+    """
+    d = OrderedDict()
     coordinates = []
     temp = [None, None]
 
@@ -268,7 +235,7 @@ def geometry_linestring(lat, lon):
     if lat[0] == lat[1] and lon[0] == lon[1]:
         lat.pop()
         lon.pop()
-        linestring_dict = geometry_point(lat, lon)
+        d = geometry_point(lat, lon)
 
     else:
         # Creates coordinates list
@@ -279,16 +246,18 @@ def geometry_linestring(lat, lon):
                 coordinates.append(copy.copy(temp))
 
         # Create geometry block
-        linestring_dict['type'] = 'Linestring'
-        linestring_dict['coordinates'] = coordinates
+        d['type'] = 'Linestring'
+        d['coordinates'] = coordinates
+    return d
 
-    return linestring_dict
 
-"""
-GeoJSON Point. (One unique pair)
-"""
 def geometry_point(lat, lon):
-
+    """
+    GeoJSON point. Latitude and Longitude only have one value each
+    :param lat: (list) Latitude values
+    :param lon: (list) Longitude values
+    :return: (dict)
+    """
     coordinates = []
     point_dict = OrderedDict()
     for index, point in enumerate(lat):
@@ -299,11 +268,13 @@ def geometry_point(lat, lon):
     return point_dict
 
 
-"""
-Take in lists of lat and lon coordinates, and determine what geometry to create
-"""
 def compile_geometry(lat, lon):
-
+    """
+    Take in lists of lat and lon coordinates, and determine what geometry to create
+    :param lat: (list) Latitude values
+    :param lon: (list) Longitude values
+    :return: (dict)
+    """
     # Sort lat an lon in numerical order
     lat.sort()
     lon.sort()
@@ -326,83 +297,109 @@ def compile_geometry(lat, lon):
     # Too many points, or no points
     else:
         geo_dict = {}
+        logging.exception("Error: compile_geometry()")
         print("Compile Geometry Error")
 
     return geo_dict
 
-"""
-Compile top-level GEO dictionary.
-"""
-def compile_geo(dict_in):
-    dict_out = OrderedDict()
-    dict_out['type'] = 'Feature'
-    geometry = compile_geometry([dict_in['latMin'], dict_in['latMax']], [dict_in['lonMin'], dict_in['lonMax']])
-    dict_out['geometry'] = geometry
-    dict_out['properties'] = {'siteName': dict_in['siteName'], 'elevation': {'value': dict_in['elevation'], 'unit': 'm'}}
 
-    return dict_out
+def compile_geo(d):
+    """
+    Compile top-level Geography dictionary.
+    :param d:
+    :return:
+    """
+    d2 = OrderedDict()
+    d2['type'] = 'Feature'
+    geometry = compile_geometry([d['latMin'], d['latMax']], [d['lonMin'], d['lonMax']])
+    d2['geometry'] = geometry
+    d2['properties'] = {'siteName': d['siteName'], 'elevation': {'value': d['elevation'], 'unit': 'm'}}
+    return d2
 
-"""
-MISC HELPER METHODS
-"""
 
-def compile_temp(dict_in, key, value):
+# MISC HELPER METHODS
+
+
+def compile_temp(d, key, value):
+    """
+
+    :param d: (dict)
+    :param key: (?)
+    :param value: (?)
+    :return: (dict)
+    """
     if single_item(value):
-        dict_in[key] = value[0]
+        d[key] = value[0]
     else:
-        dict_in[key] = value
-
-    return dict_in
-
-
-def compile_fund(d_in):
-    list_out = []
-    for counter, item in enumerate(d_in['agency']):
-        list_out.append({'fundingAgency': d_in['agency'][counter], 'fundingGrant': d_in['grant'][counter]})
-    return list_out
+        d[key] = value
+    return d
 
 
-"""
-Compile the pub section of the metadata sheet
-"""
-def compile_pub(dict_in):
-    dict_out = OrderedDict()
-    dict_out['author'] = dict_in['pubAuthor']
-    dict_out['title'] = dict_in['pubTitle']
-    dict_out['journal'] = dict_in['pubJournal']
-    dict_out['pubYear'] = dict_in['pubYear']
-    dict_out['volume'] = dict_in['pubVolume']
-    dict_out['issue'] = dict_in['pubIssue']
-    dict_out['pages'] = dict_in['pubPages']
-    dict_out['doi'] = dict_in['pubDOI']
-    dict_out['abstract'] = dict_in['pubAbstract']
-    return dict_out
+def compile_fund(d):
+    """
+    Compile list of funding data
+    :param d: (dict)
+    :return: (list of dict) One dictionary per entry
+    """
+    l = []
+    for counter, item in enumerate(d['agency']):
+        l.append({'fundingAgency': d['agency'][counter], 'fundingGrant': d['grant'][counter]})
+    return l
 
-"""
-Check an array to see if it is a single item or not
-Accepts: List / Returns: Boolean
-"""
-def single_item(array):
-    if len(array) == 1:
+
+def compile_pub(d):
+    """
+    Compile the pub section of the metadata sheet. Only items that we want.
+    :param d: (dict)
+    :return: (dict)
+    """
+    d2 = OrderedDict()
+    d2['author'] = d['pubAuthor']
+    d2['title'] = d['pubTitle']
+    d2['journal'] = d['pubJournal']
+    d2['pubYear'] = d['pubYear']
+    d2['volume'] = d['pubVolume']
+    d2['issue'] = d['pubIssue']
+    d2['pages'] = d['pubPages']
+    d2['doi'] = d['pubDOI']
+    d2['abstract'] = d['pubAbstract']
+    return d2
+
+
+def single_item(arr):
+    """
+    Check an array to see if it is a single item or not
+    :param arr: (list)
+    :return: (bool)
+    """
+    if len(arr) == 1:
         return True
     return False
 
 
-# Do cell_check to see if there is any content to retrieve
-# Returns Boolean (true: content, false: empty)
 def cell_occupied(temp_sheet, row, col):
+    """
+    Check if there is content in this cell
+    :param temp_sheet: (obj)
+    :param row: (int)
+    :param col: (int)
+    :return: (bool)
+    """
     try:
         if temp_sheet.cell_value(row, col) != ("N/A" and " " and xlrd.empty_cell and ""):
             return True
-        return False
     except IndexError:
-        pass
+        logging.exception("IndexError: cell_occupied()")
+    return False
 
 
-# Convert formal titles to camelcase json_ld text that matches our context file
-# Keep a growing list of all titles that are being used in the json_ld context
-# Accepts: String / Returns: String
 def name_to_jsonld(title_in):
+    """
+    Convert formal titles to camelcase json_ld text that matches our context file
+    Keep a growing list of all titles that are being used in the json_ld context
+    :param title_in: (str)
+    :return: (str)
+    """
 
     title_in = title_in.lower()
 
@@ -515,9 +512,13 @@ def name_to_jsonld(title_in):
     return title_out
 
 
-# Find out what type of values are stored in a specific column in data sheet
-# Accepts: sheet(obj), colListNum(int) / Returns: string
 def get_data_type(temp_sheet, colListNum):
+    """
+    Find out what type of values are stored in a specific column in data sheet (best guess)
+    :param temp_sheet: (obj)
+    :param colListNum: (int)
+    :return: (str)
+    """
     short = traverse_short_row_str(temp_sheet)
     mv_cell = traverse_missing_value(temp_sheet)
     row = var_headers_check(temp_sheet, mv_cell, short)
@@ -539,9 +540,12 @@ def get_data_type(temp_sheet, colListNum):
     return str_type
 
 
-# Tells you what data type you have, and outputs it in string form
-# Accepts: data / Returns: string
 def instance_str(cell):
+    """
+    Tells you what data type you have, and outputs it in string form
+    :param cell: (any)
+    :return: (str)
+    """
     if isinstance(cell, str):
         return 'str'
     elif isinstance(cell, int):
@@ -551,56 +555,70 @@ def instance_str(cell):
     else:
         return 'unknown'
 
-        # Look for any missing values in the data_list. If you find any, replace with 'NaN'
 
-
-# Accepts: data_list(list), missing_val(str) / Returns: data_list(list)
 def replace_missing_vals(cell_entry, missing_val):
-    missing_val_list = ['none', 'na', '', '-', 'n/a', 'N/A', 'N/a']
-    if missing_val not in missing_val_list:
+    """
+    The missing value standard is "NaN". If there are other missing values present, we need to swap them.
+    :param cell_entry: (str) Contents of target cell
+    :param missing_val: (str)
+    :return: (str)
+    """
+    missing_val_list = ['none', 'na', '', '-', 'n/a']
+    if missing_val.lower() not in missing_val_list:
         missing_val_list.append(missing_val)
-    if isinstance(cell_entry, str):
-        cell_entry = cell_entry.lower()
-    if cell_entry in missing_val_list:
-        cell_entry = 'NaN'
+    try:
+        if cell_entry.lower() in missing_val_list:
+            cell_entry = 'NaN'
+    except TypeError:
+        logging.exception("TypeError: replace_missing_vals()")
     return cell_entry
 
 
-# Extract units from parenthesis in a string. i.e. "elevation (meters)"
-# Accepts: string / Returns: string
 def extract_units(string_in):
+    """
+    Extract units from parenthesis in a string. i.e. "elevation (meters)"
+    :param string_in: (str)
+    :return: (str)
+    """
     start = '('
     stop = ')'
     return string_in[string_in.index(start) + 1:string_in.index(stop)]
 
 
-# Extract the short name from a string that also has units.
-# Accepts: string / Returns: string
 def extract_short(string_in):
+    """
+    Extract the short name from a string that also has units.
+    :param string_in: (str)
+    :return: (str)
+    """
     stop = '('
     return string_in[:string_in.index(stop)]
 
 
-"""
-DATA WORKSHEET HELPER METHODS
-"""
+# DATA WORKSHEET HELPER METHODS
 
 
-# Starts at the first short name, and counts how many variables are present
-# Accepts: temp_sheet(obj), first_short(int) / Returns: vars(int)
 def count_vars(temp_sheet, first_short):
-    vars = 0
-
+    """
+    Starts at the first short name, and counts how many variables are present
+    :param temp_sheet: (obj)
+    :param first_short: (int)
+    :return: (int) Number of variables
+    """
+    count = 0
     # If we hit a blank cell, or the MV / Data cells, then stop
     while cell_occupied(temp_sheet, first_short, 0) and temp_sheet.cell_value(first_short, 0) != ("Missing" and "Data"):
-        vars += 1
+        count += 1
         first_short += 1
-    return vars
+    return count
 
 
-# Look for what missing value is being used.
-# Accepts: None / Returns: Missing value (str)
 def get_missing_val(temp_sheet):
+    """
+    Look for what missing value is being used.
+    :param temp_sheet: (obj)
+    :return: (str) Missing value
+    """
     row = traverse_missing_value(temp_sheet)
     # There are two blank cells to check for a missing value
     empty = ''
@@ -617,9 +635,12 @@ def get_missing_val(temp_sheet):
     return empty
 
 
-# Traverse to short name cell in data sheet. Get the row number.
-# Accepts: temp_sheet(obj) / Returns: current_row(int)
 def traverse_short_row_int(temp_sheet):
+    """
+    Traverse to short name cell in data sheet. Get the row number.
+    :param temp_sheet: (obj)
+    :return: (int or none) Current row
+    """
     for i in range(0, temp_sheet.nrows):
         # We need to keep the first variable name as a reference.
         # Then loop down past "Missing Value" to see if there is a matching variable header
@@ -630,9 +651,12 @@ def traverse_short_row_int(temp_sheet):
     return
 
 
-# Traverse to short name cell in data sheet
-# Accepts: temp_sheet(obj) / Returns: first_var(str)
 def traverse_short_row_str(temp_sheet):
+    """
+    Traverse to short name cell in data sheet
+    :param temp_sheet: (obj)
+    :return: (str or none) Name of first variable, if we find one
+    """
     for i in range(0, temp_sheet.nrows):
 
         # We need to keep the first variable name as a reference.
@@ -645,12 +669,14 @@ def traverse_short_row_str(temp_sheet):
     return
 
 
-# Traverse to missing value cell in data sheet
-# Accepts: temp_sheet(obj) / Returns: row (int)
 def traverse_missing_value(temp_sheet):
+    """
+    Traverse to missing value cell in data sheet
+    :param temp_sheet: (obj)
+    :return: (int or none) Only returns int if it finds a missing value
+    """
     # Traverse down to the "Missing Value" cell. This gets us near the data we want.
     for i in range(0, temp_sheet.nrows):
-
         # Loop down until you hit the "Missing Value" cell, and then move down one more row
         if 'Missing' in temp_sheet.cell_value(i, 0):
             missing_row_num = i
@@ -658,10 +684,14 @@ def traverse_missing_value(temp_sheet):
     return
 
 
-# Traverse to the first cell that has data
-# If the cell on Col 0 has content, check 5 cells to the right for content also, as a fail-safe
-# Accepts: temp_sheet(obj), var_headers_start(int) / Returns: data_cell_start(int)
 def traverse_headers_to_data(temp_sheet, start_cell):
+    """
+    Traverse to the first cell that has data
+    If the cell on Col 0 has content, check 5 cells to the right for content also. (fail-safe)
+    :param temp_sheet: (obj)
+    :param start_cell: (int) Start of variable headers
+    :return: (int) First cell that contains numeric data
+    """
     # Start at the var_headers row, and try to find the start of the data cells
     # Loop for 5 times. It's unlikely that there are more than 5 blank rows between the var_header row and
     # the start of the data cells. Usually it's 1 or 2 at most.
@@ -670,9 +700,13 @@ def traverse_headers_to_data(temp_sheet, start_cell):
     return start_cell
 
 
-# Traverse from the missing value cell to the first occupied cell
-# Accepts: temp_sheet(obj), start (int) / Returns: start(int)
 def traverse_mv_to_headers(temp_sheet, start):
+    """
+    Traverse from the missing value cell to the first occupied cell
+    :param temp_sheet: (obj)
+    :param start: (int) var_headers start row
+    :return: (int) start cell
+    """
     # Start at the var_headers row, and try to find the start of the data cells
     # Loop for 5 times. It's unlikely that there are more than 5 blank rows between the var_header row and
     # the start of the data cells. Usually it's 1 or 2 at most.
@@ -693,10 +727,15 @@ def traverse_mv_to_headers(temp_sheet, start):
     return start
 
 
-# Check for matching variables first. If match, return var_header cell int.
-# If no match, check the first two rows to see if one is all strings, or if there's some discrepancy
-# Accepts: temp_sheet(obj), var_headers_start(int), ref_first_var(str) / Returns: start_cell(int)
 def var_headers_check(temp_sheet, missing_val_row, ref_first_var):
+    """
+    Check for matching variables first. If match, return var_header cell int.
+    If no match, check the first two rows to see if one is all strings, or if there's some discrepancy
+    :param temp_sheet: (obj)
+    :param missing_val_row: (int)
+    :param ref_first_var: (str)
+    :return: (int) start cell
+    """
     start = traverse_mv_to_headers(temp_sheet, missing_val_row)
     # If we find a match, then Variable headers exist for this file
     if temp_sheet.cell_value(start, 0) == ref_first_var:
@@ -733,9 +772,15 @@ def var_headers_check(temp_sheet, missing_val_row, ref_first_var):
     return traverse_missing_value(temp_sheet) + 1
 
 
-# Traverse all cells in a row. If you find new data in a cell, add it to the list.
-# Outputs a list of cell data for the specified row.
 def cells_right_metadata(workbook, sheet, row, col):
+    """
+    Traverse all cells in a row. If you find new data in a cell, add it to the list.
+    :param workbook: (obj)
+    :param sheet: (str)
+    :param row: (int)
+    :param col: (int)
+    :return: (list) Cell data for a specific row
+    """
     col_loop = 0
     cell_data = []
     temp_sheet = workbook.sheet_by_name(sheet)
@@ -751,9 +796,17 @@ def cells_right_metadata(workbook, sheet, row, col):
     return cell_data
 
 
-# Traverse all cells in a column moving downward. Primarily created for the metadata sheet, but may use elsewhere
-# Check the cell title, and switch it to
 def cells_down_metadata(workbook, sheet, row, col, finalDict):
+    """
+    Traverse all cells in a column moving downward. Primarily created for the metadata sheet, but may use elsewhere.
+    Check the cell title, and switch it to.
+    :param workbook: (obj)
+    :param sheet: (str)
+    :param row: (int)
+    :param col: (int)
+    :param finalDict: (dict)
+    :return: none
+    """
     row_loop = 0
     pub_cases = ['pubDOI', 'pubYear', 'pubAuthor', 'pubJournal', 'pubIssue', 'pubVolume', 'pubTitle', 'pubPages',
                  'pubReportNumber', 'pubAbstract', 'pubAlternateCitation']
@@ -803,16 +856,14 @@ def cells_down_metadata(workbook, sheet, row, col, finalDict):
         row += 1
         row_loop += 1
 
-    ############################
-    ##     DOI RESOLVER       ##
-    ############################
-    """
-    Run the DOI Resolver on the final dictionary. That way, any data we get from the DOI resolver will overwrite
-    what we parser from the file.
-    """
+    # DOI RESOLVER
+    # Run the DOI Resolver on the final dictionary.
+    # Call the DOI Resolver class directly since we already have the json data handy.
+
+    # FIGURE OUT HOW TO HOOK THIS INTO THE DOI CLASS
     funding_temp = compile_fund(funding_temp)
     geo = compile_geo(geo_temp)
-    pub = DOIResolver().run(compile_pub(pub_temp))
+    pub = compile_pub(pub_temp)
 
     finalDict['@context'] = "context.jsonld"
     finalDict['pub'] = pub
@@ -826,8 +877,16 @@ def cells_down_metadata(workbook, sheet, row, col, finalDict):
     return
 
 
-# Returns an attributes dictionary
 def cells_right_datasheets(workbook, sheet, row, col, colListNum):
+    """
+    Collect metadata for one column in the datasheet
+    :param workbook: (obj)
+    :param sheet: (str)
+    :param row: (int)
+    :param col: (int)
+    :param colListNum: (int)
+    :return: (dict) Attributes Dictionary
+    """
     temp_sheet = workbook.sheet_by_name(sheet)
     empty = ["N/A", " ", xlrd.empty_cell, "", "NA"]
 
@@ -887,9 +946,16 @@ def cells_right_datasheets(workbook, sheet, row, col, colListNum):
     return attrDict
 
 
-# Adds all measurement table data to the final dictionary
-# Returns: Dictionary
 def cells_down_datasheets(filename, workbook, sheet, row, col):
+    """
+    Add measurement table data to the final dictionary
+    :param filename: (str)
+    :param workbook: (obj?str?)
+    :param sheet: (str)
+    :param row: (int)
+    :param col: (int)
+    :return: (dict)
+    """
     # Create a dictionary to hold each column as a separate entry
     paleoDataTableDict = OrderedDict()
 
@@ -943,15 +1009,16 @@ def cells_down_datasheets(filename, workbook, sheet, row, col):
     commentList = []
     return paleoDataTableDict
 
-
-"""
-CHRONOLOGY HELPER METHODS
-"""
+# CHRONOLOGY HELPER METHODS
 
 
-# This was the temporary, inconsistent way to get chron data as a whole chunk.
-# Accept: sheet (obj) / Return: dictionary
 def blind_data_capture(temp_sheet):
+    """
+    DEPRECATED
+    This was the temporary, inconsistent way to get chron data as a whole chunk.
+    :param temp_sheet: (obj)
+    :return: (dict)
+    """
     chronology = OrderedDict()
     start_row = traverse_to_chron_var(temp_sheet)
     for row in range(start_row, temp_sheet.nrows):
@@ -964,9 +1031,12 @@ def blind_data_capture(temp_sheet):
     return chronology
 
 
-# Count the number of chron variables:
-# Accepts: temp_sheet(obj) / Returns: total_count(int)
 def count_chron_variables(temp_sheet):
+    """
+    Count the number of chron variables
+    :param temp_sheet: (obj)
+    :return: (int) variable count
+    """
     total_count = 0
     start_row = traverse_to_chron_var(temp_sheet)
     while temp_sheet.cell_value(start_row, 0) != '':
@@ -975,9 +1045,13 @@ def count_chron_variables(temp_sheet):
     return total_count
 
 
-# Capture all the vars in the chron sheet (for json-ld output)
-# Accepts: sheet, start_row(int) / Returns: column data (list of dicts)
 def get_chron_var(temp_sheet, start_row):
+    """
+    Capture all the vars in the chron sheet (for json-ld output)
+    :param temp_sheet: (obj)
+    :param start_row: (int)
+    :return: (list of dict) column data
+    """
     col_dict = OrderedDict()
     out_list = []
     column = 1
@@ -999,9 +1073,12 @@ def get_chron_var(temp_sheet, start_row):
     return out_list
 
 
-# Traverse down to the first row that has chron data
-# Accepts: temp_sheet(obj) / Returns: row(int)
 def traverse_to_chron_data(temp_sheet):
+    """
+    Traverse down to the first row that has chron data
+    :param temp_sheet: (obj)
+    :return: (int) traverse_row
+    """
     traverse_row = traverse_to_chron_var(temp_sheet)
     reference_var = temp_sheet.cell_value(traverse_row, 0)
 
@@ -1022,7 +1099,8 @@ def traverse_to_chron_data(temp_sheet):
 def traverse_to_chron_var(temp_sheet):
     """
     Traverse down to the row that has the first variable
-    Accepts: temp_sheet(obj) / Returns: row (int)
+    :param temp_sheet: (obj)
+    :return: (int)
     """
     row = 0
     while row < temp_sheet.nrows - 1:
@@ -1037,8 +1115,12 @@ def traverse_to_chron_var(temp_sheet):
 def get_chron_data(temp_sheet, row, total_vars):
     """
     Capture all data in for a specific chron data row (for csv output)
-    Accepts: temp_sheet(obj), row(int), total_vars(int) / Returns: data_row(list)
+    :param temp_sheet: (obj)
+    :param row: (int)
+    :param total_vars: (int)
+    :return: (list) data_row
     """
+
     data_row = []
     missing_val_list = ['none', 'na', '', '-']
     for i in range(0, total_vars):
