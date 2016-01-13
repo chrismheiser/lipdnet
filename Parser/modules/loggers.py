@@ -38,3 +38,23 @@ def txt_log(dir_root, filename, quarantine_txt, info):
             print("Debug Log Error")
     os.chdir(org_dir)
     return
+
+
+def txt_log_end(dir_root, quarantine_txt):
+    """
+    At the end of a batch, add a divider line to the quarantine so you know what errors belong to which batch
+    Need this because the quarantine.txt file is a continually growing file.
+    :param dir_root: (str) Directory containing .lpd file(s)
+    :param quarantine_txt: (str) Name of the txt file to be written to
+    :return: None
+    """
+    org_dir = os.getcwd()
+    os.chdir(dir_root)
+    with open(quarantine_txt, 'a+') as f:
+        try:
+            # Write update line
+            f.write("End of Process ------------------------------------\n")
+        except KeyError:
+            print("Debug Log Error")
+    os.chdir(org_dir)
+    return

@@ -154,13 +154,17 @@ def main():
             os.rename(name_ext + '.zip', name + '.lpd')
 
         except:
-            logging.exception("Error opening file.")
+            # PROBLEM OPENING SOME EXCEL FILES WITH XLRD
+            logging.exception("XLRD in MAIN(): Error opening file. - " + name)
 
         # Move back to dir_root for next loop.
         os.chdir(dir_root)
 
         # Cleanup and remove tmp directory
         shutil.rmtree(dir_tmp)
+
+    txt_log_end(dir_root, 'quarantine.txt')
+    return
 
 
 def output_csv_datasheet(workbook, sheet, name):
@@ -382,23 +386,6 @@ def compile_fund(d):
             pass
             # logging.exception("Missing agency/grant entry")
     return l
-
-
-def reorder_pub(d):
-    """
-    Compile the pub section of the metadata sheet. Only items that we want.
-    :param d: (dict)
-    :return: (dict)
-    """
-    d2 = OrderedDict()
-    keys = {'author': 'pubAuthor', 'title': 'pubTitle', 'journal': 'pubJournal', 'pubYear':'pubYear',
-            'volume': 'pubVolume', 'issue': 'pubIssue', 'pages': 'pubPages', 'doi': 'pubDOI', 'abstract':'pubAbstract'}
-    for key in keys.items():
-        try:
-            d2[key] = d[keys[key]]
-        except KeyError:
-            pass
-    return d2
 
 
 def single_item(arr):
@@ -828,6 +815,7 @@ def cells_right_metadata_pub(workbook, sheet, row, col, pub_qty):
         cell_data.append(temp_sheet.cell_value(row, col))
     return cell_data
 
+
 def cells_right_metadata(workbook, sheet, row, col):
     """
     Traverse all cells in a row. If you find new data in a cell, add it to the list.
@@ -913,8 +901,7 @@ def cells_down_metadata(workbook, sheet, row, col, finalDict):
                             for i in range(pub_qty):
                                 pub_temp.append({})
                         for pub in range(pub_qty):
-                            if cell_data[pub] != '':
-                                pub_temp[pub][title_json] = cell_data[pub]
+                            pub_temp[pub][title_json] = cell_data[pub]
 
                     # Funding
                     elif title_json in funding_cases:
@@ -929,15 +916,8 @@ def cells_down_metadata(workbook, sheet, row, col, finalDict):
         row += 1
         row_loop += 1
 
-    # DOI RESOLVER
-    # Run the DOI Resolver on the final dictionary.
-    # Call the DOI Resolver class directly since we already have the json data handy.
-
-    # FIGURE OUT HOW TO HOOK THIS INTO THE DOI CLASS
     funding_temp = compile_fund(funding_temp)
     geo = compile_geo(geo_temp)
-    for idx, pub in enumerate(pub_temp):
-        pub_temp[idx] = reorder_pub(pub)
 
     finalDict['@context'] = "context.jsonld"
     finalDict['pub'] = pub_temp

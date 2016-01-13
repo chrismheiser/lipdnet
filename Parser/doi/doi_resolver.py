@@ -39,22 +39,22 @@ class DOIResolver(object):
         :return: (dict) Updated or original data for jsonld file
         """
 
-        # Retrieve DOI id key-value from the root_dict
-        doi_string, doi_found = self.find_doi(self.root_dict['pub'])
+        for idx, pub in enumerate(self.root_dict['pub']):
+            # Retrieve DOI id key-value from the root_dict
+            doi_string, doi_found = self.find_doi(pub)
 
-        if doi_found:
-            # Empty list for no match, or list of 1+ matching DOI id strings
-            doi_list = self.clean(doi_string)
-            if not doi_list:
-                self.illegal_doi(doi_string)
+            if doi_found:
+                # Empty list for no match, or list of 1+ matching DOI id strings
+                doi_list = self.clean(doi_string)
+                if not doi_list:
+                    self.illegal_doi(doi_string)
+                else:
+                    for doi_id in doi_list:
+                        self.get_data(doi_id)
             else:
-                for doi_id in doi_list:
-                    self.get_data(doi_id)
-        else:
-            # Quarantine the flagged file and log it
-            txt_log(self.dir_root, self.name, "quarantine.txt", "DOI not provided")
-            self.root_dict['pub'][0]['pubDataUrl'] = 'Manually Entered'
-
+                # Quarantine the flagged file and log it
+                txt_log(self.dir_root, self.name, "quarantine.txt", "Publication #" + str(idx) + ": DOI not provided")
+                self.root_dict['pub'][idx]['pubDataUrl'] = 'Manually Entered'
         return self.root_dict
 
     @staticmethod
@@ -229,6 +229,8 @@ class DOIResolver(object):
         try:
             if 'id' in curr_dict:
                 return curr_dict['id'], True
+            elif 'pubDOI' in curr_dict:
+                return curr_dict['pubDOI'], True
             elif isinstance(curr_dict, list):
                 for i in curr_dict:
                     return self.find_doi(i)
