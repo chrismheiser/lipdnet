@@ -19,21 +19,21 @@ def update_changelog():
     return
 
 
-def txt_log(dir_root, txt_file, name, info):
+def txt_log(dir_root, filename, quarantine_txt, info):
     """
     Debug Log. Log names and error of problematic files to a txt file
     :param dir_root: (str) Directory containing .lpd file(s)
-    :param txt_file: (str) Name of the txt file to be written to
-    :param name: (str) Name of the current .lpd file
+    :param quarantine_txt: (str) Name of the txt file to be written to
+    :param filename: (str) Name of the current .lpd file
     :param info: (str) Error description
     :return: None
     """
     org_dir = os.getcwd()
     os.chdir(dir_root)
-    with open(txt_file, 'a+') as f:
+    with open(quarantine_txt, 'a+') as f:
         try:
             # Write update line
-            f.write("File: " + name + "\n" + "Error: " + info + "\n\n")
+            f.write("File: " + filename + "\n" + "Error: " + info + "\n\n")
         except KeyError:
             print("Debug Log Error")
     os.chdir(org_dir)

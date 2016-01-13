@@ -43,17 +43,13 @@ class DOIResolver(object):
         doi_string, doi_found = self.find_doi(self.root_dict['pub'])
 
         if doi_found:
-
             # Empty list for no match, or list of 1+ matching DOI id strings
             doi_list = self.clean(doi_string)
-
             if not doi_list:
                 self.illegal_doi(doi_string)
-
             else:
                 for doi_id in doi_list:
                     self.get_data(doi_id)
-
         else:
             # Quarantine the flagged file and log it
             txt_log(self.dir_root, self.name, "quarantine.txt", "DOI not provided")

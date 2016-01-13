@@ -6,7 +6,21 @@ Convert between NOAA and LiPD file formats. NOAA to LiPD, and LiPD to NOAA. User
 
 Overview
 ------
+###### main_noaa.py
+> Master script that runs the program. Execute this file.
 
+###### lpd_noaa.py
+> Subscript that converts LiPD to NOAA format
+
+###### noaa_lpd.py
+> Subscript that converts NOAA to LiPD format
+
+###### noaa-blank.txt
+> NOAA template file that is used to build NOAA files in lpd_noaa.py
+
+
+How to run
+------
 ###### Input
 ```
 LiPD file (.lpd) or NOAA text (.txt)
@@ -26,24 +40,33 @@ Example:
 Directory Path
 /User/Documents/Antarctica/lpd_files
 ```
+
 Locate "main()" function in the "main_noaa.py" file, and replace dir_root with your directory path.
 
 Before:
+
 ```python
 def main():
-
     # Enter user-chosen directory path
     dir_root = 'ENTER_DIRECTORY_PATH_HERE'
-
 ```
+
 After:
+
 ```python
 def main():
-
     # Enter user-chosen directory path
     dir_root = '/User/Documents/Antarctica/lpd_files'
+```
+
+###### Execution
+
+To run the program, use this command in your command line or terminal.
 
 ```
+python3 /path/to/main_noaa.py
+```
+
 
 Changelog
 ------

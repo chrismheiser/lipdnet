@@ -6,6 +6,8 @@ import logging
 from geoChronR.Parser.under_construction.flattener.flatten import *
 from geoChronR.Parser.doi.doi_resolver import *
 from geoChronR.Parser.modules.directory import *
+from geoChronR.Parser.modules.zips import *
+from geoChronR.Parser.modules.bag import *
 
 from collections import OrderedDict
 import csv
@@ -16,7 +18,7 @@ import copy
 
 def main():
 
-    dir_root = 'ENTER_DIRECTORY_PATH_HERE'
+    dir_root = '/Users/chrisheiser1/Desktop/library_excel/'
     os.chdir(dir_root)
 
     # Ask user if they want to run the Chronology sheets or flatten the JSON files.
@@ -35,12 +37,23 @@ def main():
 
     # Compile list of excel files (both types)
     f_list = list_files('.xls') + list_files('.xlsx')
-    # Create a temporary folder
-
 
     # Run once for each file
     print("Processing files: ")
-    for filename_ext in f_list:
+    for name_ext in f_list:
+
+        # Filename without extension
+        name = os.path.splitext(name_ext)[0]
+        print(name)
+
+        # Create a temporary folder and set paths
+        dir_output = os.path.join(dir_root, 'lpd')
+        dir_tmp = create_tmp_dir()
+        dir_bag = os.path.join(dir_tmp, name)
+        dir_data = os.path.join(dir_bag, 'data')
+        # Make folders in tmp
+        os.mkdir(os.path.join(dir_bag))
+        os.mkdir(os.path.join(dir_data))
 
         data_sheets = []
         chron_sheets = []
@@ -48,88 +61,106 @@ def main():
         data_combine = []
         finalDict = OrderedDict()
 
-        # File name without extension
-        filename = os.path.splitext(filename_ext)[0]
-        print(filename)
-
         # Open excel workbook with filename
-        workbook = xlrd.open_workbook(filename_ext)
+        try:
+            workbook = xlrd.open_workbook(name_ext)
+            # Check what worksheets are available, so we know how to proceed.
+            for sheet in workbook.sheet_names():
+                if 'Metadata' in sheet:
+                    metadata_str = 'Metadata'
+                elif 'Chronology' in sheet:
+                    chron_sheets.append(sheet)
+                elif 'Data' in sheet:
+                    data_sheets.append(sheet)
 
-        # Check what worksheets are available, so we know how to proceed.
-        for sheet in workbook.sheet_names():
-            if 'Metadata' in sheet:
-                metadata = workbook.sheet_by_name(sheet)
-                metadata_str = 'Metadata'
-            elif 'Chronology' in sheet:
-                chron_sheets.append(sheet)
-            elif 'Data' in sheet:
-                data_sheets.append(sheet)
+            # METADATA WORKSHEETS
+            # Parse Metadata sheet and add to output dictionary
+            if metadata_str:
+                cells_down_metadata(workbook, metadata_str, 0, 0, finalDict)
 
-        # METADATA WORKSHEETS
-        # Parse Metadata sheet and add to output dictionary
-        if metadata_str:
-            cells_down_metadata(workbook, metadata_str, 0, 0, finalDict)
+            # DATA WORKSHEETS
+            for sheet_str in data_sheets:
+                # Parse each Data sheet. Combine into one dictionary
+                sheet_str = cells_down_datasheets(name, workbook, sheet_str, 2, 0)
+                data_combine.append(sheet_str)
 
-        # DATA WORKSHEETS
-        for sheet_str in data_sheets:
-            # Parse each Data sheet. Combine into one dictionary
-            sheet_str = cells_down_datasheets(filename, workbook, sheet_str, 2, 0)
-            data_combine.append(sheet_str)
+            # Add data dictionary to output dictionary
+            finalDict['paleoData'] = data_combine
 
-        # Add data dictionary to output dictionary
-        finalDict['paleoData'] = data_combine
+            # CHRONOLOGY WORKSHEETS
+            chron_dict = OrderedDict()
+            if chron_run == 'y':
+                for sheet_str in chron_sheets:
+                    # Parse each chronology sheet. Combine into one dictionary
+                    temp_sheet = workbook.sheet_by_name(sheet_str)
+                    chron_dict['filename'] = str(name) + '-' + str(sheet_str) + '.csv'
 
-        # CHRONOLOGY WORKSHEETS
-        chron_dict = OrderedDict()
-        if chron_run == 'y':
-            for sheet_str in chron_sheets:
-                # Parse each chronology sheet. Combine into one dictionary
-                temp_sheet = workbook.sheet_by_name(sheet_str)
-                chron_dict['filename'] = str(filename) + '-' + str(sheet_str) + '.csv'
+                    # Create a dictionary that has a list of all the columns in the sheet
+                    start_row = traverse_to_chron_var(temp_sheet)
+                    columns_list_chron = get_chron_var(temp_sheet, start_row)
+                    chron_dict['columns'] = columns_list_chron
+                    chron_combine.append(chron_dict)
 
-                # Create a dictionary that has a list of all the columns in the sheet
-                start_row = traverse_to_chron_var(temp_sheet)
-                columns_list_chron = get_chron_var(temp_sheet, start_row)
-                chron_dict['columns'] = columns_list_chron
-                chron_combine.append(chron_dict)
+                # Add chronology dictionary to output dictionary
+                finalDict['chronData'] = chron_combine
 
-            # Add chronology dictionary to output dictionary
-            finalDict['chronData'] = chron_combine
+            # OUTPUT
 
-        # FILE NAMING AND OUTPUT
-        # Creates the directory 'output' if it does not already exist
-        if not os.path.exists('output/' + str(filename)):
-            os.makedirs('output/' + str(filename))
+            # Now that we have all our data (almost, need csv) switch to dir_data to create files.
+            os.chdir(dir_data)
 
-        # CSV - DATA
-        for sheet_str in data_sheets:
-            output_csv_datasheet(workbook, sheet_str, filename)
-        del data_sheets[:]
+            # CSV - DATA
+            for sheet_str in data_sheets:
+                output_csv_datasheet(workbook, sheet_str, name)
+            del data_sheets[:]
 
-        # CSV - CHRONOLOGY
-        if chron_run == 'y':
-            for sheet_str in chron_sheets:
-                output_csv_chronology(workbook, sheet_str, filename)
+            # CSV - CHRONOLOGY
+            if chron_run == 'y':
+                for sheet_str in chron_sheets:
+                    output_csv_chronology(workbook, sheet_str, name)
 
-        # JSON LD
-        new_file_name_jsonld = str(filename) + '/' + str(filename) + '.lipd'
-        file_jsonld = open('output/' + new_file_name_jsonld, 'w')
-        file_jsonld = open('output/' + new_file_name_jsonld, 'r+')
+            # JSON-LD
+            # Invoke DOI Resolver Class to update publisher data
+            finalDict = DOIResolver(dir_root, name, finalDict).main()
+            # Dump finalDict to a json file.
+            with open(os.path.join(dir_data, name + '.jsonld'), 'w+') as jld_file:
+                json.dump(finalDict, jld_file, indent=2, sort_keys=True)
 
-        # Dump finalDict to a json file.
-        ## THIS WOULD BE A GOOD SPOT TO CALL THE DOI RESOLVER! NEED A ROOT FOLDER TO PASS
-        finalDict = DOIResolver(dir_root,filename,finalDict).main()
+            # JSON FLATTEN code would go here.
 
-        json.dump(finalDict, file_jsonld, indent=4)
+            # Move files to bag root for re-bagging
+            # dir : dir_data -> dir_bag
+            dir_cleanup(dir_bag, dir_data)
 
-        # if flat_run == 'y':
-            # Flatten the JSON LD file, and output it to its own file
-            # flattened_file = flatten.run(finalDict)
-            # new_file_flat_json = str(filename) + '/' + str(filename) + '_flat.lipd'
-            # file_flat_jsonld = open('output/' + new_file_flat_json, 'w')
-            # file_flat_jsonld = open('output/' + new_file_flat_json, 'r+')
-            # json.dump(flattened_file, file_flat_jsonld, indent=0)
-            # validate_flat = validator_test.run('output/' + new_file_flat_json)
+            # Create a bag for the 3 files
+            new_bag = create_bag(dir_bag)
+            open_bag(dir_bag)
+            new_bag.save(manifests=True)
+
+            # dir: dir_tmp -> dir_root
+            os.chdir(dir_root)
+
+            # Go to output folder. Create if doesn't exist.
+            if not os.path.exists(dir_output):
+                os.mkdir(dir_output)
+            os.chdir(dir_output)
+
+            # Check if same lpd file exists. If so, delete so new one can be made
+            if os.path.isfile(name_ext):
+                os.remove(name_ext)
+
+            # Zip dir_bag. Creates in dir_root directory
+            re_zip(dir_tmp, name, name_ext)
+            os.rename(name_ext + '.zip', name + '.lpd')
+
+        except:
+            logging.exception("Error opening file.")
+
+        # Move back to dir_root for next loop.
+        os.chdir(dir_root)
+
+        # Cleanup and remove tmp directory
+        shutil.rmtree(dir_tmp)
 
 
 def output_csv_datasheet(workbook, sheet, name):
@@ -141,9 +172,9 @@ def output_csv_datasheet(workbook, sheet, name):
     :return: (none)
     """
     temp_sheet = workbook.sheet_by_name(sheet)
-    csv_folder_and_name = str(name) + '/' + str(name) + '-' + str(sheet) + '.csv'
-    csv_full_path = 'output/' + csv_folder_and_name
-    file_csv = open(csv_full_path, 'w', newline='')
+
+    # Create CSV file and open
+    file_csv = open(str(name) + '-' + str(sheet) + '.csv', 'w', newline='')
     w = csv.writer(file_csv)
 
     try:
@@ -200,9 +231,9 @@ def output_csv_chronology(workbook, sheet, name):
     :return: (none)
     """
     temp_sheet = workbook.sheet_by_name(sheet)
-    csv_folder_and_name = str(name) + '/' + str(name) + '-' + str(sheet) + '.csv'
-    csv_full_path = 'output/' + csv_folder_and_name
-    file_csv = open(csv_full_path, 'w', newline='')
+
+    # Create CSV file and open
+    file_csv = open(str(name) + '-' + str(sheet) + '.csv', 'w', newline='')
     w = csv.writer(file_csv)
     try:
         total_vars = count_chron_variables(temp_sheet)
@@ -345,26 +376,28 @@ def compile_fund(d):
     """
     l = []
     for counter, item in enumerate(d['agency']):
-        l.append({'fundingAgency': d['agency'][counter], 'fundingGrant': d['grant'][counter]})
+        try:
+            l.append({'fundingAgency': d['agency'][counter], 'fundingGrant': d['grant'][counter]})
+        except IndexError:
+            pass
+            # logging.exception("Missing agency/grant entry")
     return l
 
 
-def compile_pub(d):
+def reorder_pub(d):
     """
     Compile the pub section of the metadata sheet. Only items that we want.
     :param d: (dict)
     :return: (dict)
     """
     d2 = OrderedDict()
-    d2['author'] = d['pubAuthor']
-    d2['title'] = d['pubTitle']
-    d2['journal'] = d['pubJournal']
-    d2['pubYear'] = d['pubYear']
-    d2['volume'] = d['pubVolume']
-    d2['issue'] = d['pubIssue']
-    d2['pages'] = d['pubPages']
-    d2['doi'] = d['pubDOI']
-    d2['abstract'] = d['pubAbstract']
+    keys = {'author': 'pubAuthor', 'title': 'pubTitle', 'journal': 'pubJournal', 'pubYear':'pubYear',
+            'volume': 'pubVolume', 'issue': 'pubIssue', 'pages': 'pubPages', 'doi': 'pubDOI', 'abstract':'pubAbstract'}
+    for key in keys.items():
+        try:
+            d2[key] = d[keys[key]]
+        except KeyError:
+            pass
     return d2
 
 
@@ -565,14 +598,15 @@ def replace_missing_vals(cell_entry, missing_val):
     :param missing_val: (str)
     :return: (str)
     """
-    missing_val_list = ['none', 'na', '', '-', 'n/a']
-    if missing_val.lower() not in missing_val_list:
-        missing_val_list.append(missing_val)
-    try:
-        if cell_entry.lower() in missing_val_list:
-            cell_entry = 'NaN'
-    except TypeError:
-        logging.exception("TypeError: replace_missing_vals()")
+    if isinstance(cell_entry, str):
+        missing_val_list = ['none', 'na', '', '-', 'n/a']
+        if missing_val.lower() not in missing_val_list:
+            missing_val_list.append(missing_val)
+        try:
+            if cell_entry.lower() in missing_val_list:
+                cell_entry = 'NaN'
+        except (TypeError, AttributeError):
+            logging.exception("TypeError/AttributeError: replace_missing_vals()")
     return cell_entry
 
 
@@ -774,6 +808,26 @@ def var_headers_check(temp_sheet, missing_val_row, ref_first_var):
     return traverse_missing_value(temp_sheet) + 1
 
 
+def cells_right_metadata_pub(workbook, sheet, row, col, pub_qty):
+    """
+    Specific case: We want to get all cell data for pub. Even blank cells. Necessary for creating the pub_temp list in
+    cells_down_metadata()
+    :param workbook: (obj)
+    :param sheet: (str)
+    :param row: (int)
+    :param col: (int)
+    :param pub_qty: (int) Number of distinct publication sections in this file
+    :return: (list) Cell data for a specific row
+    """
+    col_loop = 0
+    cell_data = []
+    temp_sheet = workbook.sheet_by_name(sheet)
+    while col_loop < pub_qty:
+        col += 1
+        col_loop += 1
+        cell_data.append(temp_sheet.cell_value(row, col))
+    return cell_data
+
 def cells_right_metadata(workbook, sheet, row, col):
     """
     Traverse all cells in a row. If you find new data in a cell, add it to the list.
@@ -793,8 +847,7 @@ def cells_right_metadata(workbook, sheet, row, col):
             if temp_sheet.cell_value(row, col) != xlrd.empty_cell and temp_sheet.cell_value(row, col) != '':
                 cell_data.append(temp_sheet.cell_value(row, col))
         except IndexError:
-            continue
-
+            pass
     return cell_data
 
 
@@ -816,9 +869,11 @@ def cells_down_metadata(workbook, sheet, row, col, finalDict):
     funding_cases = ['agency', 'grant']
 
     # Temp Dictionaries
+    pub_qty = 0
+    pub_on = False
     geo_temp = {}
     general_temp = {}
-    pub_temp = {}
+    pub_temp = []
     funding_temp = OrderedDict()
 
     temp_sheet = workbook.sheet_by_name(sheet)
@@ -832,7 +887,10 @@ def cells_down_metadata(workbook, sheet, row, col, finalDict):
                 # Convert title to correct format, and grab the cell data for that row
                 title_formal = temp_sheet.cell_value(row, col)
                 title_json = name_to_jsonld(title_formal)
-                cell_data = cells_right_metadata(workbook, sheet, row, col)
+                if pub_on:
+                    cell_data = cells_right_metadata_pub(workbook, sheet, row, col, pub_qty)
+                else:
+                    cell_data = cells_right_metadata(workbook, sheet, row, col)
 
                 # If we don't have a title for it, then it's not information we want to grab
                 if title_json:
@@ -842,8 +900,21 @@ def cells_down_metadata(workbook, sheet, row, col, finalDict):
                         geo_temp = compile_temp(geo_temp, title_json, cell_data)
 
                     # Pub
+                    # PROBLEM HERE:
+                    # Need to traverse and check for multiple pub columns
+                    # need to create a list of dicts. one for each pub column.
                     elif title_json in pub_cases:
-                        pub_temp = compile_temp(pub_temp, title_json, cell_data)
+
+                        # Check for how many distinct Publications there are.
+                        # Authors seem to be the only consistent field we can rely on to determine number of Pubs.
+                        if title_json == 'pubAuthor':
+                            pub_qty = len(cell_data)
+                            pub_on = True
+                            for i in range(pub_qty):
+                                pub_temp.append({})
+                        for pub in range(pub_qty):
+                            if cell_data[pub] != '':
+                                pub_temp[pub][title_json] = cell_data[pub]
 
                     # Funding
                     elif title_json in funding_cases:
@@ -865,10 +936,11 @@ def cells_down_metadata(workbook, sheet, row, col, finalDict):
     # FIGURE OUT HOW TO HOOK THIS INTO THE DOI CLASS
     funding_temp = compile_fund(funding_temp)
     geo = compile_geo(geo_temp)
-    pub = compile_pub(pub_temp)
+    for idx, pub in enumerate(pub_temp):
+        pub_temp[idx] = reorder_pub(pub)
 
     finalDict['@context'] = "context.jsonld"
-    finalDict['pub'] = pub
+    finalDict['pub'] = pub_temp
     finalDict['funding'] = funding_temp
     finalDict['geo'] = geo
 

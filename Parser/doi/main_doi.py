@@ -57,42 +57,16 @@ def main():
     return
 
 
-def dir_cleanup(dir_bag, dir_data):
-    """
-
-    :param dir_bag: (str) Path to root of Bag
-    :param dir_data: (str) Path to Bag /data subdirectory
-    :return: None
-    """
-
-    # dir : dir_data -> dir_bag
-    os.chdir(dir_bag)
-
-    # Delete files in dir_bag
-    for file in os.listdir(dir_bag):
-        if file.endswith('.txt'):
-            os.remove(os.path.join(dir_bag, file))
-
-    # Move dir_data files up to dir_bag
-    for file in os.listdir(dir_data):
-        shutil.move(os.path.join(dir_data, file), dir_bag)
-
-    # Delete empty dir_data folder
-    shutil.rmtree(dir_data)
-
-    return
-
-
-def process_lpd(name, path_tmp):
+def process_lpd(name, dir_tmp):
     """
     Opens up a jsonld file, invokes doi_resolver, closes file, updates changelog, cleans directory, and makes new bag.
     :param name: (str) Name of current .lpd file
-    :param path_tmp: (str) Path to tmp directory
+    :param dir_tmp: (str) Path to tmp directory
     :return: none
     """
 
     dir_root = os.getcwd()
-    dir_bag = os.path.join(path_tmp, name)
+    dir_bag = os.path.join(dir_tmp, name)
     dir_data = os.path.join(dir_bag, 'data')
 
     # Navigate down to jLD file
@@ -118,14 +92,13 @@ def process_lpd(name, path_tmp):
     # Open changelog. timestamp it. Prompt user for short description of changes. Close and save
     update_changelog()
 
-    # Delete old bag files, and move files to root for re-bagging
+    # Delete old bag files, and move files to bag root for re-bagging
     # dir : dir_data -> dir_bag
     dir_cleanup(dir_bag, dir_data)
 
     # Create a bag for the 3 files
     new_bag = create_bag(dir_bag)
     open_bag(dir_bag)
-
     new_bag.save(manifests=True)
 
     return
