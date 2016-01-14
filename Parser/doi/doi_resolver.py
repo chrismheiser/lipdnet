@@ -50,7 +50,7 @@ class DOIResolver(object):
                     self.illegal_doi(doi_string)
                 else:
                     for doi_id in doi_list:
-                        self.get_data(doi_id)
+                        self.get_data(doi_id, idx)
             else:
                 # Quarantine the flagged file and log it
                 txt_log(self.dir_root, self.name, "quarantine.txt", "Publication #" + str(idx) + ": DOI not provided")
@@ -181,7 +181,7 @@ class DOIResolver(object):
 
         return fetch_dict
 
-    def get_data(self, doi_id):
+    def get_data(self, doi_id, idx):
         """
         Resolve DOI and compile all attributes into one dictionary
         :param pub_dict: (dict) Original publication dictionary
@@ -212,7 +212,7 @@ class DOIResolver(object):
                 # Compare the two pubs. Overwrite old data with new data where applicable
                 tmp_dict = self.compare_replace(tmp_dict, fetch_dict)
                 tmp_dict['pubDataUrl'] = 'doi.org'
-                self.root_dict['pub'].append(tmp_dict)
+                self.root_dict['pub'][idx] = tmp_dict
 
         except urllib.error.URLError:
             txt_log(self.dir_root, self.name, "quarantine.txt", "Malformed DOI: " + doi_id)
@@ -229,8 +229,6 @@ class DOIResolver(object):
         try:
             if 'id' in curr_dict:
                 return curr_dict['id'], True
-            elif 'pubDOI' in curr_dict:
-                return curr_dict['pubDOI'], True
             elif isinstance(curr_dict, list):
                 for i in curr_dict:
                     return self.find_doi(i)

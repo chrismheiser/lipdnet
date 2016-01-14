@@ -153,9 +153,10 @@ def main():
             re_zip(dir_tmp, name, name_ext)
             os.rename(name_ext + '.zip', name + '.lpd')
 
-        except:
+        except Exception as e:
             # PROBLEM OPENING SOME EXCEL FILES WITH XLRD
-            logging.exception("XLRD in MAIN(): Error opening file. - " + name)
+            print("exception: " + str(e) + name)
+            # logging.exception("XLRD in MAIN(): Error opening file. - " + name)
 
         # Move back to dir_root for next loop.
         os.chdir(dir_root)
@@ -354,6 +355,19 @@ def compile_geo(d):
     return d2
 
 
+def compile_authors(cell):
+    """
+    Split the string of author names into the BibJSON format.
+    :param cell: (str) Data from author cell
+    :return: (list of dicts) Author names
+    """
+    author_lst = []
+    s = cell.split(';')
+    for w in s:
+        author_lst.append(w.lstrip())
+    return author_lst
+
+
 # MISC HELPER METHODS
 
 
@@ -432,7 +446,7 @@ def name_to_jsonld(title_in):
     # Sheet names
     if title_in == 'metadata':
         title_out = 'metadata'
-    elif title_in == 'mhronology':
+    elif title_in == 'chronology':
         title_out = 'chronology'
     elif title_in == 'data (qc)' or title_in == 'data(qc)':
         title_out = 'dataQC'
@@ -453,27 +467,27 @@ def name_to_jsonld(title_in):
 
     # Pub
     elif 'authors' in title_in:
-        title_out = 'pubAuthor'
+        title_out = 'author'
     elif 'publication title' == title_in:
-        title_out = 'pubTitle'
+        title_out = 'title'
     elif title_in == 'journal':
-        title_out = 'pubJournal'
+        title_out = 'journal'
     elif title_in == 'year':
-        title_out = 'pubYear'
+        title_out = 'year'
     elif title_in == 'volume':
-        title_out = 'pubVolume'
+        title_out = 'volume'
     elif title_in == 'issue':
-        title_out = 'pubIssue'
+        title_out = 'issue'
     elif title_in == 'pages':
-        title_out = 'pubPages'
+        title_out = 'pages'
     elif title_in == 'report number':
-        title_out = 'pubReportNumber'
+        title_out = 'report'
     elif title_in == 'doi':
-        title_out = 'pubDOI'
+        title_out = 'id'
     elif title_in == 'abstract':
-        title_out = 'pubAbstract'
+        title_out = 'abstract'
     elif 'alternate citation' in title_in:
-        title_out = 'pubAlternateCitation'
+        title_out = 'alternateCitation'
 
     # Geo
     elif title_in == 'site name':
@@ -851,8 +865,8 @@ def cells_down_metadata(workbook, sheet, row, col, finalDict):
     :return: none
     """
     row_loop = 0
-    pub_cases = ['pubDOI', 'pubYear', 'pubAuthor', 'pubJournal', 'pubIssue', 'pubVolume', 'pubTitle', 'pubPages',
-                 'pubReportNumber', 'pubAbstract', 'pubAlternateCitation']
+    pub_cases = ['id', 'year', 'author', 'journal', 'issue', 'volume', 'title', 'pages',
+                 'reportNumber', 'abstract', 'alternateCitation']
     geo_cases = ['latMin', 'lonMin', 'lonMax', 'latMax', 'elevation', 'siteName', 'location']
     funding_cases = ['agency', 'grant']
 
@@ -888,21 +902,22 @@ def cells_down_metadata(workbook, sheet, row, col, finalDict):
                         geo_temp = compile_temp(geo_temp, title_json, cell_data)
 
                     # Pub
-                    # PROBLEM HERE:
-                    # Need to traverse and check for multiple pub columns
-                    # need to create a list of dicts. one for each pub column.
+                    # Create a list of dicts. One for each pub column.
                     elif title_json in pub_cases:
 
-                        # Check for how many distinct Publications there are.
                         # Authors seem to be the only consistent field we can rely on to determine number of Pubs.
-                        if title_json == 'pubAuthor':
+                        if title_json == 'author':
                             pub_qty = len(cell_data)
                             pub_on = True
                             for i in range(pub_qty):
-                                pub_temp.append({})
-                        for pub in range(pub_qty):
-                            pub_temp[pub][title_json] = cell_data[pub]
-
+                                author_lst = compile_authors(cell_data[i])
+                                pub_temp.append({'author': author_lst, 'pubDataUrl': 'Manually Entered'})
+                        else:
+                            for pub in range(pub_qty):
+                                if title_json == 'id':
+                                    pub_temp[pub]['identifier'] = [{"type": "doi", "id": cell_data[pub]}]
+                                else:
+                                    pub_temp[pub][title_json] = cell_data[pub]
                     # Funding
                     elif title_json in funding_cases:
                         funding_temp[title_json] = cell_data
@@ -916,9 +931,11 @@ def cells_down_metadata(workbook, sheet, row, col, finalDict):
         row += 1
         row_loop += 1
 
+    # Compile the more complicated functions
     funding_temp = compile_fund(funding_temp)
     geo = compile_geo(geo_temp)
 
+    # Insert into final dictionary
     finalDict['@context'] = "context.jsonld"
     finalDict['pub'] = pub_temp
     finalDict['funding'] = funding_temp
