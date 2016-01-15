@@ -216,6 +216,8 @@ class DOIResolver(object):
 
         except urllib.error.URLError:
             txt_log(self.dir_root, self.name, "quarantine.txt", "Malformed DOI: " + doi_id)
+        except ValueError:
+            txt_log(self.dir_root, self.name, "quarantine.txt", "Bad HTTP Response: " + doi_id)
 
         return
 

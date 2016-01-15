@@ -18,7 +18,7 @@ import copy
 
 def main():
 
-    dir_root = '/Users/chrisheiser1/Desktop/library_excel/'
+    dir_root = 'ENTER_DIRECTORY_PATH_HERE'
     os.chdir(dir_root)
 
     # Ask user if they want to run the Chronology sheets or flatten the JSON files.
@@ -156,7 +156,7 @@ def main():
         except Exception as e:
             # PROBLEM OPENING SOME EXCEL FILES WITH XLRD
             print("exception: " + str(e) + name)
-            # logging.exception("XLRD in MAIN(): Error opening file. - " + name)
+            logging.exception("main(): Error opening file. - " + name)
 
         # Move back to dir_root for next loop.
         os.chdir(dir_root)
