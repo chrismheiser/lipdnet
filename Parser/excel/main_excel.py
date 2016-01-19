@@ -298,9 +298,9 @@ def geometry_point(lat, lon):
     """
     coordinates = []
     point_dict = OrderedDict()
-    for index, point in enumerate(lat):
-        coordinates.append(lat[index])
-        coordinates.append(lon[index])
+    for idx, val in enumerate(lat):
+        coordinates.append(lat[idx])
+        coordinates.append(lon[idx])
     point_dict['type'] = 'Point'
     point_dict['coordinates'] = coordinates
     return point_dict
@@ -316,17 +316,18 @@ def compile_geometry(lat, lon):
     # Sort lat an lon in numerical order
     lat.sort()
     lon.sort()
+
+    # 4 coordinate values
     if len(lat) == 2 and len(lon) == 2:
         geo_dict = geometry_linestring(lat, lon)
 
-        """
-        # 4 coordinate values
-        if (lat[0] != lat[1]) and (lon[0] != lon[1]):
-            geo_dict = geometry_polygon(lat, lon)
-        # 3 unique coordinates
-        else:
-            geo_dict = geometry_multipoint(lat, lon)
-        """
+        # # 4 coordinate values
+        # if (lat[0] != lat[1]) and (lon[0] != lon[1]):
+        #     geo_dict = geometry_polygon(lat, lon)
+        # # 3 unique coordinates
+        # else:
+        #     geo_dict = geometry_multipoint(lat, lon)
+        #
 
     # 2 coordinate values
     elif len(lat) == 1 and len(lon) == 1:
@@ -349,8 +350,7 @@ def compile_geo(d):
     """
     d2 = OrderedDict()
     d2['type'] = 'Feature'
-    geometry = compile_geometry([d['latMin'], d['latMax']], [d['lonMin'], d['lonMax']])
-    d2['geometry'] = geometry
+    d2['geometry'] = compile_geometry([d['latMin'], d['latMax']], [d['lonMin'], d['lonMax']])
     d2['properties'] = {'siteName': d['siteName'], 'elevation': {'value': d['elevation'], 'unit': 'm'}}
     return d2
 
@@ -806,7 +806,8 @@ def var_headers_check(temp_sheet, missing_val_row, ref_first_var):
         else:
             return start - 1
     # If we still aren't sure, traverse one row down from the MV box and start from there
-    return traverse_missing_value(temp_sheet) + 1
+    # UNREACHABLE
+    # return traverse_missing_value(temp_sheet) + 1
 
 
 def cells_right_metadata_pub(workbook, sheet, row, col, pub_qty):
@@ -889,8 +890,10 @@ def cells_down_metadata(workbook, sheet, row, col, finalDict):
                 # Convert title to correct format, and grab the cell data for that row
                 title_formal = temp_sheet.cell_value(row, col)
                 title_json = name_to_jsonld(title_formal)
+                # Track multiple publications into separate dictionaries.
                 if pub_on:
                     cell_data = cells_right_metadata_pub(workbook, sheet, row, col, pub_qty)
+                # General case. Create a list with whatever data is found.
                 else:
                     cell_data = cells_right_metadata(workbook, sheet, row, col)
 
@@ -913,6 +916,9 @@ def cells_down_metadata(workbook, sheet, row, col, finalDict):
                                 author_lst = compile_authors(cell_data[i])
                                 pub_temp.append({'author': author_lst, 'pubDataUrl': 'Manually Entered'})
                         else:
+                            # Reached the end of the Publication section. Turn off the pub marker.
+                            if title_json == 'alternateCitation':
+                                pub_on = False
                             for pub in range(pub_qty):
                                 if title_json == 'id':
                                     pub_temp[pub]['identifier'] = [{"type": "doi", "id": cell_data[pub]}]
