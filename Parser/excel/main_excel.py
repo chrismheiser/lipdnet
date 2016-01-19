@@ -16,6 +16,10 @@ import os
 import copy
 
 
+# GLOBALS
+EMPTY = ['', ' ']
+
+
 def main():
 
     dir_root = 'ENTER_DIRECTORY_PATH_HERE'
@@ -122,11 +126,15 @@ def main():
             # JSON-LD
             # Invoke DOI Resolver Class to update publisher data
             finalDict = DOIResolver(dir_root, name, finalDict).main()
+
             # Dump finalDict to a json file.
             with open(os.path.join(dir_data, name + '.jsonld'), 'w+') as jld_file:
                 json.dump(finalDict, jld_file, indent=2, sort_keys=True)
 
             # JSON FLATTEN code would go here.
+
+            # GO THROUGH PUB DICTIONARIES AND ERASE ALL THE EMPTY ENTRIES RIGHT HERE
+            pass
 
             # Move files to bag root for re-bagging
             # dir : dir_data -> dir_bag
@@ -154,7 +162,7 @@ def main():
             os.rename(name_ext + '.zip', name + '.lpd')
 
         except Exception as e:
-            # PROBLEM OPENING SOME EXCEL FILES WITH XLRD
+            # There was a problem opening a file with XLRD
             print("exception: " + str(e) + name)
             logging.exception("main(): Error opening file. - " + name)
 
@@ -386,19 +394,35 @@ def compile_temp(d, key, value):
     return d
 
 
-def compile_fund(d):
+def compile_fund(workbook, sheet, row, col):
     """
-    Compile list of funding data
-    :param d: (dict)
-    :return: (list of dict) One dictionary per entry
+    Compile funding entries.
+    Iter both rows at the same time. Keep adding entries until both cells are empty.
+    :param workbook: (obj)
+    :param sheet: (str)
+    :param row: (int)
+    :param col: (int)
+    :return: (list of dict) l
     """
     l = []
-    for counter, item in enumerate(d['agency']):
+    temp_sheet = workbook.sheet_by_name(sheet)
+    while col < temp_sheet.ncols:
+        col += 1
         try:
-            l.append({'fundingAgency': d['agency'][counter], 'fundingGrant': d['grant'][counter]})
+            agency = temp_sheet.cell_value(row, col)
+            grant = temp_sheet.cell_value(row+1, col)
+            if (agency != xlrd.empty_cell and agency not in EMPTY) or (grant != xlrd.empty_cell and grant not in EMPTY):
+                if agency in EMPTY:
+                    l.append({'grant': grant})
+                elif grant in EMPTY:
+                    l.append({'agency': agency})
+                else:
+                    l.append({'agency': agency, 'grant': grant})
+
         except IndexError:
+            # logging.exception("IndexError, compile_fund()")
             pass
-            # logging.exception("Missing agency/grant entry")
+
     return l
 
 
@@ -481,7 +505,7 @@ def name_to_jsonld(title_in):
     elif title_in == 'pages':
         title_out = 'pages'
     elif title_in == 'report number':
-        title_out = 'report'
+        title_out = 'reportNumber'
     elif title_in == 'doi':
         title_out = 'id'
     elif title_in == 'abstract':
@@ -508,8 +532,6 @@ def name_to_jsonld(title_in):
     # Funding
     elif title_in == "funding_agency_name":
         title_out = 'agency'
-    elif title_in == "grant":
-        title_out = 'grant'
 
     # Measurement Variables
     elif title_in == 'short_name':
@@ -869,15 +891,13 @@ def cells_down_metadata(workbook, sheet, row, col, finalDict):
     pub_cases = ['id', 'year', 'author', 'journal', 'issue', 'volume', 'title', 'pages',
                  'reportNumber', 'abstract', 'alternateCitation']
     geo_cases = ['latMin', 'lonMin', 'lonMax', 'latMax', 'elevation', 'siteName', 'location']
-    funding_cases = ['agency', 'grant']
 
     # Temp Dictionaries
     pub_qty = 0
-    pub_on = False
     geo_temp = {}
     general_temp = {}
     pub_temp = []
-    funding_temp = OrderedDict()
+    funding_temp = []
 
     temp_sheet = workbook.sheet_by_name(sheet)
 
@@ -885,23 +905,18 @@ def cells_down_metadata(workbook, sheet, row, col, finalDict):
     while row_loop < temp_sheet.nrows:
         try:
             # If there is content in the cell...
-            if temp_sheet.cell_value(row, col) != xlrd.empty_cell and temp_sheet.cell_value(row, col) != '':
+            if temp_sheet.cell_value(row, col) != xlrd.empty_cell and temp_sheet.cell_value(row, col) not in EMPTY:
 
                 # Convert title to correct format, and grab the cell data for that row
                 title_formal = temp_sheet.cell_value(row, col)
                 title_json = name_to_jsonld(title_formal)
-                # Track multiple publications into separate dictionaries.
-                if pub_on:
-                    cell_data = cells_right_metadata_pub(workbook, sheet, row, col, pub_qty)
-                # General case. Create a list with whatever data is found.
-                else:
-                    cell_data = cells_right_metadata(workbook, sheet, row, col)
 
                 # If we don't have a title for it, then it's not information we want to grab
                 if title_json:
 
                     # Geo
                     if title_json in geo_cases:
+                        cell_data = cells_right_metadata(workbook, sheet, row, col)
                         geo_temp = compile_temp(geo_temp, title_json, cell_data)
 
                     # Pub
@@ -910,26 +925,25 @@ def cells_down_metadata(workbook, sheet, row, col, finalDict):
 
                         # Authors seem to be the only consistent field we can rely on to determine number of Pubs.
                         if title_json == 'author':
+                            cell_data = cells_right_metadata(workbook, sheet, row, col)
                             pub_qty = len(cell_data)
-                            pub_on = True
                             for i in range(pub_qty):
                                 author_lst = compile_authors(cell_data[i])
                                 pub_temp.append({'author': author_lst, 'pubDataUrl': 'Manually Entered'})
                         else:
-                            # Reached the end of the Publication section. Turn off the pub marker.
-                            if title_json == 'alternateCitation':
-                                pub_on = False
+                            cell_data = cells_right_metadata_pub(workbook, sheet, row, col, pub_qty)
                             for pub in range(pub_qty):
                                 if title_json == 'id':
                                     pub_temp[pub]['identifier'] = [{"type": "doi", "id": cell_data[pub]}]
                                 else:
                                     pub_temp[pub][title_json] = cell_data[pub]
                     # Funding
-                    elif title_json in funding_cases:
-                        funding_temp[title_json] = cell_data
+                    elif title_json == 'agency':
+                        funding_temp = compile_fund(workbook, sheet, row, col)
 
                     # All other cases do not need fancy structuring
                     else:
+                        cell_data = cells_right_metadata(workbook, sheet, row, col)
                         general_temp = compile_temp(general_temp, title_json, cell_data)
 
         except IndexError:
@@ -937,8 +951,7 @@ def cells_down_metadata(workbook, sheet, row, col, finalDict):
         row += 1
         row_loop += 1
 
-    # Compile the more complicated functions
-    funding_temp = compile_fund(funding_temp)
+    # Compile the more complicated items
     geo = compile_geo(geo_temp)
 
     # Insert into final dictionary
@@ -1019,7 +1032,9 @@ def cells_right_datasheets(workbook, sheet, row, col, colListNum):
     except IndexError:
         print("Cell Right datasheets index error")
 
-    attrDict['climateInterpretation'] = climInDict
+    # Only add if there's data
+    if climInDict:
+        attrDict['climateInterpretation'] = climInDict
     return attrDict
 
 
