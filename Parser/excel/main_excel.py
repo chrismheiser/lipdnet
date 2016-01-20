@@ -17,7 +17,7 @@ import copy
 
 
 # GLOBALS
-EMPTY = ['', ' ']
+EMPTY = ['', ' ', None, 'na', 'nan']
 
 
 def main():
@@ -318,6 +318,12 @@ def compile_geometry(lat, lon):
     :param lon: (list) Longitude values
     :return: (dict)
     """
+
+    while None in lat:
+        lat.remove(None)
+    while None in lon:
+        lon.remove(None)
+
     # Sort lat an lon in numerical order
     lat.sort()
     lon.sort()
@@ -353,6 +359,7 @@ def compile_geo(d):
     :param d:
     :return:
     """
+    # Should probably use some IndexError catching here.
     d2 = OrderedDict()
     d2['type'] = 'Feature'
     d2['geometry'] = compile_geometry([d['latMin'], d['latMax']], [d['lonMin'], d['lonMax']])
@@ -384,7 +391,9 @@ def compile_temp(d, key, value):
     :param value: (?)
     :return: (dict)
     """
-    if single_item(value):
+    if not value:
+        d[key] = None
+    elif len(value) == 1:
         d[key] = value[0]
     else:
         d[key] = value
@@ -425,6 +434,7 @@ def compile_fund(workbook, sheet, row, col):
 
 def single_item(arr):
     """
+    NOT REALLY NECESSARY.
     Check an array to see if it is a single item or not
     :param arr: (list)
     :return: (bool)
