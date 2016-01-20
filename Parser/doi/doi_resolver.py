@@ -20,6 +20,7 @@ Output: Updated publication dictionary (success), original publication dictionar
 
 """
 
+EMPTY = ['', ' ']
 
 class DOIResolver(object):
 
@@ -55,6 +56,7 @@ class DOIResolver(object):
                 # Quarantine the flagged file and log it
                 txt_log(self.dir_root, self.name, "quarantine.txt", "Publication #" + str(idx) + ": DOI not provided")
                 self.root_dict['pub'][idx]['pubDataUrl'] = 'Manually Entered'
+            self.remove_empties(idx)
         return self.root_dict
 
     @staticmethod
@@ -112,6 +114,15 @@ class DOIResolver(object):
             except KeyError:
                 pass
         return pub_dict
+
+    def remove_empties(self, pub):
+        for x in list(self.root_dict['pub'][pub].keys()):
+            if x == 'identifier':
+                if self.root_dict['pub'][pub][x][0]['id'] in EMPTY:
+                    del self.root_dict['pub'][pub][x]
+            elif self.root_dict['pub'][pub][x] in EMPTY:
+                del self.root_dict['pub'][pub][x]
+        return
 
     def noaa_citation(self, doi_string):
         """

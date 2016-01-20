@@ -133,9 +133,6 @@ def main():
 
             # JSON FLATTEN code would go here.
 
-            # GO THROUGH PUB DICTIONARIES AND ERASE ALL THE EMPTY ENTRIES RIGHT HERE
-            pass
-
             # Move files to bag root for re-bagging
             # dir : dir_data -> dir_bag
             dir_cleanup(dir_bag, dir_data)
