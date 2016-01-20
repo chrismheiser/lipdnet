@@ -22,7 +22,7 @@ EMPTY = ['', ' ', None, 'na', 'nan']
 
 def main():
 
-    dir_root = 'ENTER_DIRECTORY_PATH_HERE'
+    dir_root = '/Users/chrisheiser1/Desktop/test'
     os.chdir(dir_root)
 
     # Ask user if they want to run the Chronology sheets or flatten the JSON files.
@@ -263,7 +263,7 @@ def output_csv_chronology(workbook, sheet, name):
 
 # GEO DATA METHODS
 
-def geometry_linestring(lat, lon):
+def geometry_linestring(lat, lon, elev):
     """
     GeoJSON Linestring. Latitude and Longitude have 2 values each.
     :param lat: (list) Latitude values
@@ -278,7 +278,7 @@ def geometry_linestring(lat, lon):
     if lat[0] == lat[1] and lon[0] == lon[1]:
         lat.pop()
         lon.pop()
-        d = geometry_point(lat, lon)
+        d = geometry_point(lat, lon, elev)
 
     else:
         # Creates coordinates list
@@ -294,7 +294,7 @@ def geometry_linestring(lat, lon):
     return d
 
 
-def geometry_point(lat, lon):
+def geometry_point(lat, lon, elev):
     """
     GeoJSON point. Latitude and Longitude only have one value each
     :param lat: (list) Latitude values
@@ -306,12 +306,13 @@ def geometry_point(lat, lon):
     for idx, val in enumerate(lat):
         coordinates.append(lat[idx])
         coordinates.append(lon[idx])
+    coordinates.append(elev)
     point_dict['type'] = 'Point'
     point_dict['coordinates'] = coordinates
     return point_dict
 
 
-def compile_geometry(lat, lon):
+def compile_geometry(lat, lon, elev):
     """
     Take in lists of lat and lon coordinates, and determine what geometry to create
     :param lat: (list) Latitude values
@@ -330,7 +331,7 @@ def compile_geometry(lat, lon):
 
     # 4 coordinate values
     if len(lat) == 2 and len(lon) == 2:
-        geo_dict = geometry_linestring(lat, lon)
+        geo_dict = geometry_linestring(lat, lon, elev)
 
         # # 4 coordinate values
         # if (lat[0] != lat[1]) and (lon[0] != lon[1]):
@@ -342,7 +343,7 @@ def compile_geometry(lat, lon):
 
     # 2 coordinate values
     elif len(lat) == 1 and len(lon) == 1:
-        geo_dict = geometry_point(lat, lon)
+        geo_dict = geometry_point(lat, lon, elev)
 
     # Too many points, or no points
     else:
@@ -362,8 +363,8 @@ def compile_geo(d):
     # Should probably use some IndexError catching here.
     d2 = OrderedDict()
     d2['type'] = 'Feature'
-    d2['geometry'] = compile_geometry([d['latMin'], d['latMax']], [d['lonMin'], d['lonMax']])
-    d2['properties'] = {'siteName': d['siteName'], 'elevation': {'value': d['elevation'], 'unit': 'm'}}
+    d2['geometry'] = compile_geometry([d['latMin'], d['latMax']], [d['lonMin'], d['lonMax']], d['elevation'])
+    d2['properties'] = {'siteName': d['siteName']}
     return d2
 
 
