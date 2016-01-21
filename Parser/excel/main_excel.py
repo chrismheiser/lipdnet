@@ -22,7 +22,7 @@ EMPTY = ['', ' ', None, 'na', 'nan']
 
 def main():
 
-    dir_root = '/Users/chrisheiser1/Desktop/test'
+    dir_root = 'SET_DIRECTORY_PATH_HERE'
     os.chdir(dir_root)
 
     # Ask user if they want to run the Chronology sheets or flatten the JSON files.
@@ -272,7 +272,7 @@ def geometry_linestring(lat, lon, elev):
     """
     d = OrderedDict()
     coordinates = []
-    temp = [None, None]
+    temp = [None, None, elev]
 
     # Point type, Matching pairs.
     if lat[0] == lat[1] and lon[0] == lon[1]:
@@ -282,6 +282,7 @@ def geometry_linestring(lat, lon, elev):
 
     else:
         # Creates coordinates list
+        # Set to specific indicies so that the next loop will overwrite old values.
         for i in lat:
             temp[0] = i
             for j in lon:
