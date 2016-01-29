@@ -2,6 +2,10 @@ from Parser.jupyter.lpd import *
 from Parser.modules.directory import *
 
 
+"""
+NEED TO CATCH KEY ERRORS WHEN ATTEMPTING TO CALL ANY FILE OR KEY IN MASTER
+"""
+
 class LiPD_Library(object):
     """
     The LiPD Library is meant to encompass a collection of LiPD file objects that are being analyzed in the current
@@ -9,16 +13,26 @@ class LiPD_Library(object):
     """
 
     def __init__(self):
-        self.dir_root = ''
+        self.dir_root = '/Users/chrisheiser1/Desktop/lpds'
         self.dir_tmp = create_tmp_dir()
         self.master = {}
 
     def setDir(self, dir_root):
+        """
+        Changes the current working directory.
+        :param dir_root:
+        :return:
+        """
         self.dir_root = dir_root
         os.chdir(self.dir_root)
         print("Directory: " + str(dir_root))
+        return
 
     def loadLipds(self):
+        """
+        Load a directory (multiple) LiPD objects into the LiPD Library
+        :return:
+        """
         # Confirm that a CWD is set first.
         if self.dir_root == '':
             print("Current Working Directory has not been set.")
@@ -31,37 +45,79 @@ class LiPD_Library(object):
             self.appendLiPD(name_ext)
         return
 
-    def loadLipd(self, name_ext):
+    def loadLipd(self, name):
         """
-        Load a single LiPD file into the LiPD Library.
-        :param name_ext: (str) File name
+        Load a single LiPD object into the LiPD Library.
+        :param name: (str) Filename
         :return: None
         """
-        self.appendLiPD(name_ext)
+        self.appendLiPD(name + '.lpd')
         return
 
-    def displayLipdCSV(self, name_ext):
-        self.master[name_ext].displayCSV()
+    def displayLipdCSV(self, name):
+        """
+        Show CSV data from one LiPD object
+        :param name: (str) Filename
+        :return:
+        """
+        try:
+            self.master[name + '.lpd'].displayCSV()
+        except KeyError:
+            print("Invalid Filename")
+        return
 
-    def saveLipd(self, name_ext):
+    def saveLipd(self, name):
+        """
+        Overwrite target LiPD file in OS with LiPD data in the current workspace.
+        :param name: (str) Filename
+        :return:
+        """
         pass
 
     def saveLipds(self):
+        """
+        Overwrite LiPD files in OS with LiPD data in the current workspace.
+        :return:
+        """
         pass
 
-    def close(self):
+    def removeLiPD(self, name):
+        """
+        Removes target LiPD file from the workspace.
+        :param name: (str) Filename
+        :return:
+        """
         pass
 
-    def displayLipd(self, name_ext):
-        self.master[name_ext].displayData()
+    def displayLipd(self, name):
+        """
+        Display data from target LiPD file.
+        :param name: (str) Filename
+        :return:
+        """
+        try:
+            self.master[name + '.lpd'].displayData()
+        except KeyError:
+            print("Invalid Filename")
+        return
 
     def displayLipds(self):
+        """
+        Display all LiPD files in the LiPD Library
+        :return:
+        """
         for k, v in self.master.items():
             print(k)
+        return
 
     # HELPERS
 
     def appendLiPD(self, name_ext):
+        """
+        Creates and adds a new LiPD object to the LiPD Library for the given LiPD file...
+        :param name_ext: (str) Filename with extension
+        :return:
+        """
         os.chdir(self.dir_root)
         # create a lpd object
         lipd_obj = LiPD(self.dir_root, self.dir_tmp, name_ext)
@@ -69,5 +125,4 @@ class LiPD_Library(object):
         lipd_obj.load()
         # add the lpd object to the master dictionary
         self.master[name_ext] = lipd_obj
-
-
+        return

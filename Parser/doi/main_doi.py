@@ -1,7 +1,7 @@
-from geoChronR.Parser.modules.bag import *
-from geoChronR.Parser.modules.directory import *
-from geoChronR.Parser.modules.zips import *
-from geoChronR.Parser.doi.doi_resolver import *
+from Parser.modules.bag import *
+from Parser.modules.directory import *
+from Parser.modules.zips import *
+from Parser.doi.doi_resolver import *
 
 __author__ = 'Chris Heiser'
 
@@ -21,12 +21,12 @@ def main():
     :return: None
     """
     # Enter user-chosen directory path
-    dir_root = 'ENTER_DIRECTORY_PATH_HERE'
+    dir_root = '/Users/chrisheiser1/Desktop/uni'
 
     # Find all .lpd files in current directory
     # dir: ? -> dir_root
     os.chdir(dir_root)
-    f_list = list_files('.lpd')
+    f_list = list_files('lpd')
 
     for name_ext in f_list:
         print('processing: {}'.format(name_ext))
@@ -35,7 +35,8 @@ def main():
         name = os.path.splitext(name_ext)[0]
 
         # Unzip file and get tmp directory path
-        dir_tmp = unzip(name_ext)
+        dir_tmp = create_tmp_dir()
+        unzip(name_ext, dir_tmp)
 
         # Unbag and check resolved flag. Don't run if flag exists
         if resolved_flag(open_bag(os.path.join(dir_tmp, name))):
@@ -68,6 +69,7 @@ def process_lpd(name, dir_tmp):
     dir_root = os.getcwd()
     dir_bag = os.path.join(dir_tmp, name)
     dir_data = os.path.join(dir_bag, 'data')
+    valid = True
 
     # Navigate down to jLD file
     # dir : dir_root -> dir_data
@@ -75,22 +77,21 @@ def process_lpd(name, dir_tmp):
 
     # Open jld file and read in the contents. Execute DOI Resolver.
     with open(os.path.join(dir_data, name + '.jsonld'), 'r') as jld_file:
-        jld_data = json.load(jld_file)
+        try:
+            jld_data = json.load(jld_file)
+        except ValueError:
+            valid = False
+            txt_log(dir_root,  name,'quarantine.txt', "Invalid characters. Unable to load file.")
 
-    # IS THIS EVEN RETURNING THE UPDATED JSON ??
-    jld_data = DOIResolver(dir_root, name, jld_data).main()
+    if valid:
+        # Overwrite data with new data
+        jld_data = DOIResolver(dir_root, name, jld_data).main()
+        # Open the jld file and overwrite the contents with the new data.
+        with open(os.path.join(dir_data, name + '.jsonld'), 'w+') as jld_file:
+            json.dump(jld_data, jld_file, indent=2, sort_keys=True)
 
-    # Open the jld file and overwrite the contents with the new data.
-    with open(os.path.join(dir_data, name + '.jsonld'), 'w+') as jld_file:
-        json.dump(jld_data, jld_file, indent=2, sort_keys=True)
-
-    # except ValueError:
-    #     txt_log(dir_root, 'quarantine.txt', name, "Invalid Unicode characters. Unable to load file.")
-
-    # jld_file.close()
-
-    # Open changelog. timestamp it. Prompt user for short description of changes. Close and save
-    update_changelog()
+        # Open changelog. timestamp it. Prompt user for short description of changes. Close and save
+        update_changelog()
 
     # Delete old bag files, and move files to bag root for re-bagging
     # dir : dir_data -> dir_bag

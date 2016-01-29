@@ -1,8 +1,10 @@
+import json
+import csv
+
 from Parser.modules.zips import *
 from Parser.modules.directory import *
 from Parser.modules.bag import *
-import json
-import csv
+from Parser.modules.csvs import *
 
 
 class LiPD(object):
@@ -16,10 +18,10 @@ class LiPD(object):
         self.name = os.path.splitext(name_ext)[0]
         self.dir_root = dir_root
         self.dir_tmp = dir_tmp
-        self.dir_bag = os.path.join(dir_tmp, self.name)
-        self.dir_data = os.path.join(self.dir_bag, 'data')
-        self.csv_data = {}
-        self.master_data = {}
+        self.dir_tmp_bag = os.path.join(dir_tmp, self.name)
+        self.dir_tmp_bag_data = os.path.join(self.dir_tmp_bag, 'data')
+        self.data_csv = {}
+        self.data_master = {}
 
     # OPENING
 
@@ -33,14 +35,14 @@ class LiPD(object):
     # ANALYSIS
 
     def displayCSV(self):
-        print(json.dumps(self.csv_data, indent=2))
+        print(json.dumps(self.data_csv, indent=2))
 
     def displayData(self):
         """
         Display all data for this file. Pretty print for readability.
         :return: None
         """
-        print(json.dumps(self.master_data, indent=2))
+        print(json.dumps(self.data_master, indent=2))
 
     # CLOSING
 
@@ -61,18 +63,18 @@ class LiPD(object):
     # HELPERS
 
     def addCSV(self):
-        os.chdir(self.dir_data)
+        os.chdir(self.dir_tmp_bag_data)
         # Track list of available CSV files (from paleoData[table]["filename"] in JSON)
         # filenames = []
         # loop through each table in paleoData
-        for table in self.data['paleoData']:
+        for table in self.data_master['paleoData']:
             # Append CSV filename to list
             # filenames.append(table['filename'])
             # Create CSV entry into globabl self.csv_data that contains all columns.
-            self.getCSV(table['filename'])
+            self.data_csv[table['filename']] = getCSV(table['filename'])
             # Start putting CSV data into columns using the self.csv_data as source.
-            for idx, col in table['columns']:
-                col['values'] = self.csv_data[table['filename']][idx]
+            for idx, col in enumerate(table['columns']):
+                col['values'] = self.data_csv[table['filename']][idx]
 
         os.chdir(self.dir_root)
         return
@@ -82,12 +84,12 @@ class LiPD(object):
         Remove all CSV entries from the JSON structure.
         :return: None
         """
-        os.chdir(self.dir_data)
+        os.chdir(self.dir_tmp_bag_data)
         # Loop through each table in paleoData
-        for table in self.data['paleoData']:
+        for table in self.data_master['paleoData']:
             try:
                 # try to delete the values key entry
-                del self.data['paleoData'][table]['values']
+                del self.data_master['paleoData'][table]['values']
             except ValueError:
                 # if the key doesn't exist, keep going
                 pass
@@ -108,30 +110,12 @@ class LiPD(object):
         """
         pass
 
-    def getCSV(self, filename):
-        d = {}
-        try:
-            with open(filename, 'r') as f:
-                r = csv.reader(f, delimiter=',')
-                # Create a dict with X lists corresponding to X columns
-                for idx, col in enumerate(next(r)):
-                    d[idx] = []
-                # Start iter through CSV data
-                for row in r:
-                    for idx, col in enumerate(row):
-                        # Append the cell to the correct column list
-                        d[idx].append(col)
-        except FileNotFoundError:
-            print('CSV: FileNotFound')
-        self.csv_data[filename] = d
-        return
-
     def addJSON(self):
         try:
             # Open jld file and read in the contents. Execute DOI Resolver?
-            with open(os.path.join(self.dir_data, self.name + '.jsonld'), 'r') as jld_file:
+            with open(os.path.join(self.dir_tmp_bag_data, self.name + '.jsonld'), 'r') as f:
                 # set all the json data
-                self.data = json.load(jld_file)
+                self.data_master = json.load(f)
         except FileNotFoundError:
             print("Lpd object: Load(). file not found")
         return

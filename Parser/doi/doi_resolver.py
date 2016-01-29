@@ -3,17 +3,13 @@ import json
 import requests
 import re
 import urllib.error
-from geoChronR.Parser.modules.loggers import *
 
-__author__ = 'Chris Heiser, Austin McDowell'
+from Parser.modules.loggers import *
+
+__author__ = 'Chris Heiser'
 """
 PURPOSE: Runs as a subprocess to the main parser. Use DOI id(s) to pull updated publication
 info from doi.org and overwrite file data.
-
-CHANGELOG
-Version 1.2 / 12.06.2015 / Chris
-Version 1.1 / 07.05.2015 / Chris
-Version 1.0 / 06.09.2015 / Austin
 
 Input:  Original publication dictionary
 Output: Updated publication dictionary (success), original publication dictionary (fail)
