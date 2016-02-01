@@ -40,7 +40,7 @@ class LiPD_Library(object):
         file_list = list_files('lpd')
         # Loop: Append each file to Library
         for name_ext in file_list:
-            self.appendLiPD(name_ext)
+            self.appendLipd(name_ext)
         return
 
     def loadLipd(self, name):
@@ -49,7 +49,7 @@ class LiPD_Library(object):
         :param name: (str) Filename
         :return: None
         """
-        self.appendLiPD(name + '.lpd')
+        self.appendLipd(name + '.lpd')
         return
 
     # ANALYSIS
@@ -94,7 +94,7 @@ class LiPD_Library(object):
         Overwrite LiPD files in OS with LiPD data in the current workspace.
         :return: None
         """
-        self.master[name].save()
+        self.master[name + '.lpd'].save()
         return
 
     def saveLipds(self):
@@ -111,9 +111,9 @@ class LiPD_Library(object):
         :param name: (str) Filename
         :return:
         """
-        self.master[name].remove()
+        self.master[name + '.lpd'].remove()
         try:
-            del self.master[name]
+            del self.master[name + '.lpd']
         except KeyError:
             print("Problem removing LiPD object.")
         return
@@ -128,7 +128,7 @@ class LiPD_Library(object):
 
     # HELPERS
 
-    def appendLiPD(self, name_ext):
+    def appendLipd(self, name_ext):
         """
         Creates and adds a new LiPD object to the LiPD Library for the given LiPD file...
         :param name_ext: (str) Filename with extension

@@ -39,12 +39,13 @@ def remove_csv_from_json(d_master):
     d = {}
     # Loop through each table in paleoData
     for table in d_master['paleoData']:
-        try:
-            # try to delete the values key entry
-            del d_master['paleoData'][table]['values']
-        except ValueError:
-            # if the key doesn't exist, keep going
-            pass
+        for col in table['columns']:
+            try:
+                # try to delete the values key entry
+                del col['values']
+            except KeyError:
+                # if the key doesn't exist, keep going
+                print("RemoveCSVfromJSON: Error deleting values")
     return d
 
 

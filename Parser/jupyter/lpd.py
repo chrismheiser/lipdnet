@@ -53,7 +53,7 @@ class LiPD(object):
         Display CSV and JSON data.
         :return: None
         """
-        print(json.dumps(self.data_master, indent=2))
+        print(json.dumps(self.data_json, indent=2))
 
     # CLOSING
 
@@ -69,7 +69,7 @@ class LiPD(object):
         self.data_master = remove_csv_from_json(self.data_master)
 
         # Overwrite json dictionary to file
-        write_json_to_file(self.data_master)
+        write_json_to_file(self.name_ext, self.data_master)
 
         # Cleanup directory and prep for bagit
         dir_cleanup(self.dir_tmp_bag, self.dir_tmp_bag_data)
