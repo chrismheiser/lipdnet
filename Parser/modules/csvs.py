@@ -1,11 +1,11 @@
 import csv
 
 
-def getCSV(filename):
+def get_csv_from_file(filename):
     """
     Opens the target CSV file and creates a dictionary with one list for each CSV column.
     :param filename: (str) Filename
-    :return: (dict) CSV data
+    :return: (dict) CSV data. Keys: Column number(int), Values: Column data (list)
     """
     d = {}
     try:
@@ -24,5 +24,37 @@ def getCSV(filename):
     return d
 
 
-def writeCSV(filename):
-    pass
+def write_csv_to_file(filename, d_columns):
+    """
+    Writes columns of data to a target CSV file.
+    :param filename: (str) Target CSV file
+    :param d_columns: (dict) A dictionary containing one list for every data column. Keys: int, Values: list
+    :return: None
+    """
+    l_columns = []
+    for k, v in d_columns.items():
+        l_columns.append(v)
+    rows = zip(*l_columns)
+    with open(filename, 'w+') as f:
+        w = csv.writer(f)
+        for row in rows:
+            w.writerow(row)
+    return
+
+
+def add_csv_to_json(d_paleoData):
+    """
+    Using the given paleoData dictionary from the JSON metadata, retrieve CSV data from CSV files, and match the CSV
+    data columns to their respective JSON paleoData table columns.
+    :param d_paleoData:
+    :return:
+    """
+    d = {}
+    # Loop through each table in paleoData
+    for table in d_paleoData:
+        # Create CSV entry into dictionary that contains all columns.
+        d[table['filename']] = get_csv_from_file(table['filename'])
+        # Start putting CSV data into corresponding JSON metadata columns under 'values' key.
+        for idx, col in enumerate(table['columns']):
+            col['values'] = d[table['filename']][idx]
+    return d

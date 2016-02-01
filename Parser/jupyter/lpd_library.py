@@ -2,10 +2,6 @@ from Parser.jupyter.lpd import *
 from Parser.modules.directory import *
 
 
-"""
-NEED TO CATCH KEY ERRORS WHEN ATTEMPTING TO CALL ANY FILE OR KEY IN MASTER
-"""
-
 class LiPD_Library(object):
     """
     The LiPD Library is meant to encompass a collection of LiPD file objects that are being analyzed in the current
@@ -13,9 +9,11 @@ class LiPD_Library(object):
     """
 
     def __init__(self):
-        self.dir_root = '/Users/chrisheiser1/Desktop/lpds'
+        self.dir_root = '/Users/chrisheiser1/Desktop/lpds_1'
         self.dir_tmp = create_tmp_dir()
         self.master = {}
+
+    # GETTING STARTED
 
     def setDir(self, dir_root):
         """
@@ -54,60 +52,78 @@ class LiPD_Library(object):
         self.appendLiPD(name + '.lpd')
         return
 
-    def displayLipdCSV(self, name):
+    # ANALYSIS
+
+    def showCsv(self, name):
         """
         Show CSV data from one LiPD object
         :param name: (str) Filename
         :return:
         """
         try:
-            self.master[name + '.lpd'].displayCSV()
+            self.master[name + '.lpd'].display_csv()
         except KeyError:
             print("Invalid Filename")
         return
 
-    def saveLipd(self, name):
-        """
-        Overwrite target LiPD file in OS with LiPD data in the current workspace.
-        :param name: (str) Filename
-        :return:
-        """
-        pass
-
-    def saveLipds(self):
-        """
-        Overwrite LiPD files in OS with LiPD data in the current workspace.
-        :return:
-        """
-        pass
-
-    def removeLiPD(self, name):
-        """
-        Removes target LiPD file from the workspace.
-        :param name: (str) Filename
-        :return:
-        """
-        pass
-
-    def displayLipd(self, name):
+    def showLipd(self, name):
         """
         Display data from target LiPD file.
         :param name: (str) Filename
         :return:
         """
         try:
-            self.master[name + '.lpd'].displayData()
+            self.master[name + '.lpd'].display_data()
         except KeyError:
             print("Invalid Filename")
         return
 
-    def displayLipds(self):
+    def showFiles(self):
         """
         Display all LiPD files in the LiPD Library
         :return:
         """
         for k, v in self.master.items():
             print(k)
+        return
+
+    # CLOSING
+
+    def saveLipd(self, name):
+        """
+        Overwrite LiPD files in OS with LiPD data in the current workspace.
+        :return: None
+        """
+        self.master[name].save()
+        return
+
+    def saveLipds(self):
+        """
+        Overwrite target LiPD file in OS with LiPD data in the current workspace.
+        :return: None
+        """
+        for k, v in self.master.items():
+            self.master[k].save()
+
+    def removeLipd(self, name):
+        """
+        Removes target LiPD file from the workspace. Delete tmp folder, then delete object.
+        :param name: (str) Filename
+        :return:
+        """
+        self.master[name].remove()
+        try:
+            del self.master[name]
+        except KeyError:
+            print("Problem removing LiPD object.")
+        return
+
+    def removeLipds(self):
+        """
+        Clear the workspace. Empty the master dictionary.
+        :return:
+        """
+        self.master = {}
         return
 
     # HELPERS

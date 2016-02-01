@@ -2,6 +2,7 @@ from Parser.modules.bag import *
 from Parser.modules.directory import *
 from Parser.modules.zips import *
 from Parser.doi.doi_resolver import *
+from Parser.modules.jsons import *
 
 __author__ = 'Chris Heiser'
 
@@ -69,6 +70,7 @@ def process_lpd(name, dir_tmp):
     dir_root = os.getcwd()
     dir_bag = os.path.join(dir_tmp, name)
     dir_data = os.path.join(dir_bag, 'data')
+    jld_data = {}
     valid = True
 
     # Navigate down to jLD file
@@ -76,9 +78,9 @@ def process_lpd(name, dir_tmp):
     os.chdir(dir_data)
 
     # Open jld file and read in the contents. Execute DOI Resolver.
-    with open(os.path.join(dir_data, name + '.jsonld'), 'r') as jld_file:
+    with open(os.path.join(dir_data, name + '.jsonld'), 'r') as f:
         try:
-            jld_data = json.load(jld_file)
+            jld_data = json.load(f)
         except ValueError:
             valid = False
             txt_log(dir_root,  name,'quarantine.txt', "Invalid characters. Unable to load file.")
@@ -87,8 +89,7 @@ def process_lpd(name, dir_tmp):
         # Overwrite data with new data
         jld_data = DOIResolver(dir_root, name, jld_data).main()
         # Open the jld file and overwrite the contents with the new data.
-        with open(os.path.join(dir_data, name + '.jsonld'), 'w+') as jld_file:
-            json.dump(jld_data, jld_file, indent=2, sort_keys=True)
+        write_json_to_file(os.path.join(dir_data, name + '.jsonld'), jld_data)
 
         # Open changelog. timestamp it. Prompt user for short description of changes. Close and save
         update_changelog()

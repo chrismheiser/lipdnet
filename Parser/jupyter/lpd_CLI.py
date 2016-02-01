@@ -16,7 +16,9 @@ class LiPD_CLI(cmd.Cmd):
         cmd.Cmd.__init__(self)
         self.llib = LiPD_Library()
 
-    def do_setCWD(self, path):
+    # GETTING STARTED
+
+    def do_setDir(self, path):
         """
         Set the current working directory by providing a directory path.
         (ex. /Path/to/files)
@@ -38,19 +40,29 @@ class LiPD_CLI(cmd.Cmd):
         """
         self.llib.loadLipds()
 
-    def do_displayLipd(self, filename):
+    # ANALYSIS
+
+    def do_showCsv(self, filename):
+        """
+        Show CSV data for one LiPD
+        :param filename:
+        :return:
+        """
+        self.llib.showCsv(filename)
+
+    def do_showLipd(self, filename):
         """
         Display the contents of the specified LiPD file. (Must be previously loaded into the workspace)
         (ex. displayLiPD NAm-ak000.lpd)
         :param filename: (str) LiPD filename
         """
-        self.llib.displayLipd(filename)
+        self.llib.showLipd(filename)
 
-    def do_displayFiles(self, arg):
+    def do_showFiles(self, arg):
         """
         Prints filenames of all LiPD files currently loaded in the workspace.
         """
-        self.llib.displayLipds()
+        self.llib.showFiles()
 
     def do_saveLipd(self, filename):
         """
@@ -66,15 +78,31 @@ class LiPD_CLI(cmd.Cmd):
         """
         self.llib.saveLipds()
 
+    def do_removeLipd(self, filename):
+        """
+        Remove LiPD object from library
+        :return: None
+        """
+        self.llib.removeLipd(filename)
+        return
+
+    def do_removeLipds(self, arg):
+        """
+        Remove all LiPD objects from library.
+        :return: None
+        """
+        self.llib.removeLipds()
+        return
+
     def do_quit(self, arg):
         """
         Quit and exit the program. (Does not save changes)
         """
-        self.llib.close()
+        # self.llib.close()
         return True
 
-    def do_displayCSV(self, filename):
-        self.llib.displayLipdCSV(filename)
+    def do_showCSV(self, filename):
+        self.llib.showCsv(filename)
 
 
 # if __name__ == '__main__':
