@@ -1,23 +1,19 @@
 # from tkinter import filedialog
 # import tkinter
+import csv
+import copy
+
 import xlrd
 import logging
 
-from geoChronR.Parser.under_construction.flattener.flatten import *
-from geoChronR.Parser.doi.doi_resolver import *
-from geoChronR.Parser.modules.directory import *
-from geoChronR.Parser.modules.zips import *
-from geoChronR.Parser.modules.bag import *
-
-from collections import OrderedDict
-import csv
-import json
-import os
-import copy
+from Parser.doi.doi_resolver import *
+from Parser.modules.directory import *
+from Parser.modules.zips import *
+from Parser.modules.bag import *
 
 
 # GLOBALS
-EMPTY = ['', ' ', None, 'na', 'nan']
+EMPTY = ['', ' ', None, 'na', 'n/a', 'nan', '?']
 
 
 def main():

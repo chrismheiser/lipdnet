@@ -1,16 +1,23 @@
 import json
 
-EMPTY = ['', ' ', None, 'n/a', 'na', 'nan']
+import demjson
+
+EMPTY = ['', ' ', None, 'na', 'n/a', 'nan', '?']
 
 
 def write_json_to_file(filename, json_data):
     """
     Write all JSON in python dictionary to a new json file.
-    :param json_data: JSON data to be written
+    :param filename: (str) Target File
+    :param json_data: (dict) JSON data
     :return: None
     """
-    with open(filename, 'w+') as f:
-        json.dump(json_data, f, indent=2, sort_keys=True)
+    # Attempt to sort json keys before calling demjson
+    json_data = json.dumps(json_data, sort_keys=True)
+    # Use demjson to maintain unicode characters in output
+    json_bin = demjson.encode(json_data, encoding='utf-8', compactly=False)
+    # Write json to file
+    open(filename, "wb").write(json_bin)
     return
 
 
@@ -18,7 +25,7 @@ def import_json_from_file(filename):
     """
     Import the JSON data from target file.
     :param filename: (str) Target File
-    :return: (dict) Dictionary of JSON data
+    :return: (dict) JSON data
     """
     d = {}
     try:
@@ -31,14 +38,15 @@ def import_json_from_file(filename):
     return d
 
 
-def remove_csv_from_json(d_master):
+def remove_csv_from_json(d):
     """
     Remove all CSV data 'values' entries from paleoData table in the JSON structure.
+    :param d: (dict) JSON data
     :return: (dict) Metadata dictionary without CSV values
     """
     d = {}
     # Loop through each table in paleoData
-    for table in d_master['paleoData']:
+    for table in d['paleoData']:
         for col in table['columns']:
             try:
                 # try to delete the values key entry
@@ -56,6 +64,9 @@ def remove_empties(d):
     :return:
     """
     for x in list(d.keys()):
+        # Remove any empty entries
         if d[x] in EMPTY:
             del d[x]
+        # Removes trailing new line characters
+        d[x] = d[x].rstrip()
     return

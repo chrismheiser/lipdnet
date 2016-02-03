@@ -6,19 +6,10 @@ from Parser.modules.jsons import *
 
 __author__ = 'Chris Heiser'
 
-"""
-Basic Process:
-Take .lpd file(s) that have been bagged with Bagit, and compressed (zip). Uncompress and unbag,
-read in the DOI from the jsonld file, invoke DOI resolver script, retrieve doi.org info with given DOI,
-update jsonld file, Bag the files, and compress the Bag. Output a txt log file with names and errors of
-problematic files.
-
-"""
-
 
 def main():
     """
-    Main function that controls the script. Take in directory containing the .lpd file(s). Loop for each file.
+    Controls the script. Take in directory containing the .lpd file(s). Loop once for each file.
     :return: None
     """
     # Enter user-chosen directory path
@@ -61,7 +52,7 @@ def main():
 
 def process_lpd(name, dir_tmp):
     """
-    Opens up a jsonld file, invokes doi_resolver, closes file, updates changelog, cleans directory, and makes new bag.
+    Opens up json file, invokes doi_resolver, closes file, updates changelog, cleans directory, and makes new bag.
     :param name: (str) Name of current .lpd file
     :param dir_tmp: (str) Path to tmp directory
     :return: none

@@ -7,18 +7,17 @@ import urllib.error
 from Parser.modules.loggers import *
 
 __author__ = 'Chris Heiser'
-"""
-PURPOSE: Runs as a subprocess to the main parser. Use DOI id(s) to pull updated publication
-info from doi.org and overwrite file data.
 
-Input:  Original publication dictionary
-Output: Updated publication dictionary (success), original publication dictionary (fail)
+EMPTY = ['', ' ', None, 'na', 'n/a', 'nan', '?']
 
-"""
-
-EMPTY = ['', ' ']
 
 class DOIResolver(object):
+    """
+    Use DOI id(s) to pull updated publication info from doi.org and overwrite file data.
+
+    Input:  Original publication dictionary
+    Output: Updated publication dictionary (success), original publication dictionary (fail)
+    """
 
     def __init__(self, dir_root, name, root_dict):
         """
@@ -191,9 +190,9 @@ class DOIResolver(object):
     def get_data(self, doi_id, idx):
         """
         Resolve DOI and compile all attributes into one dictionary
-        :param pub_dict: (dict) Original publication dictionary
         :param doi_id: (str)
-        :return: (dict) Update publication dictionary
+        :param idx: (int) Publication index
+        :return: (dict) Updated publication dictionary
         """
 
         tmp_dict = self.root_dict['pub'][0].copy()
