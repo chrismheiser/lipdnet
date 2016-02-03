@@ -16,9 +16,8 @@ from Parser.modules.bag import *
 EMPTY = ['', ' ', None, 'na', 'n/a', 'nan', '?']
 
 
-def main():
+def excel(dir_root):
 
-    dir_root = 'SET_DIRECTORY_PATH_HERE'
     os.chdir(dir_root)
 
     # Ask user if they want to run the Chronology sheets or flatten the JSON files.
@@ -1230,5 +1229,6 @@ def get_chron_data(temp_sheet, row, total_vars):
     return data_row
 
 
-if __name__ == '__main__':
-    main()
+if __name__ == '__excel__':
+    excel()
+

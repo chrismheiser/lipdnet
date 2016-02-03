@@ -30,8 +30,8 @@ class LiPD(object):
 
         # Import JSON into object
         os.chdir(self.dir_tmp_bag_data)
-        self.data_master = import_json_from_file(self.name + '.jsonld')
-        self.data_json = import_json_from_file(self.name + '.jsonld')
+        self.data_master = read_json_from_file(self.name + '.jsonld')
+        self.data_json = read_json_from_file(self.name + '.jsonld')
 
         # Import CSV into JSON
         self.data_csv = add_csv_to_json(self.data_master['paleoData'])

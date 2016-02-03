@@ -7,12 +7,41 @@ EMPTY = ['', ' ', None, 'na', 'n/a', 'nan', '?']
 BAD = ['\n']
 
 
-def cast_csvs():
+def forward(d):
+    pd = {}
+
+    # create paleodata with table names as keys
+    for table in d['paleoData']:
+        pd[table['tableName']] = table
+
+    for
+
+    return d
+
+
+def backward(d):
+
+    return d
+
+
+def main():
     os.chdir('/Users/chrisheiser1/Desktop')
-    d = read_csv_from_file('test.csv')
-    for k,v in d.items():
-        for i in v:
-            print(type(i))
+    d = read_json_from_file('test.json')
+
+    print("ORIGINAL")
+    print(d)
+    print('\n')
+
+    print("FORWARD")
+    f = forward(d)
+    print(f)
+    print("\n")
+
+    print("BACKWARD")
+    b = backward(f)
+    print(b)
+    print("\n")
+
     return
 
-cast_csvs()
+main()

@@ -22,7 +22,6 @@ def read_csv_from_file(filename):
                         d[idx].append(float(col))
                     except ValueError:
                         d[idx].append(col)
-
     except FileNotFoundError:
         print('CSV: FileNotFound')
     return d

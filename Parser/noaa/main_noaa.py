@@ -1,14 +1,13 @@
-from geoChronR.Parser.modules.zips import *
-from geoChronR.Parser.modules.directory import *
-from geoChronR.Parser.noaa.lpd_noaa import *
-import json
+from Parser.modules.zips import *
+from Parser.modules.jsons import *
+from Parser.modules.directory import *
+from Parser.noaa.lpd_noaa import *
 
 __author__ = 'Chris Heiser'
 
 
-def main():
-    # Enter user-chosen directory path
-    dir_root = 'ENTER_DIRECTORY_PATH_HERE'
+def noaa(dir_root):
+
     os.chdir(dir_root)
 
     # Run lpd_noaa or noaa_lpd ?
@@ -18,7 +17,7 @@ def main():
     # if ans == 1:
 
     # Find all needed files in current directory
-    f_list = list_files('.lpd')
+    f_list = list_files('lpd')
 
     # Create the output folder
     if not os.path.exists(os.path.join(dir_root, 'noaa')):
@@ -32,7 +31,8 @@ def main():
         name = os.path.splitext(name_ext)[0]
 
         # Unzip file and get tmp directory path
-        dir_tmp = unzip(name_ext)
+        dir_tmp = create_tmp_dir()
+        unzip(name_ext, dir_tmp)
 
         # Process file
         if dir_tmp:
@@ -70,9 +70,8 @@ def process_lpd(name, dir_tmp):
     os.chdir(dir_data)
 
     # Open file and execute conversion script
-    with open(os.path.join(dir_data, name + '.jsonld'), 'r+') as jld_file:
-        jld_data = json.load(jld_file)
-        NOAA(dir_root, name, jld_data).main()
+    d = read_json_from_file(os.path.join(dir_data, name + '.jsonld'))
+    NOAA(dir_root, name, d).main()
 
     # except ValueError:
     #     txt_log(dir_root, 'quarantine.txt', name, "Invalid Unicode characters. Unable to load file.")
@@ -86,5 +85,6 @@ def process_lpd(name, dir_tmp):
 
     return
 
-if __name__ == '__main__':
-    main()
+if __name__ == '__noaa__':
+    noaa()
+

@@ -7,13 +7,11 @@ from Parser.modules.jsons import *
 __author__ = 'Chris Heiser'
 
 
-def main():
+def doi(dir_root):
     """
     Controls the script. Take in directory containing the .lpd file(s). Loop once for each file.
     :return: None
     """
-    # Enter user-chosen directory path
-    dir_root = '/Users/chrisheiser1/Desktop/uni'
 
     # Find all .lpd files in current directory
     # dir: ? -> dir_root
@@ -97,5 +95,5 @@ def process_lpd(name, dir_tmp):
     return
 
 
-if __name__ == '__main__':
-    main()
+if __name__ == '__doi__':
+    doi()

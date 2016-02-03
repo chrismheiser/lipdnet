@@ -1,4 +1,3 @@
-__author__ = 'chrisheiser1'
 from collections import OrderedDict
 import json
 import os
@@ -6,59 +5,11 @@ import csv
 import re
 import copy
 
-"""
-README
+__author__ = 'chrisheiser1'
 
-Accepts files with UTF-8 encoding.
-Convert a NOAA text file into a lipd file. CSV files will output if chronology or data sections are available.
-
-How to use:
- 1. Run the program
- 2. Select directory on your computer that contains NOAA text files
- 3. The console will show all files that are being processed
- 4. When complete, the output files are in the directory you selected in an "output" folder.
-"""
 
 """
-CHANGE LOG
-
-    Revision 0
-    DONE - Strip the # and the white space on the left and right of strings
-    DONE - Try to capture all the info with ":", because that's data we want
-    DONE - Figure out how to capture the data cols and maybe put it in a list(?)
-    DONE - do you need to lowercase all the strings?
-    DONE - Piece together all the dictionaries into the final dictionaries
-    DONE - Determine which info from the NOAA text file that we want to keep (waiting on Nick)
-    DONE - get rid of K-V's that are in the dictionary blocks. It's adding duplicates at the root level.
-    DONE - Get rid of blank values. Stop them from adding to the dictionary
-    DONE - Figure out what to do with coreLength val and unit
-
-    Revision 1
-    DONE - Decide what to do with Chron data columns
-    DONE - Capture variables section and use it later to cross-check the data section
-    DONE - Output Data columns to CSV
-    DONE - Strip '\n' from lines, and rstrip() also
-    DONE - Data columns are overwriting each other
-    DONE - Convert all names to JSONLD naming (method to convert to camel casing)
-    DONE - Fix case where Variables section doesn't have double ## marks
-    DONE - update to have same measurements columns as old format
-    DONE - update to have consistent naming as old format
-    DONE - add meastablename and filename (csv) fields
-    DONE - change the formatting for the funding block. new structure
-    DONE - description and notes section needs special parsing
-    DONE - yamalia - fix values that span multiple lines (i.e. abstract, description and notes)
-    DONE - account for elevations that are a range and not just a single number
-    DONE - parse lat and long data into the new geojson format, include point and multiPoint cases
-    DONE - handle multiple publication sections
-    DONE - Test compatibility on all LMR files
-    DONE - make sure number values are being converted from str to float
-    - remove "in" when units are in format "in cm" to make it look cleaner
-
-
-    # How to properly loop with enumerate
-    for index, val in enumerate(values):
-        values[index] = val.lstrip()
-
+Convert a NOAA text file into a lipd file. CSV files will be created if chronology or data sections are available.
 """
 
 

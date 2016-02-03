@@ -13,7 +13,7 @@ def write_json_to_file(filename, json_data):
     :return: None
     """
     # Attempt to sort json keys before calling demjson
-    json_data = json.dumps(json_data, sort_keys=True)
+    # json_data = json.dumps(json_data, sort_keys=True)
     # Use demjson to maintain unicode characters in output
     json_bin = demjson.encode(json_data, encoding='utf-8', compactly=False)
     # Write json to file
@@ -21,10 +21,10 @@ def write_json_to_file(filename, json_data):
     return
 
 
-def import_json_from_file(filename):
+def read_json_from_file(filename):
     """
     Import the JSON data from target file.
-    :param filename: (str) Target File
+    :param filename: (str) Target Files
     :return: (dict) JSON data
     """
     d = {}
@@ -32,7 +32,7 @@ def import_json_from_file(filename):
         # Open json file and read in the contents. Execute DOI Resolver?
         with open(filename, 'r') as f:
             # Load json into dictionary
-            d = json.load(f)
+            d = demjson.decode(json.load(f))
     except FileNotFoundError:
         print("LiPD object: Load(). file not found")
     return d
@@ -59,14 +59,13 @@ def remove_csv_from_json(d):
 
 def remove_empties(d):
     """
-    Remove empty entries from a dictionary.
+    Remove new line characters, carriage returns, and empty entries.
     :param d: (dict)
-    :return:
+    :return: (dict)
     """
-    for x in list(d.keys()):
-        # Remove any empty entries
-        if d[x] in EMPTY:
-            del d[x]
-        # Removes trailing new line characters
-        d[x] = d[x].rstrip()
-    return
+    for i in list(d.keys()):
+        if d[i] is not None:
+            d[i] = d[i].rstrip()
+        if d[i] in EMPTY:
+            del d[i]
+    return d

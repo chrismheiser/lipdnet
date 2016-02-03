@@ -1,4 +1,4 @@
-from Parser.jupyter.lpd import *
+from Parser.jupyter.LiPD import *
 from Parser.modules.directory import *
 
 
