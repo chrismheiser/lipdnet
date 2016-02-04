@@ -12,8 +12,6 @@ def write_json_to_file(filename, json_data):
     :param json_data: (dict) JSON data
     :return: None
     """
-    # Attempt to sort json keys before calling demjson
-    # json_data = json.dumps(json_data, sort_keys=True)
     # Use demjson to maintain unicode characters in output
     json_bin = demjson.encode(json_data, encoding='utf-8', compactly=False)
     # Write json to file
@@ -59,13 +57,38 @@ def remove_csv_from_json(d):
 
 def remove_empties(d):
     """
-    Remove new line characters, carriage returns, and empty entries.
-    :param d: (dict)
-    :return: (dict)
+    Go through N number of nested data types and remove all empty entries. Recursion
+    :param d: (any) Dictionary, List, or String of data
+    :return: (any) Returns a same data type as original, but without empties.
     """
-    for i in list(d.keys()):
-        if d[i] is not None:
-            d[i] = d[i].rstrip()
-        if d[i] in EMPTY:
-            del d[i]
+    # Int types don't matter. Return as-is.
+    if not isinstance(d, int):
+        if isinstance(d, str) or d is None:
+            try:
+                # Remove new line characters and carriage returns
+                d = d.rstrip()
+            except AttributeError:
+                # None types don't matter. Keep going.
+                pass
+            if d in EMPTY:
+                # Substitute empty entries with ""
+                d = ''
+        elif isinstance(d, list):
+            # Recurse once for each item in the list
+            for i, v in enumerate(d):
+                d[i] = remove_empties(d[i])
+            # After substitutions, remove and empty entries.
+            for i in d:
+                if not i:
+                    d.remove(i)
+        elif isinstance(d, dict):
+            # First, go through and substitute "" (empty string) entry for any values in EMPTY
+            for k, v in d.items():
+                d[k] = remove_empties(v)
+            # After substitutions, go through and delete the key-value pair.
+            # This has to be done after we come back up from recursion because we cannot pass keys down.
+            for key in list(d.keys()):
+                if not d[key]:
+                    del d[key]
+
     return d

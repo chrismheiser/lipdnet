@@ -1,10 +1,11 @@
 from collections import OrderedDict
-import json
 import requests
 import re
 import urllib.error
 
 from Parser.modules.loggers import *
+from Parser.modules.jsons import *
+
 
 __author__ = 'Chris Heiser'
 
@@ -51,8 +52,8 @@ class DOIResolver(object):
                 # Quarantine the flagged file and log it
                 txt_log(self.dir_root, self.name, "quarantine.txt", "Publication #" + str(idx) + ": DOI not provided")
                 self.root_dict['pub'][idx]['pubDataUrl'] = 'Manually Entered'
-            self.remove_empties(idx)
-        return self.root_dict
+            # self.remove_empties(idx)
+        return remove_empties(self.root_dict)
 
     @staticmethod
     def clean(doi_string):

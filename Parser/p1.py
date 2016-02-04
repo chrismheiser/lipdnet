@@ -4,7 +4,6 @@ from Parser.modules.jsons import *
 
 
 EMPTY = ['', ' ', None, 'na', 'n/a', 'nan', '?']
-BAD = ['\n']
 
 
 def forward(d):
