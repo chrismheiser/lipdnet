@@ -1,4 +1,5 @@
 import json
+import copy
 
 import demjson
 
@@ -28,9 +29,9 @@ def read_json_from_file(filename):
     d = {}
     try:
         # Open json file and read in the contents. Execute DOI Resolver?
-        with open(filename, 'r') as f:
+        # with open(filename, 'r') as f:
             # Load json into dictionary
-            d = demjson.decode(json.load(f))
+        d = demjson.decode_file(filename)
     except FileNotFoundError:
         print("LiPD object: Load(). file not found")
     return d
@@ -91,4 +92,64 @@ def remove_empties(d):
                 if not d[key]:
                     del d[key]
 
+    return d
+
+
+def old_to_new_structure(d):
+    """
+    Restructure JSON to the new format. Table and columns referenced by name, not index. (dictionaries)
+    :param d:(dict) JSON metadata
+    :return: (dict) JSON metadata
+    """
+    # PaleoData dict
+    tmp_p = {}
+
+    for table in d['paleoData']:
+        # All tables, all columns, table name
+        tmp_t = {}
+        tmp_c = {}
+        t_name = table['paleoDataTableName']
+
+        # Restructure columns into tmp_c
+        for col in table['columns']:
+            c_name = col['parameter']
+            tmp_c[c_name] = col
+
+        # Move table strings into tmp_t
+        for k, v in table.items():
+            if isinstance(v, str):
+                tmp_t[k] = v
+
+        # Move new column structure to table
+        tmp_t['columns'] = copy.deepcopy(tmp_c)
+
+        # Move table into tmp_p
+        tmp_p[t_name] = copy.deepcopy(tmp_t)
+
+    # Overwrite original paleoData dictionary with new dictionary
+    d['paleoData'] = tmp_p
+    return d
+
+
+def new_to_old_structure(d):
+    """
+    Restructure JSON to the old format. Table and columns are indexed by numbers. (lists)
+    :param d:(dict) JSON metadata
+    :return: (dict) JSON metadata
+    """
+    # PaleoData dict
+    tmp_p = []
+
+    for k, v in d['paleoData'].items():
+        tmp_c = []
+        # For each column, append the value, forget the key.
+        for i, e in v['columns'].items():
+            tmp_c.append(e)
+        # Replace the old column dict with the new column list
+        v['columns'] = copy.deepcopy(tmp_c)
+        # Append the table to the PaleoData Dict to the list, forget the key.
+        tmp_p.append(v)
+
+    # Overwrite original paleoData dictionary with new dictionary
+    d['paleoData'] = tmp_p
     return d

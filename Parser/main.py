@@ -5,8 +5,8 @@ from Parser.noaa.main_noaa import *
 
 def main():
     """
-    Use to run any of the subprograms. No need to mess with all the files. Set the directory and choose which
-    program to run
+    Simple commmand prompt. Use to run any of the subprograms.
+    No need to mess with all the subprogram files. Set the directory and choose which program to run.
     """
 
     directory = '/Users/chrisheiser1/Desktop/lpds_1'
