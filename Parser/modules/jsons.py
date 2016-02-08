@@ -110,9 +110,12 @@ def old_to_new_structure(d):
         tmp_c = {}
         t_name = table['paleoDataTableName']
 
+        # paleoDataTableName and variableName are current
+        # tableName and parameter are deprecated
+
         # Restructure columns into tmp_c
         for col in table['columns']:
-            c_name = col['parameter']
+            c_name = col['variableName']
             tmp_c[c_name] = col
 
         # Move table strings into tmp_t

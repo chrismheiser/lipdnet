@@ -33,6 +33,8 @@ class LiPD(object):
         self.data_master = read_json_from_file(self.name + '.jsonld')
         self.data_json = read_json_from_file(self.name + '.jsonld')
 
+        # Switch JSON structure?
+
         # Import CSV into JSON
         self.data_csv = add_csv_to_json(self.data_master['paleoData'])
         os.chdir(self.dir_root)
@@ -67,6 +69,8 @@ class LiPD(object):
 
         # Remove CSV data from json
         self.data_master = remove_csv_from_json(self.data_master)
+
+        # Switch json structure?
 
         # Overwrite json dictionary to file
         write_json_to_file(self.name_ext, self.data_master)
