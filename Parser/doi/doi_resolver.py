@@ -53,7 +53,7 @@ class DOIResolver(object):
                 txt_log(self.dir_root, self.name, "quarantine.txt", "Publication #" + str(idx) + ": DOI not provided")
                 self.root_dict['pub'][idx]['pubDataUrl'] = 'Manually Entered'
             # self.remove_empties(idx)
-        return remove_empties(self.root_dict)
+        return remove_empty_fields(self.root_dict)
 
     @staticmethod
     def clean(doi_string):

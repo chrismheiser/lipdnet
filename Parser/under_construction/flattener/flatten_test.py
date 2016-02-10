@@ -207,15 +207,13 @@ def dive(dict_in, current, overall):
 
 
 # Main function.
-def run():
+def run(data):
     current = []
     overall = []
-    json_path = 'test.jsonld'
-    json_data = open(json_path)
-    data = json.load(json_data)
+    # json_path = 'test.jsonld'
+    # json_data = open(json_path)
+    # data = json.load(json_data)
     final = dive(data, current, overall)
-    for i in final:
-        print(i)
-    json_data.close()
-
-run()
+    # for i in final:
+    #     print(i)
+    return final

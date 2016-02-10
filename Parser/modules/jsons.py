@@ -56,7 +56,7 @@ def remove_csv_from_json(d):
     return d
 
 
-def remove_empties(d):
+def remove_empty_fields(d):
     """
     Go through N number of nested data types and remove all empty entries. Recursion
     :param d: (any) Dictionary, List, or String of data
@@ -77,7 +77,7 @@ def remove_empties(d):
         elif isinstance(d, list):
             # Recurse once for each item in the list
             for i, v in enumerate(d):
-                d[i] = remove_empties(d[i])
+                d[i] = remove_empty_fields(d[i])
             # After substitutions, remove and empty entries.
             for i in d:
                 if not i:
@@ -85,7 +85,7 @@ def remove_empties(d):
         elif isinstance(d, dict):
             # First, go through and substitute "" (empty string) entry for any values in EMPTY
             for k, v in d.items():
-                d[k] = remove_empties(v)
+                d[k] = remove_empty_fields(v)
             # After substitutions, go through and delete the key-value pair.
             # This has to be done after we come back up from recursion because we cannot pass keys down.
             for key in list(d.keys()):

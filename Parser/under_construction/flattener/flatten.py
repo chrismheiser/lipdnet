@@ -7,10 +7,6 @@ The flattener takes in the final dictionary (LIPD) from the parser, flattens it,
 new flattened structure back to the parser.
 A flattened structure is a list of paths.
 
-Changelog:
-Version 1.1 / 12.09.2015 / Chris
-Version 1.0 / ?? / Chris
-
 Input: (dict) JSON data
 Output: (list of str) Full path names (ie. GEO-PROPERTIES-LOCATION:USA)
 
@@ -21,7 +17,6 @@ class Flatten(object):
 
     def __init__(self, dict_in):
         self.dict_in = dict_in
-        pass
 
     def count_dicts(self, list_in):
         """
