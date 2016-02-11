@@ -1,7 +1,6 @@
 # from tkinter import filedialog
 # import tkinter
 import csv
-import copy
 
 import xlrd
 import logging

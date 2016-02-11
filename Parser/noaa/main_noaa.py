@@ -1,6 +1,5 @@
 from Parser.modules.zips import *
 from Parser.modules.jsons import *
-from Parser.modules.directory import *
 from Parser.noaa.lpd_noaa import *
 
 __author__ = 'Chris Heiser'
@@ -89,7 +88,4 @@ def process_lpd(name, dir_tmp):
     shutil.rmtree(dir_tmp)
 
     return
-
-if __name__ == '__noaa__':
-    noaa()
 

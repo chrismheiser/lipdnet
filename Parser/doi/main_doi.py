@@ -2,7 +2,6 @@ from Parser.modules.bag import *
 from Parser.modules.directory import *
 from Parser.modules.zips import *
 from Parser.doi.doi_resolver import *
-from Parser.modules.jsons import *
 
 __author__ = 'Chris Heiser'
 
@@ -97,5 +96,3 @@ def process_lpd(name, dir_tmp):
     return
 
 
-if __name__ == '__doi__':
-    doi()
