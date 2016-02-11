@@ -64,6 +64,17 @@ class LiPD_CLI(cmd.Cmd):
         """
         self.llib.showFiles()
 
+    def do_map(self, filename):
+        """
+
+        :param filename:
+        :return:
+        """
+
+        self.llib.showMap(filename)
+
+    # CLOSING
+
     def do_saveLipd(self, filename):
         """
         Saves changes made to the target LiPD file.
@@ -100,9 +111,6 @@ class LiPD_CLI(cmd.Cmd):
         """
         # self.llib.close()
         return True
-
-    def do_showCSV(self, filename):
-        self.llib.showCsv(filename)
 
 
 # if __name__ == '__main__':

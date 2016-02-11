@@ -9,7 +9,8 @@ __author__ = 'Chris Heiser'
 
 def doi(dir_root):
     """
-    Controls the script. Take in directory containing the .lpd file(s). Loop once for each file.
+    Main function that controls the script. Take in directory containing the .lpd file(s). Loop for each file.
+    :param dir_root: (str) Directory location of target files
     :return: None
     """
 
@@ -17,6 +18,7 @@ def doi(dir_root):
     # dir: ? -> dir_root
     os.chdir(dir_root)
     f_list = list_files('lpd')
+    print("Found " + str(len(f_list)) + " LiPD files")
 
     for name_ext in f_list:
         print('processing: {}'.format(name_ext))

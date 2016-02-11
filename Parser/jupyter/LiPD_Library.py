@@ -1,5 +1,8 @@
+import random
+
 from Parser.jupyter.LiPD import *
 from Parser.modules.directory import *
+from Parser.modules.google import *
 
 
 class LiPD_Library(object):
@@ -9,7 +12,7 @@ class LiPD_Library(object):
     """
 
     def __init__(self):
-        self.dir_root = '/Users/chrisheiser1/Desktop/lpds_1'
+        self.dir_root = '/Users/chrisheiser1/Desktop/lipds'
         self.dir_tmp = create_tmp_dir()
         self.master = {}
 
@@ -85,6 +88,15 @@ class LiPD_Library(object):
         """
         for k, v in self.master.items():
             print(k)
+        return
+
+    def showMap(self, files):
+        f = files.split(',')
+        markers = []
+        for idx, filename in enumerate(f):
+            c = self.master[filename].data_json['geo']['geometry']['coordinates']
+            markers.append('markers=size:large|color:red|label:' + str(idx) + '|' + str(c[0]) + ',' + str(c[1]))
+        get_static_google_map('map', markers=markers)
         return
 
     # CLOSING

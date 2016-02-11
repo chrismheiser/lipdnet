@@ -1,24 +1,28 @@
-__author__ = 'chrisheiser1'
-
-"""
-
-Purpose:
-The flattener takes in the final dictionary (LIPD) from the parser, flattens it, and then returns the
-new flattened structure back to the parser.
-A flattened structure is a list of paths.
-
-Input: (dict) JSON data
-Output: (list of str) Full path names (ie. GEO-PROPERTIES-LOCATION:USA)
-
-"""
+from Parser.modules.jsons import remove_empty_fields
 
 
 class Flatten(object):
+    """
+    Flattens a nested, hierarchical dictionary into one or two levels.
+    e.g. geo_properties_location:USA
+
+    Input: (dict) JSON data
+    Output: (list of str) Paths
+
+    """
 
     def __init__(self, dict_in):
         self.dict_in = dict_in
 
-    def count_dicts(self, list_in):
+    def run(self):
+        current = []
+        master = []
+        final = self.dive(self.dict_in, current, master)
+        final = remove_empty_fields(final)
+        return final
+
+    @staticmethod
+    def count_dicts(list_in):
         """
         Count how many dictionaries are in a list
         :param list_in: (list)
@@ -30,23 +34,8 @@ class Flatten(object):
                 count += 1
         return count
 
-    def check_bottom(self, d):
-        """
-        Check if we're at the bottom of the nesting
-        :param d: (dict or list) Data structure
-        :return: (bool)
-        """
-        bottom = False
-        items = len(d)
-        count = self.count_strings(d)
-
-        # If equal, then no more nesting. Reached the bottom.
-        if count == items:
-            bottom = True
-
-        return bottom
-
-    def count_strings(self, d):
+    @staticmethod
+    def count_strings(d):
         """
         Count number of strings in data structure
         :param d: (dict or list) Any data
@@ -70,7 +59,25 @@ class Flatten(object):
 
         return count
 
-    def remove_empties(self, list_in):
+    def check_bottom(self, d):
+        """
+        Check if we're at the bottom of the nesting
+        :param d: (dict or list) Data structure
+        :return: (bool)
+        """
+        bottom = False
+        items = len(d)
+        count = self.count_strings(d)
+
+        # If equal, then no more nesting. Reached the bottom.
+        if count == items:
+            bottom = True
+
+        return bottom
+
+    # POSSIBLY USELESS. MIGHT REMOVE
+    @staticmethod
+    def remove_empties(list_in):
         """
         Remove all the empty strings from the final list
         :param list_in: (list)
@@ -84,7 +91,8 @@ class Flatten(object):
             i += 1
         return list_in
 
-    def to_string(self, list_in):
+    @staticmethod
+    def to_string(list_in):
         """
         Take the path list, and turn it into a path string
         :param list_in: (list)
@@ -92,13 +100,13 @@ class Flatten(object):
         """
 
         if len(list_in) > 2:
-            # Case 1: ['this', 'is', 'a', 'path'] becomes 'this-is-a:path'
+            # Case 1: ['this', 'is', 'a', 'path'] becomes 'this_is_a:path'
             end = len(list_in) - 2
             path = list_in[:end]
             k_v = list_in[end:]
-            path_join = '-'.join(map(str, path))
+            path_join = '_'.join(map(str, path))
             k_v_join = ':'.join(map(str, k_v))
-            return path_join + '-' + k_v_join
+            return path_join + '_' + k_v_join
 
         # Case 2: ['this', 'is'] becomes 'this:is'
         return ':'.join(map(str, list_in))
@@ -136,55 +144,55 @@ class Flatten(object):
         current.remove(k)
         return
 
-    def dive(self, dict_in, current, overall):
+    def dive(self, d, current, master):
         """
-        ACCEPT: final_dict, current path, overall path / RETURNS: overall path
-        :param dict_in:
+        Recursive dives down into the dictionary. Create paths as you go.
+
+        :param d:
         :param current:
-        :param overall:
-        :return:
+        :param master:
+        :return: (list) Master
         """
 
-        # Start by checking if the item is a dict
-        # It always should be a dictionary, but if not have a way to handle it
-        bottom = self.check_bottom(dict_in)
+        # Check if there are any more nested elements. i.e. at the bottom or not.
+        bottom = self.check_bottom(d)
 
-        # If we're at the bottom, remember to clear the current path list at the end
+        # If we're at the bottom, clear the current path list at the end
         if bottom and ('columns' not in current):
 
             # ONE EXCEPTION TO BEING AT THE BOTTOM
             # If we are on the bottom AND in the ClimateInterp section, we need to remove "climateInterpretation"
             # from the current path after we're done, or it'll ruin the paths for the remaining measurement columns
             if (len(current) != 0) and (current[len(current) - 1] == 'climateInterpretation'):
-                for k, v in dict_in.items():
-                    self.append_two_items(k, v, current, overall)
+                for k, v in d.items():
+                    self.append_two_items(k, v, current, master)
 
                 # Pop 'climateInterpretation' from our current path list
                 current.pop()
 
             # If we're at the bottom for any other case, we can clear the whole current path
             else:
-                for k, v in dict_in.items():
-                    self.append_two_items(k, v, current, overall)
+                for k, v in d.items():
+                    self.append_two_items(k, v, current, master)
 
         # If we are not at the bottom, then add whatever current paths you can, and then make another dive
         else:
             # Iterate through all the strings, ints, and floats first, because they're the easiest and should be done
             # before diving again.
-            for k, v in dict_in.items():
+            for k, v in d.items():
                 if isinstance(v, str) or isinstance(v, int) or isinstance(v, float):
-                    self.append_two_items(k, v, current, overall)
+                    self.append_two_items(k, v, current, master)
 
             # Next, unpack the dictionaries at this level.
-            for k, v in dict_in.items():
+            for k, v in d.items():
                 if isinstance(v, dict):
                     current.append(k)
-                    self.dive(v, current, overall)
+                    self.dive(v, current, master)
                     if k in current:
                         current.remove(k)
 
             # Lastly, unpack the lists at this level.
-            for k, v in dict_in.items():
+            for k, v in d.items():
                 if isinstance(v, list):
                     current.append(k)
 
@@ -195,29 +203,21 @@ class Flatten(object):
                     if k == 'columns':
                         columns = self.count_dicts(v)
                         for items in range(0, columns):
-                            self.dive(v[items], current, overall)
+                            self.dive(v[items], current, master)
                         current.clear()
 
                     # If you have a list with raw data (no nesting), then do single appends on all its items.
                     elif list_bottom:
                         for item in range(0, len(v)):
-                            self.append_one_item(v[item], current, overall)
+                            self.append_one_item(v[item], current, master)
                         current.pop()
 
                     # When there are nested items in the list, keep diving into each item
                     else:
                         for item in range(0, len(v)):
                             # Appending a space for readability purposes
-                            self.dive(v[item], current, overall)
+                            self.dive(v[item], current, master)
 
-        return overall
+        return master
 
-    def start(self):
-        """
-        Accepts: final dict / Returns: paths (list of strings)
-        :return:
-        """
-        current = []
-        overall = []
-        final = self.dive(self.dict_in, current, overall)
-        return final
+

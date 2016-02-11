@@ -17,6 +17,11 @@ EMPTY = ['', ' ', None, 'na', 'n/a', 'nan', '?']
 
 
 def excel(dir_root):
+    """
+    Parse data from Excel spreadsheets into LiPD files.
+    :param dir_root: (str) Directory location of target files
+    :return:
+    """
 
     os.chdir(dir_root)
 
@@ -36,6 +41,7 @@ def excel(dir_root):
 
     # Compile list of excel files (both types)
     f_list = list_files('.xls') + list_files('.xlsx')
+    print("Found " + str(len(f_list)) + " Excel files")
 
     # Run once for each file
     print("Processing files: ")

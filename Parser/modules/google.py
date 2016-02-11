@@ -80,8 +80,8 @@ def get_credentials():
     return credentials
 
 
-def get_static_google_map(filename_wo_ext, center=None, zoom=None, imgsize=(500,500), imgformat="jpeg",
-                          maptype="roadmap", markers=None):
+def get_static_google_map(filename_wo_ext, center=None, zoom=None, imgsize=(640,640), imgformat="jpeg",
+                          maptype="hybrid", markers=None):
     """
     Retrieve a map (image) from the static google maps server
 

@@ -9,7 +9,7 @@ def main():
     No need to mess with all the subprogram files. Set the directory and choose which program to run.
     """
 
-    directory = '/Users/chrisheiser1/Desktop/lpds_1'
+    directory = '/Users/chrisheiser1/Desktop/lipds'
 
     print("Welcome to LiPD. Type help or ? to list commands.\n" \
             "Choose an action by number:\n"\
