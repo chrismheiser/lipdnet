@@ -125,11 +125,10 @@ def get_static_google_map(filename_wo_ext, center=None, zoom=None, imgsize=(640,
 
     # required, deals with getting location from mobile device
     request += "sensor=false&"
-
-    print(request)
+    # print(request)
 
     # Option 1: save image directly to disk
-    # urllib.request.urlretrieve(request, filename_wo_extension+"."+imgformat)
+    # urllib.request.urlretrieve(request, "testing_map."+imgformat)
 
     # Option 2: read into PIL
     web_sock = urllib.request.urlopen(request)
@@ -137,20 +136,19 @@ def get_static_google_map(filename_wo_ext, center=None, zoom=None, imgsize=(640,
 
     try:
         # save image to disk, but then open it in Tkinter dialog box
-        if center is None:
-            center = ''
+        # if center is None:
+        #     center = ''
         pil_img = Image.open(img_data)
-        map = Tk()
-        map.frame = MapFrame(map, pil_img, filename_wo_ext + ' ' + str(center))
-        map.mainloop()
+        # Display image saved on disk
+        # Show image in default image viewer
+        pil_img.show()
+        # Save as jpg
+        pil_img.save(filename_wo_ext+".jpg", "JPEG")
+        # m = Tk()
+        # m.frame = MapFrame(m, pil_img, str(center))
+        # m.mainloop()
 
-    # if this cannot be read as image that, it's probably an error from the server,
+    # if this cannot be read as image, it's probably an error from the server,
     except IOError:
         print("IOError:" + str(img_data.read()))  # print error (or it may return a image showing the error"
 
-    # Display image saved on disk
-    # else:
-    #     # Show image in default image viewer
-    #     pil_img.show()
-    #     # Save as jpg
-    #     pil_img.save(filename_wo_ext+".jpg", "JPEG")

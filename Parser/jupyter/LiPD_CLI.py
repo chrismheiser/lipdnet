@@ -70,8 +70,13 @@ class LiPD_CLI(cmd.Cmd):
         :param filename:
         :return:
         """
-
-        self.llib.showMap(filename)
+        # No input given. Map all LiPDs
+        if not filename:
+            self.llib.showAllMap()
+        # One or more records given. Map them.
+        else:
+            self.llib.showMap(filename)
+        return
 
     # CLOSING
 

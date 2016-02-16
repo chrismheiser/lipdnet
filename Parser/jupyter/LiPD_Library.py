@@ -1,4 +1,5 @@
 import random
+import string
 
 from Parser.jupyter.LiPD import *
 from Parser.modules.directory import *
@@ -91,12 +92,57 @@ class LiPD_Library(object):
         return
 
     def showMap(self, files):
+        """
+        Map one or more specified LiPDs.
+        :param files: (str) Comma separated filenames
+        :return: None
+        """
         f = files.split(',')
+        chars = list(string.ascii_uppercase + string.digits)
         markers = []
-        for idx, filename in enumerate(f):
-            c = self.master[filename].data_json['geo']['geometry']['coordinates']
-            markers.append('markers=size:large|color:red|label:' + str(idx) + '|' + str(c[0]) + ',' + str(c[1]))
-        get_static_google_map('map', markers=markers)
+        # Call a single point
+        if len(f) is 1:
+            c = self.master[f[0]].data_json['geo']['geometry']['coordinates']
+            c_str = str(c[0]) + ',' + str(c[1])
+            markers.append("markers=size:large|color:red|label:1|" + c_str)
+            get_static_google_map(f[0], center=c_str, zoom=7, markers=markers)
+
+        # Call a list of markers
+        else:
+            # Pull coordinates from master list for each given filename
+            for idx, filename in enumerate(f):
+                try:
+                    c = self.master[filename].data_json['geo']['geometry']['coordinates']
+                    markers.append('markers=size:large|color:red|label:' + chars[idx] + '|' + str(c[0]) + ',' + str(c[1]))
+                    print('Key: ' + chars[idx] + '  Record: ' + str(filename))
+
+                except KeyError:
+                    print('Coordinates Error: ' + str(filename))
+
+            # Map the list of markers
+            get_static_google_map('multi-marker', markers=markers)
+        return
+
+    def showAllMap(self):
+        """
+        Map all LiPDs in the library.
+        :return: None
+        """
+        chars = list(string.ascii_uppercase + string.digits)
+        markers = []
+        n = 0
+
+        # Pull coordinates from master list for each given filename
+        for k, v in self.master.items():
+            try:
+                c = v.data_json['geo']['geometry']['coordinates']
+                markers.append('markers=size:large|color:red|label:' + chars[n] + '|' + str(c[0]) + ',' + str(c[1]))
+                print('Key: ' + chars[n] + '  Record: ' + str(k))
+                n += 1
+            except KeyError:
+                print("Coordinates Error: " + str(k))
+        # Map the list of markers
+        get_static_google_map('multi-marker', markers=markers)
         return
 
     # CLOSING
