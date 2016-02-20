@@ -30,6 +30,8 @@ class LiPD(object):
 
         # Import JSON into object
         os.chdir(self.dir_tmp_bag_data)
+
+        # If you want to switch JSON data to new structure in the future, This is the spot to do it.
         self.data_master = read_json_from_file(self.name + '.jsonld')
         self.data_json = read_json_from_file(self.name + '.jsonld')
 
@@ -56,6 +58,9 @@ class LiPD(object):
         :return: None
         """
         print(json.dumps(self.data_json, indent=2))
+
+    def get_data_master(self):
+        return self.data_master
 
     # CLOSING
 

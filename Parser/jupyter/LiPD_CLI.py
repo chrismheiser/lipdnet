@@ -42,6 +42,12 @@ class LiPD_CLI(cmd.Cmd):
 
     # ANALYSIS
 
+    def do_timeseries(self, arg):
+        self.llib.timeseries()
+
+    def do_showTimeSeries(self, arg):
+        self.llib.showTimeSeries()
+
     def do_showCsv(self, filename):
         """
         Show CSV data for one LiPD

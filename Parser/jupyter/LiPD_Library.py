@@ -4,6 +4,7 @@ import string
 from Parser.jupyter.LiPD import *
 from Parser.modules.directory import *
 from Parser.modules.google import *
+from Parser.time_series.TimeSeries import *
 
 
 class LiPD_Library(object):
@@ -16,6 +17,7 @@ class LiPD_Library(object):
         self.dir_root = '/Users/chrisheiser1/Desktop/lipds'
         self.dir_tmp = create_tmp_dir()
         self.master = {}
+        self.time_series = {}
 
     # GETTING STARTED
 
@@ -57,6 +59,16 @@ class LiPD_Library(object):
         return
 
     # ANALYSIS
+
+    def timeseries(self):
+        for k, v in self.master.items():
+            d = extract_tso_from_json(old_to_new_structure(v.get_data_master()))
+            for i, e in d.items():
+                self.time_series[i] = TimeSeries().load(e)
+
+    def showTimeSeries(self):
+        for k, v in self.time_series.items():
+            print(k)
 
     def showCsv(self, name):
         """
