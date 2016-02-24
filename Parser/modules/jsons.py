@@ -9,14 +9,17 @@ EMPTY = ['', ' ', None, 'na', 'n/a', 'nan', '?']
 def write_json_to_file(filename, json_data):
     """
     Write all JSON in python dictionary to a new json file.
-    :param filename: (str) Target File
+    :param filename: (str) Target File (name + .json)
     :param json_data: (dict) JSON data
     :return: None
     """
     # Use demjson to maintain unicode characters in output
     json_bin = demjson.encode(json_data, encoding='utf-8', compactly=False)
     # Write json to file
-    open(filename, "wb").write(json_bin)
+    try:
+        open(filename, "wb").write(json_bin)
+    except FileNotFoundError:
+        print("Error writing json: " + filename)
     return
 
 

@@ -67,3 +67,5 @@ workspace.xml
 data/*
 
 website/tmp/*
+
+Parser/p1.py

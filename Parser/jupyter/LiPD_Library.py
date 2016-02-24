@@ -1,4 +1,3 @@
-import random
 import string
 
 from Parser.jupyter.LiPD import *
@@ -64,7 +63,11 @@ class LiPD_Library(object):
         for k, v in self.master.items():
             d = extract_tso_from_json(old_to_new_structure(v.get_data_master()))
             for i, e in d.items():
+                # Verify TSNames are valid.
+                e = verify_tsnames(e)
+                write_json_to_file(i + '.json', e)
                 self.time_series[i] = TimeSeries().load(e)
+        return
 
     def showTimeSeries(self):
         for k, v in self.time_series.items():

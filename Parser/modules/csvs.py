@@ -1,7 +1,7 @@
 import csv
 
 
-def read_csv_from_file(filename):
+def read_csv_to_columns(filename):
     """
     Opens the target CSV file and creates a dictionary with one list for each CSV column.
     :param filename: (str) Filename
@@ -23,7 +23,7 @@ def read_csv_from_file(filename):
                     except ValueError:
                         d[idx].append(col)
     except FileNotFoundError:
-        print('CSV: FileNotFound')
+        print('CSV FileNotFound: ' + filename)
     return d
 
 
@@ -56,7 +56,7 @@ def add_csv_to_json(d):
     # Loop through each table in paleoData
     for table in d:
         # Create CSV entry into dictionary that contains all columns.
-        d2[table['filename']] = read_csv_from_file(table['filename'])
+        d2[table['filename']] = read_csv_to_columns(table['filename'])
         # Start putting CSV data into corresponding JSON metadata columns under 'values' key.
         for idx, col in enumerate(table['columns']):
             col['values'] = d2[table['filename']][idx]

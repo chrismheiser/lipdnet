@@ -16,14 +16,15 @@ SCOPES = 'https://www.googleapis.com/auth/drive'
 CLIENT_SECRET_FILE = 'client_secret_lipd.json'
 
 
-def get_google_csv(file_id):
+def get_google_csv(file_id, filename):
     """
     Get a specific spreadsheet file from Google Drive using its FILE_ID.
     Write the spreadsheet on the local system as a CSV.
+    TSNames ID: 1C135kP-SRRGO331v9d8fqJfa3ydmkG2QQ5tiXEHj5us
     :param file_id: (str) Google File ID of target file
-    :return: (csv) CSV File
+    :param filename: (str) Optional: Override filename from google your specified filename
+    :return: (str) CSV Filename
     """
-
     # Download link format
     link_csv = 'https://docs.google.com/spreadsheet/ccc?key=' + file_id + '&output=csv&pref=2'
 
@@ -37,19 +38,21 @@ def get_google_csv(file_id):
     # print("downloading {0}".format(file_id))
     resp, content = service._http.request(link_csv)
     if resp.status == 200:
-        filename = file_id + '.csv'
         # Regex the filename from the response object string
-        for i in resp['content-disposition'].split(';'):
-            if 'filename=' in i:
-                try:
-                    filename = re.findall(r'"([^"]*)"', i)[0]
-                except IndexError:
-                    print("No filename to use. Using File ID.")
+        if not filename:
+            for i in resp['content-disposition'].split(';'):
+                if 'filename=' in i:
+                    try:
+                        filename = re.findall(r'"([^"]*)"', i)[0]
+                    except IndexError:
+                        filename = file_id + '.csv'
+                        print("No filename to use. Using File ID.")
+
         with open(filename, 'wb+') as f:
             f.write(content)
     else:
         print('Error downloading: {0}'.format(file_id))
-    return
+    return filename
 
 
 def get_credentials():
