@@ -16,7 +16,6 @@ class LiPD_Library(object):
         self.dir_root = '/Users/chrisheiser1/Desktop/lipds'
         self.dir_tmp = create_tmp_dir()
         self.master = {}
-        self.time_series = {}
 
     # GETTING STARTED
 
@@ -58,20 +57,6 @@ class LiPD_Library(object):
         return
 
     # ANALYSIS
-
-    def timeseries(self):
-        for k, v in self.master.items():
-            d = extract_tso_from_json(old_to_new_structure(v.get_data_master()))
-            for i, e in d.items():
-                # Verify TSNames are valid.
-                e = verify_tsnames(e)
-                write_json_to_file(i + '.json', e)
-                self.time_series[i] = TimeSeries().load(e)
-        return
-
-    def showTimeSeries(self):
-        for k, v in self.time_series.items():
-            print(k)
 
     def showCsv(self, name):
         """
@@ -215,3 +200,26 @@ class LiPD_Library(object):
         # add the lpd object to the master dictionary
         self.master[name_ext] = lipd_obj
         return
+
+    def get_master(self):
+        return self.master
+
+    def load_tsos(self, d):
+        """
+        Overwrite converted TS metadata back into its matching LiPD object.
+        :param d: (dict) Metadata from TSO
+        :return:
+        """
+        # Maybe check if the LiPD object still exists
+        # (in case the user maybe deleted the object since the TSO was last created?). Just to be safe
+        for name, metadata in d.items():
+            # Add on the LiPD extension, because it's not currently there.
+            name_ext = name + '.lpd'
+            if name_ext in self.master:
+                # Important that the dataSetNames match for TSO and LiPD object. Make sure
+                self.master[name_ext].load_tso(metadata)
+            else:
+                # Create a new lipd object with whatever data we have.
+                pass
+        return
+

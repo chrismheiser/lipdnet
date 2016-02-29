@@ -1,18 +1,28 @@
-from Parser.modules.ts import *
+from Parser.modules.Convert import *
 
 
 class TimeSeries(object):
     def __init__(self):
         self.master = {}
-        self.data_set_name = ''
-        self.data_table_name = ''
-        self.number = ''
+        self.filename = ''
 
     def load(self, d):
+        """
+        Load TimeSeries metadata into object
+        :param d: (dict) TS Metadata
+        """
         self.master = d
-        self.data_table_name = self.master['paleoData_paleoDataTableName']
-        self.number = self.master['paleoData_number']
 
-    def set_filename(self, data_set_name):
-        self.data_set_name = data_set_name
+    def set_filename(self, filename):
+        """
+        Set the filename to match LiPD filename counterpart
+        :param filename: (str) LiPD Filename
+        """
+        self.filename = filename
 
+    def get_master(self):
+        """
+        Get all metadata from the object
+        :return: (dict) Metadata
+        """
+        return self.master

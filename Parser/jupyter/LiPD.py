@@ -101,6 +101,19 @@ class LiPD(object):
         shutil.rmtree(self.dir_tmp)
         return
 
+    # HELPERS
+
+    def load_tso(self, metadata):
+        """
+        Overwrite LiPD self.data_master with metadata from TSO.
+        :param metadata: (dict) Metadata from TSO
+        """
+        self.data_master = metadata
+        # self.data_csv = pass # strip the values from the metadata, and put it into { table: {col1: vals, col2: vals,..}}
+        # self.data_json = pass # strip the valies from the metadata, and set json here.
+
+
+
 
 
 
