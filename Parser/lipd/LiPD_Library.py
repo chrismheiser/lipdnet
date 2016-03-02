@@ -1,9 +1,8 @@
 import string
 
-from Parser.jupyter.LiPD import *
+from Parser.lipd.LiPD import *
 from Parser.modules.directory import *
 from Parser.modules.google import *
-from Parser.time_series.TimeSeries import *
 
 
 class LiPD_Library(object):
@@ -27,7 +26,7 @@ class LiPD_Library(object):
         """
         self.dir_root = dir_root
         os.chdir(self.dir_root)
-        print("Directory: " + str(dir_root))
+        print("Directory set to: " + str(dir_root))
         return
 
     def loadLipds(self):
@@ -53,7 +52,7 @@ class LiPD_Library(object):
         :param name: (str) Filename
         :return: None
         """
-        self.appendLipd(name + '.lpd')
+        self.appendLipd(name)
         return
 
     # ANALYSIS
@@ -65,7 +64,7 @@ class LiPD_Library(object):
         :return:
         """
         try:
-            self.master[name + '.lpd'].display_csv()
+            self.master[name].display_csv()
         except KeyError:
             print("Invalid Filename")
         return
@@ -77,7 +76,7 @@ class LiPD_Library(object):
         :return:
         """
         try:
-            self.master[name + '.lpd'].display_data()
+            self.master[name].display_data()
         except KeyError:
             print("Invalid Filename")
         return
@@ -152,7 +151,7 @@ class LiPD_Library(object):
         Overwrite LiPD files in OS with LiPD data in the current workspace.
         :return: None
         """
-        self.master[name + '.lpd'].save()
+        self.master[name].save()
         return
 
     def saveLipds(self):
@@ -169,9 +168,9 @@ class LiPD_Library(object):
         :param name: (str) Filename
         :return:
         """
-        self.master[name + '.lpd'].remove()
+        self.master[name].remove()
         try:
-            del self.master[name + '.lpd']
+            del self.master[name]
         except KeyError:
             print("Problem removing LiPD object.")
         return
@@ -208,18 +207,15 @@ class LiPD_Library(object):
         """
         Overwrite converted TS metadata back into its matching LiPD object.
         :param d: (dict) Metadata from TSO
-        :return:
         """
-        # Maybe check if the LiPD object still exists
-        # (in case the user maybe deleted the object since the TSO was last created?). Just to be safe
+
         for name, metadata in d.items():
             # Add on the LiPD extension, because it's not currently there.
             name_ext = name + '.lpd'
-            if name_ext in self.master:
-                # Important that the dataSetNames match for TSO and LiPD object. Make sure
+            # Important that the dataSetNames match for TSO and LiPD object. Make sure
+            try:
                 self.master[name_ext].load_tso(metadata)
-            else:
-                # Create a new lipd object with whatever data we have.
-                pass
-        return
+            except KeyError:
+                print("LiPD_Library: Error loading " + str(name_ext) + " from TSO")
 
+        return

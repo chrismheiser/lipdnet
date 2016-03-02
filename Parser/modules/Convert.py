@@ -1,13 +1,15 @@
 from copy import deepcopy
+import re
+import csv
 
-from Parser.time_series.TimeSeries_Library import *
-from Parser.time_series.TimeSeries import *
 from Parser.modules.google import get_google_csv
 from Parser.modules.directory import check_file_age
 
 # LiPD to TIME SERIES
 
 # GLOBALS
+EMPTY = ['', ' ', None, 'na', 'n/a', 'nan', '?']
+
 re_misc_fetch = re.compile(r'(geo_(\w+)|climateInterpretation_(\w+)|calibration_(\w+)|paleoData_(\w+))')
 re_pub_fetch = re.compile(r'pub1_(citation|year|DOI|author|publisher|title|type|volume|issue|journal|link|pubDataUrl|abstract|pages)')
 
@@ -32,7 +34,7 @@ class Convert(object):
     def __init__(self):
 
         # LiPD to TS (One file at a time)
-        self.ts_root = {}  # Root items from metadata
+        self.ts_root = {}  # Root metadata for current LiPD.
         self.ts_tsos = {}  # Individual columns. One entry represents one TSO (to be created later)
 
         # TS to LiPD (Batch Process)
@@ -105,7 +107,23 @@ class Convert(object):
             if k == 'coordinates':
                 for idx, i in enumerate(v):
                     try:
-                        self.ts_root[x[idx]] = float(i)
+                        # Assume it's a string and try to lower it. This is to check if it's in EMPTY.
+                        i = i.lower()
+                    except AttributeError:
+                        # Didn't work? Then it's probably a normal float or int, or a number with string type.
+                        continue
+                    try:
+                        # Check that our value is not in EMPTY.
+                        if i in EMPTY:
+                            # If elevation is a string or 0, don't record it
+                            if idx != 2:
+                                # If long ot lat is empty, set it as 0 instead
+                                self.ts_root[x[idx]] = 0
+                        # Value is a normal number, or string representation of a number
+                        else:
+                            # Set the value as a float into its entry.
+                            self.ts_root[x[idx]] = float(i)
+
                     except IndexError:
                         continue
             # Case 2: Any value that is a string can be added as-is
@@ -137,7 +155,7 @@ class Convert(object):
                         continue
                 # Case 2: All other string entries
                 else:
-                    if k != ('authors' or "author"):
+                    if k != 'authors' and k != 'author':
                         self.ts_root['pub' + str(idx+1) + '_' + k] = v
 
         return
@@ -148,13 +166,15 @@ class Convert(object):
         :param pub: (unknown type) Publication author structure is ambiguous
         :param idx: (int) Index number of Pub
         """
-        # Check for "author" field first. This is typically DOI response data.
         try:
+            # DOI Author data. We'd prefer to have this first.
             names = pub['author']
         except KeyError:
             try:
+                # Manually entered author data. This is second best.
                 names = pub['authors']
             except KeyError:
+                # Couldn't find any author data. Skip it altogether.
                 names = False
 
         # If there is author data, find out what type it is
@@ -164,13 +184,12 @@ class Convert(object):
             # Is it a list of dicts or a list of strings? Could be either
             # Authors: Stored as a list of dictionaries or list of strings
             if isinstance(names, list):
-                if len(names) > 1:
-                    for name in names:
-                        if isinstance(name, str):
-                            auth += name
-                        elif isinstance(name, dict):
-                            for k, v in name.items():
-                                auth += v + ';'
+                for name in names:
+                    if isinstance(name, str):
+                        auth += name + ';'
+                    elif isinstance(name, dict):
+                        for k, v in name.items():
+                            auth += v + ';'
             elif isinstance(names, str):
                 auth = names
             # Enter finished author string into target
@@ -291,7 +310,8 @@ class Convert(object):
         """
         tmp_funding = {}
         tmp_pub = {}
-        tmp_master = {'pub': [], 'geo': {'geometry': {'coordinates': []}, 'properties': {}}, 'funding': []}
+        tmp_master = {'pub': [], 'geo': {'geometry': {'coordinates': []}, 'properties': {}}, 'funding': [],
+                      'paleoData': {}}
         p_keys = ['siteName', 'pages2kRegion']
         c_keys = ['meanLat', 'meanLon', 'meanElev']
         c_vals = [0, 0, 0]
@@ -301,7 +321,11 @@ class Convert(object):
                 if 'funding' in k:
                     # Group funding items in tmp_funding by number
                     m = re_fund_valid.match(k)
-                    tmp_funding[m.group(1)][m.group(2)] = v
+                    try:
+                        tmp_funding[m.group(1)][m.group(2)] = v
+                    except KeyError:
+                        tmp_funding[m.group(1)] = {}
+                        tmp_funding[m.group(1)][m.group(2)] = v
 
                 elif 'geo' in k:
                     key = k.split('_')
@@ -323,16 +347,29 @@ class Convert(object):
                 elif 'pub' in k:
                     # Group pub items in tmp_pub by number
                     m = re_pub_valid.match(k)
-                    number = m.group(1)
+                    number = int(m.group(1)) - 1  # 0 indexed behind the scenes, 1 indexed to user.
                     key = m.group(2)
                     # Authors ("Pu, Y.; Nace, T.; etc..")
                     if key == 'author':
-                        tmp_pub[number]['author'] = self.lipd_extract_author(v)
+                        try:
+                            tmp_pub[number]['author'] = self.lipd_extract_author(v)
+                        except KeyError:
+                            tmp_pub[number] = {}
+                            tmp_pub[number]['author'] = self.lipd_extract_author(v)
                     # DOI ID
                     elif key == 'DOI':
-                        tmp_pub[number]['identifier'] = [{"id": v, "type": "doi", "url": "http://dx.doi.org/" + str(v)}]
+                        try:
+                            tmp_pub[number]['identifier'] = [{"id": v, "type": "doi", "url": "http://dx.doi.org/" + str(v)}]
+                        except KeyError:
+                            tmp_pub[number] = {}
+                            tmp_pub[number]['identifier'] = [{"id": v, "type": "doi", "url": "http://dx.doi.org/" + str(v)}]
                     # All others
-                    tmp_pub[number][key] = v
+                    else:
+                        try:
+                            tmp_pub[number][key] = v
+                        except KeyError:
+                            tmp_pub[number] = {}
+                            tmp_pub[number][key] = v
                 else:
                     # Root
                     tmp_master[k] = v
@@ -343,8 +380,9 @@ class Convert(object):
         for k, v in tmp_funding.items():
             tmp_master['funding'].append(v)
         # Get rid of elevation coordinate if one was never added.
-        if tmp_master['geo']['geometry']['coordinates'][2] == 0:
-            del tmp_master['geo']['geometry']['coordinates'][2]
+        if c_vals[2] == 0:
+            del c_vals[2]
+        tmp_master['geo']['geometry']['coordinates'] = c_vals
 
         # If we're getting root info, then there shouldn't be a dataset entry yet.
         # Create entry in object master, and set our new data to it.
@@ -376,13 +414,13 @@ class Convert(object):
 
         try:
             # If table doesn't exist yet, create it.
-            if not self.lipd_master[self.dataset][self.table]:
+            if self.table not in self.lipd_master[self.dataset]['paleoData']:
                 t_root_keys = ['filename', 'googleWorkSheetKey', 'paleoDataTableName']
-                self.lipd_master[self.dataset][self.table] = {'columns': {}}
+                self.lipd_master[self.dataset]['paleoData'][self.table] = {'columns': {}}
                 for key in t_root_keys:
                     try:
                         # Now set the root table items in our new table
-                        self.lipd_master[self.dataset][self.table][key] = self.lipd_curr_tso_data['paleoData_' + key]
+                        self.lipd_master[self.dataset]['paleoData'][self.table][key] = self.lipd_curr_tso_data['paleoData_' + key]
                     except KeyError:
                         # That's okay. Keep trying :)
                         continue
@@ -391,13 +429,13 @@ class Convert(object):
 
         try:
             # Create the column entry in the table
-            self.lipd_master[self.dataset][self.table]['columns'][self.variableName] = {}
+            self.lipd_master[self.dataset]['paleoData'][self.table]['columns'][self.variableName] = {}
             # Start inserting paleoData into the table at self.lipd_master[table][column]
             for k, v in self.lipd_curr_tso_data.items():
                 # ['paleoData', 'key']
                 m = k.split('_')
                 if 'paleoData' in m[0]:
-                    self.lipd_master[self.dataset][self.table]['columns'][self.variableName][m[1]] = v
+                    self.lipd_master[self.dataset]['paleoData'][self.table]['columns'][self.variableName][m[1]] = v
                 elif 'calibration' in m[0]:
                     tmp_cal[m[1]] = v
                 elif 'climateInterpretation' in m[0]:
@@ -408,22 +446,24 @@ class Convert(object):
 
         # If these sections had any items added to them, then add them to the column master.
         if tmp_clim:
-            self.lipd_master[self.dataset][self.table]['columns'][self.variableName]['climateInterpretation'] = tmp_clim
+            self.lipd_master[self.dataset]['paleoData'][self.table]['columns'][self.variableName]['climateInterpretation'] = tmp_clim
         if tmp_cal:
-            self.lipd_master[self.dataset][self.table]['columns'][self.variableName]['calibration'] = tmp_cal
+            self.lipd_master[self.dataset]['paleoData'][self.table]['columns'][self.variableName]['calibration'] = tmp_cal
         return
 
     # VALIDATING AND UPDATING TSNAMES
 
     def fetch_tsnames(self):
         """
-        Call down a current version of the TSNames spreadsheet from google. Convert to a structure better for comparisons.
+        Call down a current version of the TSNames spreadsheet from google. Convert to a structure better
+        for comparisons.
         :return: (self.full_list) Keys: Valid TSName, Values: TSName synonyms
         :return: (self.quick_list) List of valid TSnames
         """
 
         # Check if it's been longer than one day since updating the TSNames.csv file.
         # If so, go fetch the file from google in case it's been updated since.
+        # Or if file isn't found at all, download it also.
         if check_file_age('tsnames.csv', 1):
             # Fetch TSNames sheet from google
             print("TSNames is more than one day old. Fetching update...")
@@ -615,11 +655,11 @@ class Convert(object):
 
     # HELPERS
 
-    def create_tso(self):
-        """
-        Creates a TimeSeriesObject and add it to the TimeSeriesLibrary
-        :return: (obj) Time Series Object
-        """
-        for name, tso in self.ts_tsos.items():
-            TimeSeries().load(tso)
-        return
+    # def create_tso(self):
+    #     """
+    #     Creates a TimeSeriesObject and add it to the TimeSeriesLibrary
+    #     :return: (obj) Time Series Object
+    #     """
+    #     for name, tso in self.ts_tsos.items():
+    #         TimeSeries().load(tso)
+    #     return

@@ -1,5 +1,5 @@
-import json
 import copy
+import json
 
 import demjson
 
@@ -43,10 +43,9 @@ def read_json_from_file(filename):
 def remove_csv_from_json(d):
     """
     Remove all CSV data 'values' entries from paleoData table in the JSON structure.
-    :param d: (dict) JSON data
+    :param d: (dict) JSON data - old structure
     :return: (dict) Metadata dictionary without CSV values
     """
-    d = {}
     # Loop through each table in paleoData
     for table in d['paleoData']:
         for col in table['columns']:
@@ -55,7 +54,7 @@ def remove_csv_from_json(d):
                 del col['values']
             except KeyError:
                 # if the key doesn't exist, keep going
-                print("RemoveCSVfromJSON: Error deleting values")
+                print("Remove_CSV_from_JSON: Error deleting values")
     return d
 
 

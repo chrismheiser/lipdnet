@@ -76,6 +76,12 @@ def check_file_age(filename, days):
     t = days * 60 * 60 * 24
     now = time.time()
     specified_time = now - t
-    if os.path.getctime(filename) < specified_time:
+    try:
+        if os.path.getctime(filename) < specified_time:
+            # File foune and out of date
+            return True
+        # File found, and not out of date
+        return False
+    except FileNotFoundError:
+        # File not found. Need to download it.
         return True
-    return False

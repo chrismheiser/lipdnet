@@ -49,15 +49,15 @@ def add_csv_to_json(d):
     """
     Using the given paleoData dictionary from the JSON metadata, retrieve CSV data from CSV files, and insert the CSV
     data columns to their respective JSON paleoData table columns.
-    :param d:
-    :return:
+    :param d: (dict) PaleoData dictionary
+    :return: (dict) Modified original dictionary (dict) CSV column data
     """
     d2 = {}
     # Loop through each table in paleoData
-    for table in d:
+    for table_name, table_content in d.items():
         # Create CSV entry into dictionary that contains all columns.
-        d2[table['filename']] = read_csv_to_columns(table['filename'])
+        d2[table_content['filename']] = read_csv_to_columns(table_content['filename'])
         # Start putting CSV data into corresponding JSON metadata columns under 'values' key.
-        for idx, col in enumerate(table['columns']):
-            col['values'] = d2[table['filename']][idx]
-    return d2
+        for col_name, col_content in table_content['columns'].items():
+            col_content['values'] = d2[table_content['filename']][col_content['number']-1]
+    return d, d2

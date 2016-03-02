@@ -31,14 +31,16 @@ class LiPD(object):
         # Import JSON into object
         os.chdir(self.dir_tmp_bag_data)
 
-        # If you want to switch JSON data to new structure in the future, This is the spot to do it.
-        self.data_master = read_json_from_file(self.name + '.jsonld')
-        self.data_json = read_json_from_file(self.name + '.jsonld')
+        # Read in JSON, and switch to new structure
+        j = old_to_new_structure(read_json_from_file(self.name + '.jsonld'))
 
-        # Switch JSON structure?
+        # Set JSON to object self
+        self.data_master = j
+        self.data_json = copy.deepcopy(j)
 
-        # Import CSV into JSON
-        self.data_csv = add_csv_to_json(self.data_master['paleoData'])
+        # Import CSV into data_master, and set csv data to self.
+        self.data_master['paleoData'], self.data_csv = add_csv_to_json(self.data_master['paleoData'])
+
         os.chdir(self.dir_root)
 
         return
@@ -72,12 +74,13 @@ class LiPD(object):
         for filename, columns in self.data_csv.items():
             write_csv_to_file(filename, columns)
 
-        # Remove CSV data from json
-        self.data_master = remove_csv_from_json(self.data_master)
+        # Remove CSV data from self.data_master and update self.data_json
+        self.data_json = remove_csv_from_json(self.data_master)
 
-        # Switch json structure?
+        # Switch JSON back to old structure
+        self.data_json = new_to_old_structure(self.data_json)
 
-        # Overwrite json dictionary to file
+        # Overwrite JSON dictionary to file
         write_json_to_file(self.name_ext, self.data_master)
 
         # Cleanup directory and prep for bagit
@@ -109,8 +112,10 @@ class LiPD(object):
         :param metadata: (dict) Metadata from TSO
         """
         self.data_master = metadata
-        # self.data_csv = pass # strip the values from the metadata, and put it into { table: {col1: vals, col2: vals,..}}
-        # self.data_json = pass # strip the valies from the metadata, and set json here.
+        # # strip the values from the metadata, and put it into { table: {col1: vals, col2: vals,..}}
+        # self.data_csv = ''
+        # # strip the valies from the metadata, and set json here.
+        # self.data_json = ''
 
 
 

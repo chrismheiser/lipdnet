@@ -1,6 +1,8 @@
 import cmd
 
-from Parser.jupyter.LiPD_Library import *
+from Parser.modules.Convert import *
+from Parser.time_series.TimeSeries_Library import *
+from Parser.lipd.LiPD_Library import *
 
 
 class LiPD_CLI(cmd.Cmd):
@@ -42,9 +44,9 @@ class LiPD_CLI(cmd.Cmd):
         """
         self.lipd_lib.loadLipds()
 
-    # ANALYSIS
+    # ANALYSIS - LIPD
 
-    def do_extractTimeseries(self, arg):
+    def do_extractTimeSeries(self, arg):
         """
         Create a TimeSeries using the current files in LiPD_Library.
         :return: (obj) TimeSeries_Library
@@ -53,22 +55,6 @@ class LiPD_CLI(cmd.Cmd):
         for k, v in self.lipd_lib.get_master().items():
             # Get metadata from this LiPD object. Convert it. Pass TSO metadata to the TS_Library.
             self.ts_lib.load_tsos(self.convert.ts_extract_main(v.get_data_master()))
-
-    def do_exportTimeseries(self, arg):
-        """
-        Export TimeSeries back to LiPD Library. Overwrite LiPD_Library.
-        :return: (obj) LiPD_Library
-        """
-        l = []
-        # Get all TSOs from TS_Library, and add them to a list
-        for k, v in self.ts_lib.get_master().items():
-            l.append(v)
-        # Send the TSOs list through to be converted. Then let the LiPD_Library load the metadata into itself.
-        self.lipd_lib.load_tsos(self.convert.lipd_extract_main(l))
-
-    def do_showTimeSeries(self, arg):
-        # self.ts_lib.showTimeSeries_()
-        pass
 
     def do_showCsv(self, filename):
         """
@@ -88,7 +74,7 @@ class LiPD_CLI(cmd.Cmd):
 
     def do_showFiles(self, arg):
         """
-        Prints filenames of all LiPD files currently loaded in the workspace.
+        Prints the names of all LiPD files in the LiPD_Library
         """
         self.lipd_lib.showFiles()
 
@@ -105,6 +91,35 @@ class LiPD_CLI(cmd.Cmd):
         else:
             self.lipd_lib.showMap(filename)
         return
+
+    # ANALYSIS - TIME SERIES
+
+    def do_exportTimeSeries(self, arg):
+        """
+        Export TimeSeries back to LiPD Library. Overwrite LiPD_Library.
+        :return: (obj) LiPD_Library
+        """
+        l = []
+        # Get all TSOs from TS_Library, and add them to a list
+        for k, v in self.ts_lib.get_master().items():
+            l.append(v.get_master())
+        # Send the TSOs list through to be converted. Then let the LiPD_Library load the metadata into itself.
+        self.lipd_lib.load_tsos(self.convert.lipd_extract_main(l))
+
+    def do_showTimeSeries(self, arg):
+        """
+        Prints the names of all TimeSeries files in the TimeSeries_Library
+        :return:
+        """
+        self.ts_lib.show_files()
+
+    def do_showTimeSeriesFile(self, name):
+        """
+        Show contents of one TSO.
+        :param name:
+        :return:
+        """
+        self.ts_lib.show_file(name)
 
     # CLOSING
 
