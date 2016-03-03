@@ -1,9 +1,13 @@
+from Parser.modules.jsons import *
+
 
 class TimeSeries(object):
     def __init__(self):
-        self.master = {}
-        self.filename = ''
-        self.dataSetName = ''
+        self.master = {}  # Master data. JSON metadata
+        self.ts_name = ''  # TimeSeries Object name. <Dataset_table_column> format.
+        self.lpd_name = ''  # LiPD filename. Original from LiPD object.
+
+    # LOADING
 
     def load(self, d):
         """
@@ -13,25 +17,44 @@ class TimeSeries(object):
         self.master = d
         return
 
-    def set_filename(self, filename):
+    def set_ts_name(self, ts_name):
         """
         Set the filename to match LiPD filename counterpart
-        :param filename: (str) LiPD Filename
+        :param ts_name: (str) TimeSeries name. Dataset + table + column
         """
-        self.filename = filename
+        self.ts_name = ts_name
         return
 
-    def set_datasetname(self, name):
+    def set_lpd_name(self, lpd_name):
         """
         Set the data set name for this TSO
-        :param name: (str) Name
+        :param lpd_name: (str) Name_ext from the LiPD object. Needed if converting back to LiPD.
         """
-        self.dataSetName = name
+        self.lpd_name = lpd_name
         return
+
+    # ANALYSIS
 
     def get_master(self):
         """
-        Get all metadata from the object
+        Retrieves the metadata from self.master
         :return: (dict) Metadata
         """
         return self.master
+
+    def get_lpd_name(self):
+        """
+        Get LiPD filename for this dataset.
+        """
+        return self.lpd_name
+
+    def display_data(self):
+        """
+        Displays the metadata contents of self.master
+        """
+        print(json.dumps(self.master, indent=2))
+        return
+
+    # CLOSING
+
+    # HELPERS

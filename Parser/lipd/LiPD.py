@@ -12,17 +12,17 @@ class LiPD(object):
     """
 
     def __init__(self, dir_root, dir_tmp, name_ext):
-        self.name_ext = name_ext
-        self.name = os.path.splitext(name_ext)[0]
-        self.dir_root = dir_root
-        self.dir_tmp = dir_tmp
-        self.dir_tmp_bag = os.path.join(dir_tmp, self.name)
-        self.dir_tmp_bag_data = os.path.join(self.dir_tmp_bag, 'data')
-        self.data_csv = {}
-        self.data_json = {}
-        self.data_master = {}
+        self.name_ext = name_ext  # Filename with .lpd extension
+        self.name = os.path.splitext(name_ext)[0]  # Filename without .lpd extension
+        self.dir_root = dir_root  # Directory containing all original LiPD files.
+        self.dir_tmp = dir_tmp  # Directory containing unzipped files for this LiPD. Temporary workspace.
+        self.dir_tmp_bag = os.path.join(dir_tmp, self.name)  # Bagit directory in temporary folder
+        self.dir_tmp_bag_data = os.path.join(self.dir_tmp_bag, 'data')  # Data folder (json, csv) in Bagit directory.
+        self.data_csv = {}  # CSV data in format: { 'table1': { column_number: [value1, value2, value3... ]}
+        self.data_json = {}  # JSON metadata without CSV values
+        self.data_master = {}  # JSON metadata with CSV values
 
-    # OPENING
+    # LOADING
 
     def load(self):
         # Unzip LiPD into tmp folder
@@ -34,9 +34,11 @@ class LiPD(object):
         # Read in JSON, and switch to new structure
         j = old_to_new_structure(read_json_from_file(self.name + '.jsonld'))
 
-        # Set JSON to object self
-        self.data_master = j
-        self.data_json = copy.deepcopy(j)
+        # Clean JSON of empty fields and data before loading. Then set JSON to object self.
+        self.data_master = remove_empty_fields(remove_empty_doi(j))
+
+        # Copy the JSON only metadata to self before adding CSV
+        self.data_json = copy.deepcopy(self.data_master)
 
         # Import CSV into data_master, and set csv data to self.
         self.data_master['paleoData'], self.data_csv = add_csv_to_json(self.data_master['paleoData'])
@@ -54,14 +56,25 @@ class LiPD(object):
         """
         print(json.dumps(self.data_csv, indent=2))
 
-    def display_data(self):
+    def display_json(self):
         """
-        Display CSV and JSON data.
+        Display JSON data.
         :return: None
         """
         print(json.dumps(self.data_json, indent=2))
 
-    def get_data_master(self):
+    def display_master(self):
+        """
+        Display CSV and JSON data
+        :return: None
+        """
+        print(json.dumps(self.data_master, indent=2))
+
+    def get_master(self):
+        """
+        Retrieve the contents of self.data_master
+        :return: (dict) Metadata + CSV data
+        """
         return self.data_master
 
     # CLOSING
@@ -112,10 +125,16 @@ class LiPD(object):
         :param metadata: (dict) Metadata from TSO
         """
         self.data_master = metadata
-        # # strip the values from the metadata, and put it into { table: {col1: vals, col2: vals,..}}
-        # self.data_csv = ''
-        # # strip the valies from the metadata, and set json here.
-        # self.data_json = ''
+        # Split the JSON metadata from the CSV values. Update values to self.
+        self.data_json, self.data_csv = split_csv_json(metadata)
+        return
+
+    def get_name_ext(self):
+        """
+        Retrieve the LiPD filename (with extension)
+        :return: (str) Filename
+        """
+        return self.name_ext
 
 
 

@@ -41,12 +41,12 @@ class Convert(object):
         self.lipd_tsos = []  # One entry for each TSO metadata dictionary
         self.lipd_master = {}  # Key: LiPD name, Value: Complete metadata dictionary (when finished)
         self.lipd_curr_tso_data = {}  # Holds metadata for current TSO being processed
-        self.dataset = ''
+        self.dataset_ext = ''  # Filename.lpd. This is what the output name will be.
         self.table = ''
         self.variableName = ''
 
         # TS Names validation
-        self.full_list = {"root": [], "pub": [], "climateInterpretation": [],"calibration": [], "geo": [],
+        self.full_list = {"root": [], "pub": [], "climateInterpretation": [], "calibration": [], "geo": [],
                           "paleoData": []}
         # full_list - All valid TS Names and synonyms. { 'category' : [ ['validTSName', 'synonym'], ... ] }
         self.quick_list = []  # All valid TS Name keys
@@ -105,30 +105,36 @@ class Convert(object):
         for k, v in d.items():
             # Case 1: Coordinates special naming
             if k == 'coordinates':
-                for idx, i in enumerate(v):
-                    try:
-                        # Assume it's a string and try to lower it. This is to check if it's in EMPTY.
-                        i = i.lower()
-                    except AttributeError:
-                        # Didn't work? Then it's probably a normal float or int, or a number with string type.
-                        continue
+                for idx, p in enumerate(v):
                     try:
                         # Check that our value is not in EMPTY.
-                        if i in EMPTY:
-                            # If elevation is a string or 0, don't record it
-                            if idx != 2:
-                                # If long ot lat is empty, set it as 0 instead
-                                self.ts_root[x[idx]] = 0
+                        if isinstance(p, str):
+                            if p.lower() in EMPTY:
+                                # If elevation is a string or 0, don't record it
+                                if idx != 2:
+                                    # If long ot lat is empty, set it as 0 instead
+                                    self.ts_root[x[idx]] = 0
+                            else:
+                                # Set the value as a float into its entry.
+                                self.ts_root[x[idx]] = float(p)
                         # Value is a normal number, or string representation of a number
                         else:
                             # Set the value as a float into its entry.
-                            self.ts_root[x[idx]] = float(i)
+                            self.ts_root[x[idx]] = float(p)
 
                     except IndexError:
                         continue
             # Case 2: Any value that is a string can be added as-is
             elif isinstance(v, str):
-                self.ts_root['geo_' + k] = v
+                if k == 'meanElev':
+                    try:
+                        # Some data sets have meanElev listed under properties for some reason.
+                        self.ts_root['geo_' + k] = float(v)
+                    except ValueError:
+                        # If the value is a string, then we don't want it
+                        continue
+                else:
+                    self.ts_root['geo_' + k] = v
             # Case 3: Nested dictionary. Recursion
             elif isinstance(v, dict):
                 self.ts_extract_geo(v)
@@ -279,11 +285,12 @@ class Convert(object):
         # Receive list of TSO objects
         for tso in self.lipd_tsos:
             # Set current keys
-            self.lipd_curr_tso_data = tso
+            self.dataset_ext = tso['name']
+            self.lipd_curr_tso_data = tso['data']
             self.lipd_set_current()
 
             # Since root items are the same in the same dataset, we only need these steps if dataset doesn't exist yet.
-            if self.dataset not in self.lipd_master:
+            if self.dataset_ext not in self.lipd_master:
                 self.lipd_extract_roots()
 
             # Extract PaleoData, Calibration, and Climate Interpretation
@@ -297,7 +304,6 @@ class Convert(object):
         """
         # Get key info
         try:
-            self.dataset = self.lipd_curr_tso_data['dataSetName']
             self.table = self.lipd_curr_tso_data['paleoData_paleoDataTableName']
             self.variableName = self.lipd_curr_tso_data['paleoData_variableName']
         except KeyError:
@@ -350,7 +356,7 @@ class Convert(object):
                     number = int(m.group(1)) - 1  # 0 indexed behind the scenes, 1 indexed to user.
                     key = m.group(2)
                     # Authors ("Pu, Y.; Nace, T.; etc..")
-                    if key == 'author':
+                    if key == 'author' or key == 'authors':
                         try:
                             tmp_pub[number]['author'] = self.lipd_extract_author(v)
                         except KeyError:
@@ -386,8 +392,8 @@ class Convert(object):
 
         # If we're getting root info, then there shouldn't be a dataset entry yet.
         # Create entry in object master, and set our new data to it.
-        self.lipd_master[self.dataset] = {}
-        self.lipd_master[self.dataset] = tmp_master
+        self.lipd_master[self.dataset_ext] = {}
+        self.lipd_master[self.dataset_ext] = tmp_master
 
         return
 
@@ -404,6 +410,28 @@ class Convert(object):
             l.append({'name': author})
         return l
 
+    def lipd_extract_paleo_root(self):
+        """
+        Create paleo table in master if it doesn't exist. Insert table root items
+        """
+
+        try:
+            # If table doesn't exist yet, create it.
+            if self.table not in self.lipd_master[self.dataset_ext]['paleoData']:
+                t_root_keys = ['filename', 'googleWorkSheetKey', 'paleoDataTableName']
+                self.lipd_master[self.dataset_ext]['paleoData'][self.table] = {'columns': {}}
+                for key in t_root_keys:
+                    try:
+                        # Now set the root table items in our new table
+                        self.lipd_master[self.dataset_ext]['paleoData'][self.table][key] = self.lipd_curr_tso_data['paleoData_' + key]
+                    except KeyError:
+                        # That's okay. Keep trying :)
+                        continue
+        except KeyError:
+            print("KeyError lipd_extract_paleo: Inserting table ")
+
+        return
+
     def lipd_extract_paleo(self):
         """
         Extract paleoData from tso
@@ -412,30 +440,17 @@ class Convert(object):
         tmp_clim = {}
         tmp_cal = {}
 
-        try:
-            # If table doesn't exist yet, create it.
-            if self.table not in self.lipd_master[self.dataset]['paleoData']:
-                t_root_keys = ['filename', 'googleWorkSheetKey', 'paleoDataTableName']
-                self.lipd_master[self.dataset]['paleoData'][self.table] = {'columns': {}}
-                for key in t_root_keys:
-                    try:
-                        # Now set the root table items in our new table
-                        self.lipd_master[self.dataset]['paleoData'][self.table][key] = self.lipd_curr_tso_data['paleoData_' + key]
-                    except KeyError:
-                        # That's okay. Keep trying :)
-                        continue
-        except KeyError:
-            print("KeyError lipd_extract_paleo: Inserting table ")
+        self.lipd_extract_paleo_root()
 
         try:
             # Create the column entry in the table
-            self.lipd_master[self.dataset]['paleoData'][self.table]['columns'][self.variableName] = {}
+            self.lipd_master[self.dataset_ext]['paleoData'][self.table]['columns'][self.variableName] = {}
             # Start inserting paleoData into the table at self.lipd_master[table][column]
             for k, v in self.lipd_curr_tso_data.items():
                 # ['paleoData', 'key']
                 m = k.split('_')
                 if 'paleoData' in m[0]:
-                    self.lipd_master[self.dataset]['paleoData'][self.table]['columns'][self.variableName][m[1]] = v
+                    self.lipd_master[self.dataset_ext]['paleoData'][self.table]['columns'][self.variableName][m[1]] = v
                 elif 'calibration' in m[0]:
                     tmp_cal[m[1]] = v
                 elif 'climateInterpretation' in m[0]:
@@ -446,9 +461,9 @@ class Convert(object):
 
         # If these sections had any items added to them, then add them to the column master.
         if tmp_clim:
-            self.lipd_master[self.dataset]['paleoData'][self.table]['columns'][self.variableName]['climateInterpretation'] = tmp_clim
+            self.lipd_master[self.dataset_ext]['paleoData'][self.table]['columns'][self.variableName]['climateInterpretation'] = tmp_clim
         if tmp_cal:
-            self.lipd_master[self.dataset]['paleoData'][self.table]['columns'][self.variableName]['calibration'] = tmp_cal
+            self.lipd_master[self.dataset_ext]['paleoData'][self.table]['columns'][self.variableName]['calibration'] = tmp_cal
         return
 
     # VALIDATING AND UPDATING TSNAMES
@@ -466,7 +481,7 @@ class Convert(object):
         # Or if file isn't found at all, download it also.
         if check_file_age('tsnames.csv', 1):
             # Fetch TSNames sheet from google
-            print("TSNames is more than one day old. Fetching update...")
+            print("Fetching update for TSNames.csv")
             ts_id = '1C135kP-SRRGO331v9d8fqJfa3ydmkG2QQ5tiXEHj5us'
             get_google_csv(ts_id, 'tsnames.csv')
         try:

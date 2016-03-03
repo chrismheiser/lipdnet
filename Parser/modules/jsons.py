@@ -3,7 +3,7 @@ import json
 
 import demjson
 
-EMPTY = ['', ' ', None, 'na', 'n/a', 'nan', '?']
+EMPTY = ['', ' ', None, 'na', 'n/a', 'nan', '?', "'", "''"]
 
 
 def write_json_to_file(filename, json_data):
@@ -47,15 +47,36 @@ def remove_csv_from_json(d):
     :return: (dict) Metadata dictionary without CSV values
     """
     # Loop through each table in paleoData
-    for table in d['paleoData']:
-        for col in table['columns']:
+    for table, table_content in d['paleoData'].items():
+        for column, column_content in table_content['columns'].items():
             try:
                 # try to delete the values key entry
-                del col['values']
+                del column_content['values']
             except KeyError:
                 # if the key doesn't exist, keep going
-                print("Remove_CSV_from_JSON: Error deleting values")
+                print("Remove CSV from JSON: Error removing column values")
     return d
+
+
+def get_csv_from_json(d):
+    """
+    Get CSV values when mixed into json data. Pull out the CSV data and put it into a dictionary.
+    :param d: (dict) JSON with CSV values
+    :return: (dict) CSV values. (i.e. { CSVFilename1: { Column1: [Values], Column2: [Values] }, CSVFilename2: ... }
+    """
+    csv = {}
+    try:
+        for table, table_content in d['paleoData'].items():
+            # Create entry for this table/CSV file (i.e. Asia-1.measTable.PaleoData.csv)
+            # Note: Each table has a respective CSV file.
+            csv[table_content['filename']] = {}
+            for column, column_content in table_content['columns'].items():
+                # Set the "values" into csv dictionary in order of column "number"
+                csv[table_content['filename']][column_content['number']] = column_content['values']
+    except KeyError:
+        print("Get CSV from JSON: KeyError")
+
+    return csv
 
 
 def remove_empty_fields(d):
@@ -93,6 +114,31 @@ def remove_empty_fields(d):
             for key in list(d.keys()):
                 if not d[key]:
                     del d[key]
+
+    return d
+
+
+def remove_empty_doi(d):
+    """
+    If an "identifier" dictionary has no doi ID, then it has no use. Delete it.
+    :param d: (dict) JSON Metadata
+    :return: (dict) JSON Metadata
+    """
+    try:
+        # Check each publication dictionary
+        for pub in d['pub']:
+            # If no identifier, then we can quit here. If identifier, then keep going.
+            if 'identifier' in pub:
+                if 'id' in pub['identifier'][0]:
+                    # If there's a DOI id, but it's EMPTY
+                    if pub['identifier'][0]['id'] in EMPTY:
+                        del pub['identifier']
+                else:
+                    # If there's an identifier section, with no DOI id
+                    del pub['identifier']
+    except KeyError:
+        # What else could go wrong?
+        pass
 
     return d
 
@@ -158,3 +204,19 @@ def new_to_old_structure(d):
     # Overwrite original paleoData dictionary with new dictionary
     d['paleoData'] = tmp_p
     return d
+
+
+def split_csv_json(d):
+    """
+    Split JSON with CSV values into separate JSON and CSV dictionaries.
+    :param d: (dict) JSON metadata with CSV values in paleoData columns
+    :return: (dict) JSON only metadata (dict) CSV organized by filename->column
+    """
+    # First, get CSV values and organize.
+    csv = get_csv_from_json(d)
+    # Then remove CSV values, which gives us JSON only.
+    jsn = remove_csv_from_json(d)
+    return jsn, csv
+
+
+

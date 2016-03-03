@@ -3,9 +3,11 @@ from Parser.time_series.TimeSeries import TimeSeries
 
 class TimeSeries_Library(object):
     def __init__(self):
-        self.master = {}
+        self.master = {}  # Master data. (Key: Name of TimeSeries Object. Value: TimeSeries Object)
 
-    def load(self, name, d):
+    # LOADING
+
+    def loadTso(self, name, d):
         """
         Load in a single TimeSeries Objects.
         :param name: (str) TSO name
@@ -16,40 +18,45 @@ class TimeSeries_Library(object):
         self.master[name] = t
         return
 
-    def load_tsos(self, d):
+    def loadTsos(self, name_ext, d):
         """
         Load in multiple TimeSeries Objects.
+        :param name_ext: (str) Need lpd filename in case we have to convert TSOs back to LiPDs.
         :param d: (dict) All TSOs resulting from one LiPD file. K: TS names, V: TS metadata
         """
         # Create a TSO for each, and load into the TS_Library master
         for k, v in d.items():
             t = TimeSeries()
             t.load(v)
-            t.set_filename(k)
-            t.set_datasetname(v['dataSetName'])
+            t.set_ts_name(k)
+            t.set_lpd_name(name_ext)
             self.master[k] = t
         return
 
-    def show_file(self, name):
+    # ANALYSIS
+
+    def showTso(self, name):
         """
         Show contents of one TSO object.
         :param name:
         :return:
         """
-        for k, v in self.master[name].get_master().items():
-            print(k, v)
+        try:
+            self.master[name].display_data()
+        except KeyError:
+            print("TimeSeries not found")
         return
 
-    def show_files(self):
+    def showTsos(self):
         """
-        Display all LiPD files in the LiPD Library
+        Display all TimeSeries names in the TimeSeries_Library
         :return:
         """
-        for name, tso in self.master.items():
+        for name, tso in sorted(self.master.items()):
             print(name)
         return
 
-    def save_tso(self, tso):
+    def saveTso(self, tso):
         """
         Write data for one specified TSO to file.
         :param tso: (obj)
@@ -57,12 +64,16 @@ class TimeSeries_Library(object):
         """
         pass
 
-    def save_tsos(self):
+    def saveTsos(self):
         """
         Write data from all TSOs to file.
         :return:
         """
         pass
+
+    # CLOSING
+
+    # HELPERS
 
     def get_master(self):
         """

@@ -78,7 +78,7 @@ def check_file_age(filename, days):
     specified_time = now - t
     try:
         if os.path.getctime(filename) < specified_time:
-            # File foune and out of date
+            # File found and out of date
             return True
         # File found, and not out of date
         return False

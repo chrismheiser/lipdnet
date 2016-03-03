@@ -16,7 +16,7 @@ class LiPD_Library(object):
         self.dir_tmp = create_tmp_dir()
         self.master = {}
 
-    # GETTING STARTED
+    # LOADING
 
     def setDir(self, dir_root):
         """
@@ -24,9 +24,21 @@ class LiPD_Library(object):
         :param dir_root:
         :return:
         """
-        self.dir_root = dir_root
-        os.chdir(self.dir_root)
-        print("Directory set to: " + str(dir_root))
+        try:
+            self.dir_root = dir_root
+            os.chdir(self.dir_root)
+            print("Directory set to: " + str(dir_root))
+        except FileNotFoundError:
+            print("Not a valid directory")
+        return
+
+    def loadLipd(self, name):
+        """
+        Load a single LiPD object into the LiPD Library.
+        :param name: (str) Filename
+        :return: None
+        """
+        self.append_lipd(name)
         return
 
     def loadLipds(self):
@@ -43,16 +55,7 @@ class LiPD_Library(object):
         file_list = list_files('lpd')
         # Loop: Append each file to Library
         for name_ext in file_list:
-            self.appendLipd(name_ext)
-        return
-
-    def loadLipd(self, name):
-        """
-        Load a single LiPD object into the LiPD Library.
-        :param name: (str) Filename
-        :return: None
-        """
-        self.appendLipd(name)
+            self.append_lipd(name_ext)
         return
 
     # ANALYSIS
@@ -66,7 +69,7 @@ class LiPD_Library(object):
         try:
             self.master[name].display_csv()
         except KeyError:
-            print("Invalid Filename")
+            print("LiPD not found")
         return
 
     def showLipd(self, name):
@@ -76,21 +79,33 @@ class LiPD_Library(object):
         :return:
         """
         try:
-            self.master[name].display_data()
+            self.master[name].display_json()
         except KeyError:
-            print("Invalid Filename")
+            print("LiPD not found")
         return
 
-    def showFiles(self):
+    def showLipdMaster(self, name):
+        """
+        Display data from target LiPD file.
+        :param name: (str) Filename
+        :return:
+        """
+        try:
+            self.master[name].display_master()
+        except KeyError:
+            print("LiPD not found")
+        return
+
+    def showLipds(self):
         """
         Display all LiPD files in the LiPD Library
         :return:
         """
-        for k, v in self.master.items():
+        for k, v in sorted(self.master.items()):
             print(k)
         return
 
-    def showMap(self, files):
+    def map(self, files):
         """
         Map one or more specified LiPDs.
         :param files: (str) Comma separated filenames
@@ -122,10 +137,9 @@ class LiPD_Library(object):
             get_static_google_map('multi-marker', markers=markers)
         return
 
-    def showAllMap(self):
+    def mapAll(self):
         """
         Map all LiPDs in the library.
-        :return: None
         """
         chars = list(string.ascii_uppercase + string.digits)
         markers = []
@@ -149,15 +163,16 @@ class LiPD_Library(object):
     def saveLipd(self, name):
         """
         Overwrite LiPD files in OS with LiPD data in the current workspace.
-        :return: None
         """
-        self.master[name].save()
+        try:
+            self.master[name].save()
+        except KeyError:
+            print("LiPD not found")
         return
 
     def saveLipds(self):
         """
         Overwrite target LiPD file in OS with LiPD data in the current workspace.
-        :return: None
         """
         for k, v in self.master.items():
             self.master[k].save()
@@ -166,30 +181,27 @@ class LiPD_Library(object):
         """
         Removes target LiPD file from the workspace. Delete tmp folder, then delete object.
         :param name: (str) Filename
-        :return:
         """
-        self.master[name].remove()
         try:
+            self.master[name].remove()
             del self.master[name]
         except KeyError:
-            print("Problem removing LiPD object.")
+            print("LiPD not found")
         return
 
     def removeLipds(self):
         """
         Clear the workspace. Empty the master dictionary.
-        :return:
         """
         self.master = {}
         return
 
     # HELPERS
 
-    def appendLipd(self, name_ext):
+    def append_lipd(self, name_ext):
         """
         Creates and adds a new LiPD object to the LiPD Library for the given LiPD file...
         :param name_ext: (str) Filename with extension
-        :return:
         """
         os.chdir(self.dir_root)
         # create a lpd object
@@ -201,6 +213,10 @@ class LiPD_Library(object):
         return
 
     def get_master(self):
+        """
+        Retrieve the LiPD_Library master list. All names and LiPD objects.
+        :return:
+        """
         return self.master
 
     def load_tsos(self, d):
@@ -209,9 +225,7 @@ class LiPD_Library(object):
         :param d: (dict) Metadata from TSO
         """
 
-        for name, metadata in d.items():
-            # Add on the LiPD extension, because it's not currently there.
-            name_ext = name + '.lpd'
+        for name_ext, metadata in d.items():
             # Important that the dataSetNames match for TSO and LiPD object. Make sure
             try:
                 self.master[name_ext].load_tso(metadata)
