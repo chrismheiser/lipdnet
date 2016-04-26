@@ -59,11 +59,8 @@ block body
 									a(href="https://www.linkedin.com/in/chrismheiser")
 										i.fa.fa-linkedin
 								h2.md-title Christopher Heiser
-								p.
-									Chris holds a B.S. in Computer Science and primarily focuses 
-									on writing code for the LiPD project. His tasks have been 
-									building the website and writing data parsers for converting 
-									between the LiPD format. 
+								p Application Systems Analyst
+								p Northern Arizona University
 					.layout-margin(flex='25')
 						md-card
 							img.md-card-image(ng-src="img/mckay.jpg")
@@ -76,7 +73,9 @@ block body
 									a(href="#")
 										i.fa.fa-linkedin
 								h2.md-title Nicholas McKay
-								p Lorem Ipsum is simply dummy text of the printing and typesetting industry.
+								p Principal Investigator
+								p School of Earth Sciences and Environmental Sustainability
+								p Northern Arizona University
 					.layout-margin(flex='25')
 						md-card
 							img.md-card-image(ng-src="img/emile.jpg")
@@ -89,20 +88,17 @@ block body
 									a(href="https://www.linkedin.com/in/elnino")
 										i.fa.fa-linkedin
 								h2.md-title Julien Emile-Geay
-								p Lorem Ipsum is simply dummy text of the printing and typesetting industry.
+								p Principal Investigator
+								p Department of Earth Science
+								p University of Southern California
 					.layout-margin(flex='25')
 						md-card
-							img.md-card-image(ng-src="img/mcdowell.jpg")
+							img.md-card-image(ng-src="img/khider.jpg")
 							md-card-content
 								div(layout='row' layout-align='space-around center')
-									a(href="https://instagram.com/austinpatrick/")
-										i.fa.fa-instagram
-									a(href="https://github.com/austinpatrick")
-										i.fa.fa-code
-									a(href="https://www.linkedin.com/pub/austin-mcdowell/b9/b1a/3")
-										i.fa.fa-linkedin
-								h2.md-title Austin McDowell
-								p Lorem Ipsum is simply dummy text of the printing and typesetting industry.
+								h2.md-title Deborah Khider
+								p Department of Earth Science
+								p University of Southern California
 
 			.subject.second
 				.category-color
@@ -129,25 +125,25 @@ block body
 				// show this when form has not been submitted yet
 				.content(layout='row' layout-align='space-around center' ng-cloak ng-switch='sent')
 					.f(ng-switch-when="false" flex='30')
-						h4 We'd love to hear from you!
-						p Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book
+						h4 Coming Soon!
+						p The LiPD package and website are under development. We are hard at work to get it to you as quickly as possible. We will keep this site up-to-date so please be sure to check back often.
 						//- pre {{mailer}}
 					form.f(ng-switch-when="false" flex='60' method='post' ng-model='mailer')
-						//- md-input-container
-						//- 	label Name
-						//- 	input(type="text" name='name' ng-model='mailer.name' required max-length='10')
-						//- md-input-container
-						//- 	label Organization
-						//- 	input(type="text" name='org' ng-model='mailer.org' required max-length='10')
-						//- md-input-container
-						//- 	label E-Mail
-						//- 	input(type="email" name='email' ng-model='mailer.email' required max-length='10')
-						//- md-input-container
-						//- 	label Subject
-						//- 	input(type="text" name='subject' ng-model='mailer.subject' required max-length='10')
-						//- md-input-container
-						//- 	label Message
-						//- 	textarea(type="text" name='message' ng-model='mailer.message' required max-length='10')
+						md-input-container
+							label Name
+							input(type="text" name='name' ng-model='mailer.name' required max-length='10')
+						md-input-container
+							label Organization
+							input(type="text" name='org' ng-model='mailer.org' required max-length='10')
+						md-input-container
+							label E-Mail
+							input(type="email" name='email' ng-model='mailer.email' required max-length='10')
+						md-input-container
+							label Subject
+							input(type="text" name='subject' ng-model='mailer.subject' required max-length='10')
+						md-input-container
+							label Message
+							textarea(type="text" name='message' ng-model='mailer.message' required max-length='10')
 						md-button.send(type='submit' ng-click='sendMail(mailer)' ng-model='sent') Send
 					.f(ng-switch-when="true")
 						h1(style='font-weight:500;') Message Sent!

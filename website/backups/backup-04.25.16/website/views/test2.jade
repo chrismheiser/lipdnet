@@ -1,0 +1,11 @@
+extends layout
+
+block body
+  body(ng-app='upload' ng-controller='ctrl')
+    pre {{upl}}
+
+      
+block js
+  script(src='https://cdnjs.cloudflare.com/ajax/libs/danialfarid-angular-file-upload/8.0.1/ng-file-upload-shim.min.js')
+  script(src='https://cdnjs.cloudflare.com/ajax/libs/danialfarid-angular-file-upload/8.0.1/ng-file-upload.min.js')
+  script(src='js/uploadApp-test.js')

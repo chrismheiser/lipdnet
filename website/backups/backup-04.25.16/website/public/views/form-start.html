@@ -1,0 +1,277 @@
+<div>
+    <md-toolbar class='md-hue-1'>
+        <h2 class="md-toolbar-tools">
+            <span>How would you like to start?</span>
+        </h2>
+    </md-toolbar>
+
+    <div layout="row">
+        <md-input-container style="margin-right: 10px;">
+            <md-radio-group ng-model="data.group1">
+                <md-radio-button value="file" class="md-primary">Upload an existing file</md-radio-button>
+                <md-radio-button value="scratch"> Start from scratch </md-radio-button>
+                <md-checkbox ng-model="demo.showTooltip">Show Tooltips</md-checkbox>
+            </md-radio-group>
+    </div>
+
+</div>
+
+<!-- File Upload Button -->
+<!-- <div ng-model='upload_button' ng-if="data.group1 == 'file'"> -->
+<div>
+    <md-button on-read-file='showContent($fileContent)' ng-model='formData' class='md-raised'>
+        <label for="file-input">Choose File</label>
+    </md-button>
+    <input id="file-input" type="file" style='visibility:hidden'>
+</div>
+
+
+<!-- FORM INPUT -->
+<!-- <div ng-if="data.group1 == 'scratch' || upload_button"> -->
+<div>
+
+    <!-- METADATA -->
+    <md-toolbar class='md-hue-1'>
+        <h2 class="md-toolbar-tools">
+            <span>Metadata</span>
+        </h2>
+    </md-toolbar>
+    <md-content layout-padding="" layout="row" layout-sm="column">
+        <md-input-container flex>
+            <label>Site Name</label>
+            <input ng-model="userData.siteName">
+        </md-input-container>
+        <md-input-container flex>
+            <label>Collection Name</label>
+            <input ng-model="userData.collectionName">
+        </md-input-container>
+</div>
+<div layout layout-padding layout-sm="column">
+    <md-input-container flex>
+        <label>Archive Type</label>
+        <input ng-model="userData.archiveType">
+    </md-input-container>
+    <md-input-container flex>
+        <label>Investigators</label>
+        <input ng-model="userData.investigators">
+    </md-input-container>
+    <md-input-container flex>
+        <label>Data Set Name</label>
+        <input ng-model="userData.dataSetName">
+    </md-input-container>
+</div>
+<div layout layout-padding layout-sm="column">
+    <md-input-container flex>
+        <label>Notes</label>
+        <textarea ng-model="userData.notes" columns="1" md-maxlength="150"></textarea>
+    </md-input-container>
+</div>
+
+<!-- FUNDING -->
+<md-toolbar class='md-hue-1'>
+    <h2 class="md-toolbar-tools">
+        <span>Funding</span>
+    </h2>
+</md-toolbar>
+<div layout layout-padding layout-sm="column" ng-repeat='item in funding'>
+    <md-input-container flex>
+        <label>Agency Name</label>
+        <input ng-model='userData.funding[item.id][item.a]'>
+    </md-input-container>
+    <md-input-container flex>
+        <label>Grant</label>
+        <input ng-model='userData.funding[item.id][item.f]'>
+    </md-input-container>
+</div>
+<div layout layout-padding layout-sm="column">
+    <md-button ng-click="addFunding()"> + Additional Funding</md-button>
+</div>
+
+
+
+<!-- PUBLICATION -->
+<md-toolbar class='md-hue-1'>
+    <h2 class="md-toolbar-tools">
+        <span>Publication</span>
+    </h2>
+</md-toolbar>
+
+<!-- AUTHORS -->
+<div layout layout-padding layout-sm="column" ng-repeat='item in authors'>
+    <md-input-container flex>
+        <label>Author Name</label>
+        <input ng-model='userData.authors[item.id]'>
+    </md-input-container>
+</div>
+<div layout layout-padding layout-sm="column">
+    <md-button ng-click="addAuthor()"> + Add Author</md-button>
+</div>
+
+<div layout layout-padding layout-wrap layout-sm="column">
+    <md-input-container flex>
+        <label>DOI</label>
+        <input ng-model="userData.pubDoi">
+    </md-input-container>
+    <md-input-container flex>
+        <label>Year</label>
+        <input ng-model="userData.pubYear">
+    </md-input-container>
+    <md-input-container flex>
+        <label>Volume</label>
+        <input ng-model="userData.pubVolume">
+    </md-input-container>
+    <md-input-container flex>
+        <label>Edition</label>
+        <input ng-model="userData.pubEdition">
+    </md-input-container>
+    <md-input-container flex>
+        <label>Issue</label>
+        <input ng-model="userData.pubIssue">
+    </md-input-container>
+</div>
+
+<!-- GEOGRAPHY -->
+<md-toolbar class='md-hue-1'>
+    <h2 class="md-toolbar-tools">
+        <span>Geography</span>
+    </h2>
+</md-toolbar>
+<div layout layout-padding layout-sm="column">
+    <md-input-container>
+        <label>Type</label>
+        <md-select ng-model="userData.geo.type">
+            <md-option default='Feature' ng-repeat="t in geoType" value="{{t}}">{{t}}</md-option>
+        </md-select>
+    </md-input-container>
+</div>
+<md-subheader class="md-primary">Geometry</md-subheader>
+<div layout layout-padding layout-sm="column">
+    <md-input-container>
+        <label>Type</label>
+        <md-select ng-model="userData.geo.geometry.type">
+            <md-option ng-repeat="t in geoGeometryType" value="{{t}}">{{t}}</md-option>
+        </md-select>
+    </md-input-container>
+</div>
+
+<!-- GOOGLE MAP -->
+<!-- ng-if="userData.geo.geometry.coordinates" -->
+<div>
+    <ui-gmap-google-map center="map.center" zoom="map.zoom" draggable="true" options="options" bounds="map.bounds">
+        <ui-gmap-markers models="markers" coords="'self'" events="events" options="options">
+        </ui-gmap-markers>
+    </ui-gmap-google-map>
+</div>
+
+<!-- COORDINATES -->
+<div layout layout-padding layout-sm="column" ng-repeat='obj in markers'>
+
+    <md-input-container flex>
+        <md-tooltip>
+            -90 to 90
+        </md-tooltip>
+        <label>Latitude</label>
+        <input ng-model='markers[$index].latitude' required type="number" min="-90" max="90">
+    </md-input-container>
+
+    <md-input-container flex>
+        <md-tooltip>
+            -180 to 180
+        </md-tooltip>
+        <label>Longitude</label>
+        <input ng-model='markers[$index].longitude' required type="number" min="-180" max="180">
+    </md-input-container>
+
+    <md-button ng-click="removeCoords($index)"> Remove </md-button>
+</div>
+
+<div layout layout-padding layout-sm="column">
+    <md-button ng-click="addCoordinates()"> + Additional Coordinates</md-button>
+    <md-button ng-click="pushMarkers()"> Save </md-button>
+</div>
+
+<md-subheader class="md-primary">Properties</md-subheader>
+<div layout layout-padding layout-sm="column">
+    <md-input-container flex>
+        <label>Site Name</label>
+        <input ng-model="userData.geo.properties.siteName">
+    </md-input-container>
+    <md-input-container flex>
+        <label>Location</label>
+        <input ng-model="userData.geo.properties.location">
+    </md-input-container>
+    <md-input-container flex>
+        <label>Country</label>
+        <input ng-model="userData.geo.properties.country">
+    </md-input-container>
+</div>
+<md-subheader class="md-primary">Elevation</md-subheader>
+<div layout layout-padding layout-sm="column">
+    <md-input-container flex>
+        <label>Value</label>
+        <input type='number' ng-model="userData.elevation.value">
+    </md-input-container>
+    <md-input-container flex>
+        <label>Units</label>
+        <md-select ng-model='userData.elevation.unit'>
+            <md-option ng-repeat="u in unitsDistance" value="{{u.short}}">{{u.long}}</md-option>
+        </md-select>
+    </md-input-container>
+</div>
+
+<!-- DATA -->
+<md-toolbar class='md-hue-1'>
+    <h2 class="md-toolbar-tools">
+        <span>Data</span>
+    </h2>
+</md-toolbar>
+
+<md-subheader class="md-primary">Core Length</md-subheader>
+<div layout layout-padding layout-sm="column">
+    <md-input-container flex='66'>
+        <label>Value</label>
+        <input type='number' ng-model="userData.core.value">
+    </md-input-container>
+    <md-input-container flex>
+        <label>Units</label>
+        <md-select ng-model='userData.core.unit'>
+            <md-option ng-repeat="u in unitsDistance" value="{{u.short}}">{{u.long}}</md-option>
+        </md-select>
+    </md-input-container>
+</div>
+
+<div layout layout-padding layout-sm="column">
+    <md-input-container flex>
+        <md-tooltip md-visible="demo.showTooltip">
+            Here is some more helpful information
+        </md-tooltip>
+        <label>Table Name</label>
+        <input ng-model="userData.dataTableName">
+    </md-input-container>
+    <md-input-container flex>
+        <label>File Name</label>
+        <input ng-model="userData.dataFileName">
+    </md-input-container>
+</div>
+
+<div layout layout-padding layout-sm="column" ng-model='f.columns' ng-repeat='i in columns'>
+    <md-subheader class="md-primary">Column {{i.column}}</md-subheader>
+    <md-input-container flex ng-repeat='(k,v) in i'>
+        <label>{{k}}</label>
+        <input value='{{v}}'>
+    </md-input-container>
+</div>
+<div layout layout-padding layout-sm="column">
+    <md-button ng-click="addColumn()"> + Add Column</md-button>
+</div>
+
+<!-- CHRONOLOGY -->
+<md-toolbar class='md-hue-1'>
+    <h2 class="md-toolbar-tools">
+        <span>Chronology</span>
+    </h2>
+</md-toolbar>
+<div layout layout-padding layout-sm="column">
+</div>
+
+</div>

@@ -1,0 +1,314 @@
+
+#intro {
+  padding-bottom: 0;
+}
+
+/* BUTTONS */
+
+/* Animate showing and hiding the schematic image */
+.ng-hide-add         { animation:1.2s fadeOut ease; }
+.ng-hide-remove      { animation:1.2s fadeIn ease; }
+
+/* Schematic image toggle button */
+.schematic-btn {
+  float:left;
+  color: #fff;
+  background: #a4d070;
+}
+.schematic-btn.left {
+	left: 50px;
+	bottom: 15px;
+	position: absolute;
+}
+
+/* Contact "Send" Button */
+.send {
+  float:right;
+  color: #fff;
+  background: #a4d070;
+}
+
+.schematic-btn:hover,
+.schematic-btn:active,.send:hover,
+.send:active{
+  color: #577d2a;
+}
+/* END BUTTONS */
+
+strong,
+b {
+  font-weight: 600
+}
+
+*,
+*:before,
+*:after {
+  box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+}
+
+/*clearfixes*/
+.cf:before,
+.cf:after {
+  content: " ";
+  display: table;
+}
+
+.cf:after {
+  clear: both;
+}
+
+/* Containers */
+.main-container {
+  background: transparent;
+  max-width: 1000px;
+  margin: 25px 25px auto;
+  position: relative;
+}
+.container {
+  position: relative;
+  padding: 25px;
+}
+.container:last-of-type {
+  padding-top: 0px;
+}
+
+/* Cards Styling */
+.animation-element {
+  position: relative;
+  width: 99%;
+  margin: 0% 1.33 2.66% 1.33%;
+  float: left;
+}
+
+.subject {
+  float: center;
+  text-align: center;
+  width: 100%;
+  margin: 0% 1.33% 2.66% 1.33%;
+  padding: 15px;
+}
+
+.subject:hover,
+.subject:active {
+  box-shadow: 0px 2px 6px 0px rgba(0, 0, 0, 0.25);
+  background: #F4F4F4;
+}
+
+/* Override box shadow for section subject header */
+.md-display-3:hover,
+.md-display-3:active {
+  box-shadow: none !important;
+  background: none !important;
+}
+
+.subject .header {
+  margin: 8px 0px;
+}
+
+.subject .header .date,
+.subject .header .category {
+  margin: 0px;
+  clear: none;
+  width: 50%;
+}
+
+.subject .header .date i,
+.subject .header .category i {
+  margin-right: 5px;
+  color: #333;
+  -moz-transition: all 400ms linear;
+  -webkit-transition: all 400ms linear;
+  -o-transition: all 400ms linear;
+  transition: all 400ms linear;
+}
+
+/*Subject icon at the top of each category */
+.subject .icon {
+  position: absolute;
+  top: -20px;
+  left: 50%;
+  left: calc(50% - 20px);
+}
+.subject .icon i {
+  width: 40px;
+  height: 40px;
+  color: rgb(255, 255, 255);
+  font-size: 150%;
+  border-radius: 50%;
+  text-align: center;
+  padding: 7px;
+}
+
+/* Category strip color / FA icon color*/
+.subject .category-color {
+  height: 7px;
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  width: 100%;
+}
+.subject.first .category-color,
+.subject.first .icon i {
+  background: #577d2a;
+}
+.subject.second .category-color,
+.subject.second .icon i {
+  background: #8BC34A;
+}
+.subject.third .category-color,
+.subject.third .icon i {
+  background: #c8e3aa;
+}
+
+
+/* Hovering over Subject */
+.subject.first:hover .header i {
+  color: #4CAF50;
+}
+.subject.second:hover .header i {
+  color: #5cb860;
+}
+.subject.third:hover .header i {
+  color: #6ec071;
+}
+
+/* Subheader Title (Team, Location, Questions..)*/
+.subject .title {
+  margin: 12px 0px;
+  border-bottom: dashed 1px #ccc;
+  padding-bottom: 10px;
+}
+
+/* Override the text-align from "subject" so that input boxes aren't messed up*/
+.subject .content {
+  margin-bottom: 8px;
+  text-align: left !important;
+}
+
+/* Subject background */
+.subject .bk {
+  position: relative;
+  color: #333;
+  padding: 5px 12px;
+  cursor: pointer;
+  float: right;
+  display: inline-block;
+  border: solid 1px #ccc;
+  -moz-transition: all 400ms linear;
+  -webkit-transition: all 400ms linear;
+  -o-transition: all 400ms linear;
+  transition: all 400ms linear;
+}
+.subject .bk:hover,
+.subject .bk:active {
+  background: #222;
+  color: #fff;
+}
+/* END CARDS STYLING */
+
+
+
+/* ANIMATIONS */
+@-webkit-keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+.fadeIn {
+  -webkit-animation-name: fadeIn;
+  animation-name: fadeIn;
+}
+
+@-webkit-keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
+}
+
+.fadeOut {
+  -webkit-animation-name: fadeOut;
+  animation-name: fadeOut;
+}
+
+.bounce-up .subject {
+  opacity: 0;
+  -moz-transition: all 700ms ease-out;
+  -webkit-transition: all 700ms ease-out;
+  -o-transition: all 700ms ease-out;
+  transition: all 700ms ease-out;
+  -moz-transform: translate3d(0px, 200px, 0px);
+  -webkit-transform: translate3d(0px, 200px, 0px);
+  -o-transform: translate(0px, 200px);
+  -ms-transform: translate(0px, 200px);
+  transform: translate3d(0px, 200, 0px);
+  -webkit-backface-visibility: hidden;
+  -moz-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+.bounce-up.in-view .subject {
+  opacity: 1;
+  -moz-transform: translate3d(0px, 0px, 0px);
+  -webkit-transform: translate3d(0px, 0px, 0px);
+  -o-transform: translate(0px, 0px);
+  -ms-transform: translate(0px, 0px);
+  transform: translate3d(0px, 0px, 0px);
+}
+
+/* END ANIMATIONS */
+
+/* MEDIA */
+@media screen and (max-width: 678px) {
+
+  #buttons {
+    display: none;
+  }
+
+  .main-container {
+    margin: 20px 15px;
+  }
+
+  .animation-element,
+  .animation-element:nth-of-type(3n-1),
+  .animation-element:nth-of-type(3n-2),
+  .animation-element:nth-of-type(3n-0) {
+    width: 100%;
+    margin: 0px 0px 30px 0px;
+  }
+  .subject .header .date,
+  .subject .header .category {
+    width: 100%;
+    margin-bottom: 10px;
+    text-align: center;
+  }
+}

@@ -1,0 +1,166 @@
+extends layout
+
+block css
+	link(rel='stylesheet' href='css/index.css')
+
+block body
+	// add #bg-img to body for photo background
+	body(ng-app='indexApp')
+		#wrapper(ng-controller='toggle')
+			include ./include/navbar.jade
+			//- md-toolbar(id='buttons' layout='row' layout-align='space-around center')
+			//- 	md-button(href='#schematic') Schematic
+			//- 	md-button(href='#about') About Us
+			//- 	md-button(href='#contact') Contact
+			section#content(ng-cloak)
+				.container#intro.text-center
+					div
+						h1.md-display-3 { Linked Paleo Data }
+						br
+						p.md-subhead Linked Paleo Data (LiPD) is a community data framework being designed to simplify the sharing, reuse and analysis of paleoclimate data. By combining a flexible, hierarchical data container with linked data concepts, LiPD lets paleoscientists spend less time wrangling data, and more time doing science.
+						p.md-subhead We’re currently working hard to develop more and better utilities for interacting with LiPD, both for the creation and validation of LiPD datasets, and for tools to interact with LiPD data in Python, R, and Matlab. We’re always looking for more people interested in  
+							a(href='#contact') contributing to the effort.
+						p.md-subhead.
+							A technical description of the LiPD framework is available
+							#[a(href='http://www.clim-past-discuss.net/11/4309/2015/cpd-11-4309-2015-discussion.html') here.]
+			#buttons(layout='row')
+				//- .md-button.schematic-btn.left(ng-mouseenter="sch=true" ng-mouseleave="sch=false") Schematic
+				a.right.smoothScroll(href="#schematic")
+					i.fa.fa-angle-double-down.fa-5x
+			
+	.container.cf#schematic
+		.animation-element.bounce-up.cf
+			h1.subject.md-display-3(layout layout-align="center center") { Schematic }
+			.subject.third
+				.content(layout='row' layout-align='space-around center' ng-cloak)
+					img(ng-src="img/schematic.jpg" style='width:100%;')
+
+	.container.cf#about
+		.animation-element.bounce-up.cf
+			h1.subject.md-display-3(layout layout-align="center center") About Us
+			.subject.first
+				.category-color
+				.icon
+					i.fa.fa-users
+				.header.cf
+				h3.title Team
+				.content(layout-sm='column' layout='row' layout-align='space-around center')
+					.layout-margin(flex='25')
+						md-card
+							img.md-card-image(ng-src="img/heiser.jpg")
+							md-card-content
+								div(layout='row' layout-align='space-around center')
+									a(href="https://instagram.com/chrisheiser")
+										i.fa.fa-instagram
+									a(href="http://chrismheiser.github.io")
+										i.fa.fa-coffee
+									a(href="https://github.com/chrismheiser")
+										i.fa.fa-code
+									a(href="https://www.linkedin.com/in/chrismheiser")
+										i.fa.fa-linkedin
+								h2.md-title Christopher Heiser
+								p Application Systems Analyst
+								p Northern Arizona University
+					.layout-margin(flex='25')
+						md-card
+							img.md-card-image(ng-src="img/mckay.jpg")
+							md-card-content
+								div(layout='row' layout-align='space-around center')
+									a(href="#")
+										i.fa.fa-instagram
+									a(href="https://www.cefns.nau.edu/~npm4/")
+										i.fa.fa-coffee
+									a(href="#")
+										i.fa.fa-linkedin
+								h2.md-title Nicholas McKay
+								p Principal Investigator
+								p School of Earth Sciences and Environmental Sustainability
+								p Northern Arizona University
+					.layout-margin(flex='25')
+						md-card
+							img.md-card-image(ng-src="img/emile.jpg")
+							md-card-content
+								div(layout='row' layout-align='space-around center')
+									a(href="https://twitter.com/el_nino_waves")
+										i.fa.fa-twitter
+									a(href="http://climdyn.usc.edu/People.html")
+										i.fa.fa-coffee
+									a(href="https://www.linkedin.com/in/elnino")
+										i.fa.fa-linkedin
+								h2.md-title Julien Emile-Geay
+								p Principal Investigator
+								p Department of Earth Science
+								p University of Southern California
+					.layout-margin(flex='25')
+						md-card
+							img.md-card-image(ng-src="img/khider.jpg")
+							md-card-content
+								div(layout='row' layout-align='space-around center')
+								h2.md-title Deborah Khider
+								p Department of Earth Science
+								p University of Southern California
+
+			.subject.second
+				.category-color
+				.icon
+					i.fa.fa-globe
+				.header.cf
+				h3.title Location
+				.content
+					div(ng-controller='MapCtrl' ng-cloak)
+						ui-gmap-google-map(center="map.center" zoom="map.zoom" options="options")
+	
+
+	
+	.container.cf#contact(ng-controller='ContactCtrl')
+		.animation-element.bounce-up.cf(ng-init="sent=false")
+			h1.subject.md-display-3(layout layout-align="center center") Contact
+			.subject.third
+				.category-color
+				.icon
+					i.fa.fa-envelope
+				.header.cf
+				h3.title Questions, comments, concerns...
+				
+				// show this when form has not been submitted yet
+				.content(layout='row' layout-align='space-around center' ng-cloak ng-switch='sent')
+					.f(ng-switch-when="false" flex='30')
+						h4 We'd love to hear from you!
+						p Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book
+						//- pre {{mailer}}
+					form.f(ng-switch-when="false" flex='60' method='post' ng-model='mailer')
+						//- md-input-container
+						//- 	label Name
+						//- 	input(type="text" name='name' ng-model='mailer.name' required max-length='10')
+						//- md-input-container
+						//- 	label Organization
+						//- 	input(type="text" name='org' ng-model='mailer.org' required max-length='10')
+						//- md-input-container
+						//- 	label E-Mail
+						//- 	input(type="email" name='email' ng-model='mailer.email' required max-length='10')
+						//- md-input-container
+						//- 	label Subject
+						//- 	input(type="text" name='subject' ng-model='mailer.subject' required max-length='10')
+						//- md-input-container
+						//- 	label Message
+						//- 	textarea(type="text" name='message' ng-model='mailer.message' required max-length='10')
+						md-button.send(type='submit' ng-click='sendMail(mailer)' ng-model='sent') Send
+					.f(ng-switch-when="true")
+						h1(style='font-weight:500;') Message Sent!
+						p We'll get back to you as soon as possible. 
+
+
+	footer
+		p#nsf.
+			The development of LiPD is funded by the National Science Foundation   
+			#[img(ng-src='img/nsf.jpg' style='width:50px')]
+			
+
+block js
+	script(src='https://cdnjs.cloudflare.com/ajax/libs/angular-google-maps/2.2.0/angular-google-maps.min.js')
+	script(src='https://maps.googleapis.com/maps/api/js?sensor=false')
+	script(src='apps/indexApp.js')
+	script(src='js/ngMap.js')
+	script(src='js/ngContact.js')
+	script(src='modules/animate.js')
+	script(src='modules/smooth.js')
