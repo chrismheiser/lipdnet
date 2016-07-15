@@ -69,3 +69,5 @@ data/*
 website/tmp/*
 
 Parser/p1.py
+
+lipd_R/.RData
