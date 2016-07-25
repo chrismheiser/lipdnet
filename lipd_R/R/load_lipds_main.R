@@ -20,22 +20,29 @@ load.lipds <- function(){
   unzipper(lpds_ext, tmp)
 
   # Start importing data from the unpacked temp workspace
-  ls <- import.file.lipd(tmp, lpds)
+  D <- import.file.lipd(tmp, lpds)
 
   # Convert metadata structure to newest LiPD version
-  ls <- convert.version(ls)
+  D <- convert.version(D)
 
   # Convert data types whereever necessary
   # ls <-convert.data.types(ls)
 
   # Now you have all the data loaded in memory, place data from csv into columns
-  # ls <- merge.data.lipd(ls)
+  D <- merge.data.lipd(D)
 
   # TODO: Change columns and tables to index-by-name
+  D <- index.by.name(D)
+
+  # We no longer need the csv and metadata separate parts. Link straight to the data.
+  for (i in 1:length(lpds)){
+    name <- lpds[[i]]
+    D[[name]] <- D[[name]][["metadata"]]
+  }
 
   # Move back to the inital directory (Prior to temp folder)
   setwd(initial_dir)
 
-  # Return the "LiPD Library" (list) of compiled, imported data
-  return(ls)
+  # Return the "LiPD Library" of compiled, imported data
+  return(D)
 }
