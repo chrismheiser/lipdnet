@@ -21,7 +21,7 @@ index.by.name <- function(D, lpds){
       curr.pd <- D[[name]][["metadata"]][["paleoData"]][[pd.idx]]
 
       # loop for measurement tables
-      for (pdt.idx in 1:length(curr.pd[["paleoMesurementTable"]])){
+      for (pdt.idx in 1:length(curr.pd[["paleoMeasurementTable"]])){
         curr.meas <- curr.pd[["paleoMeasurementTable"]][[pdt.idx]]
         # check in measurement table
         table.name <- curr.meas[["paleoDataTableName"]]
@@ -75,7 +75,7 @@ index.by.name <- function(D, lpds){
       curr.cd <- D[[name]][["metadata"]][["chronData"]][[cd.idx]]
 
       # loop for measurement tables
-      for (cdt.idx in 1:length(curr.cd[["chronMesurementTable"]])){
+      for (cdt.idx in 1:length(curr.cd[["chronMeasurementTable"]])){
         curr.meas <- curr.cd[["chronMeasurementTable"]][[cdt.idx]]
         # check in measurement table
         table.name <- curr.meas[["chronDataTableName"]]

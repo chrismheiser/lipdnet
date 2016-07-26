@@ -91,7 +91,7 @@ merge.data.lipd <- function(D, lpds){
       curr.cd <- D[[name]][["metadata"]][["chronData"]][[cd.idx]]
 
       # loop for measurement tables
-      for (cdt.idx in 1:length(curr.cd[["chronMesurementTable"]])){
+      for (cdt.idx in 1:length(curr.cd[["chronMeasurementTable"]])){
         curr.meas <- curr.cd[["chronMeasurementTable"]][[cdt.idx]]
         # check in measurement table
         filename <- curr.meas[["filename"]]
