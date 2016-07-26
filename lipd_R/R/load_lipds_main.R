@@ -4,6 +4,9 @@
 ## into one process
 ###############################################
 
+#' Main LiPD loading function. Combines all processes into one.
+#' @export
+#' @return D LiPD Library
 load.lipds <- function(){
 
   # Do initial set up
@@ -13,7 +16,6 @@ load.lipds <- function(){
 
   # Get names of lipd files present
   lpds_ext <- get.list.lpd.ext()
-  print(lpds_ext)
   lpds <- strip.extension(lpds_ext)
 
   # Unzip the lipd files to the temp workspace
@@ -29,16 +31,13 @@ load.lipds <- function(){
   # ls <-convert.data.types(ls)
 
   # Now you have all the data loaded in memory, place data from csv into columns
-  D <- merge.data.lipd(D)
+  D <- merge.data.lipd(D, lpds)
 
-  # TODO: Change columns and tables to index-by-name
-  D <- index.by.name(D)
+  # Change columns and tables to index-by-name
+  D <- index.by.name(D, lpds)
 
   # We no longer need the csv and metadata separate parts. Link straight to the data.
-  for (i in 1:length(lpds)){
-    name <- lpds[[i]]
-    D[[name]] <- D[[name]][["metadata"]]
-  }
+  D <- remove.layers(D, lpdsD)
 
   # Move back to the inital directory (Prior to temp folder)
   setwd(initial_dir)

@@ -4,7 +4,9 @@
 ## files
 ###############################################
 
-# Import the required modules
+#' Import each of the required modules for the package
+#' @export
+#' @return none
 set.modules <- function(){
   library(Kmisc, quietly=TRUE)
   library(RJSONIO, quietly=TRUE)
@@ -15,26 +17,38 @@ set.modules <- function(){
 # TODO: Ask user where files are stored
 # This isn't working yet because the tcltk package keeps crashing upon import
 
-# Get list of all LiPD files in current directory
+
+#' Get list of all LiPD files in current directory
+#' @export
+#' @return f List of LiPD files w. ext
 get.list.lpd.ext <- function(){
   f <- list.files(path=getwd(), pattern='\\.lpd$')
   return(f)
 }
 
-# Create a temporary directory for workspace
+#' Create a temporary working directory
+#' @export
+#' @return d Temporary directory path
 create.tmp.dir <- function(){
   d <- tempdir()
   return(d)
 }
 
-# Unzip all LiPD files to the temporary directory
+#' Unzip all LiPD files to the temporary directory
+#' @export
+#' @param files LiPD files to unzip
+#' @param tmp Temporary directory
+#' @return none
 unzipper <- function(files, tmp){
   sapply(files, function(f){
     unzip(f, exdir = tmp)
   })
 }
 
-# Remove the file extension from string names
+#' Remove the file extension from string names
+#' @export
+#' @param files_ext List of LiPD filenames w. ext
+#' @return none
 strip.extension <- function(files_ext){
   x <- sapply(files_ext, function(f){
     strip_extension(f)
@@ -43,32 +57,54 @@ strip.extension <- function(files_ext){
   return(x)
 }
 
-# Get list of csv files in current directory and below
+#' Get list of csv files in current directory and below
+#' @export
+#' @return f List of csv files
 get.list.csv <- function(){
   f <- list.files(path=getwd(), pattern='\\.csv$', recursive=TRUE)
   return(f)
 }
 
-# Get list of jsonld files in current directory and below
+#' Get list of jsonly files in current directory and below
+#' @export
+#' @return f List of jsonld files
 get.list.jsonld <- function(){
   f <- list.files(path=getwd(), pattern='\\.jsonld$', recursive=TRUE)
   return(f)
 }
 
-# Import data from one CSV file
+#' Read in data from a csv file
+#' @export
+#' @return t Data frame of csv data
 import.file.csv <- function(f){
   t <- read.csv(f, header=FALSE)
   return(t)
 }
 
-# Try to import data from one jsonld file
+#' Read in data from a jsonld file
+#' @export
+#' @return l List of jsonld data
 import.file.jsonld <- function(f){
-  f.data <- fromJSON(f)
-  return(f.data)
+  l <- fromJSON(f)
+  return(l)
 }
 
-# Go back to the original working directory
+#' Return to a predetermined folder each time a process quits early from an error
+#' @export
+#' @return none
 return.to.root <- function(){
   setwd("~/Documents/code/geoChronR/lipd_R/")
 }
 
+#' Remove CSV and metadata layer from our lipd library.
+#' @export
+#' @param D LiPD Library
+#' @param lpds List of LiPD files in the library
+#' @return D Modified lipd library
+remove.layers <- function(D, lpds){
+  for (i in 1:length(lpds)){
+    name <- lpds[[i]]
+    D[[name]] <- D[[name]][["metadata"]]
+  }
+  return(D)
+}

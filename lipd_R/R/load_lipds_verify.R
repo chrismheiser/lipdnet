@@ -3,12 +3,14 @@
 ###############################################
 
 
-# Check the LiPD version of a file
-check.lipd.version <- function(D){
+#' Check the LiPD Version of a file
+#' @export
+#' @param d LiPD metadata
+#' @return ver Numeric LiPD version
+check.lipd.version <- function(d){
 
   # Get value as character, not numeric
-  ver <- as.character(D$LiPDVersion)
-  print(ver)
+  ver <- as.character(d$LiPDVersion)
   # A version number is 1.0, or wasn't found
   if (ver == "1.0"| is.null(ver)){
     d <- import.1.0(D)

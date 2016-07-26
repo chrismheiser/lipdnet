@@ -4,7 +4,10 @@
 ## current LiPD version structure
 ###############################################
 
-# Main function
+#' Convert LiPD version whenever necessary
+#' @export
+#' @param D LiPD Library
+#' @return D modified LiPD Library
 convert.version <- function(D){
   # Loop once for every LiPD object
   for (i in 1:length(D)){
@@ -34,8 +37,12 @@ get.version <- function(d){
   return(version)
 }
 
-# Convert chron from a single fixed table, so a multiple scalable table
-# (LiPD Verison 1.0 to 1.1 change)
+
+#' Convert chron from a single fixed table, so a multiple scalable table
+#' LiPD Verison 1.0 to 1.1 change
+#' @export
+#' @param d LiPD metadata
+#' @return d Modified LiPD metadata
 convert.chron.s2m <- function(d){
 
   # Notable change 1.0 to 1.1:
@@ -70,8 +77,11 @@ convert.chron.s2m <- function(d){
   return(d)
 }
 
-# Convert paleo from a single fixed table, so a multiple scalable table
-# (LiPD Verison 1.1 to 1.2 change)
+#' Convert paleo from a single fixed table, so a multiple scalable table
+#' (LiPD Verison 1.1 to 1.2 change)
+#' @export
+#' @param d LiPD metadata
+#' @return d Modified LiPD metadata
 convert.paleo.s2m <- function(d){
 
   # Notable change 1.1 to 1.2:
@@ -107,7 +117,10 @@ convert.paleo.s2m <- function(d){
   return(d)
 }
 
-# check / convert and fixed data frames into scalable lists
+#' Check / convert and fixed data frames into scalable lists
+#' @export
+#' @param d LiPD metadata
+#' @return d Modified LiPD metadata
 convert.dfs2lst <- function(d){
 
   # first check that paleo and chron are lists, and not data frames
@@ -126,7 +139,10 @@ convert.dfs2lst <- function(d){
 }
 
 
-# check / convert paleodata measurement table data frame to list
+#' Check / convert paleodata measurement table data frame to list
+#' @export
+#' @param d LiPD metadata
+#' @return d Modified LiPD metadata
 convert.df.paleo.mt <- function(d){
   table <- d[["metadata"]][["paleoData"]]
   for (i in 1:length(table)){
@@ -140,7 +156,10 @@ convert.df.paleo.mt <- function(d){
   return(d)
 }
 
-# check / convert chrondata measurement table data frame to list
+#' Check / convert chrondata measurement table data frame to list
+#' @export
+#' @param d LiPD metadata
+#' @return d Modified LiPD metadata
 convert.df.chron.mt <- function(d){
   table <- d[["metadata"]][["chronData"]]
   for (i in 1:length(table)){
@@ -154,7 +173,10 @@ convert.df.chron.mt <- function(d){
   return(d)
 }
 
-# check / convert paloedata data frame to list
+#' Check / convert paleoData data frame to list
+#' @export
+#' @param d LiPD metadata
+#' @return d Modified LiPD metadata
 convert.df.paleo <- function(d){
   table<- d[["metadata"]][["paleoData"]]
   if(is.data.frame(table)){
@@ -164,7 +186,10 @@ convert.df.paleo <- function(d){
   return(d)
 }
 
-# check / convert chrondata data frame to list
+#' Check / convert chronData data frame to list
+#' @export
+#' @param d LiPD metadata
+#' @return d Modified LiPD metadata
 convert.df.chron <- function(d){
   table<- d[["metadata"]][["chronData"]]
   if(is.data.frame(table)){

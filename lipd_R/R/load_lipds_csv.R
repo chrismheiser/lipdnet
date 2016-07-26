@@ -3,50 +3,71 @@
 ## Merge metadata and csv into one LiPD object
 ###############################################
 
-# Merge csv numeric data into the metadata columns
-merge.data.lipd <- function(D){
-  for (lipd in 1:length(D)){
 
-      # Call once for paleoData
-      for (pd.idx in 1:length(D[["metadata"]][["paleoData"]])){
-        curr.pd <- D[["metadata"]][["paleoData"]][[pd.idx]]
+#' Merge csv numeric data into the metadata columns
+#' @export
+#' @param D The lipd library
+#' @param lpds list of all LiPD files (no extension)
+#' @return D modified lipd library
+merge.data.lipd <- function(D, lpds){
 
-        # loop for measurement tables
-        for (pdt.idx in 1:length(curr.pd[["paleoMesurementTable"]])){
+  for (lipd in 1:length(lpds)){
+
+      name <- lpds[[lipd]]
+
+      # PALEODATA
+
+      # For every paleo data entry
+      for (pd.idx in 1:length(D[[name]][["metadata"]][["paleoData"]])){
+        curr.pd <- D[[name]][["metadata"]][["paleoData"]][[pd.idx]]
+
+        end <- length(curr.pd[["paleoMeasurementTable"]])
+        print(end)
+
+        # for every paleo measurement table
+        for (pdt.idx in 1:end){
+
+          # Short reference to the current table
           curr.meas <- curr.pd[["paleoMeasurementTable"]][[pdt.idx]]
-          # check in measurement table
+          # get the table's filename
           filename <- curr.meas[["filename"]]
           if (!is.null(filename)){
-            csv.cols <- D[["csv"]][[filename]]
+            # use the filename to get csv columns
+            csv.cols <- D[[name]][["csv"]][[filename]]
+            # short reference to the current table columns
             meta.cols <- curr.meas[["columns"]][[1]]
-            D[["metadata"]][["paleoData"]][[pd.idx]][["paleoMeasurementTable"]][[pdt.idx]][["columns"]][[1]] <- merge.csv(csv.cols, meta.cols)
+            # merge the data, and set the columns as the new entry
+            D[[name]][["metadata"]][["paleoData"]][[pd.idx]][["paleoMeasurementTable"]][[pdt.idx]][["columns"]][[1]] <- merge.csv(csv.cols, meta.cols)
           }
         }
 
-        # loop in models
+        # for every model
         for (pdm.idx in 1:length(curr.pd[["paleoModel"]])){
           curr.model <- curr.pd[["paleoModel"]][[pdm.idx]]
-          # check in ensemble table
+
+          # for every ensemble table
           for (pdm.ens in 1:length(curr.model[["ensembleTable"]])){
             curr.ens <- curr.model[["ensembleTable"]][[pdm.ens]]
             if (pdm.ens == 1){
-              # First column. One value column
+
+              # Special call to ensemble function
               filename <- curr.ens[["filename"]]
               if (!is.null(filename)){
-                csv.cols <- D[["csv"]][[filename]]
+                csv.cols <- D[[name]][["csv"]][[filename]]
                 meta.cols <- curr.ens[["columns"]][[1]]
-                D[["metadata"]][["paleoData"]][[pd.idx]][["paleoModel"]][[pdm.idx]][["ensembleTable"]][[pdm.ens]] = merge.csv.ens(csv.cols, meta.cols)
+                D[[name]][["metadata"]][["paleoData"]][[pd.idx]][["paleoModel"]][[pdm.idx]][["ensembleTable"]][[pdm.ens]] = merge.csv.ens(csv.cols, meta.cols)
               }
             }
           }
-          # check distribution
+
+          # for every distribution table
           for (pdm.dist in 1:length(curr.model[["distribution"]])){
             curr.dist <- curr.model[["distribution"]][[pdm.dist]]
             filename <- curr.dist[["filename"]]
             if (!is.null(filename)){
-              csv.cols <- D[["csv"]][[filename]]
+              csv.cols <- D[[name]][["csv"]][[filename]]
               meta.cols <- curr.dist[["columns"]][[1]]
-              D[["metadata"]][["paleoData"]][[pd.idx]][["paleoModel"]][[pdm.idx]][["distributiion"]][[pdm.dist]][["columns"]][[1]] <- merge.csv(csv.cols, meta.cols)
+              D[[name]][["metadata"]][["paleoData"]][[pd.idx]][["paleoModel"]][[pdm.idx]][["distributiion"]][[pdm.dist]][["columns"]][[1]] <- merge.csv(csv.cols, meta.cols)
             }
           }
 
@@ -56,18 +77,18 @@ merge.data.lipd <- function(D){
             curr.modt <- curr.model[["paleoModelTable"]][[pdm.modt]]
             filename <- curr.modt[["filename"]]
             if (!is.null(filename)){
-              csv.cols <- D[["csv"]][[filename]]
+              csv.cols <- D[[name]][["csv"]][[filename]]
               meta.cols <- curr.modt[["columns"]][[1]]
-              D[["metadata"]][["paleoData"]][[pd.idx]][["paleoModel"]][[pdm.idx]][["paleoModelTable"]][[pdm.modt]][["columns"]][[1]] <- merge.csv(csv.cols, meta.cols)
+              D[[name]][["metadata"]][["paleoData"]][[pd.idx]][["paleoModel"]][[pdm.idx]][["paleoModelTable"]][[pdm.modt]][["columns"]][[1]] <- merge.csv(csv.cols, meta.cols)
             }
           }
         }
 
       } ## end paleodata
 
-    # Call once for paleoData
-    for (cd.idx in 1:length(D[["metadata"]][["chronData"]])){
-      curr.cd <- D[["metadata"]][["chronData"]][[cd.idx]]
+    # CHRONDATA
+    for (cd.idx in 1:length(D[[name]][["metadata"]][["chronData"]])){
+      curr.cd <- D[[name]][["metadata"]][["chronData"]][[cd.idx]]
 
       # loop for measurement tables
       for (cdt.idx in 1:length(curr.cd[["chronMesurementTable"]])){
@@ -75,9 +96,9 @@ merge.data.lipd <- function(D){
         # check in measurement table
         filename <- curr.meas[["filename"]]
         if (!is.null(filename)){
-          csv.cols <- D[["csv"]][[filename]]
+          csv.cols <- D[[name]][["csv"]][[filename]]
           meta.cols <- curr.meas[["columns"]][[1]]
-          D[["metadata"]][["chronData"]][[cd.idx]][["chronMeasurementTable"]][[cdt.idx]][["columns"]][[1]] <- merge.csv(csv.cols, meta.cols)
+          D[[name]][["metadata"]][["chronData"]][[cd.idx]][["chronMeasurementTable"]][[cdt.idx]][["columns"]][[1]] <- merge.csv(csv.cols, meta.cols)
         }
       }
 
@@ -91,9 +112,9 @@ merge.data.lipd <- function(D){
             # First column. One value column
             filename <- curr.ens[["filename"]]
             if (!is.null(filename)){
-              csv.cols <- D[["csv"]][[filename]]
+              csv.cols <- D[[name]][["csv"]][[filename]]
               meta.cols <- curr.ens[["columns"]][[1]]
-              D[["metadata"]][["chronData"]][[cd.idx]][["chronModel"]][[cdm.idx]][["ensembleTable"]][[cdm.ens]] = merge.csv.ens(csv.cols, meta.cols)
+              D[[name]][["metadata"]][["chronData"]][[cd.idx]][["chronModel"]][[cdm.idx]][["ensembleTable"]][[cdm.ens]] = merge.csv.ens(csv.cols, meta.cols)
             }
           }
         }
@@ -102,21 +123,20 @@ merge.data.lipd <- function(D){
           curr.dist <- curr.model[["distribution"]][[cdm.dist]]
           filename <- curr.dist[["filename"]]
           if (!is.null(filename)){
-            csv.cols <- D[["csv"]][[filename]]
+            csv.cols <- D[[name]][["csv"]][[filename]]
             meta.cols <- curr.dist[["columns"]][[1]]
-            D[["metadata"]][["chronData"]][[cd.idx]][["chronModel"]][[cdm.idx]][["distributiion"]][[cdm.dist]][["columns"]][[1]] <- merge.csv(csv.cols, meta.cols)
+            D[[name]][["metadata"]][["chronData"]][[cd.idx]][["chronModel"]][[cdm.idx]][["distributiion"]][[cdm.dist]][["columns"]][[1]] <- merge.csv(csv.cols, meta.cols)
           }
         }
 
         # check model table
         for (cdm.modt in 1:length(curr.model[["chronModelTable"]])){
-          # Multiple
           curr.modt <- curr.model[["chronModelTable"]][[cdm.modt]]
           filename <- curr.modt[["filename"]]
           if (!is.null(filename)){
-            csv.cols <- D[["csv"]][[filename]]
+            csv.cols <- D[[name]][["csv"]][[filename]]
             meta.cols <- curr.modt[["columns"]][[1]]
-            D[["metadata"]][["chronData"]][[cd.idx]][["chronModel"]][[cdm.idx]][["chronModelTable"]][[cdm.modt]][["columns"]][[1]] <- merge.csv(csv.cols, meta.cols)
+            D[[name]][["metadata"]][["chronData"]][[cd.idx]][["chronModel"]][[cdm.idx]][["chronModelTable"]][[cdm.modt]][["columns"]][[1]] <- merge.csv(csv.cols, meta.cols)
           }
         }
       }
@@ -127,6 +147,12 @@ merge.data.lipd <- function(D){
   return(D)
 }
 
+
+#' Merge CSV data into the metadata
+#' @export
+#' @param csv.cols CSV data for this file
+#' @param meta.cols Target metadata columns
+#' @return meta.cols Modified metadata columns
 merge.csv <- function(csv.cols, meta.cols){
   values <- list()
   for (i in 1:length(meta.cols)){
@@ -141,7 +167,11 @@ merge.csv <- function(csv.cols, meta.cols){
   return(meta.cols)
 }
 
-# Special merge function for ensemble table entries
+#' Special merge function for ensemble table entries
+#' @export
+#' @param csv.cols CSV data for this file
+#' @param meta.cols Target metadata columns
+#' @return meta.cols Modified metadata columns
 merge.csv.ens <- function(csv.cols, meta.cols){
   n.cols <- list()
   # empty space at first row, since it won't have one. 2:N
@@ -166,13 +196,3 @@ merge.csv.ens <- function(csv.cols, meta.cols){
 }
 
 
-# Go through paleo data and add values where necessary
-merge.paleodata <- function(){
-
-
-}
-
-# Go through chron data and add values where necessary
-merge.chrondata <- function(){
-
-}

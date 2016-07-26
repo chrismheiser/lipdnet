@@ -4,7 +4,11 @@
 ## memory
 ###############################################
 
-# Import lipd data
+#' Import the data from each csv and jsonld file for given LiPDs
+#' @export
+#' @param tmp Char path to the temp folder in memory
+#' @param files_noext List of lipd files without extention
+#' @return out.list List of data for each lipd file
 import.file.lipd <- function(tmp, files_noext){
 
   # Move into the tmp folder

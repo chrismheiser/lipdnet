@@ -7,10 +7,13 @@
 ###############################################
 
 
-# Bagit workaround
-# Since we don't have a way of getting the bagit module in R,
-# all we can do is use the default bag function by calling the
-# full python file on a directory. This will create a bag.
+
+#' Since we don't have a way of getting the bagit module in R,
+#' all we can do is use the default bag function by calling the
+#' full python file on a directory. This will create a bag.
+#' @export
+#' @param path The path to the directory that needs to be bagged
+#' @return none
 bagit <- function(path){
   # path is the tmp directory at LiPD folder level
   bagitPath="~/R/bagit.py"
