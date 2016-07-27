@@ -155,7 +155,7 @@ merge.data.lipd <- function(D, lpds){
 merge.csv <- function(csv.cols, meta.cols){
   values <- list()
 
-  for (i in 1:length(meta.cols)){
+  for (i in 1:dim(meta.cols)[1]){
     # get a row slice from the columns data frame
     # meta.cols[which(meta.cols[["number"]] == i), ]
 

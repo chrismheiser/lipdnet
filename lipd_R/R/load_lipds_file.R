@@ -28,10 +28,18 @@ import.file.lipd <- function(tmp, files_noext){
 
       # Get all CSV files and data. Combined
       c <- get.list.csv()
-      c.data <- sapply(c, function(x){
-        datas <- import.file.csv(x)
-        return(datas)
-      })
+      print(c)
+      c.data=vector(mode="list",length=length(c))
+      for (ci in 1:length(c)){
+        df=import.file.csv(c[ci])
+      c.data[[c[ci]]]=df
+      }
+      
+      
+#       c.data <- sapply(c, function(x){
+#         datas <- import.file.csv(x)
+#         return(datas)
+#       })
 
       # Get all JSONLD files and data. Combined
       j <- get.list.jsonld()

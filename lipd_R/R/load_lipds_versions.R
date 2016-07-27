@@ -75,7 +75,7 @@ convert.s2m <- function(d, keys){
 
   if (!is.null(path1)){
     tmp <- d[["metadata"]][[key1]]
-    d[["metadata"]][[key1]] <- NA
+    d[["metadata"]][[key1]] <- list()
     d[["metadata"]][[key1]][[1]] <- tmp
   }
 
@@ -88,9 +88,9 @@ convert.s2m <- function(d, keys){
 
   # check for multiples list in pc
   if (!is.null(path2)){
-    tmp <- d[["metadata"]][[key1]][[1]][[key2]]
-    d[["metadata"]][[key1]][[1]][[key2]] <- NA
-    d[["metadata"]][[key1]][[1]][[key2]][[1]] <- tmp
+    tmp <- as.list(d[["metadata"]][[key1]][[1]][[key2]])
+    d[["metadata"]][[key1]][[1]][[key2]] <- tmp
+    #d[["metadata"]][[key1]][[1]][[key2]][[1]] <- tmp
   }
 
   # change the LiPDVersion value to 1.2
