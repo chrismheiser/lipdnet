@@ -26,8 +26,8 @@ index.by.name <- function(D, lpds){
         table.name <- curr.meas[["paleoDataTableName"]]
         if (!is.null(table.name)){
           # Reorganize table and move columns up
-          meta.cols <- move.cols.up(curr.meas)
-          D[[name]][["metadata"]][["paleoData"]][[pd.idx]][["paleoMeasurementTable"]][[pdt.idx]] <- meta.cols
+          table <- move.cols.up(curr.meas)
+          D[[name]][["metadata"]][["paleoData"]][[pd.idx]][["paleoMeasurementTable"]][[pdt.idx]] <- table
         }
       } ## end measurement
 
@@ -47,8 +47,8 @@ index.by.name <- function(D, lpds){
           table.name <- curr.dist[["paleoDataTableName"]]
           if (!is.null(table.name)){
             # Reorganize table and move columns up
-            meta.cols <- move.cols.up(curr.dist)
-            D[[name]][["metadata"]][["paleoData"]][[pd.idx]][["paleoModel"]][[pdm.idx]][["distribution"]][[pdm.dist]] <- meta.cols
+            table <- move.cols.up(curr.dist)
+            D[[name]][["metadata"]][["paleoData"]][[pd.idx]][["paleoModel"]][[pdm.idx]][["distribution"]][[pdm.dist]] <- table
           }
         } ## end distribution
 
@@ -58,17 +58,15 @@ index.by.name <- function(D, lpds){
           table.name <- curr.modt[["paleoDataTableName"]]
           if (!is.null(table.name)){
             # Reorganize table and move columns up
-            meta.cols <- move.cols.up(curr.modt)
-            D[[name]][["metadata"]][["paleoData"]][[pd.idx]][["paleoModel"]][[pdm.idx]][["paleoModelTable"]][[pdm.modt]] <- meta.cols
+            table <- move.cols.up(curr.modt)
+            D[[name]][["metadata"]][["paleoData"]][[pd.idx]][["paleoModel"]][[pdm.idx]][["paleoModelTable"]][[pdm.modt]] <- table
           }
         } ## end model table
       } ## end models
     } ## end paleodata
 
     # CHRONDATA
-    cd.len <- length(D[["metadata"]][["chronData"]])
-    for (cd.idx in 1:cd.len){
-      print(cd.idx)
+    for (cd.idx in 1:length(D[[name]][["metadata"]][["chronData"]])){
       curr.cd <- D[[name]][["metadata"]][["chronData"]][[cd.idx]]
 
       # loop for measurement tables
@@ -78,8 +76,8 @@ index.by.name <- function(D, lpds){
         table.name <- curr.meas[["chronDataTableName"]]
         if (!is.null(table.name)){
           # Reorganize table and move columns up
-          meta.cols <- move.cols.up(curr.meas)
-          D[[name]][["metadata"]][["chronData"]][[cd.idx]][["chronMeasurementTable"]][[cdt.idx]] <- meta.cols
+          table <- move.cols.up(curr.meas)
+          D[[name]][["metadata"]][["chronData"]][[cd.idx]][["chronMeasurementTable"]][[cdt.idx]] <- table
         }
       } ## measurement
 
@@ -105,8 +103,8 @@ index.by.name <- function(D, lpds){
           table.name <- curr.dist[["chronDataTableName"]]
           if (!is.null(table.name)){
             # Reorganize table and move columns up
-            meta.cols <- move.cols.up(curr.dist)
-            D[[name]][["metadata"]][["chronData"]][[cd.idx]][["chronModel"]][[cdm.idx]][["distribution"]][[cdm.dist]] <- new.cols
+            table <- move.cols.up(curr.dist)
+            D[[name]][["metadata"]][["chronData"]][[cd.idx]][["chronModel"]][[cdm.idx]][["distribution"]][[cdm.dist]] <- table
           }
         } ## end distribution
 
@@ -116,8 +114,8 @@ index.by.name <- function(D, lpds){
           table.name <- curr.modt[["chronDataTableName"]]
           if (!is.null(table.name)){
             # Reorganize table and move columns up
-            meta.cols <- move.cols.up(curr.modt)
-            D[[name]][["metadata"]][["chronData"]][[cd.idx]][["chronModel"]][[cdm.idx]][["chronModelTable"]][[cdm.modt]] <- meta.cols
+            table <- move.cols.up(curr.modt)
+            D[[name]][["metadata"]][["chronData"]][[cd.idx]][["chronModel"]][[cdm.idx]][["chronModelTable"]][[cdm.modt]] <- table
           }
         } ## end model
 
@@ -143,13 +141,10 @@ move.cols.up <- function(table){
     # get the variable name
     vn <- table[["columns"]][[i]][["variableName"]]
     print(vn)
-    new.cols[[vn]] <- table[["columns"]][[i]]
+    table[[vn]] <- table[["columns"]][[i]]
   }
   # remove the columns item from table
   table[["columns"]] <- NULL
-
-  # append the list to the table
-  table <- mapply(c, table, new.cols, SIMPLIFY=FALSE)
 
   return(table)
 }

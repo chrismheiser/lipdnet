@@ -109,7 +109,7 @@ merge.data.lipd <- function(D, lpds){
       }
 
       # loop in models
-      for (cdm.idx in 1:length(curr.cd[["chronModel"]])){
+    for (cdm.idx in 1:length(curr.cd[["chronModel"]])){
         curr.model <- curr.cd[["chronModel"]][[cdm.idx]]
         # check in ensemble table
         for (cdm.ens in 1:length(curr.model[["ensembleTable"]])){
