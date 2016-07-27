@@ -66,7 +66,7 @@ print(name)
             if (!is.null(filename)){
               csv.cols <- D[[name]][["csv"]][[filename]][[pdm.dist]]
               meta.cols <- curr.dist[["columns"]][[1]]
-              D[[name]][["metadata"]][["paleoData"]][[pd.idx]][["paleoModel"]][[pdm.idx]][["distributiion"]][[pdm.dist]][["columns"]][[1]] <- merge.csv(csv.cols, meta.cols)
+              D[[name]][["metadata"]][["paleoData"]][[pd.idx]][["paleoModel"]][[pdm.idx]][["distributiion"]][[pdm.dist]][["columns"]] <- merge.csv(csv.cols, meta.cols)
             }
           }
 
@@ -78,7 +78,7 @@ print(name)
             if (!is.null(filename)){
               csv.cols <- D[[name]][["csv"]][[filename]]
               meta.cols <- curr.modt[["columns"]][[1]]
-              D[[name]][["metadata"]][["paleoData"]][[pd.idx]][["paleoModel"]][[pdm.idx]][["paleoModelTable"]][[pdm.modt]][["columns"]][[1]] <- merge.csv(csv.cols, meta.cols)
+              D[[name]][["metadata"]][["paleoData"]][[pd.idx]][["paleoModel"]][[pdm.idx]][["paleoModelTable"]][[pdm.modt]][["columns"]] <- merge.csv(csv.cols, meta.cols)
             }
           }
         }
@@ -97,7 +97,7 @@ print(name)
         if (!is.null(filename)){
           csv.cols <- D[[name]][["csv"]][[filename]]
           meta.cols <- curr.meas[["columns"]][[1]]
-          D[[name]][["metadata"]][["chronData"]][[cd.idx]][["chronMeasurementTable"]][[cdt.idx]][["columns"]][[1]] <- merge.csv(csv.cols, meta.cols)
+          D[[name]][["metadata"]][["chronData"]][[cd.idx]][["chronMeasurementTable"]][[cdt.idx]][["columns"]] <- merge.csv(csv.cols, meta.cols)
         }
       }
 
@@ -124,7 +124,7 @@ print(name)
           if (!is.null(filename)){
             csv.cols <- D[[name]][["csv"]][[filename]]
             meta.cols <- curr.dist[["columns"]][[1]]
-            D[[name]][["metadata"]][["chronData"]][[cd.idx]][["chronModel"]][[cdm.idx]][["distributiion"]][[cdm.dist]][["columns"]][[1]] <- merge.csv(csv.cols, meta.cols)
+            D[[name]][["metadata"]][["chronData"]][[cd.idx]][["chronModel"]][[cdm.idx]][["distributiion"]][[cdm.dist]][["columns"]] <- merge.csv(csv.cols, meta.cols)
           }
         }
 
@@ -135,7 +135,7 @@ print(name)
           if (!is.null(filename)){
             csv.cols <- D[[name]][["csv"]][[filename]]
             meta.cols <- curr.modt[["columns"]][[1]]
-            D[[name]][["metadata"]][["chronData"]][[cd.idx]][["chronModel"]][[cdm.idx]][["chronModelTable"]][[cdm.modt]][["columns"]][[1]] <- merge.csv(csv.cols, meta.cols)
+            D[[name]][["metadata"]][["chronData"]][[cd.idx]][["chronModel"]][[cdm.idx]][["chronModelTable"]][[cdm.modt]][["columns"]] <- merge.csv(csv.cols, meta.cols)
           }
         }
       }
