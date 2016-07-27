@@ -22,7 +22,6 @@ merge.data.lipd <- function(D, lpds){
         curr.pd <- D[[name]][["metadata"]][["paleoData"]][[pd.idx]]
 
         end <- length(curr.pd[["paleoMeasurementTable"]])
-        print(end)
 
         # for every paleo measurement table
         for (pdt.idx in 1:end){
@@ -65,7 +64,7 @@ merge.data.lipd <- function(D, lpds){
             curr.dist <- curr.model[["distribution"]][[pdm.dist]]
             filename <- curr.dist[["filename"]]
             if (!is.null(filename)){
-              csv.cols <- D[[name]][["csv"]][[filename]]
+              csv.cols <- D[[name]][["csv"]][[filename]][[pdm.dist]]
               meta.cols <- curr.dist[["columns"]][[1]]
               D[[name]][["metadata"]][["paleoData"]][[pd.idx]][["paleoModel"]][[pdm.idx]][["distributiion"]][[pdm.dist]][["columns"]][[1]] <- merge.csv(csv.cols, meta.cols)
             }
@@ -155,6 +154,7 @@ merge.data.lipd <- function(D, lpds){
 #' @return meta.cols Modified metadata columns
 merge.csv <- function(csv.cols, meta.cols){
   values <- list()
+
   for (i in 1:length(meta.cols)){
     # get a row slice from the columns data frame
     # meta.cols[which(meta.cols[["number"]] == i), ]

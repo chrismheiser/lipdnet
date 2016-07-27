@@ -12,18 +12,17 @@ convert.version <- function(D){
   # Loop once for every LiPD object
   for (i in 1:length(D)){
     # Check which version this LiPD file is
-    current <- D[[i]]
-    version <- get.version(current)
+    lipd <- D[[i]]
+    version <- get.version(lipd)
 
     # check and convert any data frames into lists
-    current <- convert.dfs2lst(current)
+    lipd <- convert.dfs2lst(lipd)
 
     # Replace the LiPD data with the new converted structure
-    D[[i]] <- current
+    D[[i]] <- lipd
   }
   return(D)
 }
-
 
 # Get the version number from metadata
 get.version <- function(d){
@@ -37,167 +36,105 @@ get.version <- function(d){
   return(version)
 }
 
-
-#' Convert chron from a single fixed table, so a multiple scalable table
-#' LiPD Verison 1.0 to 1.1 change
-#' @export
-#' @param d LiPD metadata
-#' @return d Modified LiPD metadata
-convert.chron.s2m <- function(d){
-
-  # Notable change 1.0 to 1.1:
-  # chronData goes from single-fixed structure to multiple-variate structure
-  o <- list()
-
-  # save the data
-  backup <- d[["metadata"]][["chronData"]]
-
-  # Make sure data exists
-  if (!is.null(backup)){
-
-    # If there is not data where it should be, it's the wrong format
-    if (is.null(d[["metadata"]][["chronData"]][[1]][["chronMeasurementTable"]][[1]])){
-      # create the nested measurement table
-      l <- list()
-      mt <- list()
-      mt["chronMeasurementTable"] <- l
-      mt[["chronMeasurementTable"]][[1]] <- backup
-
-      # remove paleodata from the metadata
-      d[["metadata"]][["chronData"]] <- NULL
-
-      # place paleodata back in lipd object as a list at index 1
-      d[["metadata"]][["chronData"]] <- list()
-      d[["metadata"]][["chronData"]][[1]] <- mt
-
-      # change the LiPDVersion value to 1.1
-      d[["metadata"]][["LiPDVersion"]] <- 1.1
-    }
-  }
-  return(d)
-}
-
-#' Convert paleo from a single fixed table, so a multiple scalable table
-#' (LiPD Verison 1.1 to 1.2 change)
-#' @export
-#' @param d LiPD metadata
-#' @return d Modified LiPD metadata
-convert.paleo.s2m <- function(d){
-
-  # Notable change 1.1 to 1.2:
-  # paleoData goes from single-fixed structure to multiple-variate structure
-  o <- list()
-
-  # save the value as a paleoMeasurementTable
-  backup <- d[["metadata"]][["paleoData"]]
-
-  # Make sure data exists
-  if (!is.null(backup)){
-
-    # If there is not data where it should be, it's the wrong format
-    if (is.null(d[["metadata"]][["paleoData"]][[1]][["paleoMeasurementTable"]][[1]])){
-
-      # create the nested measurement table
-      l <- list()
-      mt <- list()
-      mt["paleoMeasurementTable"] <- l
-      mt[["paleoMeasurementTable"]][[1]] <- backup
-
-      # remove paleodata from the metadata
-      d[["metadata"]][["paleoData"]] <- NULL
-
-      # place paleodata back in lipd object as a list at index 1
-      d[["metadata"]][["paleoData"]] <- list()
-      d[["metadata"]][["paleoData"]][[1]] <- mt
-
-      # change the LiPDVersion value to 1.2
-      d[["metadata"]][["LiPDVersion"]] <- 1.2
-    }
-  }
-  return(d)
-}
-
 #' Check / convert and fixed data frames into scalable lists
 #' @export
 #' @param d LiPD metadata
 #' @return d Modified LiPD metadata
 convert.dfs2lst <- function(d){
 
+  paleos <- c("paleoData", "paleoMeasurementTable")
+  chrons <- c("chronData", "chronMeasurementTable")
+
+  # convert single entries to lists
+  d <- convert.s2m(d, paleos)
+  d <- convert.s2m(d, chrons)
+
   # first check that paleo and chron are lists, and not data frames
-  d <- convert.df.paleo(d)
-  d <- convert.df.chron(d)
-
-  # now that they're lists, check if they're in 1.2 format
-  d <- convert.chron.s2m(d)
-  d <- convert.paleo.s2m(d)
-
-  # after they're in 1.2 format, check if measurement tables are lists and not data frames
-  d <- convert.df.paleo.mt(d)
-  d <- convert.df.chron.mt(d)
+  d <- convert.dfs(d, paleos)
+  d <- convert.dfs(d, chrons)
 
   return(d)
 }
 
-
-#' Check / convert paleodata measurement table data frame to list
+#' Convert from a single fixed table, to a multiple scalable table
+#' (LiPD Verison 1.1 to 1.2 change)
 #' @export
 #' @param d LiPD metadata
 #' @return d Modified LiPD metadata
-convert.df.paleo.mt <- function(d){
-  table <- d[["metadata"]][["paleoData"]]
-  for (i in 1:length(table)){
-    old.mt <- d[["metadata"]][["paleoData"]][[i]][["paleoMeasurementTable"]]
-    if (is.data.frame(old.mt)){
-      l <- list()
-      d[["metadata"]][["paleoData"]][[i]][["paleoMeasurementTable"]] <- l
-      d[["metadata"]][["paleoData"]][[i]][["paleoMeasurementTable"]][[1]] <- old.mt
+convert.s2m <- function(d, keys){
+
+  key1 <- keys[[1]]
+  key2 <- keys[[2]]
+
+  # check for multiples list in pc
+  path1 <- tryCatch(
+    {path1 <- d[["metadata"]][[key1]][[1]]},
+    error=function(cond){
+      return(NULL)
+    })
+
+  if (!is.null(path1)){
+    tmp <- d[["metadata"]][[key1]]
+    d[["metadata"]][[key1]] <- NA
+    d[["metadata"]][[key1]][[1]] <- tmp
+  }
+
+  # check for multiples list in measurement table
+  path2 <- tryCatch(
+    {path2 <- d[["metadata"]][[key1]][[1]][[key2]][[1]]},
+    error=function(cond){
+      return(NULL)
+    })
+
+  # check for multiples list in pc
+  if (!is.null(path2)){
+    tmp <- d[["metadata"]][[key1]][[1]][[key2]]
+    d[["metadata"]][[key1]][[1]][[key2]] <- NA
+    d[["metadata"]][[key1]][[1]][[key2]][[1]] <- tmp
+  }
+
+  # change the LiPDVersion value to 1.2
+  d[["metadata"]][["LiPDVersion"]] <- 1.2
+  return(d)
+}
+
+#' Convert data frame tables into lists
+#' @export
+#' @param d LiPD metadata
+#' @param keys Table keys
+#' @return d Modified LiPD metadata
+convert.dfs <- function(d, keys){
+
+  key1 <- keys[[1]]
+  key2 <- keys[[2]]
+
+  # loop for tables inside p/c
+  for (i in 1:length(d[["metadata"]][[key1]])){
+
+    # loop for tables in the meas.tables
+    for (j in 1:length(d[["metadata"]][[key1]][[i]][[key2]])){
+      # if the meas table @ idx is a data frame
+      if (is.data.frame(d[["metadata"]][[key1]][[i]][[key2]][[j]])){
+        d[["metadata"]][[key1]][[i]][[key2]][[j]] <- as.list(d[["metadata"]][[key1]][[i]][[key2]][[j]])
+      }
+    }
+
+    # if the meas table is a data frame
+    if (is.data.frame( d[["metadata"]][[key1]][[i]][[key2]])){
+      d[["metadata"]][[key1]][[i]][[key2]] <- as.list(d[["metadata"]][[key1]][[i]][[key2]])
+    }
+
+    # if p/c @ index is a data frame
+    if (is.data.frame(d[["metadata"]][[key1]][[i]])){
+      d[["metadata"]][[key1]][[i]] <- as.list(d[["metadata"]][[key1]][[i]])
     }
   }
-  return(d)
-}
 
-#' Check / convert chrondata measurement table data frame to list
-#' @export
-#' @param d LiPD metadata
-#' @return d Modified LiPD metadata
-convert.df.chron.mt <- function(d){
-  table <- d[["metadata"]][["chronData"]]
-  for (i in 1:length(table)){
-    old.mt <- d[["metadata"]][["chronData"]][[i]][["chronMeasurementTable"]]
-    if (is.data.frame(old.mt)){
-      l <- list()
-      d[["metadata"]][["chronData"]][[i]][["chronMeasurementTable"]] <- l
-      d[["metadata"]][["chronData"]][[i]][["chronMeasurementTable"]][[1]] <- old.mt
-    }
+  # if p/c is a data frame
+  if (is.data.frame(d[["metadata"]][[key1]])){
+    d[["metadata"]][[key1]] <- as.list(d[["metadata"]][[key1]])
   }
+
   return(d)
 }
-
-#' Check / convert paleoData data frame to list
-#' @export
-#' @param d LiPD metadata
-#' @return d Modified LiPD metadata
-convert.df.paleo <- function(d){
-  table<- d[["metadata"]][["paleoData"]]
-  if(is.data.frame(table)){
-    d[["metadata"]][["paleoData"]] <- list()
-    d[["metadata"]][["paleoData"]][[1]] <- as.list(table)
-  }
-  return(d)
-}
-
-#' Check / convert chronData data frame to list
-#' @export
-#' @param d LiPD metadata
-#' @return d Modified LiPD metadata
-convert.df.chron <- function(d){
-  table<- d[["metadata"]][["chronData"]]
-  if(is.data.frame(table)){
-    d[["metadata"]][["chronData"]] <- list()
-    d[["metadata"]][["chronData"]][[1]] <- as.list(table)
-  }
-  return(d)
-}
-
-
 

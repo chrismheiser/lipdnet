@@ -28,8 +28,8 @@ index.by.name <- function(D, lpds){
         if (!is.null(table.name)){
           meta.cols <- curr.meas[["columns"]][[1]]
           new.cols <- index.cols.by.name(meta.cols)
-          D[[name]][["metadata"]][["paleoData"]][[pd.idx]][["paleoMeasurementTable"]][[pdt.idx]][["columns"]] <- NULL
-          D[[name]][["metadata"]][["paleoData"]][[pd.idx]][["paleoMeasurementTable"]][[pdt.idx]][["columns"]] <- new.cols
+          D[[name]][["metadata"]][["paleoData"]][[pd.idx]][["paleoMeasurementTable"]][[pdt.idx]][["columns"]] <- NA
+          D[[name]][["metadata"]][["paleoData"]][[pd.idx]][["paleoMeasurementTable"]][[pdt.idx]][["columns"]]<- new.cols
         }
       }
 

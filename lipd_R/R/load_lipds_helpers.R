@@ -12,6 +12,7 @@ set.modules <- function(){
   library(RJSONIO, quietly=TRUE)
   library(rPython, quietly=TRUE)
   library(jsonlite, quietly=TRUE)
+  library(BBmisc, quietly=TRUE)
 }
 
 # TODO: Ask user where files are stored

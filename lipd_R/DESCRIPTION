@@ -3,17 +3,18 @@ Type: Package
 Title: LiPD utilities for R
 Version: 0.1.1
 Date: 2015-06-05
-Author: Christopher Heiser, Nicholas McKay
-Maintainer: heiser@nau.edu
+Author: Christopher Heiser, 
+	Nicholas McKay
+Maintainer: Christopher Heiser <heiser@nau.edu>
 Description: Utilities to open, modify, analyze, and store LiPD data
 Depends: R (>= 3.1.0)
 License: GNU Public License
 LazyData: TRUE
 RoxygenNote: 5.0.1
 URL: www.lipd.net
-
 Imports:
 	Kmisc,
 	RJSONIO,
 	rPython,
-	jsonlite
+	jsonlite,
+	BBmisc

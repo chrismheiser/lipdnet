@@ -27,9 +27,6 @@ load.lipds <- function(){
   # Convert metadata structure to newest LiPD version
   D <- convert.version(D)
 
-  # Convert data types whereever necessary
-  # ls <-convert.data.types(ls)
-
   # Now you have all the data loaded in memory, place data from csv into columns
   D <- merge.data.lipd(D, lpds)
 
