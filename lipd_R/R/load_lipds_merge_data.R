@@ -14,7 +14,7 @@ merge.data.lipd <- function(D, lpds){
   for (lipd in 1:length(lpds)){
 
       name <- lpds[[lipd]]
-
+print(name)
       # PALEODATA
 
       # For every paleo data entry
@@ -34,9 +34,9 @@ merge.data.lipd <- function(D, lpds){
             # use the filename to get csv columns
             csv.cols <- D[[name]][["csv"]][[filename]]
             # short reference to the current table columns
-            meta.cols <- curr.meas[["columns"]][[1]]
+            meta.cols <- (curr.meas[["columns"]][[1]])
             # merge the data, and set the columns as the new entry
-            D[[name]][["metadata"]][["paleoData"]][[pd.idx]][["paleoMeasurementTable"]][[pdt.idx]][["columns"]][[1]] <- merge.csv(csv.cols, meta.cols)
+            D[[name]][["metadata"]][["paleoData"]][[pd.idx]][["paleoMeasurementTable"]][[pdt.idx]][["columns"]] <- merge.csv(csv.cols, meta.cols)
           }
         }
 
@@ -153,18 +153,21 @@ merge.data.lipd <- function(D, lpds){
 #' @param meta.cols Target metadata columns
 #' @return meta.cols Modified metadata columns
 merge.csv <- function(csv.cols, meta.cols){
-  values <- list()
+  meta.list <- list()
 
   for (i in 1:dim(meta.cols)[1]){
-    # get a row slice from the columns data frame
-    # meta.cols[which(meta.cols[["number"]] == i), ]
-
-    # match the number to the csv column number
+    # go through the columns
+    #grab the data
     csv.col <- csv.cols[[i]]
-    meta.cols[["values"]][[i]] <- csv.col
+    
+    #make it a list
+    meta.list[[i]]=as.list(meta.cols[i,])
+    # meta.cols[whas.list(meta.cols[1,])ich(meta.cols[["number"]] == i), ]
+
+    # assign in the values
+    meta.list[[i]]$values = csv.col
   }
-  # create and bind column to existing meta.cols
-  return(meta.cols)
+  return(meta.list)
 }
 
 #' Special merge function for ensemble table entries
