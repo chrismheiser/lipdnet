@@ -13,7 +13,6 @@
 index.by.name <- function(D, lpds){
 
   for (lipd in 1:length(lpds)){
-
     name <- lpds[[lipd]]
 
     # PALEODATA
@@ -30,7 +29,7 @@ index.by.name <- function(D, lpds){
           meta.cols <- move.cols.up(curr.meas)
           D[[name]][["metadata"]][["paleoData"]][[pd.idx]][["paleoMeasurementTable"]][[pdt.idx]] <- meta.cols
         }
-      }
+      } ## end measurement
 
       # loop in models
       for (pdm.idx in 1:length(curr.pd[["paleoModel"]])){
@@ -51,7 +50,7 @@ index.by.name <- function(D, lpds){
             meta.cols <- move.cols.up(curr.dist)
             D[[name]][["metadata"]][["paleoData"]][[pd.idx]][["paleoModel"]][[pdm.idx]][["distribution"]][[pdm.dist]] <- meta.cols
           }
-        }
+        } ## end distribution
 
         # check model table
         for (pdm.modt in 1:length(curr.model[["paleoModelTable"]])){
@@ -62,13 +61,14 @@ index.by.name <- function(D, lpds){
             meta.cols <- move.cols.up(curr.modt)
             D[[name]][["metadata"]][["paleoData"]][[pd.idx]][["paleoModel"]][[pdm.idx]][["paleoModelTable"]][[pdm.modt]] <- meta.cols
           }
-        }
-      }
-
+        } ## end model table
+      } ## end models
     } ## end paleodata
 
     # CHRONDATA
-    for (cd.idx in 1:length(D[["metadata"]][["chronData"]])){
+    cd.len <- length(D[["metadata"]][["chronData"]])
+    for (cd.idx in 1:cd.len){
+      print(cd.idx)
       curr.cd <- D[[name]][["metadata"]][["chronData"]][[cd.idx]]
 
       # loop for measurement tables
@@ -81,7 +81,7 @@ index.by.name <- function(D, lpds){
           meta.cols <- move.cols.up(curr.meas)
           D[[name]][["metadata"]][["chronData"]][[cd.idx]][["chronMeasurementTable"]][[cdt.idx]] <- meta.cols
         }
-      }
+      } ## measurement
 
       # loop in models
       # for (cdm.idx in 1:length(curr.cd[["chronModel"]])){
@@ -108,7 +108,7 @@ index.by.name <- function(D, lpds){
             meta.cols <- move.cols.up(curr.dist)
             D[[name]][["metadata"]][["chronData"]][[cd.idx]][["chronModel"]][[cdm.idx]][["distribution"]][[cdm.dist]] <- new.cols
           }
-        }
+        } ## end distribution
 
         # check model table
         for (cdm.modt in 1:length(curr.model[["chronModelTable"]])){
@@ -119,7 +119,8 @@ index.by.name <- function(D, lpds){
             meta.cols <- move.cols.up(curr.modt)
             D[[name]][["metadata"]][["chronData"]][[cd.idx]][["chronModel"]][[cdm.idx]][["chronModelTable"]][[cdm.modt]] <- meta.cols
           }
-        }
+        } ## end model
+
     } ## end chrondata
 
   }
@@ -138,16 +139,17 @@ move.cols.up <- function(table){
   col.len <- length(table[["columns"]])
 
   # loop for each column
-  for (i in 1:col.len)
+  for (i in 1:col.len){
     # get the variable name
     vn <- table[["columns"]][[i]][["variableName"]]
+    print(vn)
     new.cols[[vn]] <- table[["columns"]][[i]]
-
+  }
   # remove the columns item from table
   table[["columns"]] <- NULL
 
   # append the list to the table
-  append(table, new.cols)
+  table <- mapply(c, table, new.cols, SIMPLIFY=FALSE)
 
   return(table)
 }
