@@ -14,7 +14,6 @@ merge.data.lipd <- function(D, lpds){
   for (lipd in 1:length(lpds)){
 
       name <- lpds[[lipd]]
-print(name)
       # PALEODATA
 
       # For every paleo data entry
@@ -29,7 +28,11 @@ print(name)
           # Short reference to the current table
           curr.meas <- curr.pd[["paleoMeasurementTable"]][[pdt.idx]]
           # get the table's filename
-          filename <- curr.meas[["filename"]]
+          filename <- tryCatch(
+            {path2 <- curr.meas[["filename"]]},
+            error=function(cond){
+              return(NULL)
+            })
           if (!is.null(filename)){
             # use the filename to get csv columns
             csv.cols <- D[[name]][["csv"]][[filename]]
@@ -93,7 +96,11 @@ print(name)
       for (cdt.idx in 1:length(curr.cd[["chronMeasurementTable"]])){
         curr.meas <- curr.cd[["chronMeasurementTable"]][[cdt.idx]]
         # check in measurement table
-        filename <- curr.meas[["filename"]]
+        filename <- tryCatch(
+          {path2 <- curr.meas[["filename"]]},
+          error=function(cond){
+            return(NULL)
+          })
         if (!is.null(filename)){
           csv.cols <- D[[name]][["csv"]][[filename]]
           meta.cols <- curr.meas[["columns"]][[1]]
@@ -159,7 +166,7 @@ merge.csv <- function(csv.cols, meta.cols){
     # go through the columns
     #grab the data
     csv.col <- csv.cols[[i]]
-    
+
     #make it a list
     meta.list[[i]]=as.list(meta.cols[i,])
     # meta.cols[whas.list(meta.cols[1,])ich(meta.cols[["number"]] == i), ]
