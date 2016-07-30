@@ -42,8 +42,8 @@ get.version <- function(d){
 #' @return d Modified LiPD metadata
 convert.dfs2lst <- function(d){
 
-  paleos <- c("paleoData", "paleoMeasurementTable")
-  chrons <- c("chronData", "chronMeasurementTable")
+  paleos <- c("paleoData", "paleoMeasurementTable", "paleoModel")
+  chrons <- c("chronData", "chronMeasurementTable", "chronModel")
 
   # convert single entries to lists. matching structure to 1.2
   d <- convert.s2m(d, paleos)
@@ -61,6 +61,7 @@ convert.s2m <- function(d, keys){
 
   key1 <- keys[[1]]
   key2 <- keys[[2]]
+  key3 <- keys[[3]]
 
   # if p/c is a data frame, convert to list
   if (is.data.frame(d[["metadata"]][[key1]])){
@@ -74,22 +75,62 @@ convert.s2m <- function(d, keys){
       return(NULL)
     })
 
-  # make into list pc @ idx if needed
-  if (!is.null(path1)){
+  # make pc idx into list
+  if (is.null(path1)){
     tmp <- d[["metadata"]][[key1]]
     d[["metadata"]][[key1]] <- list()
     d[["metadata"]][[key1]][[1]] <- tmp
   }
 
-  # loop for tables inside p/c
+  # loop for tables inside pc
   for (i in 1:length(d[["metadata"]][[key1]])){
 
-    # if p/c @ index is a data frame
+    # check if pc @ index is a data frame
     if (is.data.frame(d[["metadata"]][[key1]][[i]])){
       d[["metadata"]][[key1]][[i]] <- as.list(d[["metadata"]][[key1]][[i]])
     }
 
-    # if the meas table is a data frame
+    # check for meas table in pc @ idx
+    path.meas <- tryCatch(
+      {path.meas <- d[["metadata"]][[key1]][[i]][[key2]]},
+      error=function(cond){return(NULL)}
+    )
+
+    # check for model table in pc @ idx
+    path.model <- tryCatch(
+      {path.model <- d[["metadata"]][[key1]][[i]][[key3]]},
+      error=function(cond){return(NULL)}
+    )
+
+
+    # no meas table or model table. default to making the data a meas tablee
+    if (is.null(path.meas) & is.null(path.model)){
+      tmp <- d[["metadata"]][[key1]][[i]]
+      d[["metadata"]][[key1]][[i]] <- list()
+      d[["metadata"]][[key1]][[i]][[key2]] <- list()
+      d[["metadata"]][[key1]][[i]][[key2]][[1]] <- tmp
+    }
+
+    # check if meas table goes directly into table data.
+    path.direct <- tryCatch(
+      {
+        if (!is.null(d[["metadata"]][[key1]][[i]][[key2]][["columns"]])){
+          path.direct = TRUE
+        } else if (!is.null(d[["metadata"]][[key1]][[i]][[key2]][["columns"]])){
+          path.direct = TRUE
+        } else {
+            path.direct = NULL
+        }
+      }, error = function(cond){return(NULL)}
+    )
+
+    if (!is.null(path.direct)){
+      tmp <- d[["metadata"]][[key1]][[i]][[key2]]
+      d[["metadata"]][[key1]][[i]][[key2]] <- list()
+      d[["metadata"]][[key1]][[i]][[key2]][[1]] <- tmp
+    }
+
+    # check if the meas table is a data frame
     if (is.data.frame( d[["metadata"]][[key1]][[i]][[key2]])){
       d[["metadata"]][[key1]][[i]][[key2]] <- as.list(d[["metadata"]][[key1]][[i]][[key2]])
     }
@@ -97,20 +138,18 @@ convert.s2m <- function(d, keys){
     # check for multiples list in measurement table
     path2 <- tryCatch(
       {path2 <- d[["metadata"]][[key1]][[1]][[key2]][[1]]},
-      error=function(cond){
-        return(NULL)
-      })
+      error=function(cond){return(NULL)}
+      )
 
-    # check for multiples list in pc
-    if (!is.null(path2)){
+    # make meas table into list
+    if (is.null(path2)){
       tmp <- d[["metadata"]][[key1]][[1]][[key2]]
       d[["metadata"]][[key1]][[1]][[key2]] <- list()
-      d[["metadata"]][[key1]][[1]][[key2]] <- tmp
+      d[["metadata"]][[key1]][[1]][[key2]][[1]] <- tmp
     }
 
     # loop for tables in the meas.tables
     for (j in 1:length(d[["metadata"]][[key1]][[i]][[key2]])){
-
       # if the meas table @ idx is a data frame
       if (is.data.frame(d[["metadata"]][[key1]][[i]][[key2]][[j]])){
         d[["metadata"]][[key1]][[i]][[key2]][[j]] <- as.list(d[["metadata"]][[key1]][[i]][[key2]][[j]])
@@ -125,3 +164,14 @@ convert.s2m <- function(d, keys){
 }
 
 
+# TO DO: Refactor the convert.s2m function to use this function to check data existence in path in the metadata structure
+#' If a path exists, return the contents. if not, return NULL
+#' @export
+#' @param path Hierarchy structure path
+#' @return content Contents from path
+# path.exists <- function(path){
+#   cont <- tryCatch(
+#     {cont <- path},
+#     error=function(cond){return(NULL)}
+#   )
+# }
