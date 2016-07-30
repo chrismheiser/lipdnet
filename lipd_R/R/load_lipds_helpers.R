@@ -8,6 +8,7 @@
 #' @export
 #' @return none
 set.modules <- function(){
+  library(tools, quietly=TRUE)
   library(Kmisc, quietly=TRUE)
   library(RJSONIO, quietly=TRUE)
   library(rPython, quietly=TRUE)
