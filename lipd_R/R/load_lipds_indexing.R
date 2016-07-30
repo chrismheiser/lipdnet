@@ -11,14 +11,14 @@
 #' @param lpds list of all LiPD files (no extension)
 #' @return D modified lipd library
 index.by.name <- function(D, lpds){
-  
+
   for (lipd in 1:length(lpds)){
     name <- lpds[[lipd]]
-    
+
     # PALEODATA
     for (pd.idx in 1:length(D[[name]][["metadata"]][["paleoData"]])){
       curr.pd <- D[[name]][["metadata"]][["paleoData"]][[pd.idx]]
-      
+
       # loop for measurement tables
       for (pdt.idx in 1:length(curr.pd[["paleoMeasurementTable"]])){
         curr.meas <- curr.pd[["paleoMeasurementTable"]][[pdt.idx]]
@@ -30,17 +30,17 @@ index.by.name <- function(D, lpds){
           D[[name]][["metadata"]][["paleoData"]][[pd.idx]][["paleoMeasurementTable"]][[pdt.idx]] <- table
         }
       } ## end measurement
-      
+
       # loop in models
       for (pdm.idx in 1:length(curr.pd[["paleoModel"]])){
         curr.model <- curr.pd[["paleoModel"]][[pdm.idx]]
-        
+
         # check in ensemble table - FIX
         # for (pdm.ens in 1:length(curr.model[["ensembleTable"]])){
         #   curr.ens <- curr.model[["ensembleTable"]][[pdm.ens]]
         # }
-        
-        
+
+
         # check distribution
         for (pdm.dist in 1:length(curr.model[["distribution"]])){
           curr.dist <- curr.model[["distribution"]][[pdm.dist]]
@@ -51,7 +51,7 @@ index.by.name <- function(D, lpds){
             D[[name]][["metadata"]][["paleoData"]][[pd.idx]][["paleoModel"]][[pdm.idx]][["distribution"]][[pdm.dist]] <- table
           }
         } ## end distribution
-        
+
         # check model table
         for (pdm.modt in 1:length(curr.model[["paleoModelTable"]])){
           curr.modt <- curr.model[["paleoModelTable"]][[pdm.modt]]
@@ -64,11 +64,11 @@ index.by.name <- function(D, lpds){
         } ## end model table
       } ## end models
     } ## end paleodata
-    
+
     # CHRONDATA
     for (cd.idx in 1:length(D[[name]][["metadata"]][["chronData"]])){
       curr.cd <- D[[name]][["metadata"]][["chronData"]][[cd.idx]]
-      
+
       # loop for measurement tables
       for (cdt.idx in 1:length(curr.cd[["chronMeasurementTable"]])){
         curr.meas <- curr.cd[["chronMeasurementTable"]][[cdt.idx]]
@@ -79,12 +79,12 @@ index.by.name <- function(D, lpds){
           D[[name]][["metadata"]][["chronData"]][[cd.idx]][["chronMeasurementTable"]][[cdt.idx]] <- table
         }
       } ## measurement
-      
+
       # loop in models
       for (cdm.idx in 1:length(curr.cd[["chronModel"]])){
         curr.model <- curr.cd[["chronModel"]][[cdm.idx]]
-        
-        
+
+
         # check in ensemble table
         curr.ens <- curr.model[["ensembleTable"]]
         if (!is.null(curr.ens)){
@@ -93,7 +93,7 @@ index.by.name <- function(D, lpds){
           table <- move.cols.up(curr.ens)
           D[[name]][["metadata"]][["chronData"]][[cd.idx]][["chronModel"]][[cdm.idx]][["ensembleTable"]] <- table
         }
-        
+
         # check distribution table
         if(!is.null(curr.model[["distributionTable"]])){
           for (cdm.dist in 1:length(curr.model[["distributionTable"]])){
@@ -103,7 +103,7 @@ index.by.name <- function(D, lpds){
             D[[name]][["metadata"]][["chronData"]][[cd.idx]][["chronModel"]][[cdm.idx]][["distributionTable"]][[cdm.dist]] <- table
           }
         } ## end distribution
-        
+
         # check summary table
         curr.modt <- curr.model[["summaryTable"]]
         if (!is.null(curr.modt)){
@@ -111,14 +111,14 @@ index.by.name <- function(D, lpds){
           table <- move.cols.up(curr.modt)
           D[[name]][["metadata"]][["chronData"]][[cd.idx]][["chronModel"]][[cdm.idx]][["summaryTable"]] <- table
         }
-        
-      } ## end chron Model 
+
+      } ## end chron Model
     }
   }
     return(D)
   }
-  
-  
+
+
   #' Get rid of "columns" layer so that the columns data is directly beneath its corresponding table
   #' @export
   #' @param table Table to be reorganized
@@ -132,7 +132,7 @@ move.cols.up <- function(table){
     # create a list
     new.cols <- list()
     col.len <- length(table[["columns"]])
-    
+
     # loop for each column
     for (i in 1:col.len){
       # get the variable name
@@ -145,7 +145,7 @@ move.cols.up <- function(table){
   }
   return(table)
 }
-  
+
   #' Indexes the columns by name in the table, and separates data by column, instead of by attribute.
   #' @export
   #' @param cols list of columns to be processed
@@ -191,6 +191,5 @@ move.cols.up <- function(table){
   #   }
   #   return(table)
   # }
-  
-  
-  
+
+

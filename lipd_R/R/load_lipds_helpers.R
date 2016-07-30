@@ -15,15 +15,30 @@ set.modules <- function(){
   library(BBmisc, quietly=TRUE)
 }
 
-# TODO: Ask user where files are stored
-# This isn't working yet because the tcltk package keeps crashing upon import
+#' Ask user where local file/folder location is.
+#' @export
+#' @return path Path to files
+get.local.path <- function(){
+  ans <- ask.how.many()
+  path.and.file <- gui.for.path(ans)
+  return(path.and.file)
+}
 
 
 #' Get list of all LiPD files in current directory
 #' @export
 #' @return f List of LiPD files w. ext
-get.list.lpd.ext <- function(){
-  f <- list.files(path=getwd(), pattern='\\.lpd$')
+get.list.lpd.ext <- function(path.and.file){
+  file <- path.and.file[["file"]]
+  # Multiple file grab. No single filename given.
+  if (is.null(file)){
+    f <- list.files(path=getwd(), pattern='\\.lpd$')
+  }
+  # Single file given. Create list of one filename.
+  else {
+    f <- list()
+    f[[1]] <- file
+  }
   return(f)
 }
 
@@ -91,7 +106,6 @@ import.file.jsonld <- function(f){
 }
 
 #' Return to a predetermined folder each time a process quits early from an error
-#' @export
 #' @return none
 return.to.root <- function(){
   setwd("~/Documents/code/geoChronR/lipd_R/")
@@ -108,4 +122,42 @@ remove.layers <- function(D, lpds){
     D[[name]] <- D[[name]][["metadata"]]
   }
   return(D)
+}
+
+#' Ask if user wants to load one file or a directory with multiple files.
+#' @export
+#' @return ans Answer to prompt (s/m)
+ask.how.many <- function(){
+  ans <- readline(prompt="Are you loading one file or multiple? (s/m): ")
+  # Test if input matches what we expect. Keep prompting until valid input.
+  if(!grepl("\\<s\\>",ans) & !grepl("\\<m\\>", ans))
+  { return(ask.how.many()) }
+  # Return a valid answer
+  return(as.char(ans))
+}
+
+
+#' Open a file browsing gui to let the user pick a location
+#' @export
+#' @return path Path to file
+gui.for.path <- function(ans){
+  tryCatch(
+    { path <- file.choose() },
+  error=function(cond){
+    print("File/Directory not chosen")
+    quit(1)
+    })
+
+  # parse the dir path. don't keep the filename
+  if (ans == "m"){
+    dir.path = dirname(path)
+    one.file = NULL
+  }
+  # parse the dir path and the filename
+  else if (ans == "s"){
+    dir.path = dirname(path)
+    one.file = basename(path)
+  }
+  out.list <- list("dir" = dir.name, "file"= one.file)
+  return(out.list)
 }

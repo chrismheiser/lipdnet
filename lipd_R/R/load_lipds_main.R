@@ -9,13 +9,16 @@
 #' @return D LiPD Library
 load.lipds <- function(){
 
+  # Ask user where files are stored
+  path.and.file <- get.local.path()
+
   # Do initial set up
-  initial_dir <- getwd()
+  initial_dir <- path.and.file[["dir"]]
   set.modules()
   tmp <- create.tmp.dir()
 
   # Get names of lipd files present
-  lpds_ext <- get.list.lpd.ext()
+  lpds_ext <- get.list.lpd.ext(path.and.file)
   lpds <- strip.extension(lpds_ext)
 
   # Unzip the lipd files to the temp workspace
