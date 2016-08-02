@@ -57,6 +57,7 @@ create.tmp.dir <- function(){
 #' @param tmp Temporary directory
 #' @return none
 unzipper <- function(files, tmp){
+  if(length(files)>1){
   sapply(files, function(f){
     unzip(f, exdir = tmp)
   })
@@ -134,7 +135,7 @@ ask.how.many <- function(){
   if(!grepl("\\<s\\>",ans) & !grepl("\\<m\\>", ans))
   { return(ask.how.many()) }
   # Return a valid answer
-  return(as.char(ans))
+  return(as.character(ans))
 }
 
 
@@ -159,6 +160,6 @@ gui.for.path <- function(ans){
     dir.path = dirname(path)
     one.file = basename(path)
   }
-  out.list <- list("dir" = dir.name, "file"= one.file)
+  out.list <- list("dir" = dir.path, "file"= one.file)
   return(out.list)
 }

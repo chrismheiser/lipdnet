@@ -14,6 +14,8 @@ load.lipds <- function(){
 
   # Do initial set up
   initial_dir <- path.and.file[["dir"]]
+  setwd(initial_dir)
+  
   set.modules()
   tmp <- create.tmp.dir()
 
