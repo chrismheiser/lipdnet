@@ -152,10 +152,6 @@ merge.data.lipd <- function(D, lpds){
             chronModel[[cdm.idx]]$distributionTable=distributionTable
           }
 
-
-
-
-
           # check summary table - only one
           curr.modt <- curr.model[["summaryTable"]]
           filename <- curr.modt[["filename"]]
@@ -196,14 +192,14 @@ merge.data.lipd <- function(D, lpds){
 merge.csv <- function(csv.cols, meta.cols){
   meta.list <- list()
 
+  # go through the columns
   for (i in 1:dim(meta.cols)[1]){
-    # go through the columns
-    #grab the data
+
+    # grab the data
     csv.col <- csv.cols[[i]]
 
     #make it a list
     meta.list[[i]]=as.list(meta.cols[i,])
-    # meta.cols[whas.list(meta.cols[1,])ich(meta.cols[["number"]] == i), ]
 
     # assign in the values
     meta.list[[i]]$values = csv.col

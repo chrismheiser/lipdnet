@@ -63,47 +63,49 @@ convert.s2m <- function(d, keys){
   key2 <- keys[[2]]
   key3 <- keys[[3]]
 
-  # if p/c is a data frame, convert to list
+  # [paleo] - to list
   if (is.data.frame(d[["metadata"]][[key1]])){
-    d[["metadata"]][[key1]] <- as.list(d[["metadata"]][[key1]])
+  tmp <- d[["metadata"]][[key1]]
+  d[["metadata"]][[key1]] <- list()
+  d[["metadata"]][[key1]][[1]] <- as.list(tmp)
   }
 
-  # check for multiples list in pc @ idx
+  # [paleo][1] - exists?
   path1 <- tryCatch(
     {path1 <- d[["metadata"]][[key1]][[1]]},
     error=function(cond){
       return(NULL)
     })
 
-  # make pc idx into list
+  # [paleo][1] - to list
   if (is.null(path1)){
     tmp <- d[["metadata"]][[key1]]
     d[["metadata"]][[key1]] <- list()
     d[["metadata"]][[key1]][[1]] <- tmp
   }
 
-  # loop for tables inside pc
+  # [paleo] loop
   for (i in 1:length(d[["metadata"]][[key1]])){
 
-    # check if pc @ index is a data frame
+    # [paleo][1] - data frame?
     if (is.data.frame(d[["metadata"]][[key1]][[i]])){
       d[["metadata"]][[key1]][[i]] <- as.list(d[["metadata"]][[key1]][[i]])
     }
 
-    # check for meas table in pc @ idx
+    # [paleo][1][meas] - exists?
     path.meas <- tryCatch(
       {path.meas <- d[["metadata"]][[key1]][[i]][[key2]]},
       error=function(cond){return(NULL)}
     )
 
-    # check for model table in pc @ idx
+    # [paleo][1][model] - exists?
     path.model <- tryCatch(
       {path.model <- d[["metadata"]][[key1]][[i]][[key3]]},
       error=function(cond){return(NULL)}
     )
 
-
-    # no meas table or model table. default to making the data a meas tablee
+    # [meas] and [model] do not exist.
+    # make a [meas] table
     if (is.null(path.meas) & is.null(path.model)){
       tmp <- d[["metadata"]][[key1]][[i]]
       d[["metadata"]][[key1]][[i]] <- list()
@@ -111,12 +113,11 @@ convert.s2m <- function(d, keys){
       d[["metadata"]][[key1]][[i]][[key2]][[1]] <- tmp
     }
 
-    # check if meas table goes directly into table data.
+    # check for non-indexed table. we want this to be NULL
+    # [paleo][1][meas][columns] - exist?
     path.direct <- tryCatch(
       {
         if (!is.null(d[["metadata"]][[key1]][[i]][[key2]][["columns"]])){
-          path.direct = TRUE
-        } else if (!is.null(d[["metadata"]][[key1]][[i]][[key2]][["columns"]])){
           path.direct = TRUE
         } else {
             path.direct = NULL
@@ -124,6 +125,7 @@ convert.s2m <- function(d, keys){
       }, error = function(cond){return(NULL)}
     )
 
+    # [paleo][1][meas]
     if (!is.null(path.direct)){
       tmp <- d[["metadata"]][[key1]][[i]][[key2]]
       d[["metadata"]][[key1]][[i]][[key2]] <- list()
@@ -153,7 +155,7 @@ convert.s2m <- function(d, keys){
       # if the meas table @ idx is a data frame
       if (is.data.frame(d[["metadata"]][[key1]][[i]][[key2]][[j]])){
         d[["metadata"]][[key1]][[i]][[key2]][[j]] <- as.list(d[["metadata"]][[key1]][[i]][[key2]][[j]])
-      }
+    }
     }
 
   }

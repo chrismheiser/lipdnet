@@ -9,7 +9,7 @@
 #' @param tmp Char path to the temp folder in memory
 #' @param files_noext List of lipd files without extention
 #' @return out.list List of data for each lipd file
-import.file.lipd <- function(tmp, files_noext){
+load.lipd.files <- function(tmp, files_noext){
 
   # Move into the tmp folder
   setwd(tmp)
@@ -20,6 +20,7 @@ import.file.lipd <- function(tmp, files_noext){
   for(i in 1:file.count){
     current <- files_noext[[i]]
     setwd(current)
+    print(sprintf("loading: %s", current))
 
     # Move into the data folder if it exists
     if (dir.exists("data")){
@@ -28,18 +29,11 @@ import.file.lipd <- function(tmp, files_noext){
 
       # Get all CSV files and data. Combined
       c <- get.list.csv()
-      print(c)
       c.data=vector(mode="list",length=length(c))
       for (ci in 1:length(c)){
         df=import.file.csv(c[ci])
       c.data[[c[ci]]]=df
       }
-
-
-#       c.data <- sapply(c, function(x){
-#         datas <- import.file.csv(x)
-#         return(datas)
-#       })
 
       # Get all JSONLD files and data. Combined
       j <- get.list.jsonld()

@@ -8,12 +8,12 @@
 #' @export
 #' @return none
 set.modules <- function(){
-  library(tools, quietly=TRUE)
-  library(Kmisc, quietly=TRUE)
-  library(RJSONIO, quietly=TRUE)
-  library(rPython, quietly=TRUE)
-  library(jsonlite, quietly=TRUE)
-  library(BBmisc, quietly=TRUE)
+  library(tools, quietly=TRUE, verbose=FALSE)
+  library(Kmisc, quietly=TRUE, verbose=FALSE)
+  library(RJSONIO, quietly=TRUE, verbose=FALSE)
+  library(rPython, quietly=TRUE, verbose=FALSE)
+  library(jsonlite, quietly=TRUE, verbose=FALSE)
+  library(BBmisc, quietly=TRUE, verbose=FALSE)
 }
 
 #' Ask user where local file/folder location is.
@@ -134,7 +134,7 @@ ask.how.many <- function(){
   if(!grepl("\\<s\\>",ans) & !grepl("\\<m\\>", ans))
   { return(ask.how.many()) }
   # Return a valid answer
-  return(as.char(ans))
+  return(as.character(ans))
 }
 
 
@@ -159,6 +159,32 @@ gui.for.path <- function(ans){
     dir.path = dirname(path)
     one.file = basename(path)
   }
-  out.list <- list("dir" = dir.name, "file"= one.file)
+  out.list <- list("dir" = dir.path, "file"= one.file)
   return(out.list)
+}
+
+cols.to.lists <- function(table){
+  meta.list <- list()
+
+  cols <- table[[1]][["columns"]][[1]]
+
+  for (i in 1:dim(cols)){
+    #make it a list
+    meta.list[[i]]=as.list(cols[i,])
+  }
+  table[[1]][["columns"]] <- meta.list
+
+  return(meta.list)
+}
+
+table.to.list <- function(table){
+
+  if (is.dataframe(table[[1]])){
+    table <- as.list(table[[1]])
+  }
+  if (is.dataframe(table)){
+    table <- as.list(table)
+  }
+
+  return(table)
 }

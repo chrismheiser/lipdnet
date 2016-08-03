@@ -8,13 +8,14 @@
 #' @export
 #' @return D LiPD Library
 load.lipds <- function(){
+  set.modules()
 
   # Ask user where files are stored
   path.and.file <- get.local.path()
 
   # Do initial set up
   initial_dir <- path.and.file[["dir"]]
-  set.modules()
+  setwd(initial_dir)
   tmp <- create.tmp.dir()
 
   # Get names of lipd files present
@@ -25,7 +26,7 @@ load.lipds <- function(){
   unzipper(lpds_ext, tmp)
 
   # Start importing data from the unpacked temp workspace
-  D <- import.file.lipd(tmp, lpds)
+  D <- load.lipd.files(tmp, lpds)
 
   # Convert metadata structure to newest LiPD version
   D <- convert.version(D)

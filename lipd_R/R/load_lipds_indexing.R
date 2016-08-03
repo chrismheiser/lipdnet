@@ -118,7 +118,6 @@ index.by.name <- function(D, lpds){
     return(D)
   }
 
-
   #' Get rid of "columns" layer so that the columns data is directly beneath its corresponding table
   #' @export
   #' @param table Table to be reorganized
