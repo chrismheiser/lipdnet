@@ -71,11 +71,37 @@ idx.section <- function(d, keys){
 #' @return table Modified table data
 move.cols.down <- function(table){
 
-  # Loop through and get rid of column names.
+  tmp <- list()
+  new.cols <- list()
 
-  # set the columns to numbers
+  # get a list of variableNames from the columns
+  for (i in 1:length(table)){
+    if (is.list(table[[i]])){
+      var.name <- tryCatch({
+        var.name <- table[[i]][["variableName"]]
+      },
+      error=function(cond){
+        var.name <- NULL
+      })
+      if (!is.null(var.name)){
+        tmp[[i]] <- var.name
+      }
+    }
+  }
 
-  # set columns inside [["columns"]] list
+  # make new list by number
+    for (i in 1:length(tmp)){
+      # get col data
+      one.col <- table[[tmp[[i]]]]
+      # move data to new cols list
+      new.cols[[i]] <- one.col
+      # remove entry from table
+      table[[tmp[[i]]]] <- NULL
+  }
+
+  # set columns inside [["columns"]] list in table
+  table[["columns"]] <- new.cols
+
 
   return(table)
 }

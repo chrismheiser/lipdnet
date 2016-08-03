@@ -58,9 +58,10 @@ create.tmp.dir <- function(){
 #' @return none
 unzipper <- function(files, tmp){
   if(length(files)>1){
-  sapply(files, function(f){
-    unzip(f, exdir = tmp)
-  })
+    sapply(files, function(f){
+      unzip(f, exdir = tmp)
+    })
+  }
 }
 
 #' Remove the file extension from string names
