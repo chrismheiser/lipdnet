@@ -43,6 +43,13 @@ load.lipds <- function(){
   # Move back to the inital directory (Prior to temp folder)
   setwd(initial_dir)
 
+  #if multiple files, 
   # Return the "LiPD Library" of compiled, imported data
-  return(D)
+  if(length(lpds)>1){
+    return(D)
+  }else{#return single LiPD object
+    return(D[[1]])
+    }
+  
+  
 }
