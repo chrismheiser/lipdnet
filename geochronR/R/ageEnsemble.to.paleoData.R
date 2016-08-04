@@ -59,7 +59,7 @@ ageEnsemble.to.paleoData = function(L,which.paleo=NA,which.pmt=NA,which.chron=NA
   depth = L$paleoData[[which.paleo]]$paleoMeasurementTable[[which.pmt]][[di]]$values
   
   #interpolate
-  aei=t(apply(X=ens,MARGIN = 2,FUN = function(y) approx(ensDepth,y,xout=depth)$y))
+  aei=apply(X=ens,MARGIN = 2,FUN = function(y) approx(ensDepth,y,xout=depth)$y)
   
   if(!is.na(max.ensemble.members)){
     if(ncol(aei)>max.ensemble.members){
