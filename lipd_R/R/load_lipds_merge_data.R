@@ -130,7 +130,6 @@ merge.data.lipd <- function(D, lpds){
 
           }
 
-          # }
           # check distribution
           distributionTable = vector(mode = "list",length = dim(curr.model[["distributionTable"]][[1]])[1])
           if(length(distributionTable)>1){#then import them

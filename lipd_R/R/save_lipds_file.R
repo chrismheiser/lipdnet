@@ -4,10 +4,13 @@ save.lipd.file <- function(name, d){
   # reverse columns to index by number
   d <- index.by.number(d)
 
-  # write csv to files
-  write.csvs(d)
+  # collect all csv data into an organized list
+  csv.data <- collect.csvs(name, d)
 
-  # remove csv from metadata
+  # use the organized list to write out all csv files
+  write.csvs(csv.data)
+
+  # remove all csv from metadata
   d <- remove.csvs(d)
 
   # turn data structure into json
@@ -22,6 +25,10 @@ save.lipd.file <- function(name, d){
   # bag the temp directory
   bagit(tmp)
 
-  # move .lpd to inital directory
+  # zip the tmp directory
+
+  # move the zip into the initial directory
+
+  # remove the tmp folder in the tmp directory
 
 }
