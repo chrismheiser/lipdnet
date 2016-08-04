@@ -5,16 +5,13 @@ save.lipd.file <- function(name, d){
   d <- index.by.number(d)
 
   # collect all csv data into an organized list
-  csv.data <- collect.csvs(name, d)
+  all.data <- collect.csvs(name, d)
 
   # use the organized list to write out all csv files
-  write.csvs(csv.data)
-
-  # remove all csv from metadata
-  d <- remove.csvs(d)
+  write.csvs(all.data[["csv"]])
 
   # turn data structure into json
-  j <- toJSON(d, pretty=TRUE, auto_unbox = TRUE)
+  j <- toJSON(all.data[["metadata"]], pretty=TRUE, auto_unbox = TRUE)
 
   # filename.lpd
   lpd_ext <- paste(filename, ".jsonld")

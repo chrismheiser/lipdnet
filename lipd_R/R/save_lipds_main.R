@@ -5,9 +5,9 @@ save.lipds <- function(D){
 
   for (i in 1:length(lpds)){
 
-    d <- D[[lpd[[i]]]]
+    d <- D[[lpds[[i]]]]
     # call one lipd by name, and pass the name too
-    save.lipd.file(lpd, d)
+    save.lipd.file(lpds[[i]], d)
   }
 
   # remove tmp directory

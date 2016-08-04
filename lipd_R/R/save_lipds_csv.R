@@ -1,21 +1,33 @@
-# Collect csv into organized list, and delete values from metadata columns
-# Keep breadcrumbs of traversing to use as filenames.
+#' Collect and remove csv. Main function
+#' @export
+#' @param name Name of current LiPD record
+#' @param d Metadata
+#' @return all.data Final split of metadata and csv data
 collect.csvs <- function(name, d){
 
-  csv.data<- list()
+  # Combine csv and metadata into a list so we can return multiple items in collect.csvs.section
+  all.data <- list()
+  all.data[["metadata"]] <- d
+  all.data[["csv"]] <- list()
 
   paleos <- c("paleoData", "paleoMeasurementTable", "paleoModel")
   chrons <- c("chronData", "chronMeasurementTable", "chronModel")
 
-  # Traverse both sections and add csv data wherever found
-  # csv.data $filename $col.data
-  csv.data <- collect.csvs.section(d, paleos, csv.data)
-  csv.data <- collect.csvs.section(d, chrons, csv.data)
+  # Traverse one section at a time
+  # Parallel: Get CSV from metadata, and remove CSV from metadata
+  all.data <- collect.csvs.section(all.data[["metadata"]], paleos, all.data[["csv"]])
+  all.data <- collect.csvs.section(all.data[["metadata"]], chrons, all.data[["csv"]])
 
-  return(csv.data)
+  return(all.data)
 }
 
-# Collect csv from one section
+#' Collect and remove csv from one section: Paleo or chron
+#' csv.data format: [ some_filename.csv $columns.data ]
+#' @export
+#' @param d Metadata w. values
+#' @param keys Section keys
+#' @param csv.data Running collection of csv data
+#' @return all.data List holding the running collection of separated csv and metadata
 collect.csvs.section <- function(d, keys, csv.data){
   key1 <- keys[[1]]
   key2 <- keys[[2]]
@@ -190,41 +202,32 @@ collect.csvs.section <- function(d, keys, csv.data){
 
       } # end distribution loop
 
-
     } # end model tables
 
   } # end chronDatas
 
   # Can only return one item, so add our two items to a list and use that.
-  out <- list()
-  out[["metadata"]] <- d
-  out[["csv"]] <- csv.data
-  return(out)
-
-}
-
-# Remove all csv from metadata
-remove.csvs <- function(){
+  all.data <- list()
+  all.data[["metadata"]] <- d
+  all.data[["csv"]] <- csv.data
+  return(all.data)
 
 }
 
 
-# Take a list of csv data.
-# csv $lipd_name $some_filename $columns[[1-n]]
-# Organize csv data as above.
+#' Write out each CSV file for this LiPD record
+#' csv.data format: [ some_filename.csv $columns.data ]
+#' @export
+#' @param csv.data List of Lists of csv column data
+#' @return none
 write.csvs <- function(csv.data){
 
-  lpds <- names(csv.data)
-  # loop for each lipd record
-  for (record in 1:length(lpds)){
-    # loop for each csv table in this one lipd record
-    csv.filenames <- names(lpds[[record]])
-    for (csv in 1:length(csv.filenames)){
-      # one csv file: list of lists. [V1: [column values], V2: [columns values], etc.]
-      # write.table wants a data frame or matrix, but is able to coerce a list of lists correctly also. (tested)
-      write.table(lpds[[record]][[csv]], file=csv.filenames[[csv]], col.names = FALSE, row.names=FALSE, sep=",")
-    }
+  csv.names <- names(csv.data)
+  # loop for csv file
+  for (f in 1:length(csv.names)){
+    # one csv file: list of lists. [V1: [column values], V2: [columns values], etc.]
+    # write.table wants a data frame or matrix, but is able to coerce a list of lists correctly also. (tested)
+    write.table(csv.data[[f]], file=csv.names[[f]], col.names = FALSE, row.names=FALSE, sep=",")
   }
-
   return()
 }

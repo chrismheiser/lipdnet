@@ -31,8 +31,11 @@ idx.section <- function(d, keys){
     # d$paleoData[[i]]paleoMeasurementTable
     for (j in 1:length(d[[pc]][[i]][[meas]])){
       # d$paleoData[[i]]paleoMeasurementTable[[j]]
-      new <- move.cols.down(d[[pc]][[i]][[meas]][[j]])
-      d[[pc]][[i]][[meas]][[j]] <- new
+      table <- d[[pc]][[i]][[meas]][[j]]
+      if(!is.null(table)){
+        new <- move.cols.down(table)
+        d[[pc]][[i]][[meas]][[j]] <- new
+      }
 
     } # end meas
 
@@ -41,19 +44,28 @@ idx.section <- function(d, keys){
       # d$paleoData[[i]]paleoModel[[j]]
 
       # d$paleoData[[i]]paleoModel[[j]]$summaryTable - should only be one
-      new <- move.cols.down(d[[pc]][[i]][[model]][[j]][["summaryTable"]])
-      d[[pc]][[i]][[model]][[j]][["summaryTable"]] <- new
+      table <- d[[pc]][[i]][[model]][[j]][["summaryTable"]]
+      if (!is.null(table)){
+        new <- move.cols.down(table)
+        d[[pc]][[i]][[model]][[j]][["summaryTable"]] <- new
+      }
 
       # d$paleoData[[i]]paleoModel[[j]]$ensembleTable - should only be one
-      new <- move.cols.down(d[[pc]][[i]][[model]][[j]][["ensembleTable"]])
-      d[[pc]][[i]][[model]][[j]][["ensembleTable"]] <- new
-
+      table <- d[[pc]][[i]][[model]][[j]][["ensembleTable"]]
+      if (!is.null(table)){
+        new <- move.cols.down(table)
+        d[[pc]][[i]][[model]][[j]][["ensembleTable"]] <- new
+      }
       # d$paleoData[[i]]paleoModel[[j]]$distributionTable - can be one or many
       for (k in 1:length(d[[pc]][[i]][[model]][[j]][["distributionTable"]])){
 
         # d$paleoData[[i]]paleoModel[[j]]$distributionTable[[k]]
-        new <- move.cols.down(d[[pc]][[i]][[model]][[j]][["distributionTable"]][[k]])
-        d[[pc]][[i]][[model]][[j]][["distributionTable"]][[k]] <- new
+        table <- d[[pc]][[i]][[model]][[j]][["distributionTable"]][[k]]
+        if (!is.null(table)){
+          new <- move.cols.down(table)
+          # only add if the table exists
+          d[[pc]][[i]][[model]][[j]][["distributionTable"]][[k]] <- new
+        }
 
       } # end distribution
 
@@ -77,31 +89,31 @@ move.cols.down <- function(table){
   # get a list of variableNames from the columns
   for (i in 1:length(table)){
     if (is.list(table[[i]])){
-      var.name <- tryCatch({
-        var.name <- table[[i]][["variableName"]]
-      },
-      error=function(cond){
-        var.name <- NULL
+      tmp[[i]] <- try({
+        tmp[[i]] <- table[[i]][["variableName"]]
       })
-      if (!is.null(var.name)){
-        tmp[[i]] <- var.name
+    }
+  }
+
+  # remove all null elements
+  tmp <- tmp[!sapply(tmp, is.null)]
+
+  # make new list by number
+  if (length(tmp)>0){
+    for (i in 1:length(tmp)){
+      # get col data
+      if (!is.null(tmp[[i]])){
+        one.col <- table[[tmp[[i]]]]
+        # move data to new cols list
+        new.cols[[i]] <- one.col
+        # remove entry from table
+        table[[tmp[[i]]]] <- NULL
       }
     }
   }
 
-  # make new list by number
-    for (i in 1:length(tmp)){
-      # get col data
-      one.col <- table[[tmp[[i]]]]
-      # move data to new cols list
-      new.cols[[i]] <- one.col
-      # remove entry from table
-      table[[tmp[[i]]]] <- NULL
-  }
-
   # set columns inside [["columns"]] list in table
   table[["columns"]] <- new.cols
-
 
   return(table)
 }
