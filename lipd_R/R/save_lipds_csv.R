@@ -52,7 +52,7 @@ collect.csvs.section <- function(d, keys, csv.data, name){
 
       # name.paleoData1.paleoMeasurementTable1
       # this will be the ending filename for this table
-      crumb.meas.filename <- paste0(crumb.pd.meas, j)
+      crumb.meas.filename <- paste0(crumb.pd.meas, j, ".csv")
       pd.meas.i <- pd.meas[[j]]
       tmp.dat <- parse.table(pd.meas.i)
 
@@ -82,7 +82,7 @@ collect.csvs.section <- function(d, keys, csv.data, name){
       # SUMMARY TABLE
 
       # name.paleoData1.paleoModel1.summaryTable
-      crumb.sum.filename <- paste0(crumb.pd.mod.i, ".summaryTable")
+      crumb.sum.filename <- paste0(crumb.pd.mod.i, ".summaryTable", ".csv")
       pd.sum <- pd.mod.i[["summaryTable"]]
       tmp.dat <- parse.table(pd.sum)
 
@@ -100,7 +100,7 @@ collect.csvs.section <- function(d, keys, csv.data, name){
       # ENSEMBLE TABLE
 
       # name.paleoData1.paleoModel1.ensembleTable
-      crumb.ens.filename <- paste0(crumb.pd.mod.i, ".ensembleTable")
+      crumb.ens.filename <- paste0(crumb.pd.mod.i, ".ensembleTable", ".csv")
       pd.ens <- pd.mod.i[["ensembleTable"]]
       tmp.dat <- parse.table(pd.ens)
 
@@ -126,7 +126,7 @@ collect.csvs.section <- function(d, keys, csv.data, name){
 
         # name.paleoData1.distributionTable1
         # this will be the ending filename for this table
-        crumb.dist.filename <- paste0(crumb.dist, k)
+        crumb.dist.filename <- paste0(crumb.dist, k, ".csv")
         pd.dist.i <- pd.dist[[k]]
         tmp.dat <- parse.table(pd.dist.i)
 
