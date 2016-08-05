@@ -11,7 +11,7 @@ save.lipds <- function(D){
     # reference to single lipd record
     d <- D[[lpds[[i]]]]
     # call one lipd by name, and pass the name too
-    save.lipd.file(lpds[[i]], d, tmp)
+    save.lipd.file(lpds[[i]], d)
   }
   return()
 }
