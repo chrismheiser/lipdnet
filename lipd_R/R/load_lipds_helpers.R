@@ -57,7 +57,7 @@ create.tmp.dir <- function(){
 #' @param tmp Temporary directory
 #' @return none
 unzipper <- function(files, tmp){
-  if(length(files)>1){
+  if(length(files)>0){
     sapply(files, function(f){
       unzip(f, exdir = tmp)
     })

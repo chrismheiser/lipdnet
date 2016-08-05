@@ -8,14 +8,10 @@ save.lipds <- function(D){
   lpds <- names(D)
 
   for (i in 1:length(lpds)){
-
+    # reference to single lipd record
     d <- D[[lpds[[i]]]]
     # call one lipd by name, and pass the name too
-    save.lipd.file(lpds[[i]], d)
+    save.lipd.file(lpds[[i]], d, tmp)
   }
-
-  # remove tmp directory
-  rm(tmp)
-
   return()
 }

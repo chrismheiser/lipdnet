@@ -14,8 +14,8 @@ load.lipds <- function(){
   path.and.file <- get.local.path()
 
   # Do initial set up
-  initial_dir <- path.and.file[["dir"]]
-  setwd(initial_dir)
+  initial.dir <- path.and.file[["dir"]]
+  setwd(initial.dir)
   tmp <- create.tmp.dir()
 
   # Get names of lipd files present
@@ -41,15 +41,15 @@ load.lipds <- function(){
   D <- remove.layers(D, lpds)
 
   # Move back to the inital directory (Prior to temp folder)
-  setwd(initial_dir)
+  setwd(initial.dir)
 
-  #if multiple files, 
+  #if multiple files,
   # Return the "LiPD Library" of compiled, imported data
   if(length(lpds)>1){
     return(D)
   }else{#return single LiPD object
     return(D[[1]])
     }
-  
-  
+
+
 }
