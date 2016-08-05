@@ -14,8 +14,11 @@
 #' @export
 #' @param path The path to the directory that needs to be bagged
 #' @return none
-bagit <- function(data.dir, initial.dir){
-  bagit.script="/Users/chrisheiser1/Documents/code/geoChronR/lipd_R/R/bagit.py"
+bagit <- function(data.dir, initial.dir,bagit.script=NA){
+  if(is.na(bagit.script)){
+    print("Select your bagit.py file")
+    bagit.script=file.choose()
+  }
   Sys.chmod(bagit.script, "777")
   # do a system call for bagit on the tmp folder
   system(paste0(bagit.script, " ", data.dir))

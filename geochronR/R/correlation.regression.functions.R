@@ -1,3 +1,58 @@
+AR1 = function(X){
+  ar=cor(X[-1],X[-length(X)],use="pairwise")
+  return(ar)
+}
+
+effectiveN = function(X,Y){
+  #from Bretherton 1999
+  arX = AR1(X)
+  n = sum(is.finite(X) & is.finite(Y))
+  arY = AR1(Y)
+
+  if(arX < 0 | arY < 0 ){#calculation is meaningless if either number is less than 0
+    effN=n
+  }else{
+  effN = n *(1-arX*arY)/(1+arX*arY)
+  }
+}
+
+pvalPearson.serial.corrected = function(r,n){
+  #r is the correlation coeffient
+  #n is the number of pairwise observations
+  Tval = r * sqrt(n-2/(1-r^2))
+  
+  #two tailed test
+  p = pt(-abs(Tval),df = n-2)*2
+  return(p)
+  
+}
+
+matrix.corr.and.pvalue = function(M1,M2){
+  M1=as.matrix(M1)
+  M2=as.matrix(M2)
+  if(nrow(M1)!=nrow(M2)){stop("M1 and M2 must have the same number of rows")}
+  
+  p=matrix(NA,nrow = ncol(M1)*ncol(M2))
+  r=p
+  nens=nrow(p)
+  pb <- txtProgressBar(min=1,max=nens,style=3)
+  print(paste("Calculating",nens,"correlations"))
+  for(i in 1:ncol(M1)){
+    for(j in 1:ncol(M2)){
+      r[j+ncol(M1)*(i-1)] = cor(M1[,i],M2[,j],use="pairwise")
+      effN = effectiveN(M1[,i],M2[,j])
+      p[j+ncol(M1)*(i-1)] = pvalPearson.serial.corrected(r[j+ncol(M1)*(i-1)],effN)
+    }
+    setTxtProgressBar(pb, j+ncol(M1)*(i-1))
+  }
+  out = data.frame("r"=r,"p"=p)
+  close(pb)
+  return(out)
+}
+
+
+
+
 regress=function (X,Y){
   g=which(!apply(is.na(X),1,any) & !is.na(Y))
   X=X[g,]
@@ -128,23 +183,33 @@ cor.ens = function(time1,values1,time2,values2,binvec = NA,binstep = NA ,binfun=
   bin2 = bin.ens(time = time2,values = values2,binvec = binvec,binfun=binfun,max.ens=max.ens)$matrix
   
   #calculate the correlations
-  cormat=c(cor(bin1,bin2,use = "pairwise"))
+  #cormat=c(cor(bin1,bin2,use = "pairwise"))  #faster - but no significance...
+  
+  cor.df = matrix.corr.and.pvalue(bin1,bin2)
+  
+  
+  #and the significance
+  #pairwise observations
+
   
   #calculate some default statistics
   if(!is.na(percentiles)){
-    corStats=data.frame()
-    cormatS = sort(cormat)
+    cormatS = sort(cor.df$r)
     N=length(cormatS)
     corStats = data.frame(percentiles,"values" = cormatS[round(percentiles*N)])
     row.names(corStats)=format(corStats$percentiles,digits = 2)
   }
-  cor.ens.data=list(cormat = cormat,corStats = corStats)
+  
+  
+  
+  cor.ens.data=list(cor.df = cor.df,corStats = corStats)
   
   if(plot.hist){
     library(ggplot2)
-    df = data.frame("r"=cormat)
-    cor.ens.data$plot = plot.hist.ens(df,ensStats = corStats)
-    print( cor.ens.data$plot)
+    cor.ens.data$plot.r = plot.hist.ens(cor.df$r,ensStats = corStats)
+    perc = data.frame("percentiles=0.05","values"=0.05)
+    row.names(perc)= "a = 0.05"
+    cor.ens.data$plot.p = plot.hist.ens(cor.df$p,ensStats = perc)
   }
   
   return(cor.ens.data)
@@ -221,4 +286,3 @@ bin = function(time,values,binvec,binfun = mean){
   
 }
 
-#correlate.ensemble2single = function(L,varname,which.paleo=NA,which.pmt=NA,targetTime,targetData)
