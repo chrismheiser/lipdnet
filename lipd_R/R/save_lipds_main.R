@@ -1,3 +1,7 @@
+#' Main function. Loop through all LiPD records, saving, and then cleaning up
+#' @export
+#' @param D LiPD Library
+#' @return none
 save.lipds <- function(D){
 
   # loop by record names
@@ -13,26 +17,5 @@ save.lipds <- function(D){
   # remove tmp directory
   rm(tmp)
 
-  # done!
   return()
 }
-
-
-# rec <- function(d){
-#
-#   cols <- tryCatch({
-#     cols <- d[["values"]]
-#   },
-#   error=function(cond){
-#   })
-#
-#   if (is.null(cols)){
-#     if (is.list(d)){
-#       for (i in 1:length(d)){
-#         print(d[[i]])
-#         cols <- rec(d[[i]])
-#       }
-#     }
-#   }
-#   return(cols)
-# }

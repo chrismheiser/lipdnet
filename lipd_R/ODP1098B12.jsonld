@@ -1,0 +1,1357 @@
+{
+  "@context": "context.jsonld",
+  "chronData": [
+    {
+      "chronMeasurementTable": [
+        {
+          "googleWorkSheetKey": "otkpzx6",
+          "chronTableName": "chronology",
+          "chronDataMD5": "32a637b0a73618f912f67d5afb80a1f9",
+          "chronMeasurementTableMD5": "32a637b0a73618f912f67d5afb80a1f9",
+          "chronMeasurementTableName": "measurementTable1",
+          "filename": "ODP1098B12.chronData1.chronMeasurementTable1",
+          "columns": [
+            {
+              "TSid": "LPD797006f7",
+              "variableName": "labID",
+              "description": "laboratory ID from radiocarbon facility",
+              "chronDataMD5": "537db78c70939b1a2905f727b4632308",
+              "number": 1,
+              "units": null,
+              "measurementMethod": null,
+              "uncertaintyLevel": null
+            },
+            {
+              "TSid": "LPDe54dc6d7",
+              "variableName": "Core",
+              "description": "corename",
+              "chronDataMD5": "537db78c70939b1a2905f727b4632308",
+              "number": 2,
+              "units": null,
+              "measurementMethod": null,
+              "uncertaintyLevel": null
+            },
+            {
+              "TSid": "LPD777a1b28",
+              "variableName": "materialDated",
+              "description": "code for dated material",
+              "chronDataMD5": "537db78c70939b1a2905f727b4632308",
+              "number": 3,
+              "units": null,
+              "measurementMethod": null,
+              "uncertaintyLevel": null
+            },
+            {
+              "TSid": "LPD493f1394",
+              "variableName": "thickness",
+              "description": "thickness of samples",
+              "chronDataMD5": "537db78c70939b1a2905f727b4632308",
+              "number": 4,
+              "units": "m",
+              "measurementMethod": null,
+              "uncertaintyLevel": null
+            },
+            {
+              "TSid": "LPD23f54a01",
+              "variableName": "depth",
+              "description": "mid point depth in meters below sea floor",
+              "chronDataMD5": "537db78c70939b1a2905f727b4632308",
+              "number": 5,
+              "units": "mbsf",
+              "measurementMethod": null,
+              "uncertaintyLevel": null
+            },
+            {
+              "TSid": "LPD53aad777",
+              "variableName": "age14C",
+              "description": "14C years before 1950",
+              "chronDataMD5": "537db78c70939b1a2905f727b4632308",
+              "number": 6,
+              "units": "yr14C BP",
+              "measurementMethod": "AMS 14C",
+              "uncertaintyLevel": null
+            },
+            {
+              "TSid": "LPDd7695163",
+              "variableName": "age14Cuncertainty",
+              "description": "14C years uncertainty",
+              "chronDataMD5": "537db78c70939b1a2905f727b4632308",
+              "number": 7,
+              "units": "yr14C BP",
+              "measurementMethod": null,
+              "uncertaintyLevel": "1 sigma"
+            },
+            {
+              "TSid": "LPD9c79485d",
+              "variableName": "reservoirAge14C",
+              "description": "14C reservoir age",
+              "chronDataMD5": "537db78c70939b1a2905f727b4632308",
+              "number": 8,
+              "units": "yr BP",
+              "measurementMethod": null,
+              "uncertaintyLevel": null
+            }
+          ]
+        }
+      ],
+      "chronModel": [
+        {
+          "ensembleTable": {
+            "chronEnsembleMD5": "6c7c7574cc76c4849cf4d93eb767ed8a",
+            "filename": "ODP1098B12.chronData1.chronModel1.ensembleTable",
+            "columns": [
+              {
+                "units": "cm",
+                "variableName": "depth",
+                "number": 1
+              },
+              {
+                "units": "BP",
+                "variableName": "age",
+                "number": 2
+              }
+            ]
+          },
+          "distributionTable": [
+            {
+              "depth": "38.25",
+              "depthUnits": "cm",
+              "name": "date39",
+              "calibrationCurve": "marine13",
+              "age14C": "10161",
+              "sd14C": "452",
+              "filename": "ODP1098B12.chronData1.chronModel1distributionTable1",
+              "columns": [
+                {
+                  "units": "BP",
+                  "variableName": "age",
+                  "number": 1
+                },
+                {
+                  "units": null,
+                  "variableName": "probabilityDensity",
+                  "number": 2
+                }
+              ]
+            },
+            {
+              "depth": "35.58",
+              "depthUnits": "cm",
+              "name": "date35",
+              "calibrationCurve": "marine13",
+              "age14C": "9826",
+              "sd14C": "453",
+              "filename": "ODP1098B12.chronData1.chronModel1distributionTable2",
+              "columns": [
+                {
+                  "units": "BP",
+                  "variableName": "age",
+                  "number": 1
+                },
+                {
+                  "units": null,
+                  "variableName": "probabilityDensity",
+                  "number": 2
+                }
+              ]
+            },
+            {
+              "depth": "35.69",
+              "depthUnits": "cm",
+              "name": "date36",
+              "calibrationCurve": "marine13",
+              "age14C": "9351",
+              "sd14C": "450",
+              "filename": "ODP1098B12.chronData1.chronModel1distributionTable3",
+              "columns": [
+                {
+                  "units": "BP",
+                  "variableName": "age",
+                  "number": 1
+                },
+                {
+                  "units": null,
+                  "variableName": "probabilityDensity",
+                  "number": 2
+                }
+              ]
+            },
+            {
+              "depth": "31.84",
+              "depthUnits": "cm",
+              "name": "date31",
+              "calibrationCurve": "marine13",
+              "age14C": "8936",
+              "sd14C": "452",
+              "filename": "ODP1098B12.chronData1.chronModel1distributionTable4",
+              "columns": [
+                {
+                  "units": "BP",
+                  "variableName": "age",
+                  "number": 1
+                },
+                {
+                  "units": null,
+                  "variableName": "probabilityDensity",
+                  "number": 2
+                }
+              ]
+            },
+            {
+              "depth": "16.46",
+              "depthUnits": "cm",
+              "name": "date21",
+              "calibrationCurve": "marine13",
+              "age14C": "5896",
+              "sd14C": "451",
+              "filename": "ODP1098B12.chronData1.chronModel1distributionTable5",
+              "columns": [
+                {
+                  "units": "BP",
+                  "variableName": "age",
+                  "number": 1
+                },
+                {
+                  "units": null,
+                  "variableName": "probabilityDensity",
+                  "number": 2
+                }
+              ]
+            },
+            {
+              "depth": "46.32",
+              "depthUnits": "cm",
+              "name": "date47",
+              "calibrationCurve": "marine13",
+              "age14C": "11711",
+              "sd14C": "451",
+              "filename": "ODP1098B12.chronData1.chronModel1distributionTable6",
+              "columns": [
+                {
+                  "units": "BP",
+                  "variableName": "age",
+                  "number": 1
+                },
+                {
+                  "units": null,
+                  "variableName": "probabilityDensity",
+                  "number": 2
+                }
+              ]
+            },
+            {
+              "depth": "32.38",
+              "depthUnits": "cm",
+              "name": "date32",
+              "calibrationCurve": "marine13",
+              "age14C": "9321",
+              "sd14C": "457",
+              "filename": "ODP1098B12.chronData1.chronModel1distributionTable7",
+              "columns": [
+                {
+                  "units": "BP",
+                  "variableName": "age",
+                  "number": 1
+                },
+                {
+                  "units": null,
+                  "variableName": "probabilityDensity",
+                  "number": 2
+                }
+              ]
+            },
+            {
+              "depth": "35.32",
+              "depthUnits": "cm",
+              "name": "date34",
+              "calibrationCurve": "marine13",
+              "age14C": "10311",
+              "sd14C": "451",
+              "filename": "ODP1098B12.chronData1.chronModel1distributionTable8",
+              "columns": [
+                {
+                  "units": "BP",
+                  "variableName": "age",
+                  "number": 1
+                },
+                {
+                  "units": null,
+                  "variableName": "probabilityDensity",
+                  "number": 2
+                }
+              ]
+            },
+            {
+              "depth": "23.54",
+              "depthUnits": "cm",
+              "name": "date27",
+              "calibrationCurve": "marine13",
+              "age14C": "8286",
+              "sd14C": "453",
+              "filename": "ODP1098B12.chronData1.chronModel1distributionTable9",
+              "columns": [
+                {
+                  "units": "BP",
+                  "variableName": "age",
+                  "number": 1
+                },
+                {
+                  "units": null,
+                  "variableName": "probabilityDensity",
+                  "number": 2
+                }
+              ]
+            },
+            {
+              "depth": "31.12",
+              "depthUnits": "cm",
+              "name": "date29",
+              "calibrationCurve": "marine13",
+              "age14C": "8741",
+              "sd14C": "450",
+              "filename": "ODP1098B12.chronData1.chronModel1distributionTable10",
+              "columns": [
+                {
+                  "units": "BP",
+                  "variableName": "age",
+                  "number": 1
+                },
+                {
+                  "units": null,
+                  "variableName": "probabilityDensity",
+                  "number": 2
+                }
+              ]
+            },
+            {
+              "depth": "11.54",
+              "depthUnits": "cm",
+              "name": "date16",
+              "calibrationCurve": "marine13",
+              "age14C": "4676",
+              "sd14C": "452",
+              "filename": "ODP1098B12.chronData1.chronModel1distributionTable11",
+              "columns": [
+                {
+                  "units": "BP",
+                  "variableName": "age",
+                  "number": 1
+                },
+                {
+                  "units": null,
+                  "variableName": "probabilityDensity",
+                  "number": 2
+                }
+              ]
+            },
+            {
+              "depth": "2.7",
+              "depthUnits": "cm",
+              "name": "date4",
+              "calibrationCurve": "marine13",
+              "age14C": "2076",
+              "sd14C": "453",
+              "filename": "ODP1098B12.chronData1.chronModel1distributionTable12",
+              "columns": [
+                {
+                  "units": "BP",
+                  "variableName": "age",
+                  "number": 1
+                },
+                {
+                  "units": null,
+                  "variableName": "probabilityDensity",
+                  "number": 2
+                }
+              ]
+            },
+            {
+              "depth": "7.72",
+              "depthUnits": "cm",
+              "name": "date10",
+              "calibrationCurve": "marine13",
+              "age14C": "3861",
+              "sd14C": "449",
+              "filename": "ODP1098B12.chronData1.chronModel1distributionTable13",
+              "columns": [
+                {
+                  "units": "BP",
+                  "variableName": "age",
+                  "number": 1
+                },
+                {
+                  "units": null,
+                  "variableName": "probabilityDensity",
+                  "number": 2
+                }
+              ]
+            },
+            {
+              "depth": "24.21",
+              "depthUnits": "cm",
+              "name": "date28",
+              "calibrationCurve": "marine13",
+              "age14C": "8316",
+              "sd14C": "452",
+              "filename": "ODP1098B12.chronData1.chronModel1distributionTable14",
+              "columns": [
+                {
+                  "units": "BP",
+                  "variableName": "age",
+                  "number": 1
+                },
+                {
+                  "units": null,
+                  "variableName": "probabilityDensity",
+                  "number": 2
+                }
+              ]
+            },
+            {
+              "depth": "44.81",
+              "depthUnits": "cm",
+              "name": "date44",
+              "calibrationCurve": "marine13",
+              "age14C": "10811",
+              "sd14C": "453",
+              "filename": "ODP1098B12.chronData1.chronModel1distributionTable15",
+              "columns": [
+                {
+                  "units": "BP",
+                  "variableName": "age",
+                  "number": 1
+                },
+                {
+                  "units": null,
+                  "variableName": "probabilityDensity",
+                  "number": 2
+                }
+              ]
+            },
+            {
+              "depth": "4.36",
+              "depthUnits": "cm",
+              "name": "date6",
+              "calibrationCurve": "marine13",
+              "age14C": "2556",
+              "sd14C": "451",
+              "filename": "ODP1098B12.chronData1.chronModel1distributionTable16",
+              "columns": [
+                {
+                  "units": "BP",
+                  "variableName": "age",
+                  "number": 1
+                },
+                {
+                  "units": null,
+                  "variableName": "probabilityDensity",
+                  "number": 2
+                }
+              ]
+            },
+            {
+              "depth": "5.1",
+              "depthUnits": "cm",
+              "name": "date7",
+              "calibrationCurve": "marine13",
+              "age14C": "2696",
+              "sd14C": "451",
+              "filename": "ODP1098B12.chronData1.chronModel1distributionTable17",
+              "columns": [
+                {
+                  "units": "BP",
+                  "variableName": "age",
+                  "number": 1
+                },
+                {
+                  "units": null,
+                  "variableName": "probabilityDensity",
+                  "number": 2
+                }
+              ]
+            },
+            {
+              "depth": "46.34",
+              "depthUnits": "cm",
+              "name": "date48",
+              "calibrationCurve": "marine13",
+              "age14C": "11476",
+              "sd14C": "454",
+              "filename": "ODP1098B12.chronData1.chronModel1distributionTable18",
+              "columns": [
+                {
+                  "units": "BP",
+                  "variableName": "age",
+                  "number": 1
+                },
+                {
+                  "units": null,
+                  "variableName": "probabilityDensity",
+                  "number": 2
+                }
+              ]
+            },
+            {
+              "depth": "45.64",
+              "depthUnits": "cm",
+              "name": "date46",
+              "calibrationCurve": "marine13",
+              "age14C": "10761",
+              "sd14C": "451",
+              "filename": "ODP1098B12.chronData1.chronModel1distributionTable19",
+              "columns": [
+                {
+                  "units": "BP",
+                  "variableName": "age",
+                  "number": 1
+                },
+                {
+                  "units": null,
+                  "variableName": "probabilityDensity",
+                  "number": 2
+                }
+              ]
+            },
+            {
+              "depth": "16.87",
+              "depthUnits": "cm",
+              "name": "date22",
+              "calibrationCurve": "marine13",
+              "age14C": "5926",
+              "sd14C": "451",
+              "filename": "ODP1098B12.chronData1.chronModel1distributionTable20",
+              "columns": [
+                {
+                  "units": "BP",
+                  "variableName": "age",
+                  "number": 1
+                },
+                {
+                  "units": null,
+                  "variableName": "probabilityDensity",
+                  "number": 2
+                }
+              ]
+            },
+            {
+              "depth": "6.3",
+              "depthUnits": "cm",
+              "name": "date8",
+              "calibrationCurve": "marine13",
+              "age14C": "3606",
+              "sd14C": "450",
+              "filename": "ODP1098B12.chronData1.chronModel1distributionTable21",
+              "columns": [
+                {
+                  "units": "BP",
+                  "variableName": "age",
+                  "number": 1
+                },
+                {
+                  "units": null,
+                  "variableName": "probabilityDensity",
+                  "number": 2
+                }
+              ]
+            },
+            {
+              "depth": "47.46",
+              "depthUnits": "cm",
+              "name": "date49",
+              "calibrationCurve": "marine13",
+              "age14C": "10026",
+              "sd14C": "459",
+              "filename": "ODP1098B12.chronData1.chronModel1distributionTable22",
+              "columns": [
+                {
+                  "units": "BP",
+                  "variableName": "age",
+                  "number": 1
+                },
+                {
+                  "units": null,
+                  "variableName": "probabilityDensity",
+                  "number": 2
+                }
+              ]
+            },
+            {
+              "depth": "43.89",
+              "depthUnits": "cm",
+              "name": "date42",
+              "calibrationCurve": "marine13",
+              "age14C": "10871",
+              "sd14C": "453",
+              "filename": "ODP1098B12.chronData1.chronModel1distributionTable23",
+              "columns": [
+                {
+                  "units": "BP",
+                  "variableName": "age",
+                  "number": 1
+                },
+                {
+                  "units": null,
+                  "variableName": "probabilityDensity",
+                  "number": 2
+                }
+              ]
+            },
+            {
+              "depth": "44.43",
+              "depthUnits": "cm",
+              "name": "date43",
+              "calibrationCurve": "marine13",
+              "age14C": "11311",
+              "sd14C": "451",
+              "filename": "ODP1098B12.chronData1.chronModel1distributionTable24",
+              "columns": [
+                {
+                  "units": "BP",
+                  "variableName": "age",
+                  "number": 1
+                },
+                {
+                  "units": null,
+                  "variableName": "probabilityDensity",
+                  "number": 2
+                }
+              ]
+            },
+            {
+              "depth": "11.79",
+              "depthUnits": "cm",
+              "name": "date17",
+              "calibrationCurve": "marine13",
+              "age14C": "4841",
+              "sd14C": "451",
+              "filename": "ODP1098B12.chronData1.chronModel1distributionTable25",
+              "columns": [
+                {
+                  "units": "BP",
+                  "variableName": "age",
+                  "number": 1
+                },
+                {
+                  "units": null,
+                  "variableName": "probabilityDensity",
+                  "number": 2
+                }
+              ]
+            },
+            {
+              "depth": "17.82",
+              "depthUnits": "cm",
+              "name": "date23",
+              "calibrationCurve": "marine13",
+              "age14C": "6466",
+              "sd14C": "451",
+              "filename": "ODP1098B12.chronData1.chronModel1distributionTable26",
+              "columns": [
+                {
+                  "units": "BP",
+                  "variableName": "age",
+                  "number": 1
+                },
+                {
+                  "units": null,
+                  "variableName": "probabilityDensity",
+                  "number": 2
+                }
+              ]
+            },
+            {
+              "depth": "20.82",
+              "depthUnits": "cm",
+              "name": "date25",
+              "calibrationCurve": "marine13",
+              "age14C": "7591",
+              "sd14C": "451",
+              "filename": "ODP1098B12.chronData1.chronModel1distributionTable27",
+              "columns": [
+                {
+                  "units": "BP",
+                  "variableName": "age",
+                  "number": 1
+                },
+                {
+                  "units": null,
+                  "variableName": "probabilityDensity",
+                  "number": 2
+                }
+              ]
+            },
+            {
+              "depth": "20.17",
+              "depthUnits": "cm",
+              "name": "date24",
+              "calibrationCurve": "marine13",
+              "age14C": "7196",
+              "sd14C": "451",
+              "filename": "ODP1098B12.chronData1.chronModel1distributionTable28",
+              "columns": [
+                {
+                  "units": "BP",
+                  "variableName": "age",
+                  "number": 1
+                },
+                {
+                  "units": null,
+                  "variableName": "probabilityDensity",
+                  "number": 2
+                }
+              ]
+            },
+            {
+              "depth": "7.28",
+              "depthUnits": "cm",
+              "name": "date9",
+              "calibrationCurve": "marine13",
+              "age14C": "3821",
+              "sd14C": "449",
+              "filename": "ODP1098B12.chronData1.chronModel1distributionTable29",
+              "columns": [
+                {
+                  "units": "BP",
+                  "variableName": "age",
+                  "number": 1
+                },
+                {
+                  "units": null,
+                  "variableName": "probabilityDensity",
+                  "number": 2
+                }
+              ]
+            },
+            {
+              "depth": "7.84",
+              "depthUnits": "cm",
+              "name": "date11",
+              "calibrationCurve": "marine13",
+              "age14C": "4076",
+              "sd14C": "454",
+              "filename": "ODP1098B12.chronData1.chronModel1distributionTable30",
+              "columns": [
+                {
+                  "units": "BP",
+                  "variableName": "age",
+                  "number": 1
+                },
+                {
+                  "units": null,
+                  "variableName": "probabilityDensity",
+                  "number": 2
+                }
+              ]
+            },
+            {
+              "depth": "10.32",
+              "depthUnits": "cm",
+              "name": "date14",
+              "calibrationCurve": "marine13",
+              "age14C": "4591",
+              "sd14C": "452",
+              "filename": "ODP1098B12.chronData1.chronModel1distributionTable31",
+              "columns": [
+                {
+                  "units": "BP",
+                  "variableName": "age",
+                  "number": 1
+                },
+                {
+                  "units": null,
+                  "variableName": "probabilityDensity",
+                  "number": 2
+                }
+              ]
+            },
+            {
+              "depth": "3.05",
+              "depthUnits": "cm",
+              "name": "date5",
+              "calibrationCurve": "marine13",
+              "age14C": "1941",
+              "sd14C": "449",
+              "filename": "ODP1098B12.chronData1.chronModel1distributionTable32",
+              "columns": [
+                {
+                  "units": "BP",
+                  "variableName": "age",
+                  "number": 1
+                },
+                {
+                  "units": null,
+                  "variableName": "probabilityDensity",
+                  "number": 2
+                }
+              ]
+            },
+            {
+              "depth": "36.2",
+              "depthUnits": "cm",
+              "name": "date37",
+              "calibrationCurve": "marine13",
+              "age14C": "9961",
+              "sd14C": "452",
+              "filename": "ODP1098B12.chronData1.chronModel1distributionTable33",
+              "columns": [
+                {
+                  "units": "BP",
+                  "variableName": "age",
+                  "number": 1
+                },
+                {
+                  "units": null,
+                  "variableName": "probabilityDensity",
+                  "number": 2
+                }
+              ]
+            },
+            {
+              "depth": "21.95",
+              "depthUnits": "cm",
+              "name": "date26",
+              "calibrationCurve": "marine13",
+              "age14C": "7831",
+              "sd14C": "451",
+              "filename": "ODP1098B12.chronData1.chronModel1distributionTable34",
+              "columns": [
+                {
+                  "units": "BP",
+                  "variableName": "age",
+                  "number": 1
+                },
+                {
+                  "units": null,
+                  "variableName": "probabilityDensity",
+                  "number": 2
+                }
+              ]
+            },
+            {
+              "depth": "0.32",
+              "depthUnits": "cm",
+              "name": "date1",
+              "calibrationCurve": "marine13",
+              "age14C": "661",
+              "sd14C": "449",
+              "filename": "ODP1098B12.chronData1.chronModel1distributionTable35",
+              "columns": [
+                {
+                  "units": "BP",
+                  "variableName": "age",
+                  "number": 1
+                },
+                {
+                  "units": null,
+                  "variableName": "probabilityDensity",
+                  "number": 2
+                }
+              ]
+            },
+            {
+              "depth": "1.36",
+              "depthUnits": "cm",
+              "name": "date3",
+              "calibrationCurve": "marine13",
+              "age14C": "1721",
+              "sd14C": "451",
+              "filename": "ODP1098B12.chronData1.chronModel1distributionTable36",
+              "columns": [
+                {
+                  "units": "BP",
+                  "variableName": "age",
+                  "number": 1
+                },
+                {
+                  "units": null,
+                  "variableName": "probabilityDensity",
+                  "number": 2
+                }
+              ]
+            },
+            {
+              "depth": "1.28",
+              "depthUnits": "cm",
+              "name": "date2",
+              "calibrationCurve": "marine13",
+              "age14C": "1661",
+              "sd14C": "450",
+              "filename": "ODP1098B12.chronData1.chronModel1distributionTable37",
+              "columns": [
+                {
+                  "units": "BP",
+                  "variableName": "age",
+                  "number": 1
+                },
+                {
+                  "units": null,
+                  "variableName": "probabilityDensity",
+                  "number": 2
+                }
+              ]
+            },
+            {
+              "depth": "38.8",
+              "depthUnits": "cm",
+              "name": "date40",
+              "calibrationCurve": "marine13",
+              "age14C": "9871",
+              "sd14C": "454",
+              "filename": "ODP1098B12.chronData1.chronModel1distributionTable38",
+              "columns": [
+                {
+                  "units": "BP",
+                  "variableName": "age",
+                  "number": 1
+                },
+                {
+                  "units": null,
+                  "variableName": "probabilityDensity",
+                  "number": 2
+                }
+              ]
+            },
+            {
+              "depth": "37.46",
+              "depthUnits": "cm",
+              "name": "date38",
+              "calibrationCurve": "marine13",
+              "age14C": "10046",
+              "sd14C": "453",
+              "filename": "ODP1098B12.chronData1.chronModel1distributionTable39",
+              "columns": [
+                {
+                  "units": "BP",
+                  "variableName": "age",
+                  "number": 1
+                },
+                {
+                  "units": null,
+                  "variableName": "probabilityDensity",
+                  "number": 2
+                }
+              ]
+            },
+            {
+              "depth": "10.79",
+              "depthUnits": "cm",
+              "name": "date15",
+              "calibrationCurve": "marine13",
+              "age14C": "4471",
+              "sd14C": "451",
+              "filename": "ODP1098B12.chronData1.chronModel1distributionTable40",
+              "columns": [
+                {
+                  "units": "BP",
+                  "variableName": "age",
+                  "number": 1
+                },
+                {
+                  "units": null,
+                  "variableName": "probabilityDensity",
+                  "number": 2
+                }
+              ]
+            },
+            {
+              "depth": "13.96",
+              "depthUnits": "cm",
+              "name": "date19",
+              "calibrationCurve": "marine13",
+              "age14C": "5246",
+              "sd14C": "451",
+              "filename": "ODP1098B12.chronData1.chronModel1distributionTable41",
+              "columns": [
+                {
+                  "units": "BP",
+                  "variableName": "age",
+                  "number": 1
+                },
+                {
+                  "units": null,
+                  "variableName": "probabilityDensity",
+                  "number": 2
+                }
+              ]
+            },
+            {
+              "depth": "10.19",
+              "depthUnits": "cm",
+              "name": "date13",
+              "calibrationCurve": "marine13",
+              "age14C": "4326",
+              "sd14C": "451",
+              "filename": "ODP1098B12.chronData1.chronModel1distributionTable42",
+              "columns": [
+                {
+                  "units": "BP",
+                  "variableName": "age",
+                  "number": 1
+                },
+                {
+                  "units": null,
+                  "variableName": "probabilityDensity",
+                  "number": 2
+                }
+              ]
+            },
+            {
+              "depth": "31.19",
+              "depthUnits": "cm",
+              "name": "date30",
+              "calibrationCurve": "marine13",
+              "age14C": "8726",
+              "sd14C": "452",
+              "filename": "ODP1098B12.chronData1.chronModel1distributionTable43",
+              "columns": [
+                {
+                  "units": "BP",
+                  "variableName": "age",
+                  "number": 1
+                },
+                {
+                  "units": null,
+                  "variableName": "probabilityDensity",
+                  "number": 2
+                }
+              ]
+            },
+            {
+              "depth": "41.53",
+              "depthUnits": "cm",
+              "name": "date41",
+              "calibrationCurve": "marine13",
+              "age14C": "10756",
+              "sd14C": "456",
+              "filename": "ODP1098B12.chronData1.chronModel1distributionTable44",
+              "columns": [
+                {
+                  "units": "BP",
+                  "variableName": "age",
+                  "number": 1
+                },
+                {
+                  "units": null,
+                  "variableName": "probabilityDensity",
+                  "number": 2
+                }
+              ]
+            },
+            {
+              "depth": "35.02",
+              "depthUnits": "cm",
+              "name": "date33",
+              "calibrationCurve": "marine13",
+              "age14C": "9811",
+              "sd14C": "451",
+              "filename": "ODP1098B12.chronData1.chronModel1distributionTable45",
+              "columns": [
+                {
+                  "units": "BP",
+                  "variableName": "age",
+                  "number": 1
+                },
+                {
+                  "units": null,
+                  "variableName": "probabilityDensity",
+                  "number": 2
+                }
+              ]
+            },
+            {
+              "depth": "12.52",
+              "depthUnits": "cm",
+              "name": "date18",
+              "calibrationCurve": "marine13",
+              "age14C": "4746",
+              "sd14C": "451",
+              "filename": "ODP1098B12.chronData1.chronModel1distributionTable46",
+              "columns": [
+                {
+                  "units": "BP",
+                  "variableName": "age",
+                  "number": 1
+                },
+                {
+                  "units": null,
+                  "variableName": "probabilityDensity",
+                  "number": 2
+                }
+              ]
+            },
+            {
+              "depth": "9.68",
+              "depthUnits": "cm",
+              "name": "date12",
+              "calibrationCurve": "marine13",
+              "age14C": "4941",
+              "sd14C": "451",
+              "filename": "ODP1098B12.chronData1.chronModel1distributionTable47",
+              "columns": [
+                {
+                  "units": "BP",
+                  "variableName": "age",
+                  "number": 1
+                },
+                {
+                  "units": null,
+                  "variableName": "probabilityDensity",
+                  "number": 2
+                }
+              ]
+            },
+            {
+              "depth": "15.41",
+              "depthUnits": "cm",
+              "name": "date20",
+              "calibrationCurve": "marine13",
+              "age14C": "5731",
+              "sd14C": "451",
+              "filename": "ODP1098B12.chronData1.chronModel1distributionTable48",
+              "columns": [
+                {
+                  "units": "BP",
+                  "variableName": "age",
+                  "number": 1
+                },
+                {
+                  "units": null,
+                  "variableName": "probabilityDensity",
+                  "number": 2
+                }
+              ]
+            },
+            {
+              "depth": "44.85",
+              "depthUnits": "cm",
+              "name": "date45",
+              "calibrationCurve": "marine13",
+              "age14C": "11011",
+              "sd14C": "451",
+              "filename": "ODP1098B12.chronData1.chronModel1distributionTable49",
+              "columns": [
+                {
+                  "units": "BP",
+                  "variableName": "age",
+                  "number": 1
+                },
+                {
+                  "units": null,
+                  "variableName": "probabilityDensity",
+                  "number": 2
+                }
+              ]
+            }
+          ],
+          "summaryTable": {
+            "googleWorkSheetKey": "otkpzx6",
+            "chronTableName": "chronology",
+            "chronDataMD5": "32a637b0a73618f912f67d5afb80a1f9",
+            "chronMeasurementTableMD5": "32a637b0a73618f912f67d5afb80a1f9",
+            "filename": "ODP1098B12.chronData1.chronModel1.summaryTable",
+            "columns": [
+              {
+                "TSid": "LPD797006f7",
+                "variableName": "labID",
+                "description": "laboratory ID from radiocarbon facility",
+                "chronDataMD5": "537db78c70939b1a2905f727b4632308",
+                "number": 1,
+                "units": null,
+                "measurementMethod": null,
+                "uncertaintyLevel": null
+              },
+              {
+                "TSid": "LPDe54dc6d7",
+                "variableName": "Core",
+                "description": "corename",
+                "chronDataMD5": "537db78c70939b1a2905f727b4632308",
+                "number": 2,
+                "units": null,
+                "measurementMethod": null,
+                "uncertaintyLevel": null
+              },
+              {
+                "TSid": "LPD777a1b28",
+                "variableName": "materialDated",
+                "description": "code for dated material",
+                "chronDataMD5": "537db78c70939b1a2905f727b4632308",
+                "number": 3,
+                "units": null,
+                "measurementMethod": null,
+                "uncertaintyLevel": null
+              },
+              {
+                "TSid": "LPD493f1394",
+                "variableName": "thickness",
+                "description": "thickness of samples",
+                "chronDataMD5": "537db78c70939b1a2905f727b4632308",
+                "number": 4,
+                "units": "m",
+                "measurementMethod": null,
+                "uncertaintyLevel": null
+              },
+              {
+                "TSid": "LPD23f54a01",
+                "variableName": "depth",
+                "description": "mid point depth in meters below sea floor",
+                "chronDataMD5": "537db78c70939b1a2905f727b4632308",
+                "number": 5,
+                "units": "mbsf",
+                "measurementMethod": null,
+                "uncertaintyLevel": null
+              },
+              {
+                "TSid": "LPD53aad777",
+                "variableName": "age14C",
+                "description": "14C years before 1950",
+                "chronDataMD5": "537db78c70939b1a2905f727b4632308",
+                "number": 6,
+                "units": "yr14C BP",
+                "measurementMethod": "AMS 14C",
+                "uncertaintyLevel": null
+              },
+              {
+                "TSid": "LPDd7695163",
+                "variableName": "age14Cuncertainty",
+                "description": "14C years uncertainty",
+                "chronDataMD5": "537db78c70939b1a2905f727b4632308",
+                "number": 7,
+                "units": "yr14C BP",
+                "measurementMethod": null,
+                "uncertaintyLevel": "1 sigma"
+              },
+              {
+                "TSid": "LPD9c79485d",
+                "variableName": "reservoirAge14C",
+                "description": "14C reservoir age",
+                "chronDataMD5": "537db78c70939b1a2905f727b4632308",
+                "number": 8,
+                "units": "yr BP",
+                "measurementMethod": null,
+                "uncertaintyLevel": null
+              }
+            ]
+          },
+          "method": [
+            {
+              "name": "BChron",
+              "runCommand": "runBChron(setting = 1)",
+              "runEnv": "python"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "archiveType": "marine sediment",
+  "dataSetName": "ODP1098B1_2",
+  "googleMetadataWorksheet": "ok7qoi4",
+  "googleSpreadSheetKey": "1qfwPUOV1un4k0ZxDLAZmAv3zJEtV4aX4DDprF3jGVts",
+  "metadataMD5": "5b54e3aa31b7eebcf5d78fb11ccc7d89",
+  "tagMD5": "d1ad6d2e014aed9597acc5376289a04d",
+  "pub": [
+    {
+      "year": 2007,
+      "Journal": "USGS Open-File Report 2007-1047",
+      "title": "Orbital and atmospheric forcing of western Antarctic Peninsula climate in the Holocene: The TEX86 paleotemperature record of Palmer Deep",
+      "identifier": {}
+    },
+    {
+      "year": 2001,
+      "title": "Chronology of the Palmer Deep site, Antarctic Peninsula: a Holocene palaeoenvironmental reference for the circum-Antarctic",
+      "identifier": [
+        {
+          "type": "doi",
+          "id": "oi:10.1191/095968301673881493",
+          "url": "http://dx.doi.org/oi:10.1191/095968301673881493"
+        }
+      ]
+    }
+  ],
+  "geo": {
+    "type": "Feature",
+    "geometry": {
+      "coordinates": [-64.86, -64.2, -1011],
+      "type": "Point"
+    }
+  },
+  "paleoData": [
+    {
+      "paleoMeasurementTable": [
+        {
+          "paleoDataTableName": "data",
+          "googWorkSheetKey": "o3bdbjr",
+          "paleoDataMD5": "32a637b0a73618f912f67d5afb80a1f9",
+          "paleoMeasurementTableName": "measurementTable1",
+          "filename": "ODP1098B12.paleoData1.paleoMeasurementTable1",
+          "columns": [
+            {
+              "TSid": "LPD02c025e9",
+              "variableName": "depth",
+              "description": "depth below sea floor",
+              "paleoDataMD5": "537db78c70939b1a2905f727b4632308",
+              "number": 1,
+              "units": null,
+              "proxy": null,
+              "climateInterpretation": [
+                {}
+              ]
+            },
+            {
+              "TSid": "LPD05340dbb",
+              "variableName": "depth1",
+              "description": "compoiste depth",
+              "paleoDataMD5": "537db78c70939b1a2905f727b4632308",
+              "number": 2,
+              "units": null,
+              "proxy": null,
+              "climateInterpretation": [
+                {}
+              ]
+            },
+            {
+              "TSid": "LPDcb260002",
+              "variableName": "age",
+              "description": null,
+              "paleoDataMD5": "537db78c70939b1a2905f727b4632308",
+              "number": 3,
+              "units": "yr BP",
+              "proxy": null,
+              "climateInterpretation": [
+                {}
+              ]
+            },
+            {
+              "TSid": "LPD28794972",
+              "variableName": "TEX86",
+              "description": null,
+              "paleoDataMD5": "537db78c70939b1a2905f727b4632308",
+              "number": 4,
+              "units": null,
+              "proxy": null,
+              "climateInterpretation": [
+                {}
+              ]
+            },
+            {
+              "TSid": "LPD1028d531",
+              "variableName": "SST",
+              "description": null,
+              "paleoDataMD5": "537db78c70939b1a2905f727b4632308",
+              "number": 5,
+              "units": "degC",
+              "proxy": "TEX86",
+              "climateInterpretation": [
+                {
+                  "variable": "T",
+                  "dir": "positive"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "LiPDVersion": 1.2
+}

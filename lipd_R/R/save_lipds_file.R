@@ -1,4 +1,8 @@
-
+#' Main function. Run all save sub-routines for one LiPD record
+#' @export
+#' @param name Name of current LiPD record
+#' @param d Metadata
+#' @return none
 save.lipd.file <- function(name, d){
 
   # reverse columns to index by number
@@ -25,7 +29,5 @@ save.lipd.file <- function(name, d){
   # zip the tmp directory
 
   # move the zip into the initial directory
-
-  # remove the tmp folder in the tmp directory
 
 }

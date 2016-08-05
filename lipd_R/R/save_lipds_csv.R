@@ -15,8 +15,8 @@ collect.csvs <- function(name, d){
 
   # Traverse one section at a time
   # Parallel: Get CSV from metadata, and remove CSV from metadata
-  all.data <- collect.csvs.section(all.data[["metadata"]], paleos, all.data[["csv"]])
-  all.data <- collect.csvs.section(all.data[["metadata"]], chrons, all.data[["csv"]])
+  all.data <- collect.csvs.section(all.data[["metadata"]], paleos, all.data[["csv"]], name)
+  all.data <- collect.csvs.section(all.data[["metadata"]], chrons, all.data[["csv"]], name)
 
   return(all.data)
 }
@@ -28,7 +28,7 @@ collect.csvs <- function(name, d){
 #' @param keys Section keys
 #' @param csv.data Running collection of csv data
 #' @return all.data List holding the running collection of separated csv and metadata
-collect.csvs.section <- function(d, keys, csv.data){
+collect.csvs.section <- function(d, keys, csv.data, name){
   key1 <- keys[[1]]
   key2 <- keys[[2]]
   key3 <- keys[[3]]
@@ -54,33 +54,19 @@ collect.csvs.section <- function(d, keys, csv.data){
       # this will be the ending filename for this table
       crumb.meas.filename <- paste0(crumb.pd.meas, j)
       pd.meas.i <- pd.meas[[j]]
+      tmp.dat <- parse.table(pd.meas.i)
 
-      # add entry for new filename
-      pd.meas.i[["filename"]] <- crumb.meas.filename
+      # only set items if table has data
+      if (!is.null(tmp.dat[["table"]])){
+        # Set csv in overall output
+        csv.data[[crumb.meas.filename]] <- tmp.dat[["csv"]]
+        # overwrite old table
+        d[[key1]][[i]][[key2]][[j]]<- tmp.dat[["table"]]
+        # overwrite old filename
+        d[[key1]][[i]][[key2]][[j]][["filename"]]<- crumb.meas.filename
+      } # end measurement[i]
 
-      # if columns exists
-      if (!is.null(pd.meas.i[["columns"]])){
-
-        # list to hold each column for this table
-        vals <- list()
-
-        # name.paleoData1.paleoMeasurementTable1 $columns
-        for (k in 1:length(pd.meas.i[["columns"]])){
-
-          # add values for this column to the main list, then remove values
-          if (!is.null(pd.meas.i.cols[[k]][["values"]])){
-            vals[[k]] <- pd.meas.i.cols[[k]][["values"]]
-            d[[key1]][[i]][[key2]][[j]][["columns"]][[k]][["values"]] <- NULL
-          }
-
-          # remove the "number" entry for the column, then replace it with the index of this loop
-          d[[key1]][[i]][[key2]][[j]][["columns"]][[k]][["number"]] <- k
-        }
-
-        # add the this csv set to the output collection
-        csv.data[[crumb.meas.filename]] <- vals
-      }
-    }
+    } # end measurement
 
     # name.paleoData1.paleoModel
     crumb.pd.mod <- paste(crumb.pd.i, key3, sep=".")
@@ -96,111 +82,65 @@ collect.csvs.section <- function(d, keys, csv.data){
       # SUMMARY TABLE
 
       # name.paleoData1.paleoModel1.summaryTable
-      crumb.sum.filename <- paste(crumb.pd.mod.i, "summaryTable")
+      crumb.sum.filename <- paste0(crumb.pd.mod.i, ".summaryTable")
       pd.sum <- pd.mod.i[["summaryTable"]]
+      tmp.dat <- parse.table(pd.sum)
 
-      # add entry for new filename
-      pd.sum[["filename"]] <- crumb.sum.filename
+      # only set items if table has data
+      if (!is.null(tmp.dat[["table"]])){
+        # Set csv in overall output
+        csv.data[[crumb.sum.filename]] <- tmp.dat[["csv"]]
+        # overwrite old table
+        d[[key1]][[i]][[key3]][[j]][["summaryTable"]]<- tmp.dat[["table"]]
+        # overwrite old filename
+        d[[key1]][[i]][[key3]][[j]][["summaryTable"]][["filename"]]<- crumb.sum.filename
+      } # end summary
 
-      # if columns exists
-      if (!is.null(pd.sum[["columns"]])){
-
-        # list to hold each column for this table
-        vals <- list()
-
-        # name.paleoData1.paleoModel1.summaryTable $columns
-        for (k in 1:length(pd.sum[["columns"]])){
-
-          # add values for this column to the main list, then remove values
-          if (!is.null(pd.sum[[k]][["values"]])){
-            vals[[k]] <- pd.sum[[k]][["values"]]
-            d[[key1]][[i]][[key3]][[j]][["columns"]][[k]][["values"]] <- NULL
-          }
-
-          # remove the "number" entry for the column, then replace it with the index of this loop
-          d[[key1]][[i]][[key3]][[j]][["columns"]][[k]][["number"]] <- k
-        }
-
-        # add the this csv set to the output collection
-        csv.data[[crumb.sum.filename]] <- vals
-
-      } # end summary table
 
       # ENSEMBLE TABLE
 
       # name.paleoData1.paleoModel1.ensembleTable
-      crumb.ens.filename <- paste(crumb.pd.mod.i, "ensembleTable")
+      crumb.ens.filename <- paste0(crumb.pd.mod.i, ".ensembleTable")
       pd.ens <- pd.mod.i[["ensembleTable"]]
+      tmp.dat <- parse.table(pd.ens)
 
-      # add entry for new filename
-      pd.ens[["filename"]] <- crumb.ens.filename
+      # only set items if table has data
+      if (!is.null(tmp.dat[["table"]])){
+        # Set csv in overall output
+        csv.data[[crumb.ens.filename]] <- tmp.dat[["csv"]]
+        # overwrite old table
+        d[[key1]][[i]][[key3]][[j]][["ensembleTable"]]<- tmp.dat[["table"]]
+        # overwrite old filename
+        d[[key1]][[i]][[key3]][[j]][["ensembleTable"]][["filename"]]<- crumb.ens.filename
 
-      # if columns exists
-      if (!is.null(pd.ens[["columns"]])){
+      } # end ensemble
 
-        # list to hold each column for this table
-        vals <- list()
-
-        # name.paleoData1.paleoModel1.ensembleTable $columns
-        for (k in 1:length(pd.ens[["columns"]])){
-
-          # add values for this column to the main list, then remove values
-          if (!is.null(pd.ens.cols[[k]][["values"]])){
-            vals[[k]] <- pd.ens.cols[[k]][["values"]]
-            d[[key1]][[i]][[key3]][[j]][["columns"]][[k]][["values"]] <- NULL
-          }
-
-          # remove the "number" entry for the column, then replace it with the index of this loop
-          d[[key1]][[i]][[key3]][[j]][["columns"]][[k]][["number"]] <- k
-        }
-
-        # add the this csv set to the output collection
-        csv.data[[crumb.ens.filename]] <- vals
-
-      } # end ensemble table
 
       # DISTRIBUTION TABLES
 
       # name.paleoData1.paleoModel1.distributionTable
-      crumb.dist <- paste(crumb.pd.mod.i, "distributionTable")
+      crumb.dist <- paste0(crumb.pd.mod.i, "distributionTable")
       pd.dist <- pd.mod.i[["distributionTable"]]
 
-      # loop for distributions
       for (k in 1:length(pd.dist)){
 
-        # name.paleoData1.paleoModel1.distributionTable1
+        # name.paleoData1.distributionTable1
+        # this will be the ending filename for this table
         crumb.dist.filename <- paste0(crumb.dist, k)
         pd.dist.i <- pd.dist[[k]]
+        tmp.dat <- parse.table(pd.dist.i)
 
-        # Process this distribution
-        # add entry for new filename
-        pd.dist.i[["filename"]] <- crumb.dist.filename
+        # only set items if table has data
+        if (!is.null(tmp.dat[["table"]])){
+          # Set csv in overall output
+          csv.data[[crumb.dist.filename]] <- tmp.dat[["csv"]]
+          # overwrite old table
+          d[[key1]][[i]][[key3]][[j]][["distributionTable"]][[k]]<- tmp.dat[["table"]]
+          # overwrite old filename
+          d[[key1]][[i]][[key3]][[j]][["distributionTable"]][[k]][["filename"]]<- crumb.dist.filename
+        } # end distribution[i]
 
-        # if columns exists
-        if (!is.null(pd.meas.i[["columns"]])){
-
-          # list to hold each column for this table
-          vals <- list()
-
-          # name.paleoData1.paleoModel1.distributionTable1 $columns
-          for (k in 1:length(pd.dist.i[["columns"]])){
-
-            # add values for this column to the main list, then remove values
-            if (!is.null(pd.dist.i.cols[[k]][["values"]])){
-              vals[[k]] <- pd.dist.i.cols[[k]][["values"]]
-              d[[key1]][[i]][[key3]][[j]][["columns"]][[k]][["values"]] <- NULL
-            }
-
-            # remove the "number" entry for the column, then replace it with the index of this loop
-            d[[key1]][[i]][[key3]][[j]][["columns"]][[k]][["number"]] <- k
-          }
-
-          # add the this csv set to the output collection
-          csv.data[[crumb.dist.filename]] <- vals
-
-        } # end distributionTable1
-
-      } # end distribution loop
+      } # end distribution
 
     } # end model tables
 
@@ -212,6 +152,40 @@ collect.csvs.section <- function(d, keys, csv.data){
   all.data[["csv"]] <- csv.data
   return(all.data)
 
+}
+
+
+parse.table <- function(table){
+
+  # list to hold each column for this table
+  vals <- list()
+  out <- list()
+
+  # if pd.sum exists
+  if (!is.null(table)){
+
+    # if a columns entry exists
+    if (!is.null(table[["columns"]])){
+
+      # name.paleoData1.paleoModel1.summaryTable $columns
+      for (k in 1:length(table[["columns"]])){
+
+        # add values for this column to the main list, then remove values
+        if (!is.null(table[["columns"]][[k]][["values"]])){
+          vals[[k]] <- table[["columns"]][[k]][["values"]]
+          table[["columns"]][[k]][["values"]] <- NULL
+        }
+
+        # remove the "number" entry for the column, then replace it with the index of this loop
+        table[["columns"]][[k]][["number"]] <- k
+      }
+    }
+  }
+
+  out[["table"]] <- table
+  out[["csv"]] <- vals
+
+  return(out)
 }
 
 
@@ -227,7 +201,9 @@ write.csvs <- function(csv.data){
   for (f in 1:length(csv.names)){
     # one csv file: list of lists. [V1: [column values], V2: [columns values], etc.]
     # write.table wants a data frame or matrix, but is able to coerce a list of lists correctly also. (tested)
-    write.table(csv.data[[f]], file=csv.names[[f]], col.names = FALSE, row.names=FALSE, sep=",")
+    ref.name <- csv.names[[f]]
+    out.name <- paste0(ref.name, ".csv")
+    write.table(csv.data[[ref.name]], file=out.name, col.names = FALSE, row.names=FALSE, sep=",")
   }
   return()
 }
