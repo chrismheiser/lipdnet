@@ -6,7 +6,7 @@ regress=function (X,Y){
   return(b)
 }
 
-regression.ens = function(timeX,valuesX,timeY,valuesY,binvec = NA,binstep = NA ,binfun=mean,max.ens=NA,percentiles=c(pnorm(-2:2)),plot.reg=TRUE){
+regression.ens = function(timeX,valuesX,timeY,valuesY,binvec = NA,binstep = NA ,binfun=mean,max.ens=NA,percentiles=c(pnorm(-2:2)),plot.reg=TRUE,plot.alpha=0.2){
   
   #make them all matrices
   timeX = as.matrix(timeX)
@@ -76,65 +76,27 @@ regression.ens = function(timeX,valuesX,timeY,valuesY,binvec = NA,binstep = NA ,
   close(pb)
   
   #calculate some default statistics
-  if(!is.na(percentiles)){
+  if(!all(is.na(percentiles))){
     ms = sort(m)
     bs = sort(b)
     N=length(ms)
     regStats = data.frame(percentiles,"m" = m[round(percentiles*N)],"b" = b[round(percentiles*N)])
     row.names(regStats)=format(regStats$percentiles,digits = 2)
   }
-  reg.ens.data=list(m,b,regStats)
+  reg.ens.data=list("m"=m,"b"=b,"regStats"=regStats,"binX"=binX,"binY"=binY,"rX"=rX,"rY",rY)
   
   if(plot.reg){
-    maxPlotN=1000#max number to plot
-    np = min(maxPlotN,nens)
-    #sample randomly what to plot
-    pX = sample.int(ncol(binX),size = np,replace = TRUE)
-    pY = sample.int(ncol(binY),size = np,replace = TRUE)
-    #create data frame of uncertain X, Y data
-    Xplot = c(binX[,pX])
-    Yplot = c(binY[,pY])
-    dfXY = data.frame("x"=Xplot,"y"=Yplot)
+    #scatter plot
+    regPlot = plot.scatter.ens(binX,binY,alp=plot.alpha)
+    #add trendlines
+    regPlot = plot.trendlines.ens(mb.df = t(rbind(m,b)),xrange = range(binX,na.rm=TRUE), alp = plot.alpha/10,add.to.plot = regPlot$plot)
     
-    #create a path for the fit lines
-    xrange = range(Xplot,na.rm = TRUE)
-    yrange = range(Yplot,na.rm = TRUE)
-    xvec = c(xrange,NA)
-    yall = c()
-    xall = c()
-    pXY=pX*pY
-    df = data.frame(m=m[pXY],b=b[pXY])
-    for(p in 1:np){
-      yvec = c(df$m[p]*xrange + df$b[p],NA)
-      yall = c(yall,yvec)
-      xall = c(xall,xvec)
-    }
-    dfi = data.frame(x=xall,y=yall)
-    
-    
-
-    library(ggplot2)
-    scatterplot = ggplot(data=dfXY)+
-      geom_point(aes(x = x,y=y),alpha=alp)+
-      geom_path(data=dfi,aes(x=x,y=y),colour = "red",alpha=alp)+
-      theme_bw()+
-      xlim(xrange)
-      scatterplot
-
-    histPlot = ggplot(data=df)+
-      geom_histogram(aes(x=r,y=..density..),colour="white")+
-      theme_bw()+
-      ylab("Probability density")
-    if(!is.na(percentiles)){
-      histPlot = histPlot + geom_vline(data=corStats,aes(xintercept = values),colour="red") +
-        geom_label(data = corStats, aes(x = values, y=0,label=rownames(corStats)))
-      
-    }
-    print(histPlot)
-    cor.ens.data$plot = histPlot
+    reg.ens.data$plot = regPlot
+   
   }
+
   
-  return(cor.ens.data)
+  return(reg.ens.data)
   
 }
 
@@ -181,22 +143,15 @@ cor.ens = function(time1,values1,time2,values2,binvec = NA,binstep = NA ,binfun=
   if(plot.hist){
     library(ggplot2)
     df = data.frame("r"=cormat)
-    histPlot = ggplot(data=df)+
-      geom_histogram(aes(x=r,y=..density..),colour="white")+
-      theme_bw()+
-      ylab("Probability density")
-    if(!is.na(percentiles)){
-      histPlot = histPlot + geom_vline(data=corStats,aes(xintercept = values),colour="red") +
-        geom_label(data = corStats, aes(x = values, y=0,label=rownames(corStats)))
-      
-    }
-    print(histPlot)
-    cor.ens.data$plot = histPlot
+    cor.ens.data$plot = plot.hist.ens(df,ensStats = corStats)
+    print( cor.ens.data$plot)
   }
   
   return(cor.ens.data)
   
 }
+
+
 
 bin.ens = function(time,values,binvec,binfun=mean,max.ens=NA){
   #takes ensembles in time and/or values and creates a matrix of data for future analysis
