@@ -114,7 +114,7 @@ return.to.root <- function(){
   setwd("~/Documents/code/geoChronR/lipd_R/")
 }
 
-#' Remove CSV and metadata layer from our lipd library.
+#' Remove CSV and metadata layer from our lipd library. Also, remove empties
 #' @export
 #' @param D LiPD Library
 #' @param lpds List of LiPD files in the library
@@ -122,7 +122,8 @@ return.to.root <- function(){
 remove.layers <- function(D, lpds){
   for (i in 1:length(lpds)){
     name <- lpds[[i]]
-    D[[name]] <- D[[name]][["metadata"]]
+    new.meta <- remove.rec(D[[name]][["metadata"]])
+    D[[name]] <- new.meta
   }
   return(D)
 }
@@ -165,28 +166,60 @@ gui.for.path <- function(ans){
   return(out.list)
 }
 
+#' Convert column type: data frame to list
+#' @export
+#' @param table Data table
+#' @return table Converted data table
 cols.to.lists <- function(table){
   meta.list <- list()
 
+  # columns are at index 1
   cols <- table[[1]][["columns"]][[1]]
 
+  # loop over dim
   for (i in 1:dim(cols)){
     #make it a list
     meta.list[[i]]=as.list(cols[i,])
   }
+  # insert new columns
   table[[1]][["columns"]] <- meta.list
 
   return(meta.list)
 }
 
+#' Convert table type: data frame to list
+#' @export
+#' @param table Data table
+#' @return table Converted data table
 table.to.list <- function(table){
 
+  # convert table index
   if (is.dataframe(table[[1]])){
     table <- as.list(table[[1]])
   }
+  # convert table
   if (is.dataframe(table)){
     table <- as.list(table)
   }
-
   return(table)
 }
+
+
+#' Remove all NA, NULL, and empty objects from the data structure
+#' @export
+#' @param x Data structure
+#' @return x Modified data structure
+remove.rec <- function( x ){
+  # Remove all the nulls
+  x <- x[ !is.NullOb( x )]
+  x <- x[ !is.na( x ) ]
+  x <- x[ !sapply( x, is.null ) ]
+  # Recursion
+  if( is.list(x) ){
+    # Recursive dive
+    x <- lapply( x, removeNullRec)
+  }
+  x <- x[ unlist(sapply(x, length) != 0)]
+  return(x)
+}
+

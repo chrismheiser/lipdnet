@@ -35,8 +35,11 @@ save.lipd.file <- function(name, d){
   # use the organized list to write out all csv files
   write.csvs(all.data[["csv"]])
 
+  # remove all empty objs and null values
+  j <- remove.empty.rec(all.data[["metadata"]])
+
   # turn data structure into json
-  j <- toJSON(all.data[["metadata"]], pretty=TRUE, auto_unbox = TRUE)
+  j <- toJSON(j, pretty=TRUE, auto_unbox = TRUE)
 
   # filename.lpd
   lpd.jsonld <- paste0(name, ".jsonld")
@@ -71,3 +74,4 @@ save.lipd.file <- function(name, d){
 
   return()
 }
+

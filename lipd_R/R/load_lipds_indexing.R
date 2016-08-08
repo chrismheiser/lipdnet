@@ -118,10 +118,10 @@ index.by.name <- function(D, lpds){
     return(D)
   }
 
-  #' Get rid of "columns" layer so that the columns data is directly beneath its corresponding table
-  #' @export
-  #' @param table Table to be reorganized
-  #' @return table Modified table
+#' Get rid of "columns" layer so that the columns data is directly beneath its corresponding table
+#' @export
+#' @param table Table to be reorganized
+#' @return table Modified table
 move.cols.up <- function(table){
   #look for columns
   if(is.null(table[["columns"]])){
@@ -136,7 +136,6 @@ move.cols.up <- function(table){
     for (i in 1:col.len){
       # get the variable name
       vn <- table[["columns"]][[i]][["variableName"]]
-      print(vn)
       table[[vn]] <- table[["columns"]][[i]]
     }
     # remove the columns item from table
@@ -144,51 +143,4 @@ move.cols.up <- function(table){
   }
   return(table)
 }
-
-  #' Indexes the columns by name in the table, and separates data by column, instead of by attribute.
-  #' @export
-  #' @param cols list of columns to be processed
-  #' @return cols modified list of cols
-  # index.cols.by.name <- function(cols){
-  #
-  #   # flatten nested data frames into single layer data frame
-  #   cols <- flatten(cols)
-  #
-  #   # variables
-  #   var.count <- length(cols$variableName)
-  #   print(cols$variableName)
-  #
-  #   # entries per variable
-  #   entries.names <- colnames(cols)
-  #   entries.col.count <- length(entries.names)
-  #
-  #   # create output table
-  #   table <- list()
-  #
-  #
-  #   # -- PARSE ONE COLUMN
-  #   # loop over variables
-  #   for (i in 1:var.count){
-  #
-  #     # create list for this column
-  #     indv.col <- list()
-  #
-  #     # get variable name for this column
-  #     variable.name <- cols$variableName[[i]]
-  #
-  #     # loop over entries per column
-  #     for (j in 1:entries.col.count){
-  #
-  #       entry.name <- entries.names[[j]]
-  #       indv.col[[entry.name]] <- cols[[entry.name]][[i]]
-  #     }
-  #   # -- END PARSE ONE COLUMN
-  #
-  #     # add column entry to table
-  #     table[[variable.name]] <- indv.col
-  #
-  #   }
-  #   return(table)
-  # }
-
 
