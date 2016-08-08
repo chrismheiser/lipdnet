@@ -1,6 +1,14 @@
-load.Bacon.output.LiPD = function(L,site.name=L$dataSetName,which.chron=NA,baconDir=NA,modelNum=NA){
-  
+load.Bacon.output.LiPD = function(L,site.name=L$dataSetName,which.chron=NA,baconDir=NA,modelNum=NA,makeNew=NA){
   cur.dir = getwd()
+   #see if there's an appropriate folder.
+  setwd(baconDir)
+  setwd("Cores")
+  if(!any(grepl(site.name,dir()))){
+    return(NA)
+  }
+  
+
+  
   #initialize which.chron
   if(is.na(which.chron)){
     if(length(L$chronData)==1){
@@ -28,12 +36,20 @@ load.Bacon.output.LiPD = function(L,site.name=L$dataSetName,which.chron=NA,bacon
     }
   }
   
+  if(is.na(makeNew)){
+    makeNew = FALSE
+  }
+    
   if(length(L$chronData[[which.chron]]$chronModel)<modelNum){
-    nm=readline(prompt = paste("model",modelNum,"doesn't exist. Create it? y or n "))
-    if(grepl(pattern = "y",x = tolower(nm))){
+    if(makeNew){
       L$chronData[[which.chron]]$chronModel[[modelNum]]=NA
     }else{
-      stop("Stopping, since you didn't want to create a new model")
+      nm=readline(prompt = paste("model",modelNum,"doesn't exist. Create it? y or n "))
+      if(grepl(pattern = "y",x = tolower(nm))){
+        L$chronData[[which.chron]]$chronModel[[modelNum]]=NA
+      }else{
+        stop("Stopping, since you didn't want to create a new model")
+      }
     }
   }
   
@@ -41,8 +57,8 @@ load.Bacon.output.LiPD = function(L,site.name=L$dataSetName,which.chron=NA,bacon
   
   
   #grab methods first
-  setwd(baconDir)
-  setwd("Cores")
+#   setwd(baconDir)
+#   setwd("Cores")
   setwd(site.name)
   sf=dir(pattern="*settings.txt")
   if(length(sf)!=1){
@@ -52,8 +68,23 @@ load.Bacon.output.LiPD = function(L,site.name=L$dataSetName,which.chron=NA,bacon
 bacMethods=read.delim(sf,sep="#",header = FALSE)
 m=bacMethods[,1]
 names(m)=bacMethods[,2]  
-L$chronData[[which.chron]]$chronModel[[modelNum]]$methods=as.data.frame(m)
+parameters= list()
+keys = names(m)
+for(mi in 1:length(m)){
+  parameters[[keys[mi]]]=as.character(m[mi])
+}
+methods = list("parameters"=parameters)
+methods$algorithm = "Bacon"
+methods$version = 2.2
 
+
+
+if(is.na(L$chronData[[which.chron]]$chronModel[[modelNum]])){
+  L$chronData[[which.chron]]$chronModel[[modelNum]]=list("methods"=methods)
+  
+}else{
+L$chronData[[which.chron]]$chronModel[[modelNum]]$methods=methods
+}
 
 #summary table!
 st=dir(pattern="*ages.txt")
@@ -67,7 +98,12 @@ summTable = read.table(st,header = TRUE)
 #assign names in.
 origNames = c("depth","min","max","median","wmean")
 newNames = c("depth","ageRangeLow","ageRangeHigh","age","age")
-units = c(L$chronData[[which.chron]]$chronMeasurementTable[[1]]$depth$units, "yr BP","yr BP","yr BP","yr BP")
+
+depthUnits = L$chronData[[which.chron]]$chronMeasurementTable[[1]]$depth$units
+if(is.null(depthUnits)){
+  depthUnits="cm"
+}
+units = c("cm", "yr BP","yr BP","yr BP","yr BP")
 description = c("modeled depth","low end of the uncertainty range","high end of the uncertainty range","median age estimate","weighted mean age estimate")
 uncertaintyLevel = c(NA,"2.5%","97.5%",NA,NA)
 
@@ -89,7 +125,7 @@ L$chronData[[which.chron]]$chronModel[[modelNum]]$summaryTable=summaryTable
 
 
 #now grab ensemble data.
-ageEns = sampleBaconAgesLiPD(corename=site.name,K = 102,baconDir = baconDir)
+ageEns = sampleBaconAgesLiPD(corename=site.name,baconDir = baconDir)
                 
 ageEns$depth$units = L$chronData[[which.chron]]$chronModel[[modelNum]]$summaryTable$depth$units
 ageEns$ageEnsemble$units = L$chronData[[which.chron]]$chronModel[[modelNum]]$summaryTable$age$units

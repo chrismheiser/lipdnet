@@ -170,8 +170,8 @@ cor.ens = function(time1,values1,time2,values2,binvec = NA,binstep = NA ,binfun=
     if(is.na(binstep)){
       stop("Either a binvec or binstep must be specified")
     }else{
-      binStart=min(c(time1,time2))
-      binStop=max(c(time1,time2))
+      binStart=min(c(time1,time2),na.rm = TRUE)
+      binStop=max(c(time1,time2),na.rm = TRUE)
       binvec=seq(binStart,binStop,by=binstep)
     }
   }

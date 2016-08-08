@@ -1,18 +1,84 @@
-plot.scatter.ens = function(binX,binY,alp=.2,maxPlotN=1000){
-  binX=as.matrix(binX)
-  binY=as.matrix(binY)
+map.lipd = function(L){
   
-  if(nrow(binX)!=nrow(binY)){
-    stop("binX and binY must have the same number of observations")
+}
+
+#show a map, timeseries, and age model diagram..
+summary.plot = function(L){
+  
+}
+
+
+plot.timeseries.lines = function(X,Y,alp=.2,color = "blue",maxPlotN=1000,add.to.plot=ggplot()){
+  X=as.matrix(X)
+  Y=as.matrix(Y)
+  
+  if(nrow(X)!=nrow(Y)){
+    stop("X and Y must have the same number of observations")
   }
   
-  np = min(maxPlotN,ncol(binX)*ncol(binY))
+  np = min(maxPlotN,ncol(X)*ncol(Y))
   #sample randomly what to plot
-  pX = sample.int(ncol(binX),size = np,replace = TRUE)
-  pY = sample.int(ncol(binY),size = np,replace = TRUE)
+  pX = sample.int(ncol(X),size = np,replace = TRUE)
+  pY = sample.int(ncol(Y),size = np,replace = TRUE)
+  
   #create data frame of uncertain X, Y data
-  Xplot = c(binX[,pX])
-  Yplot = c(binY[,pY])
+  Xplot = c(rbind(X[,pX],matrix(NA,ncol=np)))
+  Yplot = c(rbind(Y[,pY],matrix(NA,ncol=np)))
+  dfXY = data.frame("x"=Xplot,"y"=Yplot)
+  
+ 
+  library(ggplot2)
+  linePlot = add.to.plot+
+    geom_path(data=dfXY,aes(x=x,y=y),colour = color,alpha=alp)+
+    theme_bw()
+  
+  return(linePlot)
+  
+}
+plot.timeseries.ribbons = function(X,Y,alp=.2,probs=pnorm(-2:2)){
+  X=as.matrix(X)
+  Y=as.matrix(Y)
+
+  if(nrow(X)!=nrow(Y)){
+    stop("X and Y must have the same number of observations")
+  }
+  
+  
+  Xs = t(apply(t(X),2,sort))
+  Ys = t(apply(t(Y),2,sort))
+  
+  
+  if(!all(is.na(ensStats))){
+    #make labels better
+    goodName= c("-2σ","-1σ","Median","1σ","2σ")
+    realProb= c(pnorm(-2:2))
+    for(i in 1:length(lineLabels)){
+      p=which(abs(as.numeric(lineLabels[i])-realProb)<.001)
+      if(length(p)==1){
+        lineLabels[i]=goodName[p]
+      }
+    }
+  
+  }
+  
+  
+}
+
+plot.scatter.ens = function(X,Y,alp=.2,maxPlotN=1000){
+  X=as.matrix(X)
+  Y=as.matrix(Y)
+  
+  if(nrow(X)!=nrow(Y)){
+    stop("X and Y must have the same number of observations")
+  }
+  
+  np = min(maxPlotN,ncol(X)*ncol(Y))
+  #sample randomly what to plot
+  pX = sample.int(ncol(X),size = np,replace = TRUE)
+  pY = sample.int(ncol(Y),size = np,replace = TRUE)
+  #create data frame of uncertain X, Y data
+  Xplot = c(X[,pX])
+  Yplot = c(Y[,pY])
   dfXY = data.frame("x"=Xplot,"y"=Yplot)
   
   library(ggplot2)

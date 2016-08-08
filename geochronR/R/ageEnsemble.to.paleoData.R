@@ -41,7 +41,7 @@ ageEnsemble.to.paleoData = function(L,which.paleo=NA,which.pmt=NA,which.chron=NA
       which.pmt=1
     }else{
       print(paste("PaleoData", which.paleo, "has", length(L$paleoData[[which.paleo]]$paleoMeasurementTable), "measurement tables"))
-      which.pmt=as.integer(readline(prompt = "Which measurement tablel do you want to put the ensemble in? Enter an integer "))
+      which.pmt=as.integer(readline(prompt = "Which measurement table do you want to put the ensemble in? Enter an integer "))
     }
   }
   
@@ -53,13 +53,15 @@ ageEnsemble.to.paleoData = function(L,which.paleo=NA,which.pmt=NA,which.chron=NA
   ens=L$chronData[[which.chron]]$chronModel[[which.model]]$ensembleTable$ageEnsemble$values
   ensDepth = L$chronData[[which.chron]]$chronModel[[which.model]]$ensembleTable$depth$values
   #get the depth from the paleo measurement table
+  print("getting depth from the paleodata table...")
   di = getVariableIndex(L$paleoData[[which.paleo]]$paleoMeasurementTable[[which.pmt]],"depth",altNames = "position",always.choose = TRUE)
 
   #depthTarget
   depth = L$paleoData[[which.paleo]]$paleoMeasurementTable[[which.pmt]][[di]]$values
   
   #interpolate
-  aei=apply(X=ens,MARGIN = 2,FUN = function(y) approx(ensDepth,y,xout=depth)$y)
+  library(Hmisc)
+  aei=apply(X=ens,MARGIN = 2,FUN = function(y) approxExtrap(ensDepth,y,xout=depth,na.rm=TRUE)$y)
   
   if(!is.na(max.ensemble.members)){
     if(ncol(aei)>max.ensemble.members){
