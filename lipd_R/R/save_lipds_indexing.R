@@ -26,12 +26,15 @@ idx.section <- function(d, keys){
 
   # d$paleoData
   for (i in 1:length(d[[pc]])){
+
     # d$paleoData[[i]]
 
     # d$paleoData[[i]]paleoMeasurementTable
     for (j in 1:length(d[[pc]][[i]][[meas]])){
+
       # d$paleoData[[i]]paleoMeasurementTable[[j]]
       table <- d[[pc]][[i]][[meas]][[j]]
+
       if(!is.null(table)){
         new <- move.cols.down(table)
         d[[pc]][[i]][[meas]][[j]] <- new
@@ -41,17 +44,18 @@ idx.section <- function(d, keys){
 
     # d$paleoData[[i]]paleoModel
     for (j in 1:length(d[[pc]][[i]][[model]])){
+
       # d$paleoData[[i]]paleoModel[[j]]
 
       # d$paleoData[[i]]paleoModel[[j]]$summaryTable - should only be one
-      table <- d[[pc]][[i]][[model]][[j]][["summaryTable"]]
+      table <- d[[pc]][[i]][[model]][[j]][["summaryTable"]][[1]]
       if (!is.null(table)){
         new <- move.cols.down(table)
         d[[pc]][[i]][[model]][[j]][["summaryTable"]] <- new
       }
 
       # d$paleoData[[i]]paleoModel[[j]]$ensembleTable - should only be one
-      table <- d[[pc]][[i]][[model]][[j]][["ensembleTable"]]
+      table <- d[[pc]][[i]][[model]][[j]][["ensembleTable"]][[1]]
       if (!is.null(table)){
         new <- move.cols.down(table)
         d[[pc]][[i]][[model]][[j]][["ensembleTable"]] <- new

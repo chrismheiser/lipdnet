@@ -32,7 +32,7 @@ load.lipds <- function(){
   D <- convert.version(D)
 
   # Now you have all the data loaded in memory, place data from csv into columns
-  D <- merge.data.lipd(D, lpds)
+  D <- merge.main(D, lpds)
 
   # Change columns and tables to index-by-name
   D <- index.by.name(D, lpds)
