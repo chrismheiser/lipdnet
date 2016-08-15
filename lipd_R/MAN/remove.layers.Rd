@@ -2,7 +2,7 @@
 % Please edit documentation in R/load_lipds_helpers.R
 \name{remove.layers}
 \alias{remove.layers}
-\title{Remove CSV and metadata layer from our lipd library.}
+\title{Remove CSV and metadata layer from our lipd library. Also, remove empties}
 \usage{
 remove.layers(D, lpds)
 }
@@ -15,6 +15,6 @@ remove.layers(D, lpds)
 D Modified lipd library
 }
 \description{
-Remove CSV and metadata layer from our lipd library.
+Remove CSV and metadata layer from our lipd library. Also, remove empties
 }
 

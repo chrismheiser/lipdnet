@@ -4,7 +4,10 @@
 \alias{get.list.lpd.ext}
 \title{Get list of all LiPD files in current directory}
 \usage{
-get.list.lpd.ext()
+get.list.lpd.ext(path.and.file)
+}
+\arguments{
+\item{path.and.file}{Target directory and 1+ files}
 }
 \value{
 f List of LiPD files w. ext

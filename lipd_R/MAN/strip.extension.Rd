@@ -10,7 +10,7 @@ strip.extension(files_ext)
 \item{files_ext}{List of LiPD filenames w. ext}
 }
 \value{
-none
+x LiPD filename
 }
 \description{
 Remove the file extension from string names

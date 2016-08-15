@@ -2,7 +2,7 @@
 % Please edit documentation in R/load_lipds_versions.R
 \name{convert.version}
 \alias{convert.version}
-\title{Convert LiPD version whenever necessary}
+\title{Convert LiPD version structure whenever necessary}
 \usage{
 convert.version(D)
 }
@@ -13,6 +13,6 @@ convert.version(D)
 D modified LiPD Library
 }
 \description{
-Convert LiPD version whenever necessary
+Convert LiPD version structure whenever necessary
 }
 

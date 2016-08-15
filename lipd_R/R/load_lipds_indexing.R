@@ -1,5 +1,5 @@
 ###############################################
-## Load LiPDs - Convert
+## Load LiPDs - Indexing
 ## Misc functions that aid in converting LiPD
 ## data into a preferred R analysis structure
 ###############################################
@@ -11,112 +11,73 @@
 #' @param lpds list of all LiPD files (no extension)
 #' @return D modified lipd library
 index.by.name <- function(D, lpds){
+  paleo <- c("paleoData", "paleoMeasurementTable", "paleoModel")
+  chron <- c("chronData", "chronMeasurementTable", "chronModel")
 
   for (lipd in 1:length(lpds)){
     name <- lpds[[lipd]]
-
-    # PALEODATA
-    for (pd.idx in 1:length(D[[name]][["metadata"]][["paleoData"]])){
-      curr.pd <- D[[name]][["metadata"]][["paleoData"]][[pd.idx]]
-
-      # loop for measurement tables
-      for (pdt.idx in 1:length(curr.pd[["paleoMeasurementTable"]])){
-        curr.meas <- curr.pd[["paleoMeasurementTable"]][[pdt.idx]]
-        # check in measurement table
-        table.name <- curr.meas[["paleoDataTableName"]]
-        if (!is.null(table.name)){
-          # Reorganize table and move columns up
-          table <- move.cols.up(curr.meas)
-          D[[name]][["metadata"]][["paleoData"]][[pd.idx]][["paleoMeasurementTable"]][[pdt.idx]] <- table
-        }
-      } ## end measurement
-
-      # loop in models
-      for (pdm.idx in 1:length(curr.pd[["paleoModel"]])){
-        curr.model <- curr.pd[["paleoModel"]][[pdm.idx]]
-
-        # check in ensemble table - FIX
-        # for (pdm.ens in 1:length(curr.model[["ensembleTable"]])){
-        #   curr.ens <- curr.model[["ensembleTable"]][[pdm.ens]]
-        # }
-
-
-        # check distribution
-        for (pdm.dist in 1:length(curr.model[["distribution"]])){
-          curr.dist <- curr.model[["distribution"]][[pdm.dist]]
-          table.name <- curr.dist[["paleoDataTableName"]]
-          if (!is.null(table.name)){
-            # Reorganize table and move columns up
-            table <- move.cols.up(curr.dist)
-            D[[name]][["metadata"]][["paleoData"]][[pd.idx]][["paleoModel"]][[pdm.idx]][["distribution"]][[pdm.dist]] <- table
-          }
-        } ## end distribution
-
-        # check model table
-        for (pdm.modt in 1:length(curr.model[["paleoModelTable"]])){
-          curr.modt <- curr.model[["paleoModelTable"]][[pdm.modt]]
-          table.name <- curr.modt[["paleoDataTableName"]]
-          if (!is.null(table.name)){
-            # Reorganize table and move columns up
-            table <- move.cols.up(curr.modt)
-            D[[name]][["metadata"]][["paleoData"]][[pd.idx]][["paleoModel"]][[pdm.idx]][["paleoModelTable"]][[pdm.modt]] <- table
-          }
-        } ## end model table
-      } ## end models
-    } ## end paleodata
-
-    # CHRONDATA
-    for (cd.idx in 1:length(D[[name]][["metadata"]][["chronData"]])){
-      curr.cd <- D[[name]][["metadata"]][["chronData"]][[cd.idx]]
-
-      # loop for measurement tables
-      for (cdt.idx in 1:length(curr.cd[["chronMeasurementTable"]])){
-        curr.meas <- curr.cd[["chronMeasurementTable"]][[cdt.idx]]
-        # check in measurement table
-        if (!is.null(curr.meas)){
-          # Reorganize table and move columns up
-          table <- move.cols.up(curr.meas)
-          D[[name]][["metadata"]][["chronData"]][[cd.idx]][["chronMeasurementTable"]][[cdt.idx]] <- table
-        }
-      } ## measurement
-
-      # loop in models
-      for (cdm.idx in 1:length(curr.cd[["chronModel"]])){
-        curr.model <- curr.cd[["chronModel"]][[cdm.idx]]
-
-
-        # check in ensemble table
-        curr.ens <- curr.model[["ensembleTable"]]
-        if (!is.null(curr.ens)){
-          # Reorganize table and move columns up
-          print("moving up ensembleTable")
-          table <- move.cols.up(curr.ens)
-          D[[name]][["metadata"]][["chronData"]][[cd.idx]][["chronModel"]][[cdm.idx]][["ensembleTable"]] <- table
-        }
-
-        # check distribution table
-        if(!is.null(curr.model[["distributionTable"]])){
-          for (cdm.dist in 1:length(curr.model[["distributionTable"]])){
-            curr.dist <- curr.model[["distributionTable"]][[cdm.dist]]
-            # Reorganize table and move columns up
-            table <- move.cols.up(curr.dist)
-            D[[name]][["metadata"]][["chronData"]][[cd.idx]][["chronModel"]][[cdm.idx]][["distributionTable"]][[cdm.dist]] <- table
-          }
-        } ## end distribution
-
-        # check summary table
-        curr.modt <- curr.model[["summaryTable"]]
-        if (!is.null(curr.modt)){
-          # Reorganize table and move columns up
-          table <- move.cols.up(curr.modt)
-          D[[name]][["metadata"]][["chronData"]][[cd.idx]][["chronModel"]][[cdm.idx]][["summaryTable"]] <- table
-        }
-
-      } ## end chron Model
-    }
+    D[[name]] <- index.section(D[[name]], paleo)
+    D[[name]] <- index.section(D[[name]], chron)
+    D[[name]] <- index.geo(D[[name]])
   }
-    return(D)
+
+  return(D)
+}
+
+#' Change index-by-number for one section
+#' @export
+#' @param d LiPD metadata
+#' @param keys Section keys
+#' @return d Modified LiPD metadata
+index.section <- function(d, keys){
+
+  key1 <- keys[[1]]
+  key2 <- keys[[2]]
+  key3 <- keys[[3]]
+
+  # d$paleoData
+  pc <- d[["metadata"]][[key1]]
+
+  # section
+  for (i in 1:length(pc)){
+
+    # measurement
+    for (j in 1:length(pc[[i]][[key2]])){
+
+      # check in measurement table
+      if (!is.null(pc[[i]][[key2]][[j]])){
+        new.table <- move.cols.up(pc[[i]][[key2]][[j]])
+        d[["metadata"]][[key1]][[i]][[key2]][[j]] <- new.table
+      }
+    } ## measurement
+
+    # loop in models
+    for (j in 1:length(pc[[i]][[key3]])){
+
+      # summary
+      if (!is.null(pc[[i]][[key3]][[j]][["summaryTable"]])){
+        new.table <- move.cols.up(pc[[i]][[key3]][[j]][["summaryTable"]])
+        d[["metadata"]][[key1]][[i]][[key3]][[j]][["summaryTable"]] <- new.table
+      } # end summary
+
+      # ensemble
+      if (!is.null(pc[[i]][[key3]][[j]][["ensembleTable"]])){
+        new.table <- move.cols.up(pc[[i]][[key3]][[j]][["ensembleTable"]])
+        d[["metadata"]][[key1]][[i]][[key3]][[j]][["ensembleTable"]] <- new.table
+      } # end ensemble
+
+      # distribution
+      if(!is.null(pc[[i]][[key3]][[j]][["distributionTable"]])){
+        for (k in 1:length(pc[[i]][[key3]][[j]][["distributionTable"]])){
+          new.table <- move.cols.up(pc[[i]][[key3]][[j]][["distributionTable"]][[k]])
+          d[["metadata"]][[key1]][[i]][[key3]][[j]][["distributionTable"]][[k]] <- new.table
+        }
+      } ## end distribution
+
+    } ## end models
   }
+  return(d)
+}
 
 #' Get rid of "columns" layer so that the columns data is directly beneath its corresponding table
 #' @export
@@ -142,5 +103,56 @@ move.cols.up <- function(table){
     table[["columns"]] <- NULL
   }
   return(table)
+}
+
+#' Make geo semi-flat. Remove unnecessary levels between us and data.
+#' @export
+#' @param d Metadata
+#' @return d Modified metadata
+index.geo <- function(d){
+  # create a tmp list
+  tmp <- list()
+  geo <- d$metadata$geo
+
+  if (!is.null(geo)){
+    # properties
+    if (!is.null(geo$properties)){
+      names <- names(geo$properties)
+      for (i in 1:length(names)){
+        tmp[[names[[i]]]] <- geo$properties[[i]]
+      }
+    } # end properties
+
+    # geometry
+    if (!is.null(geo$geometry)){
+      names <- names(geo$geometry)
+      for (i in 1:length(names)){
+        if (names[[i]] == "coordinates"){
+          tmp$latitude <- geo$geometry$coordinates[[1]]
+          tmp$longitude <- geo$geometry$coordinates[[2]]
+          if (length(geo$geometry$coordinates) == 3){
+            tmp$elevation <- geo$geometry$coordinates[[3]]
+          }
+        }
+        else if (names[[i]] == "type"){
+          tmp$geometryType <- geo$geometry[[i]]
+        }
+        else{
+          tmp[[names[[i]]]] <- geo$geometry[[i]]
+        }
+      }
+    } # end geometry
+
+    # root geo
+    names(geo)
+    for (i in 1:length(names))
+      if (names[[i]] != "geometry" & names[[i]] != "properties"){
+        tmp[[names[[i]]]] <- geo[[names[[i]]]]
+      }
+
+    # set the new data in d
+    d$metadata$geo <- tmp
+  }
+  return(d)
 }
 

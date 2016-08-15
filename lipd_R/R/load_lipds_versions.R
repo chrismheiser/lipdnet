@@ -4,7 +4,7 @@
 ## current LiPD version structure
 ###############################################
 
-#' Convert LiPD version whenever necessary
+#' Convert LiPD version structure whenever necessary
 #' @export
 #' @param D LiPD Library
 #' @return D modified LiPD Library
@@ -24,7 +24,10 @@ convert.version <- function(D){
   return(D)
 }
 
-# Get the version number from metadata
+#' Get the version number from metadata
+#' @export
+#' @param d LiPD Metadata
+#' @return version LiPD version number
 get.version <- function(d){
   version <- as.numeric(d[["metadata"]][["LiPDVersion"]])
   if (length(version)==0){
@@ -63,117 +66,177 @@ convert.s2m <- function(d, keys){
   key2 <- keys[[2]]
   key3 <- keys[[3]]
 
-  # [paleo] - to list
-  if (is.data.frame(d[["metadata"]][[key1]])){
-  tmp <- d[["metadata"]][[key1]]
-  d[["metadata"]][[key1]] <- list()
-  d[["metadata"]][[key1]][[1]] <- as.list(tmp)
-  }
+  # PALEODATA
+  # data frame?
+  dat <- has.data(d[["metadata"]], key1)
 
-  # [paleo][1] - exists?
-  path1 <- tryCatch(
-    {path1 <- d[["metadata"]][[key1]][[1]]},
-    error=function(cond){
-      return(NULL)
-    })
+  # proceed of section exists
+  if (!is.null(dat)){
 
-  # [paleo][1] - to list
-  if (is.null(path1)){
-    tmp <- d[["metadata"]][[key1]]
-    d[["metadata"]][[key1]] <- list()
-    d[["metadata"]][[key1]][[1]] <- tmp
-  }
-
-  # [paleo] loop
-  for (i in 1:length(d[["metadata"]][[key1]])){
-
-    # [paleo][1] - data frame?
-    if (is.data.frame(d[["metadata"]][[key1]][[i]])){
-      d[["metadata"]][[key1]][[i]] <- as.list(d[["metadata"]][[key1]][[i]])
+    if (is.data.frame(dat)){
+      d[["metadata"]][[key1]] <- list()
+      d[["metadata"]][[key1]][[1]] <- as.list(dat)
     }
+    # multiples?
+    dat <- has.data(d[["metadata"]][[key1]], 1)
+    # convert to multiples
+    if (is.null(dat)){
+      d[["metadata"]][[key1]] <- list()
+      d[["metadata"]][[key1]][[1]] <- dat
+    } # END PALEODATA
 
-    # [paleo][1][meas] - exists?
-    path.meas <- tryCatch(
-      {path.meas <- d[["metadata"]][[key1]][[i]][[key2]]},
-      error=function(cond){return(NULL)}
-    )
+    # loop
+    for (i in 1:length(d[["metadata"]][[key1]])){
 
-    # [paleo][1][model] - exists?
-    path.model <- tryCatch(
-      {path.model <- d[["metadata"]][[key1]][[i]][[key3]]},
-      error=function(cond){return(NULL)}
-    )
+      # PALEODATA[[i]]
+      # data frame?
+      dat <- has.data(d[["metadata"]][[key1]], i)
+      if (is.data.frame(!is.null(dat))){
+          d[["metadata"]][[key1]][[i]] <- as.list(dat)
+      }
+      # MEAS + MODEL
+      # table exists ?
+      # d$paleoData[[i]]$paleoMeasurementTable
+      dat.meas <- has.data(d[["metadata"]][[key1]][[i]], key2)
 
-    # [meas] and [model] do not exist.
-    # make a [meas] table
-    if (is.null(path.meas) & is.null(path.model)){
-      tmp <- d[["metadata"]][[key1]][[i]]
-      d[["metadata"]][[key1]][[i]] <- list()
-      d[["metadata"]][[key1]][[i]][[key2]] <- list()
-      d[["metadata"]][[key1]][[i]][[key2]][[1]] <- tmp
-    }
+      # table exists ?
+      # d$paleoData[[i]]$paleoModel
+      dat.model <- has.data(d[["metadata"]][[key1]][[i]], key3)
 
-    # check for non-indexed table. we want this to be NULL
-    # [paleo][1][meas][columns] - exist?
-    path.direct <- tryCatch(
-      {
-        if (!is.null(d[["metadata"]][[key1]][[i]][[key2]][["columns"]])){
-          path.direct = TRUE
-        } else {
-            path.direct = NULL
+      # tables do not exist.
+      # make a meas table
+      if (is.null(dat.meas) & is.null(dat.model)){
+        tmp <- d[["metadata"]][[key1]][[i]]
+        d[["metadata"]][[key1]][[i]] <- list()
+        d[["metadata"]][[key1]][[i]][[key2]] <- list()
+        d[["metadata"]][[key1]][[i]][[key2]][[1]] <- tmp
+      }  # end meas and model
+
+      # DIRECT
+      # multiples ?
+      # d$paleoData[[i]]$paleoMeasurementTable$columns
+      dat <- has.data(d[["metadata"]][[key1]][[i]][[key2]], "columns")
+      # convert to multiples
+      # d$paleoData[[i]]$paleoMeasurementTable
+      if (!is.null(dat)){
+        tmp <- d[["metadata"]][[key1]][[i]][[key2]]
+        d[["metadata"]][[key1]][[i]][[key2]] <- list()
+        d[["metadata"]][[key1]][[i]][[key2]][[1]] <- tmp
+      } # end direct data
+
+      # MEASUREMENT
+      # paleoData[[i]]paleoMeasurementTable
+      # data frame ?
+      dat <- has.data(d[["metadata"]][[key1]][[i]], key2)
+      if (is.data.frame(!is.null(dat))){
+        d[["metadata"]][[key1]][[i]][[key2]] <- as.list(dat)
+      }
+      # multiples ?
+      dat <- has.data(d[["metadata"]][[key1]][[1]][[key2]], 1)
+
+      # convert to multiples
+      # d$paleoData[[i]]$paleoMeasurementTable[[j]]
+      if (is.null(dat)){
+        tmp <- d[["metadata"]][[key1]][[1]][[key2]]
+        d[["metadata"]][[key1]][[1]][[key2]] <- list()
+        d[["metadata"]][[key1]][[1]][[key2]][[1]] <- tmp
+      } # END MEASUREMENT
+
+      # loop
+      for (j in 1:length(d[["metadata"]][[key1]][[i]][[key2]])){
+
+        # MEASUREMENT[[j]]
+        # paleoData[[i]]paleoMeasurementTable[[j]]
+        # data frame?
+        dat <- has.data(d[["metadata"]][[key1]][[i]][[key2]], j)
+        if (is.data.frame(!is.null(dat))){
+          d[["metadata"]][[key1]][[i]][[key2]][[j]] <- as.list(dat)
+        } # END MEASUREMENT[[j]]
+
+      }
+
+      # continue if Model table present
+      if (length(d[["metadata"]][[key1]][[i]][[key3]]) > 0){
+        # MODEL
+        # paleoData[[i]]paleoModel
+        # data frame ?
+        dat <- has.data( d[["metadata"]][[key1]][[i]], key3)
+        if (is.data.frame(!is.null(dat))){
+          d[["metadata"]][[key1]][[i]][[key3]] <- as.list(dat)
         }
-      }, error = function(cond){return(NULL)}
-    )
+        # multiples ?
+        # convert to multiples
+        dat <- has.data(d[["metadata"]][[key1]][[1]][[key3]], 1)
+        if (is.null(dat)){
+          tmp <- d[["metadata"]][[key1]][[1]][[key3]]
+          d[["metadata"]][[key1]][[1]][[key3]] <- list()
+          d[["metadata"]][[key1]][[1]][[key3]][[1]] <- tmp
+        } # END MODEL
 
-    # [paleo][1][meas]
-    if (!is.null(path.direct)){
-      tmp <- d[["metadata"]][[key1]][[i]][[key2]]
-      d[["metadata"]][[key1]][[i]][[key2]] <- list()
-      d[["metadata"]][[key1]][[i]][[key2]][[1]] <- tmp
-    }
+        # loop
+        for (j in 1:length(d[["metadata"]][[key1]][[i]][[key3]])){
 
-    # check if the meas table is a data frame
-    if (is.data.frame( d[["metadata"]][[key1]][[i]][[key2]])){
-      d[["metadata"]][[key1]][[i]][[key2]] <- as.list(d[["metadata"]][[key1]][[i]][[key2]])
-    }
+          # MODEL[[j]]
+          # paleoModel[[j]]
+          # data frame ?
+          dat <- has.data(d[["metadata"]][[key1]][[i]][[key3]], j)
+          if (is.data.frame(!is.null(dat))){
+            d[["metadata"]][[key1]][[i]][[key3]][[j]] <- as.list(dat)
+          }
 
-    # check for multiples list in measurement table
-    path2 <- tryCatch(
-      {path2 <- d[["metadata"]][[key1]][[1]][[key2]][[1]]},
-      error=function(cond){return(NULL)}
-      )
+          # SUMMARY
+          # paleoModel[[j]]$summaryTable
+          # data frame ?
+          dat <- has.data(d[["metadata"]][[key1]][[i]][[key3]][[j]], "summaryTable")
+          if (is.data.frame(!is.null(dat))){
+            d[["metadata"]][[key1]][[i]][[key3]][[j]][["summaryTable"]] <- as.list(dat)
+          }
 
-    # make meas table into list
-    if (is.null(path2)){
-      tmp <- d[["metadata"]][[key1]][[1]][[key2]]
-      d[["metadata"]][[key1]][[1]][[key2]] <- list()
-      d[["metadata"]][[key1]][[1]][[key2]][[1]] <- tmp
-    }
+          # ENSEMBLE
+          # paleoModel[[j]]$ensembleTable
+          # data frame ?
+          dat <- has.data(d[["metadata"]][[key1]][[i]][[key3]][[j]], "ensembleTable")
+          if (is.data.frame(!is.null(dat))){
+            d[["metadata"]][[key1]][[i]][[key3]][[j]][["ensembleTable"]] <- as.list(dat)
+          }
 
-    # loop for tables in the meas.tables
-    for (j in 1:length(d[["metadata"]][[key1]][[i]][[key2]])){
-      # if the meas table @ idx is a data frame
-      if (is.data.frame(d[["metadata"]][[key1]][[i]][[key2]][[j]])){
-        d[["metadata"]][[key1]][[i]][[key2]][[j]] <- as.list(d[["metadata"]][[key1]][[i]][[key2]][[j]])
-    }
-    }
+          # DISTRIBUTION
+          # paleoModel[[j]]$distributionTable
+          dat <- has.data(d[["metadata"]][[key1]][[i]][[key3]][[j]], "distributionTable")
+          if (is.data.frame(!is.null(dat))){
+            d[["metadata"]][[key1]][[i]][[key3]][[j]][["distributionTable"]] <- as.list(dat)
+          }
+          # multiples ?
+          # convert to multiples
+          dat <- has.data(d[["metadata"]][[key1]][[1]][[key3]][[j]][["distributionTable"]], 1)
+          if (is.null(dat)){
+            tmp <- d[["metadata"]][[key1]][[i]][[key3]][[j]][["distributionTable"]]
+            d[["metadata"]][[key1]][[i]][[key3]][[j]][["distributionTable"]] <- list()
+            d[["metadata"]][[key1]][[i]][[key3]][[j]][["distributionTable"]][[1]] <- tmp
+          } # end paleo model
 
-  }
+          # loop
+          for (k in 1:length(d[["metadata"]][[key1]][[i]][[key3]][[j]][["distributionTable"]])){
+
+            # DISTRIBUTION[[k]]
+            dat <- has.data(d[["metadata"]][[key1]][[i]][[key3]][[j]][["distributionTable"]], k)
+            if (is.data.frame(!is.null(dat))){
+              d[["metadata"]][[key1]][[i]][[key3]][[j]][["distributionTable"]][[k]] <- as.list(dat)
+            } # END DISTRIBUTION[[k]]
+
+          } # end dist loop
+
+        } # end models
+
+      } # end if
+
+
+    } # end section
+
+  } # end if section
 
   # change the LiPDVersion value to 1.2
   d[["metadata"]][["LiPDVersion"]] <- 1.2
   return(d)
 }
 
-
-# TO DO: Refactor the convert.s2m function to use this function to check data existence in path in the metadata structure
-#' If a path exists, return the contents. if not, return NULL
-#' @export
-#' @param path Hierarchy structure path
-#' @return content Contents from path
-# path.exists <- function(path){
-#   cont <- tryCatch(
-#     {cont <- path},
-#     error=function(cond){return(NULL)}
-#   )
-# }

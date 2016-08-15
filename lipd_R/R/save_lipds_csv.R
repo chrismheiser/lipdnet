@@ -1,4 +1,4 @@
-#' Collect and remove csv. Main function
+#' Collect csvs main. Collect and remove csv "values" fields.
 #' @export
 #' @param name Name of current LiPD record
 #' @param d Metadata
@@ -27,6 +27,7 @@ collect.csvs <- function(name, d){
 #' @param d Metadata w. values
 #' @param keys Section keys
 #' @param csv.data Running collection of csv data
+#' @param name LiPD data set name
 #' @return all.data List holding the running collection of separated csv and metadata
 collect.csvs.section <- function(d, keys, csv.data, name){
   key1 <- keys[[1]]
@@ -154,7 +155,10 @@ collect.csvs.section <- function(d, keys, csv.data, name){
 
 }
 
-
+#' Parse the csv value columns from the table, then split the metadata from the csv
+#' @export
+#' @param table Table of data
+#' @return table Table w/o csv, csv Value columns
 parse.table <- function(table){
 
   # list to hold each column for this table
@@ -177,7 +181,10 @@ parse.table <- function(table){
         }
 
         # remove the "number" entry for the column, then replace it with the index of this loop
-        table[["columns"]][[k]][["number"]] <- k
+        # however, if it's an ensemble table with many "numbers"/columns, then we'll keep it.
+        if (length(table[["columns"]][[k]][["number"]]) == 1 | is.null(table[["columns"]][[k]][["number"]])){
+          table[["columns"]][[k]][["number"]] <- k
+        }
       }
     }
   }
@@ -193,17 +200,78 @@ parse.table <- function(table){
 #' csv.data format: [ some_filename.csv $columns.data ]
 #' @export
 #' @param csv.data List of Lists of csv column data
-#' @return none
+#' @return success Boolean for successful csv write
 write.csvs <- function(csv.data){
 
+  success <- TRUE
   csv.names <- names(csv.data)
+
   # loop for csv file
   for (f in 1:length(csv.names)){
-    # one csv file: list of lists. [V1: [column values], V2: [columns values], etc.]
-    # write.table wants a data frame or matrix, but is able to coerce a list of lists correctly also. (tested)
-    ref.name <- csv.names[[f]]
-    out.name <- paste0(ref.name, ".csv")
-    write.table(csv.data[[ref.name]], file=out.name, col.names = FALSE, row.names=FALSE, sep=",")
+    tmp <- matrix()
+
+    # only keep writing if all csvs have been successful.
+    if (!is.null(success)){
+      # one csv file: list of lists. [V1: [column values], V2: [columns values], etc.]
+      ref.name <- csv.names[[f]]
+      for (i in 1:length(csv.data[[ref.name]])){
+        col <- csv.data[[ref.name]][[i]]
+
+        # convert to numeric if needed
+        if (is.list(col)){
+          col <- as.numeric(col)
+        }
+        # check if tmp matrix has data or is fresh.
+        if(all(is.na(tmp))){
+          # fresh, so just bind the col itself
+          tmp <- tryCatch({
+            cbind(col, deparse.level = 0)
+          }, error = function(cond){
+            print(sprintf("cbind error: %s", ref.name))
+            return(NULL)
+          })
+        }else{
+          # not fresh, bind the existing with the col
+          tmp <- tryCatch({
+            cbind(tmp, col, deparse.level = 0)
+          }, error = function(cond){
+            if(is.matrix(col)){
+              tmp <- tryCatch({
+                col <- t(col)
+                cbind(tmp, col, deparse.level = 0)
+              }, error = function(cond){
+                print(sprintf("cbind error: %s", ref.name))
+                return(NULL)
+              })
+            }
+            else{
+              return(NULL)
+            }
+          })
+          # cbind didn't work here, it's possible the matrix is transposed wrong.
+          # give it another try after transposing it.
+          if (is.null(tmp) & is.matrix(col)){
+
+          }
+        }
+      }
+      if (!is.null(tmp)){
+        success <- tryCatch({
+          write.table(tmp, file=ref.name, col.names = FALSE, row.names=FALSE, sep=",")
+          success <- TRUE
+        }, error=function(cond){
+          print(sprintf("Error writing csv: %s", ref.name))
+          print("Check data for unequal row or column lengths")
+          return(NULL)
+        })
+        # end try
+      } # end write success
+    } # end if success
+  } # end loop
+
+  if (is.null(success)){
+    success <- FALSE
   }
-  return()
+
+  return(success)
 }

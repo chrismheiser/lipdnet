@@ -8,17 +8,16 @@
 #' @export
 #' @return none
 set.modules <- function(){
-  library(tools, quietly=TRUE, verbose=FALSE)
-  library(Kmisc, quietly=TRUE, verbose=FALSE)
-  library(RJSONIO, quietly=TRUE, verbose=FALSE)
-  library(rPython, quietly=TRUE, verbose=FALSE)
-  library(jsonlite, quietly=TRUE, verbose=FALSE)
-  library(BBmisc, quietly=TRUE, verbose=FALSE)
+  suppressPackageStartupMessages(library(tools, quietly=TRUE, verbose=FALSE))
+  suppressPackageStartupMessages(library(Kmisc, quietly=TRUE, verbose=FALSE))
+  suppressPackageStartupMessages(library(RJSONIO, quietly=TRUE, verbose=FALSE))
+  suppressPackageStartupMessages(library(jsonlite, quietly=TRUE, verbose=FALSE))
+  suppressPackageStartupMessages(library(BBmisc, quietly=TRUE, verbose=FALSE))
 }
 
 #' Ask user where local file/folder location is.
 #' @export
-#' @return path Path to files
+#' @return path.and.file Path to files
 get.local.path <- function(){
   ans <- ask.how.many()
   path.and.file <- gui.for.path(ans)
@@ -28,6 +27,7 @@ get.local.path <- function(){
 
 #' Get list of all LiPD files in current directory
 #' @export
+#' @param path.and.file Target directory and 1+ files
 #' @return f List of LiPD files w. ext
 get.list.lpd.ext <- function(path.and.file){
   file <- path.and.file[["file"]]
@@ -43,13 +43,6 @@ get.list.lpd.ext <- function(path.and.file){
   return(f)
 }
 
-#' Create a temporary working directory
-#' @export
-#' @return d Temporary directory path
-create.tmp.dir <- function(){
-  d <- tempdir()
-  return(d)
-}
 
 #' Unzip all LiPD files to the temporary directory
 #' @export
@@ -67,7 +60,7 @@ unzipper <- function(files, tmp){
 #' Remove the file extension from string names
 #' @export
 #' @param files_ext List of LiPD filenames w. ext
-#' @return none
+#' @return x LiPD filename
 strip.extension <- function(files_ext){
   x <- sapply(files_ext, function(f){
     strip_extension(f)
@@ -94,17 +87,25 @@ get.list.jsonld <- function(){
 
 #' Read in data from a csv file
 #' @export
+#' @param f Target file
 #' @return t Data frame of csv data
 import.file.csv <- function(f){
   t <- read.csv(f, header=FALSE)
+  # convert data frame to list
+  t <- as.list(t)
+  # convert columns from ANY type to numeric
+  for (i in 1:length(t)){
+    t[[i]] <- as.numeric(t[[i]])
+  }
   return(t)
 }
 
 #' Read in data from a jsonld file
 #' @export
+#' @param f Target file
 #' @return l List of jsonld data
 import.file.jsonld <- function(f){
-  l <- fromJSON(f)
+  l <- fromJSON(f, simplifyDataFrame = FALSE)
   return(l)
 }
 
@@ -122,7 +123,7 @@ return.to.root <- function(){
 remove.layers <- function(D, lpds){
   for (i in 1:length(lpds)){
     name <- lpds[[i]]
-    new.meta <- remove.rec(D[[name]][["metadata"]])
+    new.meta <- remove.empty.rec(D[[name]][["metadata"]])
     D[[name]] <- new.meta
   }
   return(D)
@@ -143,6 +144,7 @@ ask.how.many <- function(){
 
 #' Open a file browsing gui to let the user pick a location
 #' @export
+#' @param ans Single or multiple files
 #' @return path Path to file
 gui.for.path <- function(ans){
   tryCatch(
@@ -205,21 +207,5 @@ table.to.list <- function(table){
 }
 
 
-#' Remove all NA, NULL, and empty objects from the data structure
-#' @export
-#' @param x Data structure
-#' @return x Modified data structure
-remove.rec <- function( x ){
-  # Remove all the nulls
-  x <- x[ !is.NullOb( x )]
-  x <- x[ !is.na( x ) ]
-  x <- x[ !sapply( x, is.null ) ]
-  # Recursion
-  if( is.list(x) ){
-    # Recursive dive
-    x <- lapply( x, removeNullRec)
-  }
-  x <- x[ unlist(sapply(x, length) != 0)]
-  return(x)
-}
+
 

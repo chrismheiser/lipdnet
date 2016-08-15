@@ -22,33 +22,43 @@ load.lipd.files <- function(tmp, files_noext){
     setwd(current)
     print(sprintf("loading: %s", current))
 
-    # Move into the data folder if it exists
-    if (dir.exists("data")){
-      data.list <- list()
-      setwd("data")
+    # real bagit. move into data folder
+    if (dir.exists("data")){ setwd("data") }
 
-      # Get all CSV files and data. Combined
-      c <- get.list.csv()
-      c.data=vector(mode="list",length=length(c))
-      for (ci in 1:length(c)){
-        df=import.file.csv(c[ci])
-      c.data[[c[ci]]]=df
-      }
+    # fake bagit. no data folder. all files in root dir.
+    data.list <- get.data()
 
-      # Get all JSONLD files and data. Combined
-      j <- get.list.jsonld()
-      j.data <- import.file.jsonld(j)
-
-      # Append the JSONLD and CSV data together
-      # out <- append(j.data, c.data)
-      data.list[["metadata"]] <- j.data
-      data.list[["csv"]] <- c.data
-    }
-
+    # compiled list of all data
     out.list[[files_noext[[i]]]] <- data.list
+
     # Move back up to the tmp directory
     setwd(tmp)
   }
-
   return(out.list)
+}
+
+#' Retrieve and import csv and jsonld files in the current directory.
+#' @export
+#' @return data.list List of data for one LiPD file
+get.data <- function(){
+  data.list <- list()
+  # list of csv files
+  c <- get.list.csv()
+  # csv data placeholder
+  c.data=vector(mode="list",length=length(c))
+  # import each csv file
+  for (ci in 1:length(c)){
+    df=import.file.csv(c[ci])
+    c.data[[c[ci]]]=df
+  }
+
+  # jsonld file - one per lpd
+  j <- get.list.jsonld()
+  # import jsonld file
+  j.data <- import.file.jsonld(j)
+
+  # combine data for return.
+  data.list[["metadata"]] <- j.data
+  data.list[["csv"]] <- c.data
+  return(data.list)
 }

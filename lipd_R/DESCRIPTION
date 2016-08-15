@@ -3,7 +3,7 @@ Type: Package
 Title: LiPD utilities for R
 Version: 0.1.1
 Date: 2015-06-05
-Author: Christopher Heiser, 
+Author: Christopher Heiser,
 	Nicholas McKay
 Maintainer: Christopher Heiser <heiser@nau.edu>
 Description: Utilities to open, modify, analyze, and store LiPD data
@@ -15,6 +15,5 @@ URL: www.lipd.net
 Imports:
 	Kmisc,
 	RJSONIO,
-	rPython,
 	jsonlite,
 	BBmisc

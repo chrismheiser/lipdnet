@@ -9,6 +9,7 @@
 #' @return D LiPD Library
 load.lipds <- function(){
   set.modules()
+  options( warn = -1 )
 
   # Ask user where files are stored
   path.and.file <- get.local.path()
@@ -40,16 +41,13 @@ load.lipds <- function(){
   # We no longer need the csv and metadata separate parts. Link straight to the data.
   D <- remove.layers(D, lpds)
 
+  # If there's only one lpds object in D, move it to the front
+  if(length(D)==1){
+    D <- D[[1]]
+  }
+
   # Move back to the inital directory (Prior to temp folder)
   setwd(initial.dir)
 
-  #if multiple files,
-  # Return the "LiPD Library" of compiled, imported data
-  if(length(lpds)>1){
-    return(D)
-  }else{#return single LiPD object
-    return(D[[1]])
-    }
-
-
+  return(D)
 }

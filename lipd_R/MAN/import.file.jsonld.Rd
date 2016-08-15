@@ -6,6 +6,9 @@
 \usage{
 import.file.jsonld(f)
 }
+\arguments{
+\item{f}{Target file}
+}
 \value{
 l List of jsonld data
 }

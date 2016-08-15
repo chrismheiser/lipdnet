@@ -6,6 +6,9 @@
 \usage{
 import.file.csv(f)
 }
+\arguments{
+\item{f}{Target file}
+}
 \value{
 t Data frame of csv data
 }

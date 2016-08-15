@@ -4,15 +4,15 @@
 \alias{merge.data.lipd}
 \title{Merge csv numeric data into the metadata columns}
 \usage{
-\method{merge}{data.lipd}(D, lpds)
+\method{merge}{data.lipd}(d, keys)
 }
 \arguments{
-\item{D}{The lipd library}
+\item{d}{LiPD metadata}
 
-\item{lpds}{list of all LiPD files (no extension)}
+\item{keys}{Paleo or Chron keys}
 }
 \value{
-D modified lipd library
+d Modified LiPD metadata
 }
 \description{
 Merge csv numeric data into the metadata columns
