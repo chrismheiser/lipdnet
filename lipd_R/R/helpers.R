@@ -34,6 +34,18 @@ create.tmp.dir <- function(){
   return(d)
 }
 
+#' Return to preset "home" working directory
+#' @return none
+return.to.root <- function(){
+  if(!exists("working.dir",where = .GlobalEnv)){
+    print("Working directory not set. Choose any file -inside- your target directory")
+    out <- gui.for.path(NULL)
+    working.dir <- out[["dir"]]
+    assign("working.dir", working.dir, envir = .GlobalEnv)
+  }
+  setwd(working.dir)
+}
+
 #' Check if metadata path exists. Combine path and i to check for existence
 #' @export
 #' @param path Path in metadata

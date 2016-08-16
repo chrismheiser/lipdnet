@@ -33,8 +33,8 @@ get.version <- function(d){
   if (length(version)==0){
     version <- 1.0
   }
-  else if (version != 1.1 & version != 1.2){
-    print("LiPD Version is invalid")
+  else if (!(version %in% c(1, 1.0, 1.1, 1.2))){
+    print(sprintf("LiPD Version is invalid: %s", version))
   }
   return(version)
 }

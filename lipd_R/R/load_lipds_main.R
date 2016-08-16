@@ -15,8 +15,9 @@ load.lipds <- function(){
   path.and.file <- get.local.path()
 
   # Do initial set up
-  initial.dir <- path.and.file[["dir"]]
-  setwd(initial.dir)
+  working.dir <- path.and.file[["dir"]]
+  assign("working.dir", working.dir, envir = .GlobalEnv)
+  setwd(working.dir)
   tmp <- create.tmp.dir()
 
   # Get names of lipd files present
@@ -47,7 +48,7 @@ load.lipds <- function(){
   }
 
   # Move back to the inital directory (Prior to temp folder)
-  setwd(initial.dir)
+  setwd(working.dir)
 
   return(D)
 }

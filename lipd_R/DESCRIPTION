@@ -1,7 +1,7 @@
 Package: lipdR
 Type: Package
 Title: LiPD utilities for R
-Version: 0.1.3
+Version: 0.1.5
 Date: 2015-06-05
 Author: Christopher Heiser,
 	Nicholas McKay
@@ -13,6 +13,16 @@ LazyData: TRUE
 RoxygenNote: 5.0.1
 URL: www.lipd.net
 Imports:
+  Rcpp,
+  lattice,
+  grid,
+  knitr,
+  markdown,
+  methods,
+  stats,
+  utils,
+  checkmate,
+  chron,
   data.table,
 	Kmisc,
 	RJSONIO,

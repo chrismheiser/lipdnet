@@ -109,12 +109,6 @@ import.file.jsonld <- function(f){
   return(l)
 }
 
-#' Return to a predetermined folder each time a process quits early from an error
-#' @return none
-return.to.root <- function(){
-  setwd("~/Documents/code/geoChronR/lipd_R/")
-}
-
 #' Remove CSV and metadata layer from our lipd library. Also, remove empties
 #' @export
 #' @param D LiPD Library
@@ -155,7 +149,7 @@ gui.for.path <- function(ans){
     })
 
   # parse the dir path. don't keep the filename
-  if (ans == "m"){
+  if (ans == "m" | is.null(ans)){
     dir.path = dirname(path)
     one.file = NULL
   }
@@ -205,7 +199,6 @@ table.to.list <- function(table){
   }
   return(table)
 }
-
 
 
 
