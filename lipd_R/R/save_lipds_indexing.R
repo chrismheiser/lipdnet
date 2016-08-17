@@ -92,35 +92,51 @@ move.cols.down <- function(table){
   new.cols <- list()
 
   # get a list of variableNames from the columns
+  tnames <- names(table)
   for (i in 1:length(table)){
+    # if it's a list (column), then add it to tmp by index number
     if (is.list(table[[i]])){
-      tmp[[i]] <- try({
-        tmp[[i]] <- table[[i]][["variableName"]]
+      # tmp[[i]] <- try({
+      #   tmp[[i]] <- table[[i]][["variableName"]]
+      # })
+      new.cols[[i]] <- table[[i]]
+      vn <- tryCatch({
+        vn <- table[[i]][["variableName"]]
+      }, error = function(cond){
+        return(NULL)
       })
-    }
-  }
-
-  # remove all null elements
-  tmp <- tmp[!sapply(tmp, is.null)]
-
-  # make new list by number
-  if (length(tmp)>0){
-    for (i in 1:length(tmp)){
-      # get col data
-      if (!is.null(tmp[[i]])){
-        one.col <- table[[tmp[[i]]]]
-        # move data to new cols list
-        new.cols[[i]] <- one.col
-        # remove entry from table
-        table[[tmp[[i]]]] <- NULL
+      if (is.null(vn)){
+        new.cols[[i]][["variableName"]] <- tnames[[i]]
       }
     }
+    else {
+      tmp[[tnames[[i]]]] <- table[[i]]
+    }
   }
 
-  # set columns inside [["columns"]] list in table
-  table[["columns"]] <- new.cols
+  # # remove all null elements
+  # tmp <- tmp[!sapply(tmp, is.null)]
+  #
+  # # make new list by number
+  # if (length(tmp)>0){
+  #   for (i in 1:length(tmp)){
+  #     # get col data
+  #     if (!is.null(tmp[[i]])){
+  #       one.col <- table[[tmp[[i]]]]
+  #       # move data to new cols list
+  #       new.cols[[i]] <- one.col
+  #       # remove entry from table
+  #       table[[tmp[[i]]]] <- NULL
+  #     }
+  #   }
+  # }
 
-  return(table)
+  # set columns inside [["columns"]] list in table
+  # table[["columns"]] <- new.cols
+  tmp[["columns"]] <- new.cols
+
+
+  return(tmp)
 }
 
 #' Convert geo from semi-flat structure back to original GeoJSON structure.
@@ -145,8 +161,8 @@ unindex.geo <- function(d){
       }
       # geometry
       else if (names[[i]] %in% c("latitude", "longitude", "elevation", "geometryType")){
-        if (names[[i]] == "latitude"){ tmp$geometry$coordinates[[1]] <- geo$latitude }
-        else if (names[[i]] == "longitude"){ tmp$geometry$coordinates[[2]] <- geo$longitude }
+        if (names[[i]] == "latitude"){ tmp$geometry$coordinates[[1]] <- geo$longitude }
+        else if (names[[i]] == "longitude"){ tmp$geometry$coordinates[[2]] <- geo$latitude }
         else if (names[[i]] == "elevation"){ tmp$geometry$coordinates[[3]] <- geo$elevation }
         else if (names[[i]] == "geometryType"){ tmp$geometry$type <- geo$geometryType}
       }

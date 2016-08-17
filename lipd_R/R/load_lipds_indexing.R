@@ -36,46 +36,49 @@ index.section <- function(d, keys){
   key3 <- keys[[3]]
 
   # d$paleoData
-  pc <- d[["metadata"]][[key1]]
+  pc <- has.data(d[["metadata"]], key1)
 
   # section
-  for (i in 1:length(pc)){
+  if (!is.null(pc)){
+    for (i in 1:length(pc)){
 
-    # measurement
-    for (j in 1:length(pc[[i]][[key2]])){
+      # measurement
+      for (j in 1:length(pc[[i]][[key2]])){
 
-      # check in measurement table
-      if (!is.null(pc[[i]][[key2]][[j]])){
-        new.table <- move.cols.up(pc[[i]][[key2]][[j]])
-        d[["metadata"]][[key1]][[i]][[key2]][[j]] <- new.table
-      }
-    } ## measurement
+        # check in measurement table
+        if (!is.null(has.data(pc[[i]][[key2]], j))){
+          new.table <- move.cols.up(pc[[i]][[key2]][[j]])
+          d[["metadata"]][[key1]][[i]][[key2]][[j]] <- new.table
+        }
+      } ## measurement
 
-    # loop in models
-    for (j in 1:length(pc[[i]][[key3]])){
+      # loop in models
+      for (j in 1:length(pc[[i]][[key3]])){
 
-      # summary
-      if (!is.null(pc[[i]][[key3]][[j]][["summaryTable"]])){
-        new.table <- move.cols.up(pc[[i]][[key3]][[j]][["summaryTable"]])
-        d[["metadata"]][[key1]][[i]][[key3]][[j]][["summaryTable"]] <- new.table
+        # summary
+        if (!is.null(has.data(pc[[i]][[key3]][[j]], "summaryTable"))){
+          new.table <- move.cols.up(pc[[i]][[key3]][[j]][["summaryTable"]])
+          d[["metadata"]][[key1]][[i]][[key3]][[j]][["summaryTable"]] <- new.table
       } # end summary
 
-      # ensemble
-      if (!is.null(pc[[i]][[key3]][[j]][["ensembleTable"]])){
-        new.table <- move.cols.up(pc[[i]][[key3]][[j]][["ensembleTable"]])
-        d[["metadata"]][[key1]][[i]][[key3]][[j]][["ensembleTable"]] <- new.table
-      } # end ensemble
+        # ensemble
+        if (!is.null(has.data(pc[[i]][[key3]][[j]], "ensembleTable"))){
+          new.table <- move.cols.up(pc[[i]][[key3]][[j]][["ensembleTable"]])
+          d[["metadata"]][[key1]][[i]][[key3]][[j]][["ensembleTable"]] <- new.table
+        } # end ensemble
 
-      # distribution
-      if(!is.null(pc[[i]][[key3]][[j]][["distributionTable"]])){
-        for (k in 1:length(pc[[i]][[key3]][[j]][["distributionTable"]])){
-          new.table <- move.cols.up(pc[[i]][[key3]][[j]][["distributionTable"]][[k]])
-          d[["metadata"]][[key1]][[i]][[key3]][[j]][["distributionTable"]][[k]] <- new.table
-        }
-      } ## end distribution
+        # distribution
+        if(!is.null(has.data(pc[[i]][[key3]][[j]], "distributionTable"))){
+          for (k in 1:length(pc[[i]][[key3]][[j]][["distributionTable"]])){
+            new.table <- move.cols.up(pc[[i]][[key3]][[j]][["distributionTable"]][[k]])
+            d[["metadata"]][[key1]][[i]][[key3]][[j]][["distributionTable"]][[k]] <- new.table
+          }
+        } ## end distribution
 
-    } ## end models
+      } ## end models
+    }
   }
+
   return(d)
 }
 
@@ -96,8 +99,12 @@ move.cols.up <- function(table){
     # loop for each column
     for (i in 1:col.len){
       # get the variable name
-      vn <- table[["columns"]][[i]][["variableName"]]
-      table[[vn]] <- table[["columns"]][[i]]
+      try(vn <- table[["columns"]][[i]][["variableName"]])
+      if (is.null(vn)){
+        table[[i]] <- table[["columns"]][[i]]
+      } else {
+        table[[vn]] <- table[["columns"]][[i]]
+      }
     }
     # remove the columns item from table
     table[["columns"]] <- NULL
@@ -128,8 +135,8 @@ index.geo <- function(d){
       names <- names(geo$geometry)
       for (i in 1:length(names)){
         if (names[[i]] == "coordinates"){
-          tmp$latitude <- geo$geometry$coordinates[[1]]
-          tmp$longitude <- geo$geometry$coordinates[[2]]
+          tmp$longitude <- geo$geometry$coordinates[[1]]
+          tmp$latitude <- geo$geometry$coordinates[[2]]
           if (length(geo$geometry$coordinates) == 3){
             tmp$elevation <- geo$geometry$coordinates[[3]]
           }

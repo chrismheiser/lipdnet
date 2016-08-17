@@ -170,20 +170,30 @@ parse.table <- function(table){
 
     # if a columns entry exists
     if (!is.null(table[["columns"]])){
-
+      curr.num <- 1
       # name.paleoData1.paleoModel1.summaryTable $columns
       for (k in 1:length(table[["columns"]])){
-
         # add values for this column to the main list, then remove values
         if (!is.null(table[["columns"]][[k]][["values"]])){
-          vals[[k]] <- table[["columns"]][[k]][["values"]]
-          table[["columns"]][[k]][["values"]] <- NULL
-        }
-
-        # remove the "number" entry for the column, then replace it with the index of this loop
-        # however, if it's an ensemble table with many "numbers"/columns, then we'll keep it.
-        if (length(table[["columns"]][[k]][["number"]]) == 1 | is.null(table[["columns"]][[k]][["number"]])){
-          table[["columns"]][[k]][["number"]] <- k
+            vals[[k]] <- table[["columns"]][[k]][["values"]]
+            len <- NCOL(table[["columns"]][[k]][["values"]])
+            # remove the "number" entry for the column, then replace it with the index of this loop
+            # however, if it's an ensemble table with many "numbers"/columns, then we'll keep it.
+            if (len > 1){
+              # this is multiple columns in one. most likely an ensemble
+              # the end of the range is the start col + the cols in the matrix
+              num.cols <- dim(table[["columns"]][[k]][["values"]])[2]
+              # set the range as the number
+              nums <- create.range(curr.num, num.cols)
+              table[["columns"]][[k]][["number"]] <- nums
+              # the beginning point for the next loop is right after the finish of this loop.
+              curr.num <- curr.num + num.cols
+            }
+            else if (len <= 1){
+              table[["columns"]][[k]][["number"]] <- curr.num
+              curr.num <- curr.num + 1
+            }
+            table[["columns"]][[k]][["values"]] <- NULL
         }
       }
     }

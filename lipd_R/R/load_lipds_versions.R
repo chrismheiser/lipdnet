@@ -132,28 +132,29 @@ convert.s2m <- function(d, keys){
         d[["metadata"]][[key1]][[i]][[key2]] <- as.list(dat)
       }
       # multiples ?
-      dat <- has.data(d[["metadata"]][[key1]][[1]][[key2]], 1)
+      if (!is.null(dat)){
+        dat <- has.data(d[["metadata"]][[key1]][[1]][[key2]], 1)
+        # convert to multiples
+        # d$paleoData[[i]]$paleoMeasurementTable[[j]]
+        if (is.null(dat)){
+          tmp <- d[["metadata"]][[key1]][[1]][[key2]]
+          d[["metadata"]][[key1]][[1]][[key2]] <- list()
+          d[["metadata"]][[key1]][[1]][[key2]][[1]] <- tmp
+        } # END MEASUREMENT
 
-      # convert to multiples
-      # d$paleoData[[i]]$paleoMeasurementTable[[j]]
-      if (is.null(dat)){
-        tmp <- d[["metadata"]][[key1]][[1]][[key2]]
-        d[["metadata"]][[key1]][[1]][[key2]] <- list()
-        d[["metadata"]][[key1]][[1]][[key2]][[1]] <- tmp
-      } # END MEASUREMENT
+        # loop
+        for (j in 1:length(d[["metadata"]][[key1]][[i]][[key2]])){
 
-      # loop
-      for (j in 1:length(d[["metadata"]][[key1]][[i]][[key2]])){
+          # MEASUREMENT[[j]]
+          # paleoData[[i]]paleoMeasurementTable[[j]]
+          # data frame?
+          dat <- has.data(d[["metadata"]][[key1]][[i]][[key2]], j)
+          if (is.data.frame(!is.null(dat))){
+            d[["metadata"]][[key1]][[i]][[key2]][[j]] <- as.list(dat)
+          } # END MEASUREMENT[[j]]
 
-        # MEASUREMENT[[j]]
-        # paleoData[[i]]paleoMeasurementTable[[j]]
-        # data frame?
-        dat <- has.data(d[["metadata"]][[key1]][[i]][[key2]], j)
-        if (is.data.frame(!is.null(dat))){
-          d[["metadata"]][[key1]][[i]][[key2]][[j]] <- as.list(dat)
-        } # END MEASUREMENT[[j]]
-
-      }
+        } # end meas loop
+      } # end meas exists
 
       # continue if Model table present
       if (length(d[["metadata"]][[key1]][[i]][[key3]]) > 0){
@@ -166,70 +167,76 @@ convert.s2m <- function(d, keys){
         }
         # multiples ?
         # convert to multiples
-        dat <- has.data(d[["metadata"]][[key1]][[1]][[key3]], 1)
-        if (is.null(dat)){
-          tmp <- d[["metadata"]][[key1]][[1]][[key3]]
-          d[["metadata"]][[key1]][[1]][[key3]] <- list()
-          d[["metadata"]][[key1]][[1]][[key3]][[1]] <- tmp
-        } # END MODEL
-
-        # loop
-        for (j in 1:length(d[["metadata"]][[key1]][[i]][[key3]])){
-
-          # MODEL[[j]]
-          # paleoModel[[j]]
-          # data frame ?
-          dat <- has.data(d[["metadata"]][[key1]][[i]][[key3]], j)
-          if (is.data.frame(!is.null(dat))){
-            d[["metadata"]][[key1]][[i]][[key3]][[j]] <- as.list(dat)
-          }
-
-          # SUMMARY
-          # paleoModel[[j]]$summaryTable
-          # data frame ?
-          dat <- has.data(d[["metadata"]][[key1]][[i]][[key3]][[j]], "summaryTable")
-          if (is.data.frame(!is.null(dat))){
-            d[["metadata"]][[key1]][[i]][[key3]][[j]][["summaryTable"]] <- as.list(dat)
-          }
-
-          # ENSEMBLE
-          # paleoModel[[j]]$ensembleTable
-          # data frame ?
-          dat <- has.data(d[["metadata"]][[key1]][[i]][[key3]][[j]], "ensembleTable")
-          if (is.data.frame(!is.null(dat))){
-            d[["metadata"]][[key1]][[i]][[key3]][[j]][["ensembleTable"]] <- as.list(dat)
-          }
-
-          # DISTRIBUTION
-          # paleoModel[[j]]$distributionTable
-          dat <- has.data(d[["metadata"]][[key1]][[i]][[key3]][[j]], "distributionTable")
-          if (is.data.frame(!is.null(dat))){
-            d[["metadata"]][[key1]][[i]][[key3]][[j]][["distributionTable"]] <- as.list(dat)
-          }
-          # multiples ?
-          # convert to multiples
-          dat <- has.data(d[["metadata"]][[key1]][[1]][[key3]][[j]][["distributionTable"]], 1)
+        if (!is.null(dat)){
+          dat <- has.data(d[["metadata"]][[key1]][[1]][[key3]], 1)
           if (is.null(dat)){
-            tmp <- d[["metadata"]][[key1]][[i]][[key3]][[j]][["distributionTable"]]
-            d[["metadata"]][[key1]][[i]][[key3]][[j]][["distributionTable"]] <- list()
-            d[["metadata"]][[key1]][[i]][[key3]][[j]][["distributionTable"]][[1]] <- tmp
-          } # end paleo model
+            tmp <- d[["metadata"]][[key1]][[1]][[key3]]
+            d[["metadata"]][[key1]][[1]][[key3]] <- list()
+            d[["metadata"]][[key1]][[1]][[key3]][[1]] <- tmp
+          } # END MODEL
 
           # loop
-          for (k in 1:length(d[["metadata"]][[key1]][[i]][[key3]][[j]][["distributionTable"]])){
+          for (j in 1:length(d[["metadata"]][[key1]][[i]][[key3]])){
 
-            # DISTRIBUTION[[k]]
-            dat <- has.data(d[["metadata"]][[key1]][[i]][[key3]][[j]][["distributionTable"]], k)
+            # MODEL[[j]]
+            # paleoModel[[j]]
+            # data frame ?
+            dat <- has.data(d[["metadata"]][[key1]][[i]][[key3]], j)
             if (is.data.frame(!is.null(dat))){
-              d[["metadata"]][[key1]][[i]][[key3]][[j]][["distributionTable"]][[k]] <- as.list(dat)
-            } # END DISTRIBUTION[[k]]
+              d[["metadata"]][[key1]][[i]][[key3]][[j]] <- as.list(dat)
+            }
 
-          } # end dist loop
+            # SUMMARY
+            # paleoModel[[j]]$summaryTable
+            # data frame ?
+            dat <- has.data(d[["metadata"]][[key1]][[i]][[key3]][[j]], "summaryTable")
+            if (is.data.frame(!is.null(dat))){
+              d[["metadata"]][[key1]][[i]][[key3]][[j]][["summaryTable"]] <- as.list(dat)
+            }
 
-        } # end models
+            # ENSEMBLE
+            # paleoModel[[j]]$ensembleTable
+            # data frame ?
+            dat <- has.data(d[["metadata"]][[key1]][[i]][[key3]][[j]], "ensembleTable")
+            if (is.data.frame(!is.null(dat))){
+              d[["metadata"]][[key1]][[i]][[key3]][[j]][["ensembleTable"]] <- as.list(dat)
+            }
+
+            # DISTRIBUTION
+            # paleoModel[[j]]$distributionTable
+            dat <- has.data(d[["metadata"]][[key1]][[i]][[key3]][[j]], "distributionTable")
+            if (is.data.frame(!is.null(dat))){
+              d[["metadata"]][[key1]][[i]][[key3]][[j]][["distributionTable"]] <- as.list(dat)
+            } # end dist
+
+            # multiples ?
+            # convert to multiples
+            if (!is.null(dat)){
+              dat <- has.data(d[["metadata"]][[key1]][[1]][[key3]][[j]][["distributionTable"]], 1)
+              if (is.null(dat) & !is.null(dat)){
+                tmp <- d[["metadata"]][[key1]][[i]][[key3]][[j]][["distributionTable"]]
+                d[["metadata"]][[key1]][[i]][[key3]][[j]][["distributionTable"]] <- list()
+                d[["metadata"]][[key1]][[i]][[key3]][[j]][["distributionTable"]][[1]] <- tmp
+              } # end dist 1
+
+              # loop
+              for (k in 1:length(d[["metadata"]][[key1]][[i]][[key3]][[j]][["distributionTable"]])){
+
+                # DISTRIBUTION[[k]]
+                dat <- has.data(d[["metadata"]][[key1]][[i]][[key3]][[j]][["distributionTable"]], k)
+                if (is.data.frame(!is.null(dat))){
+                  d[["metadata"]][[key1]][[i]][[key3]][[j]][["distributionTable"]][[k]] <- as.list(dat)
+                } # END DISTRIBUTION[[k]]
+
+              } # end dist loop
+
+            } # end dist exists
+
+          } # end models
+
+        } # end model exists
 
       } # end if
-
 
     } # end section
 

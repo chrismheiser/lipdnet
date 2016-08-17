@@ -1,3 +1,53 @@
+#' Create the range for ensemble table "number" field
+#' @export
+#' @param start Number to start at
+#' @param len Amount of times to loop
+#' @return l A vectory of column ints
+create.range <- function(start, len){
+  l <- c()
+  for (i in 1:len){
+    l[[i]] <- start
+    start <- start + 1
+  }
+  return(l)
+}
+
+
+#' Ask user where local file/folder location is.
+#' @export
+#' @return path.and.file Path to files
+get.local.path <- function(){
+  ans <- ask.how.many()
+  path.and.file <- gui.for.path(ans)
+  return(path.and.file)
+}
+
+#' Open a file browsing gui to let the user pick a location
+#' @export
+#' @param ans Single or multiple files
+#' @return path Path to file
+gui.for.path <- function(ans){
+  tryCatch(
+    { path <- file.choose() },
+    error=function(cond){
+      print("File/Directory not chosen")
+      quit(1)
+    })
+
+  # parse the dir path. don't keep the filename
+  if (ans == "m" | is.null(ans)){
+    dir.path = dirname(path)
+    one.file = NULL
+  }
+  # parse the dir path and the filename
+  else if (ans == "s"){
+    dir.path = dirname(path)
+    one.file = basename(path)
+  }
+  out.list <- list("dir" = dir.path, "file"= one.file)
+  return(out.list)
+}
+
 #' Remove all NA, NULL, and empty objects from the data structure
 #' @export
 #' @param x Data structure
@@ -57,6 +107,9 @@ has.data <- function(path, i){
   }, error=function(cond){
     return(NULL)
   })
+  if (is.NullOb(dat)){
+    dat <- NULL
+  }
   return(dat)
 }
 

@@ -63,82 +63,90 @@ merge.data.lipd <- function(d, keys){
       if(any(names(pc[[i]])==key3)){
 
         # loop in models
-        chronModel <- vector(mode="list",length=length(pc[[i]][[key3]]))
+        dat <- has.data(pc[[i]], key3)
+        if (!is.null(dat)){
+          chronModel <- vector(mode="list",length=length(dat))
 
-        # d$chronData[[i]]$chronModel
-        for (j in 1:length(pc[[i]][[key3]])){
+          # d$chronData[[i]]$chronModel
+          for (j in 1:length(pc[[i]][[key3]])){
 
-          # d$chronData[[i]]$chronModel[[j]]
+            # d$chronData[[i]]$chronModel[[j]]
 
-          # summary table
-          # d$chronData[[i]]$chronModel[[j]]$summaryTable[[1]] - only one per model
-          table <- pc[[i]][[key3]][[j]][["summaryTable"]]
-          filename <- table[["filename"]]
-          if (!is.null(filename)){
-            csv.cols <- d[["csv"]][[filename]]
-            meta.cols <- table[["columns"]]
-            columns <- merge.csv(csv.cols, meta.cols)
-            toCopy <- which(names(table)!="columns")
-            for(tt in toCopy){
-              chronModel[[j]]$summaryTable[[names(table)[tt]]] <- table[[names(table)[tt]]]
+            # summary table
+            # d$chronData[[i]]$chronModel[[j]]$summaryTable[[1]] - only one per model
+            table <- pc[[i]][[key3]][[j]][["summaryTable"]]
+            filename <- table[["filename"]]
+            if (!is.null(filename)){
+              csv.cols <- d[["csv"]][[filename]]
+              meta.cols <- table[["columns"]]
+              columns <- merge.csv(csv.cols, meta.cols)
+              toCopy <- which(names(table)!="columns")
+              for(tt in toCopy){
+                chronModel[[j]]$summaryTable[[names(table)[tt]]] <- table[[names(table)[tt]]]
+              }
+              chronModel[[j]]$summaryTable$columns <-columns
+
             }
-            chronModel[[j]]$summaryTable$columns <-columns
 
-          }
-
-          # ensemble table
-          # d$chronData[[i]]$chronModel[[j]]$ensembleTable[[1]] - only one per model
-          table <- pc[[i]][[key3]][[j]][["ensembleTable"]]
-
-          # get filename
-          filename <- table[["filename"]]
-
-          if (!is.null(filename)){
-            csv.cols <- d[["csv"]][[filename]]
-            meta.cols <- table[["columns"]]
-            columns <- merge.csv(csv.cols, meta.cols)
-            toCopy <- which(names(table)!="columns")
-            for(tt in toCopy){
-              chronModel[[j]]$ensembleTable[[names(table)[tt]]] <- table[[names(table)[tt]]]
-            }
-            chronModel[[j]]$ensembleTable$columns <- columns
-          }
-
-          # distribution tables
-          distributionTable <- vector(mode = "list",length = length(pc[[i]][[key3]][[j]][["distributionTable"]][[1]])[1])
-          if(length(distributionTable)>=1){
-
-            # d$chronData[[i]]$chronModel[[j]]$distributionTable
-            for (k in 1:length(pc[[i]][[key3]][[j]][["distributionTable"]][[1]])[1]){
-
-              # d$chronData[[i]]$chronModel[[j]]$distributionTable[[k]]
-              table <- pc[[i]][[key3]][[j]][["distributionTable"]][[k]]
-
+            # ensemble table
+            # d$chronData[[i]]$chronModel[[j]]$ensembleTable[[1]] - only one per model
+            dat <- has.data(pc[[i]][[key3]][[j]], "ensembleTable")
+            if (!is.null(dat)){
+              table <- pc[[i]][[key3]][[j]][["ensembleTable"]]
+              # get filename
               filename <- table[["filename"]]
               if (!is.null(filename)){
                 csv.cols <- d[["csv"]][[filename]]
                 meta.cols <- table[["columns"]]
-                columns  <- merge.csv(csv.cols, meta.cols)
+                columns <- merge.csv(csv.cols, meta.cols)
                 toCopy <- which(names(table)!="columns")
                 for(tt in toCopy){
-                  distributionTable[[k]][[names(table)[tt]]] <- table[[names(table)[tt]]]
+                  chronModel[[j]]$ensembleTable[[names(table)[tt]]] <- table[[names(table)[tt]]]
                 }
-                distributionTable[[k]]$columns <- columns
-
+                chronModel[[j]]$ensembleTable$columns <- columns
               }
             }
-            chronModel[[j]]$distributionTable <- distributionTable
-          }
 
-          #add in anything that we didn't recreate
-          icm <- names(pc[[i]][[key3]][[j]])
-          cmnames <- names(chronModel[[j]])
-          toAdd <- which(!(icm %in% cmnames))
-          for(ta in 1:length(toAdd)){
-            chronModel[[j]][[icm[toAdd[ta]]]] <- pc[[i]][[key3]][[j]][[icm[toAdd[ta]]]]
-          }
-        } ##end chronModel loop
-        d[["metadata"]][[key1]][[i]]$chronModel <- chronModel
+            # distribution tables
+            dat <- has.data(pc[[i]][[key3]][[j]][["distributionTable"]], 1)
+            if (!is.null(dat)){
+              distributionTable <- vector(mode = "list",length = length(dat)[1])
+              if(length(distributionTable)>=1){
+
+                # d$chronData[[i]]$chronModel[[j]]$distributionTable
+                for (k in 1:length(pc[[i]][[key3]][[j]][["distributionTable"]][[1]])[1]){
+
+                  # d$chronData[[i]]$chronModel[[j]]$distributionTable[[k]]
+                  table <- pc[[i]][[key3]][[j]][["distributionTable"]][[k]]
+
+                  filename <- table[["filename"]]
+                  if (!is.null(filename)){
+                    csv.cols <- d[["csv"]][[filename]]
+                    meta.cols <- table[["columns"]]
+                    columns  <- merge.csv(csv.cols, meta.cols)
+                    toCopy <- which(names(table)!="columns")
+                    for(tt in toCopy){
+                      distributionTable[[k]][[names(table)[tt]]] <- table[[names(table)[tt]]]
+                    }
+                    distributionTable[[k]]$columns <- columns
+
+                  }
+                } # end loop
+                chronModel[[j]]$distributionTable <- distributionTable
+              } # end length
+            } # end distribution
+
+            #add in anything that we didn't recreate
+            icm <- names(pc[[i]][[key3]][[j]])
+            cmnames <- names(chronModel[[j]])
+            toAdd <- which(!(icm %in% cmnames))
+            for(ta in 1:length(toAdd)){
+              chronModel[[j]][[icm[toAdd[ta]]]] <- pc[[i]][[key3]][[j]][[icm[toAdd[ta]]]]
+            }
+          } ##end chronModel loop
+          d[["metadata"]][[key1]][[i]]$chronModel <- chronModel
+
+        } # end chronModel check
 
       }#end chronModel
 

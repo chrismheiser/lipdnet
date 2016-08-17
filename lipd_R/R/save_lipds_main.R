@@ -4,16 +4,20 @@
 #' @return none
 save.lipds <- function(D){
 
+  ans <- readline(prompt="Save files to the current working directory? (y/n): ")
+  if (ans=="n"){
+    change.dir <- gui.for.path(NULL)
+    setwd(change.dir[["dir"]])
+  }
   # starting directory. this is where files will be saved to
   initial.dir <- getwd()
 
   # Parse one or many records?
   if ("paleoData" %in% names(D)){
-    single.parse(D)
-  } else {
-    multi.parse(D)
-  }
-
+      single.parse(D)
+    } else {
+      multi.parse(D)
+    }
   # return back to the initial directory
   setwd(initial.dir)
 }
@@ -28,9 +32,15 @@ single.parse <- function(d, name=NA){
   if (is.na(name)){
     name <- get.datasetname(d)
   }
-  print(sprintf("saving: %s", name))
-  # Save lipd data
   save.lipd.file(d, name)
+
+  # # Save lipd data
+  # tryCatch({
+  #   print(sprintf("saving: %s", name))
+  #   save.lipd.file(d, name)
+  # }, error = function(cond){
+  #   print(sprintf("error saving: %s", name))
+  # })
 }
 
 #' Parse library of data records
@@ -42,9 +52,15 @@ multi.parse <- function(D){
   lpds <- names(D)
 
   for (i in 1:length(lpds)){
-    # reference to single lipd record
-    d <- D[[lpds[[i]]]]
-    single.parse(d, lpds[[i]])
+    tryCatch({
+        # reference to single lipd record
+        d <- D[[lpds[[i]]]]
+        print(sprintf("saving: %s", lpds[[i]]))
+        single.parse(d, lpds[[i]])
+    }, error=function(cond){
+      print(sprintf("error saving: %s", lpds[[i]]))
+    })
+
   }
 }
 
