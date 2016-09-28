@@ -12,7 +12,7 @@ var transporter = nodemailer.createTransport({
     }
 });
 
-// Home page
+// Get the home page
 router.get('/', function(req, res, next) {
   res.render('index', { title: 'LiPD' });
 });
@@ -38,12 +38,12 @@ router.post('/', function(req, res, next){
   });
 });
 
-// Schema page
+// Get the schema page
 router.get('/schema', function(req, res, next){
     res.render('schema', {title: 'Schema'});
 });
 
-// Upload page
+// Get the upload page
 router.get('/upload', function(req, res, next){
   res.render('upload', {title: 'Upload'});
 });
@@ -56,29 +56,38 @@ router.get('/upload', function(req, res, next){
 //   });
 // });
 
-// Upload a new file
-router.post('/upload', function(req, res, next){
+// Upload a file from the upload page, and insert it into the database
+router.post('/upss', function(req, res, next){
   var result;
-  // var db = req.db;
-  // var collection = db.get('docs');
   console.log(req.file);
-  // req.file.time = Date.now();
-  // res.json(req.file);
-  // collection.insert(req.file);
-
-  // var result = "";
-  // var py = require('child_process').spawn('python',
-  // ['/Users/chrisheiser1/Documents/code/geoChronR/website/public/scripts/test.py']);
-  // py.stdout.on('data', function(data){ result += data; });
-  // py.stdout.on('close', function(code){
-  //    if (code != 0) {
-  //      return res.send(500, code);
-  //    }
-  //    return res.json(result);
-  // });
+  req.file.time = Date.now();
+  res.json(req.file);
 });
 
-// Browse the files in the database
+// Upload a file from the upload page, and insert it into the database
+router.post('/updb', function(req, res, next){
+  var result;
+  var db = req.db;
+  var collection = db.get('docs');
+  console.log(req.file);
+  req.file.time = Date.now();
+  res.json(req.file);
+  collection.insert(req.file);
+});
+
+// Download a validated LiPD file, or a file chosen from browsing the DB, to users computer
+router.post("/dwn", function(req, res, next){
+  var result;
+  var db = req.db;
+  var collection = db.get('docs');
+  console.log(req.file);
+  req.file.time = Date.now();
+  res.json(req.file);
+  collection.insert(req.file);
+});
+
+// Get the browse page
+// This finds every document since there's no parameters
 router.get('/browse', function(req, res, next){
   var db = req.db;
   var collection = db.get('docs');

@@ -1,5 +1,6 @@
 var f = angular.module('ngForm', ['uiGmapgoogle-maps']);
 
+// Google Maps API key to allow us to embed the map
 f.config(function(uiGmapGoogleMapApiProvider) {
     uiGmapGoogleMapApiProvider.configure({
         key: 'AIzaSyB8nllB0zwraQo5qJMGdtcxulsTPJOnd8U',
@@ -11,10 +12,12 @@ f.config(function(uiGmapGoogleMapApiProvider) {
 // Controller for the Upload form
 f.controller('FormCtrl', function($scope, $log, $timeout) {
 
-    // User data holds all the user selected
+    // User data holds all the user selected or imported data
     $scope.userData = {};
 
-    $scope.uploadType = ['CSV (headerless)', 'Excel', 'NOAA', 'LiPD'];
+    // LiPD may end up being the only option, but I can foresee where we might accept jsonld files also.
+    $scope.uploadType = ['LiPD'];
+
     // Predefined form data
     $scope.unitsDistance = [{
         "short": "m",
@@ -48,22 +51,22 @@ f.controller('FormCtrl', function($scope, $log, $timeout) {
     $scope.geoGeometryType = ['Point', "MultiPoint", 'LineString', 'Polygon'];
     $scope.geoCoordinates = [{}];
 
-    // $scope.addCoordinates = function() {
-    //     var newID = $scope.geoCoordinates.length + 1;
-    //     $scope.geoCoordinates.push({});
-    // };
+    $scope.addCoordinates = function() {
+        var newID = $scope.geoCoordinates.length + 1;
+        $scope.geoCoordinates.push({});
+    };
 
-    // REMOVE ROW OF COORDINATES FROM PAGE
+    // Remove row of coordinates
     $scope.removeCoords = function($index) {
-        $scope.markers.splice($index, 1);
+      $scope.markers.splice($index, 1);
     };
 
-    // AFTER COORDIANTES COMPLETE, PUSH COORDS TO USERDATA
+    // Coordinates are complete, push to userData (Is this needed? Should be automatically linked to userData)
     $scope.pushCoords = function() {
-
+      // push to $scope.userData or $scope.geo?
     };
 
-    // ADD NEW DATA COLUMN
+    // Add data column
     $scope.addColumn = function() {
         var newID = $scope.columns.length + 1;
         $scope.columns.push({
@@ -74,7 +77,7 @@ f.controller('FormCtrl', function($scope, $log, $timeout) {
         });
     };
 
-    // ADD NEW AUTHOR ROW
+    // Add author
     $scope.addAuthor = function() {
         var newID = $scope.authors.length + 1;
         $scope.authors.push({
@@ -82,7 +85,7 @@ f.controller('FormCtrl', function($scope, $log, $timeout) {
         });
     };
 
-    // ADD NEW FUNDING ROW
+    // Add funding
     $scope.addFunding = function() {
         var newID = $scope.funding.length + 1;
         $scope.funding.push({
@@ -92,12 +95,12 @@ f.controller('FormCtrl', function($scope, $log, $timeout) {
         });
     }
 
-    // SHOW CONTENTS OF ANY TEXT UPLOADED FILE
+    // Show contents of uploaded file
     $scope.showContent = function($fileContent) {
         $scope.userData = $fileContent;
     };
 
-    // INITIALIZE MAP
+    // Initialize the map
     $scope.flagstaff ={ latitude: 35.185, longitude: -111.6526};
     $scope.map = {
         center: {
@@ -113,7 +116,7 @@ f.controller('FormCtrl', function($scope, $log, $timeout) {
     };
     $scope.markers = [];
 
-    // PUSH NEW COORDINATES
+    // Add another set of coordinates to the map
     $scope.addCoordinates = function() {
         var newID = $scope.markers.length + 1;
         $scope.markers.push({

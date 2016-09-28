@@ -2,6 +2,7 @@ extends layout
 
 block css
 	link(rel='stylesheet' href='css/upload.css')
+	link(rel='stylesheet' href='css/zip-js.css')
 
 block body
 	body(ng-app='uploadApp' ng-cloak)
@@ -12,6 +13,25 @@ block body
 					.md-title Upload
 
 			.col-sm-8.col-sm-offset-2
+				// Ordered list that contains all the "upload lpd file" pieces
+				ol
+					// Method input: this will always be "RAM", so keep the code here but hide the element on the page
+					li(style="display:hide; visibility:hidden;list-style-type: none;")
+						label(style="display:hide; visibility:hidden;")
+							span#form-label Temp storage
+							select#creation-method-input
+								option(value="Blob") RAM
+					// File chooser: Set to accept LPD file types. 
+					li(style="list-style-type: none;")
+						label
+							span#form-label Load LiPD
+							input#file-input(type="file" accept=".lpd")
+					// When a LPD file is chosen, all the files inside are listed here. 
+					li(style="list-style-type: none;")
+						span#form-label Contents
+						ul#file-list
+				br
+						
 				#form-container(ng-controller='FormCtrl')
 					h4 Form Data Preview
 					p userData
@@ -26,20 +46,28 @@ block body
 								h2.md-toolbar-tools
 									span File
 									
-							// File Upload Button
-							form#uploadForm(action="/upload" enctype="multipart/form-data" method='post')
+							// Upload file to session storage
+							form#uploadForm(action="/upss" enctype="multipart/form-data" method='')
 								//- md-input-container
 								//- 	label File type
 								//- 	md-select(ng-model='upload.type')
 								//- 		md-option(ng-repeat='i in uploadType' value='{{i}}') {{i}}
-								md-button(ngf-select="upload($file)" ng-model='file' name='file' ngf-max-size="1MB") Select File    
+								md-button(ngf-select="uploadToSession($file)" ng-model='file' name='file' ngf-max-size="50MB") Select File  
+
+							// Upload data to database
+							form#uploadForm(action="/updb" enctype="multipart/form-data" method='post')
+								md-button(ngf-select="uploadToDb($file)" ng-if="validated" ng-model='file' name='file' ngf-max-size="50MB") Push to Database   
+
+							// Upload data to database
+							form#uploadForm(action="/dwnld" enctype="multipart/form-data" method='post')
+								md-button(ngf-select="downloadToLocal($file)" ng-if="validated" ng-model='file' name='file' ngf-max-size="50MB") Download LiPD   
 
 							pre
 								p Response Object
 								p(ng-if="obj.path") {{obj}}
 							pre
 								p Uploaded Content
-								p(ng-if="obj.path" ng-init='pull()') {{content}}
+								p(ng-if="obj.path" ng-init='pullFromDb()') {{content}}								
 								
 						// FORM INPUT
 						div
@@ -190,17 +218,38 @@ block body
 									input(value='{{v}}')
 							div(layout='', layout-padding='', layout-sm='column')
 								md-button(ng-click='addColumn()')  + Add Column
+								
 							// CHRONOLOGY
 							md-toolbar.md-hue-1
 								h2.md-toolbar-tools
 									span Chronology
 							div(layout='', layout-padding='', layout-sm='column')
 
+							md-toolbar.md-hue-1
+								h2.md-toolbar-tools
+									span Download
+							// Download Lipd Button
+							// download button should be greyed out or missing until the data is valid and ready
+							// figure out how this will zip up the session contents and download to disk
+							//- form#upload-form(action="/download")
+							//- 	md-button#download(ng-if="validLipd") Download LiPD   
+							// use this until testing out "completeness" is finished.
+							form#upload-form(action="/filedown")
+								p Download the new, valid lipd file
+								p This button will activate when the lipd data is valid
+								md-button#download() Download LiPD only
+								br
+								md-button#download() Add LiPD to database 
+
 
 block js
 	script(src='apps/uploadApp.js')
 	script(src='js/ngForm.js')
 	script(src='js/ngFile.js')
+	script(src="lib/zip/zip.js")
+	script(src="lib/zip/zip-ext.js")
+	script(src="lib/zip/zip-load.js")
+
 	script(src='https://cdnjs.cloudflare.com/ajax/libs/angular-ui-router/0.2.15/angular-ui-router.min.js')
 	script(src='https://cdnjs.cloudflare.com/ajax/libs/angular-google-maps/2.2.0/angular-google-maps.min.js')
 	script(src='https://cdnjs.cloudflare.com/ajax/libs/danialfarid-angular-file-upload/8.0.1/ng-file-upload-shim.min.js')
