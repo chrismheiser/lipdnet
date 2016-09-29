@@ -13,39 +13,47 @@ block body
 					.md-title Upload
 
 			.col-sm-8.col-sm-offset-2
-				// Ordered list that contains all the "upload lpd file" pieces
-				ol
-					// Method input: this will always be "RAM", so keep the code here but hide the element on the page
-					li(style="display:hide; visibility:hidden;list-style-type: none;")
-						label(style="display:hide; visibility:hidden;")
-							span#form-label Temp storage
-							select#creation-method-input
-								option(value="Blob") RAM
-					// File chooser: Set to accept LPD file types. 
-					li(style="list-style-type: none;")
-						label
-							span#form-label Load LiPD
-							input#file-input(type="file" accept=".lpd")
-					// When a LPD file is chosen, all the files inside are listed here. 
-					li(style="list-style-type: none;")
-						span#form-label Contents
-						ul#file-list
-				br
 						
 				#form-container(ng-controller='FormCtrl')
+				
+					// DEV AREA : Check that everything is binging in angular correctly. 
 					h4 Form Data Preview
 					p userData
 					pre {{ userData }}
 					p markers
 					pre {{ markers }}
+					
+					// is this line needed ?
 					form#upload-form(ng-submit='')
-
+						// UPLOAD METHOD 2: Use node / multer / angular to POST file data to mongo db
 						div(ng-controller="FileCtrl")
 
 							md-toolbar.md-hue-1
 								h2.md-toolbar-tools
 									span File
 									
+							// UPLOAD METHOD 1 : use zip.js to unzip the LiPD file into RAM and jsonld file into SessionStorage
+							ol
+								// Method input: this will always be "RAM", so keep the code here but hide the element on the page
+								li(style="display:hide; visibility:hidden;list-style-type: none;")
+									label(style="display:hide; visibility:hidden;")
+										span#form-label Temp storage
+										select#creation-method-input
+											option(value="Blob") RAM
+								// File chooser: Set to accept LPD file types. 
+								li(style="list-style-type: none;")
+									label
+										span#form-label Load LiPD
+										// Bind this to a 'change' event so that we know when jsonld data is available to start processing.
+										input#file-input(ngf-select="uploadEvent()" ng-model="file" name='file' type="file" accept=".lpd")
+								// When a LPD file is chosen, all the files inside are listed here. 
+								li(style="list-style-type: none;")
+									span#form-label Contents
+									ul#file-list
+							br
+							
+							
+																
 							// Upload file to session storage
 							form#uploadForm(action="/upss" enctype="multipart/form-data" method='')
 								//- md-input-container
@@ -54,13 +62,14 @@ block body
 								//- 		md-option(ng-repeat='i in uploadType' value='{{i}}') {{i}}
 								md-button(ngf-select="uploadToSession($file)" ng-model='file' name='file' ngf-max-size="50MB") Select File  
 
+							// LATER,  CHANGE THESE TWO BUTTONS TO NG-IF="validated" SO THEY DONT SHOW UP IF DATA IS INVALID 
 							// Upload data to database
 							form#uploadForm(action="/updb" enctype="multipart/form-data" method='post')
-								md-button(ngf-select="uploadToDb($file)" ng-if="validated" ng-model='file' name='file' ngf-max-size="50MB") Push to Database   
+								md-button(ngf-select="uploadToDb($file)" ng-model='file' name='file' ngf-max-size="50MB") Push to Database   
 
 							// Upload data to database
 							form#uploadForm(action="/dwnld" enctype="multipart/form-data" method='post')
-								md-button(ngf-select="downloadToLocal($file)" ng-if="validated" ng-model='file' name='file' ngf-max-size="50MB") Download LiPD   
+								md-button(ngf-select="downloadToLocal($file)" ng-model='file' name='file' ngf-max-size="50MB") Download LiPD   
 
 							pre
 								p Response Object

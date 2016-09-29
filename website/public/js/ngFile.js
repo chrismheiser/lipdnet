@@ -2,7 +2,18 @@ var t = angular.module('ngFile', ['ngFileUpload']);
 
 t.controller('FileCtrl', ['$scope', 'Upload', '$timeout', '$q', '$http', function ($scope, Upload, $timeout, $q, $http) {
     $scope.obj = 'none';
+    $scope.getMeta = false;
+    $scope.userData = $scope.$parent.userData;
 
+    // When a file is uploaded (change event), trigger a bool change that will tie to ng-if.
+    // Ng-if will then trigger a call to SessionStorage to get Jsonld data and start parsing / validating.
+    $scope.uploadEvent = function(){
+      // file was chosen, and data was put into sessionStorage. Go get it and start parsing.
+      $scope.getMeta = true;
+      // wait a second, then call the start of JSONLD processing.
+      $scope.wait(1000);
+      $scope.parseMetadata();
+    };
 
     // Link this function to a button that will push the lipd data to the mongo db
     $scope.uploadToSession = function(file){
@@ -58,6 +69,13 @@ t.controller('FileCtrl', ['$scope', 'Upload', '$timeout', '$q', '$http', functio
 
     // Link this function to a button that will download the lipd file to the users computer
     $scope.downloadToLocal = function(file){
+      // compile data in form fields into a JSON Object
+
+      // Stringify and store that data into SessionStorage
+
+      // Overwrite the jsonld file in the ZIP js data
+
+      // use Zip JS to compress and download the file
 
     };
 
@@ -78,11 +96,26 @@ t.controller('FileCtrl', ['$scope', 'Upload', '$timeout', '$q', '$http', functio
       });
     };
 
-    $scope.parse = function(data){
+    $scope.parseMetadata = function(data){
+      var meta;
+      meta = JSON.parse(sessionStorage.getItem("lipd-metadata"))
+      $.each(meta,function(key, value){
+        if(key == "archiveType"){
+          $scope.userData.archiveType = value;
+        }
+      });
       // do a $.each loop on the LiPD data and put it in $scope.userData whenever it's a valid key
       // keep track of the invalid keys and present them to the user.
       // "No match for these entries. Please enter the data into one of the valid fields above"
     };
+
+    $scope.wait = function(ms){
+       var start = new Date().getTime();
+       var end = start;
+       while(end < start + ms) {
+         end = new Date().getTime();
+      }
+    }
 
     $scope.processData = function(){
       // step one
