@@ -1,4 +1,4 @@
-var t = angular.module('ngFile', ['ngFileUpload', 'ngStorage']);
+var t = angular.module('ngFile', ['ngFileUpload']);
 
 t.run([function() {
   if (typeof(Storage) !== "undefined") {
@@ -11,19 +11,25 @@ t.run([function() {
   }
 } ]);
 
-t.controller('FileCtrl', ['$scope', 'Upload', '$timeout', '$q', '$http', function ($scope, $rootScope, $default, Upload, $timeout, $q, $http) {
+t.controller('FileCtrl', ['$scope', 'Upload', '$timeout', '$q', '$http',
+                          function ($scope, $default, Upload, $timeout, $q, $http) {
     $scope.obj = 'none';
     $scope.meta = $scope.$parent.meta;
     $scope.pageMeta = $scope.$parent.pageMeta;
-    $scope.colsChron = $scope.$parent.colsChron;
-    $scope.colsPaleo = $scope.$parent.colsPaleo;
     $scope.validated = $scope.$parent.validated;
-    $scope.errorCt = $scope.$parent.errorCt;
+    $scope.geoMarkers = $scope.$parent.geoMarkers;
+    $scope.errors = {
+      "missingKeys": [],
+      "errStructure": [],
+      "unknownKeys": [],
+      "warningCount": 0,
+      "errorCount": 0,
+    }
     $scope.parseComplete = false;
 
     // refresh all the scopes and bubble changes to the parent
     $scope.refreshScopes = function(){
-      $.each(["meta", "pageMeta", "validated", "obj", "errorCt"], function(key){
+      $.each(["meta", "pageMeta", "validated", "obj", "errorCt", "geoMarkers"], function(key){
         $scope.updateScopesFromChild(key, $scope.$parse(key));
       });
     }
@@ -182,12 +188,28 @@ t.controller('FileCtrl', ['$scope', 'Upload', '$timeout', '$q', '$http', functio
       }
     }
 
+    $scope.parseGeo = function(value){
+      $scope.geo.type = value.type;
+      $scope.geo.geometry.type = value.geometry.type;
+      $scope.geoMarkers[0].latitude = value.geometry.coordinates[0]
+      $scope.geoMarkers[0].longitude = value.geometry.coordinates[1]
+      $scope.geoMarkers[0].elevation = value.geometry.coordinates[2]
+
+    }
+
+
+    $scope.verifySection = function(){
+
+    }
+
     // Parse and place the metadata in the correct fields on the page
     $scope.parseMetadata = function(dat){
       // do a $.each loop on the LiPD data and put it in $scope.userData whenever it's a valid key
       // keep track of the invalid keys and present them to the user.
       // "No match for these entries. Please enter the data into one of the valid fields above"
 
+      // set the json data directly into the scope.
+      $scope.meta = dat
       // Trigger the userData toggle, which animate the form fields to show all values.
       $scope.pageMeta.toggle = true;
 

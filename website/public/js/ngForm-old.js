@@ -3,8 +3,7 @@ var f = angular.module('ngForm', ['uiGmapgoogle-maps', 'json-tree', 'ngFileUploa
 // Google Maps API key to allow us to embed the map
 f.config(function(uiGmapGoogleMapApiProvider) {
     uiGmapGoogleMapApiProvider.configure({
-        // key: 'AIzaSyB8nllB0zwraQo5qJMGdtcxulsTPJOnd8U',
-        key: "AIzaSyA7HRzSi5HhyKTX9Xw7CZ-9XScwq04TZyc",
+        key: 'AIzaSyB8nllB0zwraQo5qJMGdtcxulsTPJOnd8U',
         v: '3.20',
         libraries: 'weather,geometry,visualization'
     });
@@ -52,10 +51,8 @@ f.controller('FormCtrl',['$scope', 'Upload', '$timeout', '$q', '$http', function
     $scope.errorCt = 0;
     $scope.warningCt = 0;
 
-    // watch for updated metadata information, then display the changes in the pre/code box (if it's being shown)
     $scope.$watch("json.metadata", function(){
-      var mp = document.getElementById("metaPretty");
-      if (mp){ mp.innerHTML = JSON.stringify($scope.json.metadata, undefined, 2);}
+      document.getElementById("metaPretty").innerHTML = JSON.stringify($scope.json.metadata, undefined, 2);
     }, true);
 
 
@@ -99,23 +96,22 @@ f.controller('FormCtrl',['$scope', 'Upload', '$timeout', '$q', '$http', function
       $scope.$parse(key) = newVal;
     };
 
-    // PUSH A NEW LINE OF EMPTY COORDINATES TO GEO
     $scope.addCoordinates = function() {
         var newID = $scope.geoCoordinates.length + 1;
         $scope.geoCoordinates.push({});
     };
 
-    // REMOVE A ROW OF COORDINATES
+    // Remove row of coordinates
     $scope.removeCoords = function($index) {
       $scope.geoMarkers.splice($index, 1);
     };
 
-    // PUSH NEW LINE OF FULL COORDINATES TO GEO
+    // Coordinates are complete, push to userData (Is this needed? Should be automatically linked to userData)
     $scope.pushCoords = function() {
       // push to $scope.meta or $scope.geo.coords?
     };
 
-    // PALEO
+    // Add Paleo column
     $scope.addColumnPaleo = function() {
         var newID = $scope.colsPaleo.length + 1;
         $scope.colsPaleo.push({
@@ -125,8 +121,7 @@ f.controller('FormCtrl',['$scope', 'Upload', '$timeout', '$q', '$http', function
             "Units": ""
         });
     };
-
-    // CHRONOLOGY
+    // Add Chron column
     $scope.addColumnChron = function() {
         var newID = $scope.colsChron.length + 1;
         $scope.colsChron.push({
@@ -137,7 +132,7 @@ f.controller('FormCtrl',['$scope', 'Upload', '$timeout', '$q', '$http', function
         });
     };
 
-    // PUBLICATION
+    // Add Publication Author
     $scope.addAuthor = function() {
         var newID = $scope.authors.length + 1;
         $scope.authors.push({
@@ -145,7 +140,7 @@ f.controller('FormCtrl',['$scope', 'Upload', '$timeout', '$q', '$http', function
         });
     };
 
-    // FUNDING
+    // Add Funding Entry
     $scope.addFunding = function() {
         var newID = $scope.funding.length + 1;
         $scope.funding.push({

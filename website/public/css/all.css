@@ -67,9 +67,9 @@ h1,h2, h3, h4, h5, h6 {
 }
 
 /* ANGULAR MATERIAL  */
-
 .md-toolbar-tools {
-	color: white !important;
+	color: black !important;
+  background-color: #F9F9F9;
 }
 
 /*.md-toolbar-tools{

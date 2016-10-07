@@ -1,0 +1,106 @@
+/*
+JSON-TREE styles
+*/
+.span {
+    display: inline-block;
+    vertical-align: top;
+}
+.span50 {
+    width: 50%;
+}
+
+json-tree {
+    font-size: 12px;
+    font-family: monospace;
+    width: 100%;
+}
+json-tree input[type="text"]{
+    size: 200px
+    width: 200px !important;
+    height: 15px;
+    font-size: 12px;
+    border: solid 1px lightgray !important;
+    border-radius: 0px !important;
+    box-shadow: none !important;
+    text-align: left !important;
+
+}
+
+json-tree input[type="number"]{
+
+    font-size: 12px;
+    width: 200px !important;
+    height: 15px;
+    vertical-align: middle;
+    border: solid 1px lightgray !important;
+
+}
+
+json-tree input[type=number]::-webkit-inner-spin-button,
+json-tree input[type=number]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+json-tree textarea {
+    width: 200px !important;
+    height: 12px;
+    padding-top: 0;
+    margin-bottom: -4px;
+    border-color: lightgray;
+    resize: none;
+    overflow: visible;
+}
+json-tree textarea:focus {
+    width: auto;
+    min-height: 100px;
+    height: auto;
+    position: absolute;
+    z-index: 10;
+    resize: inherit;
+    overflow: auto;
+}
+json-tree textarea:focus.valid {
+    background-color: #d6e9c9;
+}
+json-tree textarea:focus.invalid {
+    background-color: rgb(237, 200, 188);
+}
+json-tree ul {
+    list-style: none;
+    margin: 0 0 0 -24px;
+}
+json-tree .key {
+    color: darkred;
+}
+json-tree .add {
+    color: green;
+    cursor: pointer;
+}
+json-tree .reset {
+    color: steelblue;
+    cursor: pointer;
+}
+json-tree .remove {
+    color: red;
+    cursor: pointer;
+}
+json-tree .comma {
+    color: #c0c0c0;
+}
+json-tree .drag {
+    position: absolute;
+    background-color: #e2efff;
+    opacity:0.5;
+    cursor: pointer;
+}
+json-tree .empty {
+    border: 1px dashed darkred;
+    background-color: #e2efff;
+}
+
+json-tree .add-item-block button {
+    margin-left: 3px;
+    font-size:11px;
+    cursor: pointer;
+}

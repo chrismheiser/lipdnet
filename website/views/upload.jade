@@ -24,11 +24,17 @@ block body
 					pre {{ meta }}
 					p markers
 					pre {{ markers }}
-					
+					p(ng-if="warningCt>0") Errors
+					pre(style="background-color:#FEBABB;" ng-if="errorCt>0") {{ errorCt }} errors detected
+					p(ng-if="warningCt>0") Warnings
+					pre(style="background-color:#FEEEB6;" ng-if="warningCt>0") {{ warningCt }} warnings found
+					h4(ng-if="validated") Validation Complete!
+					pre(style="background-color:#DFF1C1;" ng-if="validated") Done!
+						| This file adheres to LiPD v1.2 standards.
 					// is this line needed ?
 					form#upload-form(ng-submit='')
 					
-						div(ng-controller="FileCtrl")
+						div
 							md-toolbar.md-hue-1
 								h2.md-toolbar-tools
 									span File
@@ -253,33 +259,16 @@ block body
 							div(layout='', layout-padding='', layout-sm='column')
 								md-button(ng-click='addColumnChron()')  + Add Column
 
-						// DOWNLOAD && PUSH TO DB
-						//- div(ng-controller="FileCtrl")
-						//- 	md-toolbar.md-hue-1
-						//- 		h2.md-toolbar-tools
-						//- 			span Download
-						//- 	br
-						//- 	p These buttons will activate when LiPD data is complete and valid.
-						//- 	// Push to database
-						//- 	form#uploadForm(action="/updb" enctype="multipart/form-data" method='post')
-						//- 		md-button(ng-disabled="!validated" ngf-select="uploadToDb()" ng-model='file' name='file' ngf-max-size="50MB") Push to Database   
-						//- 
-						//- 	// Download to local computer
-						//- 	form#uploadForm(action="/dwnld" enctype="multipart/form-data" method='post')
-						//- 		md-button(ng-disabled="!validated" ngf-select="downloadToLocal($file)" ng-model='file' name='file' ngf-max-size="50MB") Download LiPD   
-
 
 // block js will insert js scripts listed in footer.jade that are needed on every page.
 block js
 	// files below are page specific
 	script(src='apps/uploadApp.js')
 	script(src='js/ngForm.js')
-	script(src='js/ngFile.js')
 	script(src="lib/zip/zip.js")
 	script(src="lib/zip/zip-ext.js")
 	script(src='https://cdnjs.cloudflare.com/ajax/libs/angular-ui-router/0.2.15/angular-ui-router.min.js')
 	script(src='https://cdnjs.cloudflare.com/ajax/libs/angular-google-maps/2.2.0/angular-google-maps.min.js')
 	script(src='https://cdnjs.cloudflare.com/ajax/libs/danialfarid-angular-file-upload/8.0.1/ng-file-upload-shim.min.js')
 	script(src='https://cdnjs.cloudflare.com/ajax/libs/danialfarid-angular-file-upload/8.0.1/ng-file-upload.min.js')
-	script(src="https://cdnjs.cloudflare.com/ajax/libs/ngStorage/0.3.6/ngStorage.min.js")
 	script(src='//maps.googleapis.com/maps/api/js?sensor=false')

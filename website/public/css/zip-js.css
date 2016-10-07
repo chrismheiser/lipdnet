@@ -2,6 +2,10 @@
 	width: 700px;
 }
 
+#buttons {
+	padding-bottom: 10px;
+}
+
 #demo-container li {
 	margin-bottom: 1em;
 	min-height: 40px;
@@ -10,17 +14,19 @@
 #file-list {
 	padding-left: 10px;
 	padding-top: 5px;
+	padding-bottom: 14px;
 	font-family: 'Droid Sans Mono', courier;
-	font-size: 12pt;
+	font-size: 10pt;
 	overflow: hidden;
 	white-space: nowrap;
 	margin-top: 14px;
-	padding: 4px;
-	border: solid 1px #AACFE4;
+	border: solid 1px #gray;
 	border-radius: 5px;
 	min-height: 28px;
-	background-color: #eee;
-	box-shadow: 0px 0px 10px #ccc;
+	/*background-color: #eee;*/
+	background-color:#f9f9f9;
+}
+
 }
 
 #file-list li {
@@ -65,27 +71,66 @@ input[type=file] {
 	font-size: 12pt;
 }
 
-button,#download-button {
+/*button,#download-button {
 	margin: 0px;
 	font-size: 12pt;
 	padding: 4px;
-	border: solid 1px #AACFE4;
+	border: solid 1px #ccc;
 	width: 209px;
 	border-radius: 5px;
-	box-shadow: 0px 0px 10px #ccc;
-}
+	box-sizing:border-box;
+}*/
 
 input[type=file]::-webkit-file-upload-button {
-	margin: 0px;
-	font-size: 12pt;
-	padding: 4px;
-	border: solid 1px #AACFE4;
-	width: 209px;
+	font-size: 10pt;
+	color: gray;
+	border: solid 1px gray;
+	width: 150px !important;
+	max-width: 150px;
 	height: 31px;
 	border-radius: 5px;
-	box-shadow: 0px 0px 10px #ccc;
+	box-sizing:border-box;
+	background-color: white;
 }
 
+input[type=file][disabled]::-webkit-file-upload-button {
+	font-size: 10pt;
+	color: #eee;
+	border: solid 1px #eee;
+	width: 150px !important;
+	max-width: 150px;
+	height: 31px;
+	border-radius: 5px;
+	box-sizing:border-box;
+	background-color: white;
+}
+
+#valid-btn{
+	font-size: 10pt;
+	background-color: white;
+	font-family: RobotoDraft,Roboto,'Helvetica Neue',sans-serif;
+	margin-right: 5px;
+	padding: 4px;
+	width: 150px;
+	height: 31px;
+	border-radius: 5px;
+	color: #8FA864;
+	border: solid 1px #8FA864;
+}
+
+#valid-btn[disabled]{
+	font-size: 10pt;
+	background-color: white;
+	font-family: RobotoDraft,Roboto,'Helvetica Neue',sans-serif;
+	margin-right: 5px;
+	padding: 4px;
+	width: 150px;
+	height: 31px;
+	border-radius: 5px;
+	color: #eee;
+	border: solid 1px #eee;
+}
+/*
 #download-button {
 	height: 21px;
 	width: 200px;
@@ -94,7 +139,7 @@ input[type=file]::-webkit-file-upload-button {
 	text-decoration: none;
 	cursor: default;
 	color: black;
-}
+}*/
 
 progress {
 	position: absolute;

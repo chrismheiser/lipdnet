@@ -48,6 +48,8 @@ router.get('/upload', function(req, res, next){
   res.render('upload', {title: 'Upload'});
 });
 
+
+
 // router.get('/upload/paths', function(req, res, next){
 //   var db = req.db;
 //   var collection = db.get('docs');
@@ -105,6 +107,11 @@ router.post('/test', function(req, res, next){
   console.log(req.file);
   res.json(req.file);
   res.end("END");
+});
+
+// Get the upload page
+router.get('/upload-tree', function(req, res, next){
+  res.render('upload-tree', {title: 'Upload JSON Tree'});
 });
 // TESTING TESTING TESTING TESTING TESTING
 
