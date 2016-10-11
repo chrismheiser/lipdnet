@@ -22,8 +22,8 @@ f.run([function() {
 }]);
 
 // Controller for the Upload form
-f.controller('FormCtrl',['$scope', 'Upload', '$timeout', '$q', '$http', function($scope, $log, $timeout, $default, Upload, $q, $http) {
-
+f.controller('FormCtrl',['$scope', 'Upload', '$timeout', '$q', '$http',
+function($scope, $log, $timeout, $default, Upload, $q, $http) {
 
     // User data holds all the user selected or imported data
     $scope.json = {
@@ -31,137 +31,284 @@ f.controller('FormCtrl',['$scope', 'Upload', '$timeout', '$q', '$http', function
           "lipdVersion": 1.2,
           "archiveType": "",
           "dataSetName": "",
-          "funding": [],
-          "pub": [{}],
-          "geo": {"geometry":{"coordinates":[]}},
-          "chronData": {"chronMeasurementTable": {}, "chronModel":{}},
-          "paleoData": {"paleoMeasurementTable": {}, "paleoModel":{}}
+          "funding": [
+            {"agencyName": "", "grant": ""}
+          ],
+          "pub": [
+            {"identifier":[
+              {"type": "doi",
+              "id":"",
+              "url":""}]}
+          ],
+          "geo": {"geometry":{"coordinates":[0,0,0]}},
+          "chronData": {
+            "chronMeasurementTable": {},
+            "chronModel":[
+              {"method": {},
+              "ensembleTable":{},
+              "summaryTable": {},
+              "distributionTable": []
+            }]},
+          "paleoData": {
+            "paleoMeasurementTable": {},
+            "paleoModel":[
+              {"method": {},
+              "ensembleTable":{},
+              "summaryTable": {},
+              "distributionTable": []
+            }]}
           }
     }
-
-    $scope.metaErrors = {}
-    $scope.pageMeta = {"toggle": "", "valid": false, "filePicker": false}
+    $scope.pageMeta = {
+      "toggle": "",
+      "valid": false,
+      "filePicker": false
+    }
+    $scope.tmp = {
+      "lowKeys": [],
+      "otherKnownKeys": ["studyname", "proxy", "metadatamd5", "googlespreadsheetkey", "googlemetadataworksheet",
+      "@context", "tagmd5", "datasetname"],
+      "mustHaves": ["archivetype", "lipdversion", "datasetname"]
+    }
+    $scope.feedback = {
+      "errCt": 0,
+      "errMsgs": [],
+      "wrnCt":0,
+      "wrnMsgs": [],
+      "dataCanDo": [],
+    }
     $scope.geoMarkers = [];
 
-    $scope.pubCt = 1;
-    $scope.fundCt = 1;
-    $scope.paleoCt = 1;
-    $scope.chronCt = 1;
-    $scope.paleoModelCt = 1;
-    $scope.chronModelCt = 1;
-    $scope.errorCt = 0;
-    $scope.warningCt = 0;
+  // MISC
 
-    // watch for updated metadata information, then display the changes in the pre/code box (if it's being shown)
-    $scope.$watch("json.metadata", function(){
-      var mp = document.getElementById("metaPretty");
-      if (mp){ mp.innerHTML = JSON.stringify($scope.json.metadata, undefined, 2);}
-    }, true);
-
-
-    // LiPD may end up being the only option, but I can foresee where we might accept jsonld files also.
-    // $scope.uploadType = ['LiPD'];
-
-    // Predefined form data
-    $scope.unitsDistance = [
-      { "short": "m", "long": 'Meters (m)'},
-      { "short": "km", "long": 'Kilometers (km)'},
-      { "short": "ft", "long": 'Feet (ft)'},
-      { "short": "mi", "long": 'Miles (mi)'}
-    ];
-    $scope.authors = [{
-        id: "1"
-    }];
-    $scope.colsPaleo = [{
-        "Number": "1",
-        "Variable Name": "",
-        "Description": "",
-        "Units": ""
-    }];
-    $scope.colsChron = [{
-        "Number": "1",
-        "Variable Name": "",
-        "Description": "",
-        "Units": ""
-    }];
-    $scope.pubType = ['Article']
-    $scope.funding = [{
-        "id": "1",
-        "agency": "fundingAgency",
-        "fund": "fundingGrant"
-    }];
-    $scope.geo = {}
-    $scope.geoType = ['Feature'];
-    $scope.geoGeometryType = ['Point', "MultiPoint", 'LineString', 'Polygon'];
-    $scope.geoCoordinates = [{}];
-
-    $scope.updateScopesFromChild = function(key, newVal) {
-      $scope.$parse(key) = newVal;
-    };
-
-    // PUSH A NEW LINE OF EMPTY COORDINATES TO GEO
-    $scope.addCoordinates = function() {
-        var newID = $scope.geoCoordinates.length + 1;
-        $scope.geoCoordinates.push({});
-    };
-
-    // REMOVE A ROW OF COORDINATES
-    $scope.removeCoords = function($index) {
-      $scope.geoMarkers.splice($index, 1);
-    };
-
-    // PUSH NEW LINE OF FULL COORDINATES TO GEO
-    $scope.pushCoords = function() {
-      // push to $scope.meta or $scope.geo.coords?
-    };
-
-    // PALEO
-    $scope.addColumnPaleo = function() {
-        var newID = $scope.colsPaleo.length + 1;
-        $scope.colsPaleo.push({
-            "Number": newID,
-            "Variable Name": "",
-            "Description": "",
-            "Units": ""
-        });
-    };
-
-    // CHRONOLOGY
-    $scope.addColumnChron = function() {
-        var newID = $scope.colsChron.length + 1;
-        $scope.colsChron.push({
-            "Number": newID,
-            "Variable Name": "",
-            "Description": "",
-            "Units": ""
-        });
-    };
-
-    // PUBLICATION
-    $scope.addAuthor = function() {
-        var newID = $scope.authors.length + 1;
-        $scope.authors.push({
-            'id': newID
-        });
-    };
-
-    // FUNDING
-    $scope.addFunding = function() {
-        var newID = $scope.funding.length + 1;
-        $scope.funding.push({
-            "id": newID,
-            "a": "fundingAgency",
-            "f": "fundingGrant"
-        });
+    // error logger. add to count and log message to user.
+    $scope.logError = function(errType, msg, key){
+      if(errType === "warn"){
+        $scope.feedback.wrnCt++;
+        $scope.feedback.wrnMsgs.push(msg)
+      } else if (errType === "err"){
+        $scope.feedback.errCt++;
+        $scope.feedback.errMsgs.push(msg)
+      }
     }
 
-    // show contents of file upload
-    // $scope.showContent = function($fileContent) {
-    //     $scope.meta = $fileContent;
-    // };
+    // watch for updated metadata information, then display the changes in the pre/code box (if it's being shown)
+    $scope.$watch("json", function(){
+      var mp = document.getElementById("metaPretty");
+      if (mp){ mp.innerHTML = JSON.stringify($scope.json.metadata, undefined, 2);}
+      if(!$scope.pageMeta.valid){
+        if($scope.feedback.errCt === 0 && $scope.pageMeta.filePicker === true){
+          $scope.pageMeta.valid = true;
+        }
+      }
+    }, true);
 
-    // Initialize the map
-    // $scope.flagstaff = { latitude: 35.185, longitude: -111.6526};
+    // triggers a new validation loop. resets and checks all data again.
+    $scope.revalidate = function(){
+      console.log("revalidating");
+      // wipe all page data and start from scratch.
+      $scope.tmp.lowKeys = [];
+      $scope.geoMarkers = [];
+      $scope.pageMeta.valid = false;
+      $scope.feedback = {
+        "errCt": 0,
+        "errMsgs": [],
+        "wrnCt":0,
+        "wrnMsgs": [],
+        "dataCanDo": []
+      }
+      $scope.verifyStructure($scope.json.metadata);
+      $scope.verifyRequiredFields($scope.json.metadata);
+      $scope.verifyCapabilities($scope.json.metadata);
+    }
+
+
+  // CAPABILITIES
+
+    // master function. calls all sub routines to see what can be done with the amount of data given
+    $scope.verifyCapabilities = function(m){
+      // check what data is available
+      // This will create the "progress bar" of how complete a data set is.
+      $scope.canYouMap(m);
+    }
+
+    // checks if there is coordinate information needed to plot a map of the location
+    $scope.canYouMap = function(m){
+      try {
+        coords = m.geo.geometry.coordinates.length;
+        if(coords == 2 || coords == 3){
+          // start building map marker(s)
+          lat = m.geo.geometry.coordinates[0];
+          lon = m.geo.geometry.coordinates[1];
+          $scope.moveMapToMarker(lat, lon);
+          $scope.addMapMarker(lat, lon);
+
+        } else {
+          $scope.logError("warn", "Unable to map location: Insufficient coordinate information", "geo");
+        }
+      } catch(err) {
+        console.log("canYouMap: " + err);
+      }
+    }
+
+    // check if there is enough information given to run bchron
+    $scope.canYouBchron = function(m){
+    }
+
+
+  // REQUIRED FIELDS
+
+    $scope.verifyRequiredFields = function(m){
+      // loop through and check for required fields. (lipdVersion, archiveType, paleoMeasurementTable..what else???)
+      for (var i = 0; i < $scope.tmp.mustHaves.length; i++) {
+        k = $scope.tmp.mustHaves[i]
+        if($scope.tmp.lowKeys.indexOf(k) == -1){
+          $scope.logError("err", "Missing required data: " + k);
+        }
+      }
+      // check for nested items
+      try{
+        pmt = m.paleoData[0].paleoMeasurementTable[0];
+        if(pmt === null){
+          $scope.logError("err", "Missing required data: paleoMeasurementTable");
+        }
+      } catch(err) {
+        console.log("verifyRequiredFields: Error trying to get paleoMeasurementTable");
+      }
+
+    }
+
+
+  // VERIFY STRUCTURE
+
+    // master fucntion. call all subroutines to determine if this is a valid lipd structure
+    $scope.verifyStructure = function(m){
+      // check that data fields are holding the correct value data types
+      $.each(m, function(k, v){
+        try{
+          var correctType = null;
+          lowKey = k.toLowerCase();
+          $scope.tmp.lowKeys.push(lowKey);
+          if(lowKey === "archivetype"){
+            correctType = $scope.verifyDataType("string", k, v)
+
+          } else if(lowKey === "lipdversion"){
+            // check that the value is a number
+            v = parseInt(v)
+            correctType = $scope.verifyDataType("number", k, v);
+            if(correctType){
+              // Valid LiPD versions: 1.0, 1.1, 1.2
+              if([1.0, 1.1, 1.2].indexOf(v) == -1){
+                // LiPD version wasn't valid. Log errors to scope.
+                $scope.logError("err", "Invalid LiPD Version: Valid versions are 1.0, 1.1, and 1.2", "lipdVersion");
+              } // end if in
+            } // end data type check
+
+          } else if(lowKey === "pub"){
+            $scope.verifyArrObjs(k, v);
+
+          } else if(lowKey === "investigators" || lowKey === "investigator"){
+            $scope.verifyArrObjs(k, v);
+
+          } else if(lowKey === "funding"){
+            $scope.verifyArrObjs(k, v);
+
+          } else if (lowKey === "geo"){
+            $scope.verifyDataType("object", k, v);
+
+          } else if (lowKey == "chrondata"){
+            $scope.verifyPaleoChron("chron", k, v)
+
+          } else if (lowKey === "paleodata"){
+            $scope.verifyPaleoChron("paleo", k, v)
+
+          } else {
+            // anything goes? no rules for these keys
+            if($scope.tmp.otherKnownKeys.indexOf(lowKey) === -1){
+              $scope.logError("warn", "No rules found for key: " + k, k);
+              console.log("verifyStructure: No rules for key: " + k);
+            }
+          }
+        } catch(err){
+          console.log("verifyStructure: Caught error parsing: " + k);
+        }
+
+      });
+
+    }
+
+    // check if the data type for a given key matches what we expect for that key
+    $scope.verifyDataType = function(dt, k, v){
+      try{
+        // special case: check for object array.
+        if(dt === "array"){
+          if(!Array.isArray(v)){
+            $scope.logError("err", "Invalid data type for: " + k + ". Expected: " + dt, k);
+            return(false);
+          }
+        } else {
+          // expecting specified data type, but didn't get it.
+          if(typeof(v) != dt){
+            $scope.logError("err", "Invalid data type for: " + k + ". Expected: " + dt, k);
+            return(false);
+          } // end if
+        } // end else
+      } catch(err) {
+        // caught some other unknown error
+        console.log("verifyDataType: Caught error parsing. Expected: " + cdt + ", Given: " + typeof(v));
+      } // end catch
+      return(true);
+    }
+
+    // Check for an Array with objects in it.
+    $scope.verifyArrObjs = function(k, v){
+      isArr = $scope.verifyDataType("array", k, v);
+      if(isArr){
+        isObjs = $scope.verifyDataType("object", k, v[0])
+        if(isObjs){
+          return(true);
+        }
+      }
+      console.log("verifyArrObjs: Invalid data type: expected: obj, given: " + typeof(v[0]));
+      return(false);
+    }
+
+    // paleoData and chronData use the same structure. Use to verify data types in both.
+    $scope.verifyPaleoChron = function(pc, k, v){
+      // check if the root paleoData or chronData is an array with objects.
+      var correctTop = $scope.verifyArrObjs(k, v);
+      if(correctTop){
+        // create table names based on what "mode" we're in. chron or paleo
+        var meas = pc + "MeasurementTable";
+        var mod = pc + "Model";
+        // check if measurement table exists
+        if(v[0].hasOwnProperty(meas)){
+          // check if measurement table is array with objects
+          $scope.verifyArrObjs(meas, v[0][meas])
+        } // end measurement table
+        // check if model table exists
+        if(v[0].hasOwnProperty(mod)){
+          // check if model table is array with objects
+          var correctBottom = $scope.verifyArrObjs(mod, v[0][mod]);
+          var modTables = ["summaryTable", "distributionTable", "method", "ensembleTable"];
+          if(correctBottom){
+            // correct so far, so check if items in model table [0] are correct types
+            for(i=0; i<modTables.length; i++){
+              table = modTables[i];
+              if(table === "distributionTable" && v[0][mod][0].hasOwnProperty(table)){
+                $scope.verifyArrObjs(table, v[0][mod][0][table])
+              } else {
+                $scope.verifyDataType("object", table, v[0][mod][0][table])
+              }
+            } // end model table inner
+          } // end correctBottom
+        } // end has model table
+      } // end correctTop
+    } // end verify
+
+
+
+  // MAPPING
 
     // set google map default window to USA
     $scope.map = {
@@ -179,17 +326,20 @@ f.controller('FormCtrl',['$scope', 'Upload', '$timeout', '$q', '$http', function
         streetViewControl: false,
     };
 
+    $scope.moveMapToMarker = function(lat, lon){
+      $scope.map.center = {"latitude": lat, "longitude": lon};
+      $scope.map.zoom = 2;
+    }
+
     // Add another set of coordinates to the map
-    $scope.addCoordinates = function() {
+    $scope.addMapMarker = function(lat, lon) {
         // geoMarker IDs are sequential
         var newID = $scope.geoMarkers.length + 1;
         // push the marker and it's default options to the array of geoMarkers
         $scope.geoMarkers.push({
             id: newID,
-            longitude: 0,
-            latitude: 0,
-            elevation: 0,
-            unit: "m",
+            longitude: lat,
+            latitude: lon,
             options: {
                 draggable: true
             },
@@ -197,7 +347,7 @@ f.controller('FormCtrl',['$scope', 'Upload', '$timeout', '$q', '$http', function
                 dragend: function(marker, eventName, args) {
                     $scope.geoMarkers.options = {
                         draggable: true,
-                        labelContent: "lat: " + $scope.geoMarkers.latitude + ' ' + 'lon: ' + $scope.geoMarkers.longitude,
+                        labelContent: "lat: " + lat + ' ' + 'lon: ' + lon,
                         labelAnchor: "100 0",
                         labelClass: "marker-labels"
                     };
@@ -205,7 +355,7 @@ f.controller('FormCtrl',['$scope', 'Upload', '$timeout', '$q', '$http', function
             }
         });
     };
-    $scope.addCoordinates();
+
 
   // ANONYMOUS FUNCTIONS
 
@@ -384,8 +534,10 @@ f.controller('FormCtrl',['$scope', 'Upload', '$timeout', '$q', '$http', function
                 // parse text into a JSON object, and then parse the metadata
                 console.log("call parseMetadata form event listener. ")
                 $scope.json.metadata = JSON.parse(text);
+                $scope.verifyStructure(JSON.parse(text));
+                $scope.verifyRequiredFields(JSON.parse(text));
+                $scope.verifyCapabilities(JSON.parse(text));
                 $scope.pageMeta.filePicker = true;
-
               });
             }, function(current, total) {
               // onprogress callback

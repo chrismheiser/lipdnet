@@ -44,18 +44,25 @@ block body
 										// Bind this to a 'change' event so that we know when jsonld data is available to start processing.
 										input#file-input(ng-model="file.input" name='file' type="file" accept=".lpd" ng-disabled="pageMeta.filePicker" style="max-width:200px; width:175px; padding:4px; display:inline;")
 										// button to download validated lipd file
+										button#valid-btn(ng-click="revalidate()" ng-disabled="!pageMeta.filePicker") Validate
+										// When a LPD file is chosen, all the files inside are listed here.
 										button#valid-btn(ng-model="file.down" ng-disabled="!pageMeta.valid") Download
 										// button to push validated lipd file to database
 										button#valid-btn(ng-model="file.push" ng-disabled="!pageMeta.valid") Upload to DB
 									// When a LPD file is chosen, all the files inside are listed here.
 									li
-										p(ng-if="warningCt>0") Errors
-										pre(style="background-color:#FEBABB; border: none;") {{ errorCt }} errors detected
-										p(ng-if="warningCt>0") Warnings
-										pre(style="background-color:#FEEEB6; border: none;") {{ warningCt }} warnings found
-										h4(ng-if="validated") Validation Complete!
-										pre(style="background-color:#DFF1C1; border: none;") Done!
+										pre(style="background-color:#FEBABB; border: none;") {{ feedback.errCt}} errors
+											ul(ng-if="feedback.errCt>0")
+												li(ng-repeat="err in feedback.errMsgs") {{err}}
+
+										pre(style="background-color:#FEEEB6; border: none;") {{ feedback.wrnCt }} warnings
+											ul(ng-if="feedback.wrnCt>0")
+												li(ng-repeat="wrn in feedback.wrnMsgs") {{wrn}}
+
+										pre(style="background-color:#DFF1C1; border: none;" ng-if="pageMeta.valid") Validation Complete!
 											| This file adheres to LiPD v1.2 standards.
+											
+										//- pre#metaPretty
 									li(style="list-style-type: none;")
 										//- span#form-label LiPD Contents
 										ul#file-list
