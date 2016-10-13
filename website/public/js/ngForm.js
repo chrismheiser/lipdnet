@@ -61,6 +61,7 @@ function($scope, $log, $timeout, $default, Upload, $q, $http) {
     }
     $scope.pageMeta = {
       "toggle": "",
+      "simpleView": true,
       "valid": false,
       "filePicker": false
     }
@@ -68,7 +69,7 @@ function($scope, $log, $timeout, $default, Upload, $q, $http) {
       "lowKeys": [],
       "otherKnownKeys": ["studyname", "proxy", "metadatamd5", "googlespreadsheetkey", "googlemetadataworksheet",
       "@context", "tagmd5", "datasetname"],
-      "mustHaves": ["archivetype", "lipdversion", "datasetname"]
+      "mustHaves": ["archiveType", "lipdVersion", "dataSetName"]
     }
     $scope.feedback = {
       "errCt": 0,
@@ -96,16 +97,19 @@ function($scope, $log, $timeout, $default, Upload, $q, $http) {
     $scope.$watch("json", function(){
       var mp = document.getElementById("metaPretty");
       if (mp){ mp.innerHTML = JSON.stringify($scope.json.metadata, undefined, 2);}
+    }, true);
+
+    $scope.verifyValid = function(){
       if(!$scope.pageMeta.valid){
         if($scope.feedback.errCt === 0 && $scope.pageMeta.filePicker === true){
           $scope.pageMeta.valid = true;
         }
       }
-    }, true);
+    }
 
     // triggers a new validation loop. resets and checks all data again.
-    $scope.revalidate = function(){
-      console.log("revalidating");
+    $scope.validate = function(m){
+      console.log("validating");
       // wipe all page data and start from scratch.
       $scope.tmp.lowKeys = [];
       $scope.geoMarkers = [];
@@ -117,9 +121,17 @@ function($scope, $log, $timeout, $default, Upload, $q, $http) {
         "wrnMsgs": [],
         "dataCanDo": []
       }
-      $scope.verifyStructure($scope.json.metadata);
-      $scope.verifyRequiredFields($scope.json.metadata);
-      $scope.verifyCapabilities($scope.json.metadata);
+      $scope.verifyStructure(m);
+      $scope.verifyRequiredFields(m);
+      $scope.verifyCapabilities(m);
+      $scope.verifyValid();
+    }
+
+    $scope.numberInRange = function(start, end, val){
+      if(val >= start && val <= end){
+        return(true);
+      }
+      return(false);
     }
 
 
@@ -136,17 +148,35 @@ function($scope, $log, $timeout, $default, Upload, $q, $http) {
     $scope.canYouMap = function(m){
       try {
         coords = m.geo.geometry.coordinates.length;
+        // start building map marker(s)
         if(coords == 2 || coords == 3){
-          // start building map marker(s)
+          // get coordinate values
           lat = m.geo.geometry.coordinates[0];
           lon = m.geo.geometry.coordinates[1];
-          $scope.moveMapToMarker(lat, lon);
-          $scope.addMapMarker(lat, lon);
-
+          // check if values are in range
+          latValid = $scope.numberInRange(-90, 90, lat);
+          lonValid = $scope.numberInRange(-180, 180, lon);
+          // both values are in the correct ranges
+          if(latValid && lonValid){
+            // start making the marker on the map
+            $scope.moveMapToMarker(lat, lon);
+            $scope.addMapMarker(lat, lon);
+          } else {
+            // check if longitude is range
+            if(!lonValid){
+              $scope.logError("warn", "Longitude out of range: Enter value from -180 to 180", "longitude");
+            }
+            // check if latitude is in range
+            if(!latValid){
+              $scope.logError("warn", "Latitude out of range: Enter value from -90 to 90", "latitude");
+            }
+          }
         } else {
+          // there aren't any coordinate values to make the map
           $scope.logError("warn", "Unable to map location: Insufficient coordinate information", "geo");
         }
       } catch(err) {
+        $scope.logError("warn", "Unable to map location: encountered an error", "geo");
         console.log("canYouMap: " + err);
       }
     }
@@ -161,8 +191,8 @@ function($scope, $log, $timeout, $default, Upload, $q, $http) {
     $scope.verifyRequiredFields = function(m){
       // loop through and check for required fields. (lipdVersion, archiveType, paleoMeasurementTable..what else???)
       for (var i = 0; i < $scope.tmp.mustHaves.length; i++) {
-        k = $scope.tmp.mustHaves[i]
-        if($scope.tmp.lowKeys.indexOf(k) == -1){
+        k = $scope.tmp.mustHaves[i];
+        if($scope.tmp.lowKeys.indexOf(k.toLowerCase()) == -1){
           $scope.logError("err", "Missing required data: " + k);
         }
       }
@@ -533,11 +563,9 @@ function($scope, $log, $timeout, $default, Upload, $q, $http) {
               $scope.$apply(function(){
                 // parse text into a JSON object, and then parse the metadata
                 console.log("call parseMetadata form event listener. ")
-                $scope.json.metadata = JSON.parse(text);
-                $scope.verifyStructure(JSON.parse(text));
-                $scope.verifyRequiredFields(JSON.parse(text));
-                $scope.verifyCapabilities(JSON.parse(text));
                 $scope.pageMeta.filePicker = true;
+                $scope.json.metadata = JSON.parse(text);
+                $scope.validate(JSON.parse(text));
               });
             }, function(current, total) {
               // onprogress callback

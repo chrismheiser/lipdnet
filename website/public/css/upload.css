@@ -34,6 +34,14 @@ body                            { padding-top:20px; }
   margin: auto auto;
 }
 
+.on {
+  border: none;
+}
+.off {
+  border: none;
+  opacity: 0.2;
+}
+
 
 /* Autocomplete database form (in FileCtrl)
 ============================================================================= */

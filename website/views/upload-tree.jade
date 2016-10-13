@@ -43,24 +43,21 @@ block body
 										//- span#form-label Load LiPD
 										// Bind this to a 'change' event so that we know when jsonld data is available to start processing.
 										input#file-input(ng-model="file.input" name='file' type="file" accept=".lpd" ng-disabled="pageMeta.filePicker" style="max-width:200px; width:175px; padding:4px; display:inline;")
-										// button to download validated lipd file
-										button#valid-btn(ng-click="revalidate()" ng-disabled="!pageMeta.filePicker") Validate
 										// When a LPD file is chosen, all the files inside are listed here.
 										button#valid-btn(ng-model="file.down" ng-disabled="!pageMeta.valid") Download
 										// button to push validated lipd file to database
 										button#valid-btn(ng-model="file.push" ng-disabled="!pageMeta.valid") Upload to DB
 									// When a LPD file is chosen, all the files inside are listed here.
-									li
-										pre(style="background-color:#FEBABB; border: none;") {{ feedback.errCt}} errors
-											ul(ng-if="feedback.errCt>0")
+									li(style="list-style-type: none;")
+										pre(ng-class="feedback.errCt>0 ? 'on' : 'off'" style="background-color:#FEBABB; border: none;") {{ feedback.errCt}} errors
+											ul
 												li(ng-repeat="err in feedback.errMsgs") {{err}}
 
-										pre(style="background-color:#FEEEB6; border: none;") {{ feedback.wrnCt }} warnings
-											ul(ng-if="feedback.wrnCt>0")
+										pre(ng-class="feedback.wrnCt>0 ? 'on' : 'off'" style="background-color:#FEEEB6; border: none;") {{ feedback.wrnCt }} warnings
+											ul
 												li(ng-repeat="wrn in feedback.wrnMsgs") {{wrn}}
 
-										pre(style="background-color:#DFF1C1; border: none;" ng-if="pageMeta.valid") Validation Complete!
-											| This file adheres to LiPD v1.2 standards.
+										pre(ng-class="pageMeta.valid ? 'on' : 'off'" style="background-color:#DFF1C1; border: none;") Validation Complete!
 											
 										//- pre#metaPretty
 									li(style="list-style-type: none;")
@@ -71,7 +68,23 @@ block body
 							md-toolbar.md-hue-1
 								h2.md-toolbar-tools
 									span Edit & Validate
-							json-tree(json="json.metadata" node="nodeOptions" collapsed-level="2" edit-level="high")
+							div
+								ol
+									// this is strictly a placeholder to mirror the spacing on the other column. it has no function. 
+									li(style="display:hide; visibility:hidden;list-style-type: none;")
+										label(style="display:hide; visibility:hidden;")
+											span
+											select
+												option
+									li#buttons(style="list-style-type: none;")
+										// button to download validated lipd file
+										button#valid-btn(ng-click="validate(json.metadata)" ng-disabled="!pageMeta.filePicker") Validate
+										// toggle simple view: default to simple view
+										button#valid-btn(ng-click="pageMeta.simpleView = !pageMeta.simpleView" ng-disabled="pageMeta.simpleView") Simple
+										// toggle advanced view
+										button#valid-btn(ng-click="pageMeta.simpleView = !pageMeta.simpleView" ng-disabled="!pageMeta.simpleView") Advanced
+							div#tree-contain
+								json-tree(json="json.metadata" node="nodeOptions" collapsed-level="2" edit-level="low")
 
 // block js will insert js scripts listed in footer.jade that are needed on every page.
 block js

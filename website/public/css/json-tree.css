@@ -9,6 +9,10 @@ JSON-TREE styles
     width: 50%;
 }
 
+#tree-contain{
+  padding-left: 30px;
+}
+
 json-tree {
     font-size: 12px;
     font-family: monospace;
