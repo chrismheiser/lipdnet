@@ -27,7 +27,7 @@ function($scope, $log, $timeout, $default, Upload, $q, $http) {
 
     // User data holds all the user selected or imported data
     $scope.json = {
-      'metadata':{
+      "metadata":{
           "lipdVersion": 1.2,
           "archiveType": "",
           "dataSetName": "",
@@ -57,11 +57,15 @@ function($scope, $log, $timeout, $default, Upload, $q, $http) {
               "summaryTable": {},
               "distributionTable": []
             }]}
-          }
+          },
+      "simple":{
+
+      }
     }
     $scope.pageMeta = {
       "toggle": "",
       "simpleView": true,
+      "simpleViewRm": ["@context", "tsid", "number", "google", "md5", "lipdversion", "investigator"],
       "valid": false,
       "filePicker": false
     }
@@ -69,7 +73,10 @@ function($scope, $log, $timeout, $default, Upload, $q, $http) {
       "lowKeys": [],
       "otherKnownKeys": ["studyname", "proxy", "metadatamd5", "googlespreadsheetkey", "googlemetadataworksheet",
       "@context", "tagmd5", "datasetname"],
-      "mustHaves": ["archiveType", "lipdVersion", "dataSetName"]
+      "rootRequired": ["archiveType", "lipdVersion", "dataSetName", "paleoData", "geo", "pub"],
+      "geoRequired": ["coordinates"],
+      "pubRequired": ["author", "title", "pubYear", "journal"],
+      "optionalKeys": [""]
     }
     $scope.feedback = {
       "errCt": 0,
@@ -82,6 +89,72 @@ function($scope, $log, $timeout, $default, Upload, $q, $http) {
 
   // MISC
 
+    $scope.verifyBibJson = function(){
+      // if pub section exists, make sure it matches the bib json standard
+    }
+
+    $scope.verifyGeoJson = function(){
+      // if geo section exists, make sure it matches the geo json standard
+
+    }
+
+    // filter metadata for simple view. Recursive function that removes keys that match a predefined set in "simpleViewRm"
+    $scope.advancedToSimpleView = function(x){
+      if(Array.isArray(x)){
+        console.log("array");
+        for(i=0; i<x.length; i++){
+          x[i] = $scope.advancedToSimpleView(x[i]);
+        }
+      }
+      else if(typeof(x) === "object"){
+        console.log("object");
+        // stay safe: default to keeping the key
+        var rmKey = false;
+        for(key in x){
+          console.log(key);
+          // check if this key is a keeper
+          rmKey = $scope.isSimpleKey(key);
+          if(rmKey){
+            // key is not a keeper. remove it.
+            delete x[key]
+          } else {
+            // this is a keeper key, so dive down with the value
+            x[key] = $scope.advancedToSimpleView(x[key]);
+          }
+        }
+      }
+      console.log(x)
+      console.log("end of function");
+      return(x)
+    } // end fn
+
+    // determine whether a key should be removed for the simple view
+    $scope.isSimpleKey = function(key){
+      // default to keeping the key.
+      var rmKey = false;
+      try{
+        // base case: this is a string, so check if it needs to be removed.
+        if(typeof(key) === "string"){
+          // exact match: if the key is in the 'remove' array, then remove it.
+          if($scope.pageMeta.simpleViewRm.indexOf(key.toLowerCase()) !== -1){
+            // bad key
+            rmKey = true;
+          } else {
+            // substring match: for each item in the 'remove' array
+            for(i=0; i<$scope.pageMeta.simpleViewRm.length; i++){
+              // if the word in the 'remove' array is a substring of the current key, remove it.
+              if($scope.pageMeta.simpleViewRm[i].indexOf(key.toLowerCase()) !== -1){
+                // bad key
+                rmKey = true;
+              }
+            }
+          }
+        }
+      } catch(err) {
+      }
+      return(rmKey);
+    }
+
     // error logger. add to count and log message to user.
     $scope.logError = function(errType, msg, key){
       if(errType === "warn"){
@@ -92,6 +165,10 @@ function($scope, $log, $timeout, $default, Upload, $q, $http) {
         $scope.feedback.errMsgs.push(msg)
       }
     }
+
+
+
+    // WATCHERS
 
     // watch for updated metadata information, then display the changes in the pre/code box (if it's being shown)
     $scope.$watch("json", function(){
@@ -173,7 +250,7 @@ function($scope, $log, $timeout, $default, Upload, $q, $http) {
           }
         } else {
           // there aren't any coordinate values to make the map
-          $scope.logError("warn", "Unable to map location: Insufficient coordinate information", "geo");
+          $scope.logError("warn", "Unable to map location: No coordinates given", "geo");
         }
       } catch(err) {
         $scope.logError("warn", "Unable to map location: encountered an error", "geo");
@@ -190,8 +267,8 @@ function($scope, $log, $timeout, $default, Upload, $q, $http) {
 
     $scope.verifyRequiredFields = function(m){
       // loop through and check for required fields. (lipdVersion, archiveType, paleoMeasurementTable..what else???)
-      for (var i = 0; i < $scope.tmp.mustHaves.length; i++) {
-        k = $scope.tmp.mustHaves[i];
+      for (var i = 0; i < $scope.tmp.rootRequired.length; i++) {
+        k = $scope.tmp.rootRequired[i];
         if($scope.tmp.lowKeys.indexOf(k.toLowerCase()) == -1){
           $scope.logError("err", "Missing required data: " + k);
         }
@@ -214,10 +291,11 @@ function($scope, $log, $timeout, $default, Upload, $q, $http) {
     // master fucntion. call all subroutines to determine if this is a valid lipd structure
     $scope.verifyStructure = function(m){
       // check that data fields are holding the correct value data types
-      $.each(m, function(k, v){
+      for(var k in m){
         try{
           var correctType = null;
           lowKey = k.toLowerCase();
+          v = m[k];
           $scope.tmp.lowKeys.push(lowKey);
           if(lowKey === "archivetype"){
             correctType = $scope.verifyDataType("string", k, v)
@@ -263,7 +341,7 @@ function($scope, $log, $timeout, $default, Upload, $q, $http) {
           console.log("verifyStructure: Caught error parsing: " + k);
         }
 
-      });
+      }
 
     }
 
@@ -563,9 +641,14 @@ function($scope, $log, $timeout, $default, Upload, $q, $http) {
               $scope.$apply(function(){
                 // parse text into a JSON object, and then parse the metadata
                 console.log("call parseMetadata form event listener. ")
+                // boolean to know that the user chose a file to upload
                 $scope.pageMeta.filePicker = true;
+                // set the raw json to a scope variable
                 $scope.json.metadata = JSON.parse(text);
+                // start validation on the json that we got
                 $scope.validate(JSON.parse(text));
+                // create a 'simple view' version of the json metadata. remove keys that aren't vital/needed
+                // $scope.json.simple = $scope.advancedToSimpleView(JSON.parse(text));
               });
             }, function(current, total) {
               // onprogress callback
