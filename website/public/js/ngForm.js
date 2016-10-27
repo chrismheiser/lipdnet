@@ -21,9 +21,68 @@ f.run([function() {
   }
 }]);
 
+// Parse service for unpacking and sorting LiPD file data
+f.factory("CompileService", function($q){
+
+  var setCsvMeta = function(dat){
+    var s = Papa.parse(dat);
+    s["rows"]  = s.data.length;
+    s["cols"] = s.data[0].length;
+    s["delimiter"] = s.meta.delimiter;
+    return s;
+  }
+
+  var getText = function(entry){
+    var d = $q.defer();
+    entry.getData(new zip.TextWriter(), function(text) {
+      try{
+        // blindly attempt to parse as jsonld file
+        d.resolve(JSON.parse(text));
+      } catch(err){
+        // if parsing jsonld file fails, that's because it's a csv file. So parse as csv instead.
+        d.resolve(setCsvMeta(text));
+      }
+      });
+    return d.promise;
+  }
+
+  var parseFiles = function(entries){
+    console.log("parsing data in factory");
+    var d = $q.defer();
+    var promises = [];
+    try{
+      angular.forEach(entries, function(entry){
+        if(entry){
+          if(entry.filename.indexOf(".csv") >= 0 || entry.filename.indexOf(".jsonld") >= 0){
+            console.log(entry.filename);
+            promises.push(getText(entry));
+          }
+        }
+      });
+
+      return $q.all(promises);
+    }catch(err){
+      console.log(err);
+    }
+  }
+  return {
+    parseFiles : parseFiles
+    }
+});
+
+// f.factory("ParseService", function($q){
+//   var parseData = function(){
+//     console.log("in ParseService");
+//   };
+//   return{
+//     parseData: parseData
+//   };
+// });
+
+
 // Controller for the Upload form
-f.controller('FormCtrl',['$scope', 'Upload', '$timeout', '$q', '$http',
-function($scope, $log, $timeout, $default, Upload, $q, $http) {
+f.controller('FormCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Upload', "CompileService",
+function($scope, $log, $timeout, $q, $http, Upload, CompileService){
 
     // User data holds all the user selected or imported data
     $scope.json = {
@@ -69,13 +128,19 @@ function($scope, $log, $timeout, $default, Upload, $q, $http) {
       "valid": false,
       "filePicker": false
     }
+    // track all csvs by filename, and the # of columns in the file
+    $scope.csvFiles = {}
+
+    // NOTE: to do case insensitve key checking, you'd have to loop over every field. You cannot use "hasOwnProperty"
+
     $scope.tmp = {
       "lowKeys": [],
-      "otherKnownKeys": ["studyname", "proxy", "metadatamd5", "googlespreadsheetkey", "googlemetadataworksheet",
-      "@context", "tagmd5", "datasetname"],
-      "rootRequired": ["archiveType", "lipdVersion", "dataSetName", "paleoData", "geo", "pub"],
-      "geoRequired": ["coordinates"],
-      "pubRequired": ["author", "title", "pubYear", "journal"],
+      "miscKeys": ["studyname", "proxy", "metadatamd5",
+                  "googlespreadsheetkey", "googlemetadataworksheet",
+                  "@context", "tagmd5", "datasetname"],
+      "reqRootKeys": ["archiveType", "dataSetName", "paleoData", "geo"],
+      "reqPubKeys": ["author", "title", "year", "journal"],
+      "reqTableKeys": ["number", "variableName", "TSid"],
       "optionalKeys": [""]
     }
     $scope.feedback = {
@@ -89,12 +154,8 @@ function($scope, $log, $timeout, $default, Upload, $q, $http) {
 
   // MISC
 
-    $scope.verifyBibJson = function(){
-      // if pub section exists, make sure it matches the bib json standard
-    }
-
-    $scope.verifyGeoJson = function(){
-      // if geo section exists, make sure it matches the geo json standard
+    // get and set all the CSV metadata in the scope
+    $scope.getCsvMetadata = function(){
 
     }
 
@@ -166,14 +227,14 @@ function($scope, $log, $timeout, $default, Upload, $q, $http) {
       }
     }
 
-
-
     // WATCHERS
 
     // watch for updated metadata information, then display the changes in the pre/code box (if it's being shown)
     $scope.$watch("json", function(){
       var mp = document.getElementById("metaPretty");
       if (mp){ mp.innerHTML = JSON.stringify($scope.json.metadata, undefined, 2);}
+      var c = document.getElementById("csvPretty");
+      if (c){ c.innerHTML = JSON.stringify($scope.csvFiles, undefined, 2);}
     }, true);
 
     $scope.verifyValid = function(){
@@ -218,11 +279,158 @@ function($scope, $log, $timeout, $default, Upload, $q, $http) {
     $scope.verifyCapabilities = function(m){
       // check what data is available
       // This will create the "progress bar" of how complete a data set is.
-      $scope.canYouMap(m);
+    }
+
+    // check if there is enough information given to run bchron
+    $scope.canYouBchron = function(m){
+    }
+
+
+  // REQUIRED FIELDS
+
+
+    // master for checking for required fields. call sub-routines.
+    $scope.verifyRequiredFields = function(m){
+
+      // call sub-routine checks
+      $scope.requiredRoot(m);
+      $scope.requiredPub(m);
+      $scope.requiredGeo(m);
+      $scope.requiredPaleoChron("paleo", m);
+      $scope.requiredPaleoChron("chron", m);
+
+    }
+
+    // verify required fields at all levels of paleoData & chronData
+    $scope.requiredPaleoChron = function(pc, m){
+      // I'll use "paleoData" in comments, but this function applies to paleoData and chronData
+      var pc = pc + "Data";
+      var meas = pc + "MeasurementTable";
+      var mod = pc + "Model";
+      // paleoData not found
+      if(!m.hasOwnProperty(pc)){
+        $scope.logError("err", "Missing required data: paleoData", "paleoData");
+      }
+      // paleoData found
+      else {
+        // for each object in the paleoData list
+        for(i=0; i<m[pc].length; i++){
+          // hold table in variable.
+          var table = m[pc][i];
+          var crumbs = pc + i + meas;
+
+          // measurementTable found
+          if(table.hasOwnProperty(meas)) {
+            for(k=0; k<table[meas].length; k++){
+              // hold current meas table object in a variable
+              var measObj = table[meas][k];
+              var crumbs = pc + i + meas + k;
+              $scope.requiredTable(measObj, crumbs);
+            }
+          } // end meas
+
+          // paleoMeasurementTable not found, and it's required
+          else if(!table.hasOwnProperty(meas) && pc == "paleo"){
+            // log error for missing required table
+            $scope.logError("err", "Missing required data: " + crumbs, meas);
+          }
+          // paleoModel found
+          if(table.hasOwnProperty(mod)){
+            for(k=0; k<table[mod].length; k++){
+              var modObj = table[mod][k];
+              var crumbs = pc + i + mod + k;
+              // found summary table
+              if(modObj.hasOwnProperty("summaryTable")){
+                $scope.requiredTable(modObj.summaryTable, crumbs + ".summaryTable");
+              }
+              // found ensemble table
+              if(modObj.hasOwnProperty("ensembleTable")){
+                $scope.requiredTable(modObj.ensembleTable, crumbs + ".ensembleTable");
+              }
+              // found distribution table
+              if(modObj.hasOwnProperty("distributionTable")){
+                for(j=0; j<modObj.distributionTable.length; j++){
+                  var distObj = modObj.distributionTable[j];
+                  $scope.requiredTable(distObj, crumbs + ".distributionTable" + j);
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+
+    // each table must have "filename"
+    // each column must have "number", "tsid", and "variableName"
+    $scope.requiredTable = function(t, crumbs){
+
+      // filename not found
+      if(!t.hasOwnProperty("filename")){
+        $scope.logError("err", "Missing required data: " + crumbs + ".filename", "filename");
+      }
+      // columns not found
+      if(!t.hasOwnProperty("columns")){
+        $scope.logError("err", "Missing required data: " + crumbs + ".columns", "columns");
+      }
+      // columns found
+      else if(t.hasOwnProperty("columns")){
+        // loop over each column in the table
+        for(i=0; i<t.columns.length; i++){
+          // loop over each of the required column keys
+          for(key in $scope.tmp.reqTableKeys){
+            // see if this column has each of the required keys
+            if(!t.columns[i].hasOwnProperty(key)){
+              // required key is missing, log error
+              $scope.logError("err", "Missing required data :" + crumbs + "." + key, key);
+            }
+          } // end table keys
+        } // end columns loop
+      } // end 'if columns exist'
+    }
+
+    // verify required keys in metadata root level
+    $scope.requiredRoot = function(m){
+      // loop through and check for required fields. (lipdVersion, archiveType, paleoMeasurementTable..what else???)
+      for (var i = 0; i < $scope.tmp.reqRootKeys.length; i++) {
+        // the current key to look for
+        var key = $scope.tmp.reqRootKeys[i];
+        if(!m.hasOwnProperty(key)){
+          // key not found! log the error
+          $scope.logError("err", "Missing required data: " + key, key);
+        }
+
+      }
+    }
+
+    // pub is not mandatory, but if pub is present, then it must have the required keys
+    $scope.requiredPub = function(m){
+      try{
+        // pub not found, log a warning.
+        if(!m.hasOwnProperty("pub")){
+          $scope.logError("err", "No publication data", "pub");
+        }
+        // pub found, make sure it has the required keys
+        else {
+          // for each pub in the pub list
+          for(i=0; i<m.pub.length; i++){
+            var curPub = m.pub[i];
+            // loop over required keys, and see if this pub has the key
+            for(k=0;k<$scope.tmp.reqPubKeys.length;k++){
+              var key = $scope.tmp.reqPubKeys[k];
+              if(!m.pub[i].hasOwnProperty(key)){
+                // this pub is missing a required key!
+                $scope.logError("err", "Missing required data: " + "pub"+ i + key, key);
+              }
+            }
+          }
+        }
+      }catch(err){
+        $scope.logError("warn", "Encountered problem validating: pub");
+      }
     }
 
     // checks if there is coordinate information needed to plot a map of the location
-    $scope.canYouMap = function(m){
+    $scope.requiredGeo = function(m){
       try {
         coords = m.geo.geometry.coordinates.length;
         // start building map marker(s)
@@ -241,50 +449,22 @@ function($scope, $log, $timeout, $default, Upload, $q, $http) {
           } else {
             // check if longitude is range
             if(!lonValid){
-              $scope.logError("warn", "Longitude out of range: Enter value from -180 to 180", "longitude");
+              $scope.logError("error", "Longitude out of range: Enter value from -180 to 180", "longitude");
             }
             // check if latitude is in range
             if(!latValid){
-              $scope.logError("warn", "Latitude out of range: Enter value from -90 to 90", "latitude");
+              $scope.logError("error", "Latitude out of range: Enter value from -90 to 90", "latitude");
             }
           }
         } else {
           // there aren't any coordinate values to make the map
-          $scope.logError("warn", "Unable to map location: No coordinates given", "geo");
+          $scope.logError("error", "Missing required data: " + "geo - coordinates" , "coordinates");
         }
       } catch(err) {
         $scope.logError("warn", "Unable to map location: encountered an error", "geo");
-        console.log("canYouMap: " + err);
+        console.log("requiredGeo: " + err);
       }
     }
-
-    // check if there is enough information given to run bchron
-    $scope.canYouBchron = function(m){
-    }
-
-
-  // REQUIRED FIELDS
-
-    $scope.verifyRequiredFields = function(m){
-      // loop through and check for required fields. (lipdVersion, archiveType, paleoMeasurementTable..what else???)
-      for (var i = 0; i < $scope.tmp.rootRequired.length; i++) {
-        k = $scope.tmp.rootRequired[i];
-        if($scope.tmp.lowKeys.indexOf(k.toLowerCase()) == -1){
-          $scope.logError("err", "Missing required data: " + k);
-        }
-      }
-      // check for nested items
-      try{
-        pmt = m.paleoData[0].paleoMeasurementTable[0];
-        if(pmt === null){
-          $scope.logError("err", "Missing required data: paleoMeasurementTable");
-        }
-      } catch(err) {
-        console.log("verifyRequiredFields: Error trying to get paleoMeasurementTable");
-      }
-
-    }
-
 
   // VERIFY STRUCTURE
 
@@ -299,20 +479,22 @@ function($scope, $log, $timeout, $default, Upload, $q, $http) {
           $scope.tmp.lowKeys.push(lowKey);
           if(lowKey === "archivetype"){
             correctType = $scope.verifyDataType("string", k, v)
-
-          } else if(lowKey === "lipdversion"){
+          }
+          // Valid LiPD versions: 1.0, 1.1, 1.2
+          else if(lowKey === "lipdversion"){
             // check that the value is a number
             v = parseInt(v)
             correctType = $scope.verifyDataType("number", k, v);
             if(correctType){
-              // Valid LiPD versions: 1.0, 1.1, 1.2
               if([1.0, 1.1, 1.2].indexOf(v) == -1){
                 // LiPD version wasn't valid. Log errors to scope.
                 $scope.logError("err", "Invalid LiPD Version: Valid versions are 1.0, 1.1, and 1.2", "lipdVersion");
               } // end if in
             } // end data type check
 
-          } else if(lowKey === "pub"){
+          }
+          // pub must follow BibJSON standards
+          else if(lowKey === "pub"){
             $scope.verifyArrObjs(k, v);
 
           } else if(lowKey === "investigators" || lowKey === "investigator"){
@@ -321,7 +503,9 @@ function($scope, $log, $timeout, $default, Upload, $q, $http) {
           } else if(lowKey === "funding"){
             $scope.verifyArrObjs(k, v);
 
-          } else if (lowKey === "geo"){
+          }
+          // geo must follow GeoJSON standards
+          else if (lowKey === "geo"){
             $scope.verifyDataType("object", k, v);
 
           } else if (lowKey == "chrondata"){
@@ -332,7 +516,7 @@ function($scope, $log, $timeout, $default, Upload, $q, $http) {
 
           } else {
             // anything goes? no rules for these keys
-            if($scope.tmp.otherKnownKeys.indexOf(lowKey) === -1){
+            if($scope.tmp.miscKeys.indexOf(lowKey) === -1){
               $scope.logError("warn", "No rules found for key: " + k, k);
               console.log("verifyStructure: No rules for key: " + k);
             }
@@ -344,6 +528,12 @@ function($scope, $log, $timeout, $default, Upload, $q, $http) {
       }
 
     }
+
+    // todo Do I need to verify these for structure????
+    // if pub section exists, make sure it matches the bib json standard
+    // if geo section exists, make sure it matches the geo json standard
+
+
 
     // check if the data type for a given key matches what we expect for that key
     $scope.verifyDataType = function(dt, k, v){
@@ -611,6 +801,13 @@ function($scope, $log, $timeout, $default, Upload, $q, $http) {
       // get a list of file entries inside this zip
       model.getEntries(fileInput.files[0], function(entries) {
         fileList.innerHTML = "";
+        var deferred = $q.defer();
+        CompileService.parseFiles(entries)
+          .then(function(res){
+            $scope.rawData = res;
+            console.log("got raw data");
+        });
+
         // loop for each file in the zip
         entries.forEach(function(entry) {
           var li = document.createElement("li");
@@ -629,37 +826,14 @@ function($scope, $log, $timeout, $default, Upload, $q, $http) {
             }
             // if file was already downloaded, then skip the legwork and go straight to downloading the file
           }, false);
-          // check if this is the jsonld file. If it is, we want to load the data into the sesson storage.
-          if(entry.filename.indexOf(".jsonld") >= 0){
-            // get the data from the jsonld file, and set it to the sessionStorage
-            entry.getData(new zip.TextWriter(), function(text) {
-
-              // Set the text contains the entry data as a String
-              sessionStorage.setItem("metadata", text);
-
-              // wrap parse function in $apply, so the view is updated with the new information
-              $scope.$apply(function(){
-                // parse text into a JSON object, and then parse the metadata
-                console.log("call parseMetadata form event listener. ")
-                // boolean to know that the user chose a file to upload
-                $scope.pageMeta.filePicker = true;
-                // set the raw json to a scope variable
-                $scope.json.metadata = JSON.parse(text);
-                // start validation on the json that we got
-                $scope.validate(JSON.parse(text));
-                // create a 'simple view' version of the json metadata. remove keys that aren't vital/needed
-                // $scope.json.simple = $scope.advancedToSimpleView(JSON.parse(text));
-              });
-            }, function(current, total) {
-              // onprogress callback
-            });
-          }
 
           // replace 'a'  tag with our new modified 'a' tag
           li.appendChild(a);
           // replace 'li' tag with new modified 'li' tag
           fileList.appendChild(li);
-        });
+        }); // end for each file loop
+
+
       });
       // once the change even has triggered, it cannot be triggered again until page refreshes.
     }, false);

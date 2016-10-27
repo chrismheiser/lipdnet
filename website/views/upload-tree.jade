@@ -59,7 +59,8 @@ block body
 
 										pre(ng-class="pageMeta.valid ? 'on' : 'off'" style="background-color:#DFF1C1; border: none;") Validation Complete!
 											
-										//- pre#metaPretty
+										pre#metaPretty
+										pre#csvPretty
 									li(style="list-style-type: none;")
 										//- span#form-label LiPD Contents
 										ul#file-list
@@ -96,6 +97,7 @@ block js
 	script(src='js/ngForm.js')
 	script(src="lib/zip/zip.js")
 	script(src="lib/zip/zip-ext.js")
+	script(src="lib/papaparse.min.js")
 	script(src='https://cdnjs.cloudflare.com/ajax/libs/angular-ui-router/0.2.15/angular-ui-router.min.js')
 	script(src='https://cdnjs.cloudflare.com/ajax/libs/angular-google-maps/2.2.0/angular-google-maps.min.js')
 	script(src='https://cdnjs.cloudflare.com/ajax/libs/danialfarid-angular-file-upload/8.0.1/ng-file-upload-shim.min.js')
