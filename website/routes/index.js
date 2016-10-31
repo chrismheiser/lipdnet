@@ -110,9 +110,9 @@ router.post('/test', function(req, res, next){
 });
 
 // Get the upload page
-router.get('/upload-tree', function(req, res, next){
-  res.render('upload-tree', {title: 'Upload JSON Tree'});
-});
+// router.get('/upload-tree', function(req, res, next){
+//   res.render('upload-tree', {title: 'Upload JSON Tree'});
+// });
 // TESTING TESTING TESTING TESTING TESTING
 
 
