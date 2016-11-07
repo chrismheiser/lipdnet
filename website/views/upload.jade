@@ -57,9 +57,9 @@ block body
 											ul
 												li(ng-repeat="wrn in feedback.wrnMsgs track by $index") {{wrn}}
 												
-										pre(ng-class="feedback.posMsgs.length>0? 'on': 'off'" style="background-color:#DFF1C1; border: none;")
-											ul
-												li(ng-repeat="pos in feedback.posMsgs track by $index") {{pos}}
+										//- pre(ng-class="feedback.posMsgs.length>0? 'on': 'off'" style="background-color:#DFF1C1; border: none;")
+										//- 	ul
+										//- 		li(ng-repeat="pos in feedback.posMsgs track by $index") {{pos}}
 
 										pre(ng-class="pageMeta.valid? 'on' : 'off'" style="background-color:#DFF1C1; border: none;") Validation Complete!
 
@@ -68,7 +68,7 @@ block body
 										//- pre#csvPretty
 									li(style="list-style-type: none;")
 										//- span#form-label LiPD Contents
-										ul#file-list
+										ul(ng-repeat="file in allFiles") {{ file.filenameFull }}
 										
 						div(class="span span50")
 							md-toolbar.md-hue-1
@@ -84,15 +84,15 @@ block body
 												option
 									li#buttons(style="list-style-type: none;")
 										// button to download validated lipd file
-										button#valid-btn(ng-click="validate(json.metadata)" ng-disabled="!pageMeta.filePicker") Validate
+										button#valid-btn(ng-click="validate(json.metadata)" ng-disabled="pageMeta.filePicker") Validate
 										// toggle simple view: default to simple view
 										button#valid-btn(ng-click="pageMeta.simpleView = !pageMeta.simpleView" ng-disabled="pageMeta.simpleView") Simple
 										// toggle advanced view
 										button#valid-btn(ng-click="pageMeta.simpleView = !pageMeta.simpleView" ng-disabled="!pageMeta.simpleView") Advanced
 							div#tree-contain(ng-if="pageMeta.simpleView")
-								json-tree(json="json.simple" node="nodeOptions" collapsed-level="2" edit-level="low")
+								json-tree(json="files.jsonSimple" node="nodeOptions" collapsed-level="2" edit-level="low")
 							div#tree-contain(ng-if="!pageMeta.simpleView")
-								json-tree(json="json.metadata" node="nodeOptions" collapsed-level="2" edit-level="high")
+								json-tree(json="files.json" node="nodeOptions" collapsed-level="2" edit-level="high")
 
 // block js will insert js scripts listed in footer.jade that are needed on every page.
 block js
