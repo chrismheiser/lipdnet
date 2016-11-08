@@ -1,0 +1,30 @@
+md-dialog(aria-label='{{ mdDialogData.filenameShort }}')
+  form(ng-cloak='')
+    md-toolbar
+      .md-toolbar-tools
+        h2 {{mdDialogData.type}} file
+        span(flex='')
+        md-button.md-icon-button(ng-click='cancel()')
+          md-icon(aria-label='Close dialog')
+    md-dialog-content(ng-if="mdDialogData.type==bagit")
+      .md-dialog-content
+        h2 {{ mdDialogData.filenameShort}}
+        p {{mdDialogData.data}}
+        
+    md-dialog-content(ng-if="mdDialogData.type==json")
+      .md-dialog-content
+        h2 {{ mdDialogData.filenameShort}}
+        p {{mdDialogData.data}}
+            
+    md-dialog-content(ng-if="mdDialogData.type==csv")
+      .md-dialog-content
+        h2 {{ mdDialogData.filenameShort}}
+        p {{mdDialogData.data}}
+    //- md-dialog-actions(layout='row')
+    //-   md-button(href='http://en.wikipedia.org/wiki/Mango', target='_blank', md-autofocus='')
+    //-     | More on Wikipedia
+    //-   span(flex='')
+      //- md-button(ng-click="answer('not useful')")
+      //-   | Not Useful
+      //- md-button(ng-click="answer('useful')")
+      //-   | Useful

@@ -98,6 +98,10 @@ router.get('/browse', function(req, res, next){
   res.render('browse', {title: 'Browse', docs: push});
 });
 
+router.get("/modal", function(req, res, next){
+  res.render('modal', {title: ''});
+});
+
 // TESTING TESTING TESTING TESTING TESTING
 router.get('/test', function(req, res, next){
   res.render('test', {title: 'Test'});

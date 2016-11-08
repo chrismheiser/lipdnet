@@ -1,4 +1,4 @@
-var f = angular.module('ngForm', ['uiGmapgoogle-maps', 'json-tree', 'ngFileUpload']);
+var f = angular.module('ngForm', ['uiGmapgoogle-maps', 'json-tree', 'ngFileUpload', "ngMaterial"]);
 
 // Google Maps API key to allow us to embed the map
 f.config(function(uiGmapGoogleMapApiProvider) {
@@ -107,9 +107,63 @@ f.factory("CompileService", ["$q", function($q){
 }]);
 
 
+
 // Controller for the Upload form
-f.controller('FormCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Upload', "CompileService",
-function($scope, $log, $timeout, $q, $http, Upload, CompileService){
+f.controller('FormCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Upload', "CompileService", "$mdDialog",
+function($scope, $log, $timeout, $q, $http, Upload, CompileService, $mdDialog){
+
+  $scope.status = '  ';
+  $scope.customFullscreen = false;
+
+  $scope.showAdvanced = function(ev, file) {
+    $mdDialog.show({
+      locals:{dataToPass: file},
+      controller: mdDialogCtrl,
+      templateUrl: '/modal',
+      parent: angular.element(document.body),
+      targetEvent: ev,
+      clickOutsideToClose:true,
+      fullscreen: $scope.customFullscreen // Only for -xs, -sm breakpoints.
+    })
+    .then(function(answer) {
+      $scope.status = 'You said the information was "' + answer + '".';
+    }, function() {
+      $scope.status = 'You cancelled the dialog.';
+    });
+  };
+
+  var mdDialogCtrl = function ($scope, $mdDialog, dataToPass) {
+    $scope.mdDialogData = dataToPass;
+    console.log("dataToPass");
+    console.log(dataToPass);
+    $scope.mdDialogData = dataToPass;
+
+    $scope.hide = function() {
+      $mdDialog.hide();
+    };
+
+    $scope.cancel = function() {
+      $mdDialog.cancel();
+    };
+
+    $scope.answer = function(answer) {
+      $mdDialog.hide(answer);
+    };
+  }
+
+  // function DialogController($scope, $mdDialog, dataToPass) {
+  //   $scope.hide = function() {
+  //     $mdDialog.hide();
+  //   };
+  //
+  //   $scope.cancel = function() {
+  //     $mdDialog.cancel();
+  //   };
+  //
+  //   $scope.answer = function(answer) {
+  //     $mdDialog.hide(answer);
+  //   };
+  // }
 
   $scope.allFiles = [];
   $scope.allFilenames = [];

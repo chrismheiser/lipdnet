@@ -46,7 +46,7 @@ block body
 										// When a LPD file is chosen, all the files inside are listed here.
 										button#valid-btn(ng-model="file.down" ng-disabled="!pageMeta.valid") Download
 										// button to push validated lipd file to database
-										button#valid-btn(ng-model="file.push" ng-disabled="!pageMeta.valid") Upload to DB
+										button#valid-btn(ng-model="file.push" ng-disabled="!pageMeta.valid") Upload to Wiki
 									// When a LPD file is chosen, all the files inside are listed here.
 									li(style="list-style-type: none;")
 										pre(ng-class="feedback.errCt>0 ? 'on' : 'off'" style="background-color:#FEBABB; border: none;") {{ feedback.errCt}} errors
@@ -67,8 +67,10 @@ block body
 										//- pre#metaPretty
 										//- pre#csvPretty
 									li(style="list-style-type: none;")
+										//- pre(style="background-color:#eee; border: none;")
 										//- span#form-label LiPD Contents
-										ul(ng-repeat="file in allFiles") {{ file.filenameFull }}
+										//ng-click="showAdvanced($event, file)"
+										ul(class="modal-demo" ng-repeat="file in allFiles" ng-click="showAdvanced($event, file)") {{ file.filenameFull }}
 										
 						div(class="span span50")
 							md-toolbar.md-hue-1
@@ -109,3 +111,5 @@ block js
 	script(src='https://cdnjs.cloudflare.com/ajax/libs/danialfarid-angular-file-upload/8.0.1/ng-file-upload.min.js')
 	script(src="https://cdnjs.cloudflare.com/ajax/libs/ngStorage/0.3.6/ngStorage.min.js")
 	script(src='https://maps.googleapis.com/maps/api/js?libraries=places&key=AIzaSyA7HRzSi5HhyKTX9Xw7CZ-9XScwq04TZyc')
+	script(src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/2.2.0/ui-bootstrap-tpls.min.js")
+	script(src="https://cdnjs.cloudflare.com/ajax/libs/angular-sanitize/1.5.8/angular-sanitize.min.js")
