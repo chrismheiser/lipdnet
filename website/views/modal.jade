@@ -6,20 +6,18 @@ md-dialog(aria-label='{{ mdDialogData.filenameShort }}')
         span(flex='')
         md-button.md-icon-button(ng-click='cancel()')
           md-icon(aria-label='Close dialog')
-    md-dialog-content(ng-if="mdDialogData.type==bagit")
+    md-dialog-content()
       .md-dialog-content
-        h2 {{ mdDialogData.filenameShort}}
-        p {{mdDialogData.data}}
-        
-    md-dialog-content(ng-if="mdDialogData.type==json")
-      .md-dialog-content
-        h2 {{ mdDialogData.filenameShort}}
-        p {{mdDialogData.data}}
-            
-    md-dialog-content(ng-if="mdDialogData.type==csv")
-      .md-dialog-content
-        h2 {{ mdDialogData.filenameShort}}
-        p {{mdDialogData.data}}
+        h4 {{ mdDialogData.filenameShort}}
+        p {{ mdDialogData.pretty }}
+        //- 
+        //- table(ng-table="tableParams" show-filter="true" class="table table-bordered")
+        //-     tr(ng-repeat="line in mdDialogData.data track by $index")
+        //-         td {{ line }}
+
+        // simpler bootstrap modals 
+        // http://www.bootply.com/SLezsLancK
+
     //- md-dialog-actions(layout='row')
     //-   md-button(href='http://en.wikipedia.org/wiki/Mango', target='_blank', md-autofocus='')
     //-     | More on Wikipedia

@@ -1,4 +1,4 @@
-var f = angular.module('ngForm', ['uiGmapgoogle-maps', 'json-tree', 'ngFileUpload', "ngMaterial"]);
+var f = angular.module('ngForm', ['uiGmapgoogle-maps', 'json-tree', 'ngFileUpload', "ngMaterial", "ngTable", "cgBusy"]);
 
 // Google Maps API key to allow us to embed the map
 f.config(function(uiGmapGoogleMapApiProvider) {
@@ -44,8 +44,9 @@ f.factory("CompileService", ["$q", function($q){
     x["filenameFull"] = entry.filename;
     x["filenameShort"] = entry.filename.split("/").pop();
     // how do we get the blobURL here?
-    x["blobURL"] = "";
+    // x["blobURL"] = "";
     x["data"] = dat;
+    x["pretty"] = JSON.stringify(dat, undefined, 2)
     return x
   }
 
@@ -107,13 +108,16 @@ f.factory("CompileService", ["$q", function($q){
 }]);
 
 
-
 // Controller for the Upload form
-f.controller('FormCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Upload', "CompileService", "$mdDialog",
-function($scope, $log, $timeout, $q, $http, Upload, CompileService, $mdDialog){
+f.controller('FormCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Upload', "CompileService", "$mdDialog", "NgTableParams",
+function($scope, $log, $timeout, $q, $http, Upload, CompileService, $mdDialog, NgTableParams){
 
+  $scope.myPromise = "";
   $scope.status = '  ';
   $scope.customFullscreen = false;
+  var self = this;
+  $scope.dataToPass = "";
+  $scope.tableParams = new NgTableParams({}, { dataset: $scope.dataToPass});
 
   $scope.showAdvanced = function(ev, file) {
     $mdDialog.show({
@@ -134,9 +138,8 @@ function($scope, $log, $timeout, $q, $http, Upload, CompileService, $mdDialog){
 
   var mdDialogCtrl = function ($scope, $mdDialog, dataToPass) {
     $scope.mdDialogData = dataToPass;
-    console.log("dataToPass");
-    console.log(dataToPass);
-    $scope.mdDialogData = dataToPass;
+    $scope.dataToPass = dataToPass;
+
 
     $scope.hide = function() {
       $mdDialog.hide();
@@ -151,25 +154,12 @@ function($scope, $log, $timeout, $q, $http, Upload, CompileService, $mdDialog){
     };
   }
 
-  // function DialogController($scope, $mdDialog, dataToPass) {
-  //   $scope.hide = function() {
-  //     $mdDialog.hide();
-  //   };
-  //
-  //   $scope.cancel = function() {
-  //     $mdDialog.cancel();
-  //   };
-  //
-  //   $scope.answer = function(answer) {
-  //     $mdDialog.hide(answer);
-  //   };
-  // }
-
   $scope.allFiles = [];
   $scope.allFilenames = [];
 
     // User data holds all the user selected or imported data
   $scope.files = {
+    "fileCt": 0,
     "bagit": {},
     "csv": {},
     "jsonSimple": {},
@@ -372,11 +362,11 @@ function($scope, $log, $timeout, $q, $http, Upload, CompileService, $mdDialog){
   }, true);
 
   $scope.verifyValid = function(){
-    if($scope.feedback.tsidCt > 5){
+    if($scope.feedback.tsidCt > 1){
       // Count all TSid errors as one culmulative error
       // $scope.feedback.errCt++;
-      // Count all TSid errors as separate individual errors
-      $scope.feedback.errCt = $scope.feedback.errCt + $scope.feedback.tsidCt;
+      // Count all TSid errors as a single error
+      $scope.feedback.errCt++;
       $scope.feedback.errMsgs.push("Missing data: TSid key from " + $scope.feedback.tsidCt + " columns");
     }
     if(!$scope.pageMeta.valid){
@@ -739,7 +729,7 @@ function($scope, $log, $timeout, $q, $http, Upload, CompileService, $mdDialog){
             $scope.verifyArrObjs(k, v);
 
           } else if(lowKey === "investigators" || lowKey === "investigator"){
-            $scope.verifyArrObjs(k, v);
+            $scope.verifyDataType("string", k, v);
 
           } else if(lowKey === "funding"){
             $scope.verifyArrObjs(k, v);
@@ -840,11 +830,13 @@ function($scope, $log, $timeout, $q, $http, Upload, CompileService, $mdDialog){
               // correct so far, so check if items in model table [0] are correct types
               for(i=0; i<modTables.length; i++){
                 table = modTables[i];
-                if(table === "distributionTable" && v[0][mod][0].hasOwnProperty(table)){
-                  $scope.verifyArrObjs(table, v[0][mod][0][table])
-                } else {
-                  $scope.verifyDataType("object", table, v[0][mod][0][table])
-                }
+                if (v[0][mod][0].hasOwnProperty(table)){
+                  if(table === "distributionTable"){
+                    $scope.verifyArrObjs(table, v[0][mod][0][table])
+                  } else{
+                    $scope.verifyDataType("object", table, v[0][mod][0][table])
+                  }
+                } // if has property
               } // end model table inner
             } // end correctBottom
           } // end has model table
@@ -977,35 +969,65 @@ function($scope, $log, $timeout, $q, $http, Upload, CompileService, $mdDialog){
         var deferred = $q.defer();
 
         // use the service to parse data from the ZipJS entries
-        CompileService.parseFiles(entries)
-          .then(function(res){
-            console.log("In 'then()'");
+        $scope.myPromise = CompileService.parseFiles(entries);
+        $scope.myPromise.then(function(res){
+          console.log("In 'then()'");
 
-            // function that splits jsonld and csv entries into different scope variables
-            function splitValidate(objs){
-              console.log("splitValidate");
-              $scope.allFiles = objs;
-              // loop over each csv/jsonld object. sort them into the scope by file type
-              angular.forEach(objs, function(obj){
-                if(obj.type === "json"){
-                  $scope.files.json = obj.data;
-                } else if (obj.type === "csv"){
-                  $scope.files.csv[obj.filenameShort] = obj.data;
-                } else if(obj.type === "bagit"){
-                  $scope.files.bagit[obj.filenameShort] = obj
-                } else {
-                  console.log("Not sure what to do with this file: " + obj.filenameFull);
-                }
-              });
-              // start validation
-              $scope.validate();
-            }
+          // function that splits jsonld and csv entries into different scope variables
+          function splitValidate(objs){
+            console.log("splitValidate");
+            $scope.allFiles = objs;
+            $scope.files.fileCt = objs.length;
+            // loop over each csv/jsonld object. sort them into the scope by file type
+            angular.forEach(objs, function(obj){
+              if(obj.type === "json"){
+                $scope.files.json = obj.data;
+              } else if (obj.type === "csv"){
+                $scope.files.csv[obj.filenameShort] = obj.data;
+              } else if(obj.type === "bagit"){
+                $scope.files.bagit[obj.filenameShort] = obj
+              } else {
+                console.log("Not sure what to do with this file: " + obj.filenameFull);
+              }
+            });
+            // start validation
+            $scope.validate();
+          }
 
-            // split the data, and then callback to start validation.
-            splitValidate(res);
-        });
+          // split the data, and then callback to start validation.
+          splitValidate(res);
+      }); // end CompileService
 
-      });
+        // CompileService.parseFiles(entries)
+        //   .then(function(res){
+        //     console.log("In 'then()'");
+        //
+        //     // function that splits jsonld and csv entries into different scope variables
+        //     function splitValidate(objs){
+        //       console.log("splitValidate");
+        //       $scope.allFiles = objs;
+        //       $scope.files.fileCt = objs.length;
+        //       // loop over each csv/jsonld object. sort them into the scope by file type
+        //       angular.forEach(objs, function(obj){
+        //         if(obj.type === "json"){
+        //           $scope.files.json = obj.data;
+        //         } else if (obj.type === "csv"){
+        //           $scope.files.csv[obj.filenameShort] = obj.data;
+        //         } else if(obj.type === "bagit"){
+        //           $scope.files.bagit[obj.filenameShort] = obj
+        //         } else {
+        //           console.log("Not sure what to do with this file: " + obj.filenameFull);
+        //         }
+        //       });
+        //       // start validation
+        //       $scope.validate();
+        //     }
+        //
+        //     // split the data, and then callback to start validation.
+        //     splitValidate(res);
+        // }); // end CompileService
+
+      }); // end model.getEntries
       // once the change even has triggered, it cannot be triggered again until page refreshes.
     }, false);
   })();
