@@ -26,7 +26,6 @@ f.factory("CompileService", ["$q", function($q){
 
   // parse the csv metadata and return an object
   var setCsvMeta = function(dat){
-    console.log("setCsvMeta");
     // parse the data using Papa module
     var x = Papa.parse(dat);
     // set fields of interest for later validation
@@ -37,7 +36,7 @@ f.factory("CompileService", ["$q", function($q){
   }
 
   var compilePromise = function(entry, dat, type){
-    console.log("compilePromise");
+    console.log("compilePromse: " + entry.filename.split("/").pop());
     var d = $q.defer();
     var x = {};
     x["type"] = type;
@@ -52,7 +51,6 @@ f.factory("CompileService", ["$q", function($q){
 
   // get the text from the ZipJs entry object. Parse JSON as-is and pass CSV to next step.
   var getText = function(entry, type){
-    console.log("getText");
     var d = $q.defer();
     // var filename = entry.filename;
     entry.getData(new zip.TextWriter(), function(text) {
@@ -78,20 +76,21 @@ f.factory("CompileService", ["$q", function($q){
       // loop for each entry object in the array
       angular.forEach(entries, function(entry){
         // if the object isn't empty
-        console.log("Parsing Entry");
         if(entry){
           // if the entry represents a csv or jsonld file, keep going. If it's a bagit manifest file, skip over it.
-          if(entry.filename.indexOf(".csv") >= 0){
-            // push the promise to the master list
-            promises.push(getText(entry, "csv"));
-          }
-          else if(entry.filename.indexOf(".jsonld") >= 0 || entry.filename.indexOf(".json") >= 0){
-            // push the promise to the master list
-            promises.push(getText(entry, "json"));
-          }
-          // track the bagit filenames
-          else if(entry.filename.indexOf(".txt") >= 0){
-            promises.push(getText(entry, "bagit"));
+          if(entry.filename.split("/").pop().indexOf("._") !== 0){
+            if(entry.filename.indexOf(".csv") >= 0){
+              // push the promise to the master list
+              promises.push(getText(entry, "csv"));
+            }
+            else if(entry.filename.indexOf(".jsonld") >= 0 || entry.filename.indexOf(".json") >= 0){
+              // push the promise to the master list
+              promises.push(getText(entry, "json"));
+            }
+            // track the bagit filenames
+            else if(entry.filename.indexOf(".txt") >= 0){
+              promises.push(getText(entry, "bagit"));
+            }
           }
         }
       });
