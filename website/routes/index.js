@@ -102,6 +102,18 @@ router.get("/modal", function(req, res, next){
   res.render('modal', {title: ''});
 });
 
+router.get("/modalJson", function(req, res, next){
+  res.render('modalJson', {title: ''});
+});
+
+router.get("/modalCsv", function(req, res, next){
+  res.render('modalCsv', {title: ''});
+});
+
+router.get("/modalTxt", function(req, res, next){
+  res.render('modalTxt', {title: ''});
+});
+
 // TESTING TESTING TESTING TESTING TESTING
 router.get('/test', function(req, res, next){
   res.render('test', {title: 'Test'});

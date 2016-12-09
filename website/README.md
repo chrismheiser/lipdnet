@@ -29,6 +29,7 @@ Required data is what we consider the bare minimum amount of data to create a Li
 Data tables must have:
 
 - filename
+- missingValues
 
 Data table columns must have:
 

@@ -159,3 +159,7 @@ body                            { padding-top:20px; }
     width: 20px;
     position:relative;
     margin-top:5%;}
+
+  body{
+    -webkit-text-size-adjust: none;
+  }

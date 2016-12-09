@@ -14,14 +14,16 @@ JSON-TREE styles
 }
 
 json-tree {
+    -webkit-text-size-adjust: none;
     font-size: 12px;
     font-family: monospace;
     width: 100%;
 }
 json-tree input[type="text"]{
+    -webkit-text-size-adjust: none;
     size: 200px
     width: 200px !important;
-    height: 15px;
+    height: 25px;
     font-size: 12px;
     border: solid 1px lightgray !important;
     border-radius: 0px !important;
@@ -31,10 +33,10 @@ json-tree input[type="text"]{
 }
 
 json-tree input[type="number"]{
-
+    -webkit-text-size-adjust: none;
     font-size: 12px;
     width: 200px !important;
-    height: 15px;
+    height: 25px;
     vertical-align: middle;
     border: solid 1px lightgray !important;
 
@@ -47,8 +49,9 @@ json-tree input[type=number]::-webkit-outer-spin-button {
 }
 
 json-tree textarea {
+    -webkit-text-size-adjust: none;
     width: 200px !important;
-    height: 12px;
+    height: 25px;
     padding-top: 0;
     margin-bottom: -4px;
     border-color: lightgray;
