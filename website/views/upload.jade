@@ -6,7 +6,6 @@ block css
 	link(rel="stylesheet" href="css/angular-busy.css")
 	link(rel="stylesheet" href="https://unpkg.com/ng-table@2.0.2/bundles/ng-table.min.css")
 	link(rel='stylesheet' href='css/upload.css')
-	link(rel='stylesheet' href='css/zip-js.css')
 	link(rel="stylesheet" href="css/json-tree.css")
 
 
@@ -46,10 +45,14 @@ block body
 											//- span#form-label Load LiPD
 											// Bind this to a 'change' event so that we know when jsonld data is available to start processing.
 											input#file-input(ng-model="file.input" name='file' type="file" accept=".lpd" ng-disabled="pageMeta.filePicker" style="max-width:200px; width:175px; padding:4px; display:inline;")
+											
 											// When a LPD file is chosen, all the files inside are listed here.
-											button#valid-btn(ng-model="file.down" ng-disabled="!pageMeta.valid") Download
+											button.valid-btn#download-btn(ng-model="file.down" ng-click="saveZip()") Download
+											//- button.valid-btn#download-btn(ng-model="file.down" ng-disabled="!pageMeta.valid") Download
+
 											// button to push validated lipd file to database
-											button#valid-btn(ng-model="file.push" ng-disabled="!pageMeta.valid") Upload to Wiki
+											button.valid-btn(ng-model="file.push" ng-disabled="!pageMeta.valid") Upload to Wiki
+											
 										// When a LPD file is chosen, all the files inside are listed here.
 										li(style="list-style-type: none;")
 											pre(ng-class="feedback.errCt>0 ? 'on' : 'off'" style="background-color:#FEBABB; border: none;") {{ feedback.errCt}} errors
@@ -88,11 +91,11 @@ block body
 													option
 										li#buttons(style="list-style-type: none;")
 											// button to download validated lipd file
-											button#valid-btn(ng-click="validate(json.metadata)" ng-disabled="pageMeta.filePicker") Validate
+											button.valid-btn(ng-click="validate(json.metadata)" ng-disabled="pageMeta.filePicker") Validate
 											// toggle simple view: default to simple view
-											button#valid-btn(ng-click="pageMeta.simpleView = !pageMeta.simpleView" ng-disabled="pageMeta.simpleView") Simple
+											button.valid-btn(ng-click="pageMeta.simpleView = !pageMeta.simpleView" ng-disabled="pageMeta.simpleView") Simple
 											// toggle advanced view
-											button#valid-btn(ng-click="pageMeta.simpleView = !pageMeta.simpleView" ng-disabled="!pageMeta.simpleView") Advanced
+											button.valid-btn(ng-click="pageMeta.simpleView = !pageMeta.simpleView" ng-disabled="!pageMeta.simpleView") Advanced
 								div#tree-contain(ng-if="pageMeta.simpleView")
 									json-tree(json="files.jsonSimple" node="nodeOptions" collapsed-level="2" edit-level="low")
 								div#tree-contain(ng-if="!pageMeta.simpleView")

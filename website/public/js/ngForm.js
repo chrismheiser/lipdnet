@@ -170,9 +170,11 @@ f.controller('FormCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Upload',
 
   $scope.allFiles = [];
   $scope.allFilenames = [];
+  $scope.allForDownload = {};
 
   // User data holds all the user selected or imported data
   $scope.files = {
+    "dataSetName": "",
     "fileCt": 0,
     "bagit": {},
     "csv": {},
@@ -237,6 +239,64 @@ f.controller('FormCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Upload',
   $scope.geoMarkers = [];
 
   // MISC
+
+
+  // process to zip all contents and download zip file to local disk.
+  $scope.saveZip = function(){
+
+    // prep the files in a flat list by {filename.csv: data, filename.jsonld: data}, etc.
+    $scope.prepForDownload();
+
+    // initiate download now that the files are ready
+    $scope.zipAndDownload();
+
+  }; //end saveZip
+
+  // Data is ready. Zip and Download!
+  $scope.zipAndDownload = function(){
+    console.log("zipAndDownload");
+  };
+
+  // prep all files for zip download.
+  // make data "write ready" and index by filename
+  $scope.prepForDownload = function(){
+
+    // add in the jsonld
+    var _jsonldFilename = $scope.files.dataSetName + ".jsonld";
+    $scope.allForDownload[_jsonldFilename] = $scope.files.json;
+
+    // loop for bagit items
+    for (var _filename1 in $scope.files.bagit) {
+      // create entry in flat scope obj. ref by filename, and link data. no special work needed here
+      $scope.allForDownload[_filename1] = $scope.files.bagit[_filename1]["data"]
+    }
+
+    // loop for csv items
+    for (var _filename2 in $scope.files.csv) {
+      // skip loop if the property is from prototype
+      if (!$scope.files.csv.hasOwnProperty(_filename2)) continue;
+      var csvArrs = $scope.files.csv[_filename2]["data"];
+      var csvStr = $scope.prepCsvEntry(csvArrs);
+      $scope.allForDownload[_filename2] = csvStr;
+
+    }
+
+
+  }; // end prepForDownload
+
+  // concat all the csv arrays into a flat data string that can be written to file
+  $scope.prepCsvEntry = function(csvArrs){
+    // header for the csv file
+    var csvContent = "data:text/csv;charset=utf-8,";
+    angular.forEach(csvArrs, function(entry, idx){
+      // turn the array into a joined string by commas.
+       dataString = entry.join(",");
+       // add this new string onto the growing master string. if it's the end of the data string, then add newline char
+       csvContent += idx < entry.length ? dataString + "\n" : dataString;
+    });
+    return(csvContent);
+
+  }; // end prepCsvEntry
 
   $scope.rmAdvKeys = function (d, isTable) {
     try {
@@ -422,13 +482,13 @@ f.controller('FormCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Upload',
   // CAPABILITIES
 
   // master function. calls all sub routines to see what can be done with the amount of data given
-  $scope.verifyCapabilities = function (m) {}
+  $scope.verifyCapabilities = function (m) {};
   // check what data is available
   // This will create the "progress bar" of how complete a data set is.
 
 
   // check if there is enough information given to run bchron
-  ;$scope.canYouBchron = function (m) {};
+  $scope.canYouBchron = function (m) {};
 
   // REQUIRED FIELDS
 
@@ -527,16 +587,24 @@ f.controller('FormCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Upload',
       } // end else
   }; // end requiredPaleoChron fn
 
-  // each table must have "filename"
+  // each table must have "filename" and "missingValue"
   // each column must have "number", "tsid", and "variableName"
   $scope.requiredTable = function (t, crumbs) {
 
+    // look for table filename
     var filename = "";
-    // filename not found
     if (!t.hasOwnProperty("filename")) {
       $scope.logFeedback("err", "Missing data: " + crumbs + ".filename", "filename");
     } else {
       filename = t.filename;
+    }
+
+    // look for table missing value
+    var missingValue = "";
+    if (!t.hasOwnProperty("missingValue")) {
+      $scope.logFeedback("err", "Missing data: " + crumbs + ".missingValue", "missingValue");
+    } else {
+      missingValue = t.missingValue;
     }
 
     // columns not found
@@ -691,7 +759,7 @@ f.controller('FormCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Upload',
         $scope.logFeedback("error", "Missing data: " + "geo - coordinates", "coordinates");
       }
     } catch (err) {
-      $scope.logFeedback("warn", "Unable to map location: encountered an error", "geo");
+      $scope.logFeedback("warn", "Unable to map location", "geo");
       console.log("requiredGeo: " + err);
     }
   };
@@ -911,9 +979,49 @@ f.controller('FormCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Upload',
     }
 
     var model = function () {
+      var zipFileEntry, zipWriter, writer, creationMethod;
       URL = window.webkitURL || obj.mozURL || obj.URL;
 
       return {
+        setCreationMethod : function(method) {
+          creationMethod = method;
+        },
+        addFiles : function addFiles(files, oninit, onadd, onprogress, onend) {
+          var addIndex = 0;
+
+          function nextFile() {
+            var file = files[addIndex];
+            onadd(file);
+            zipWriter.add(file.name, new zip.BlobReader(file), function() {
+              addIndex++;
+              if (addIndex < files.length)
+                nextFile();
+              else
+                onend();
+            }, onprogress);
+          }
+
+          function createZipWriter() {
+            zip.createWriter(writer, function(writer) {
+              zipWriter = writer;
+              oninit();
+              nextFile();
+            }, onerror);
+          }
+
+          if (zipWriter)
+            nextFile();
+          else if (creationMethod == "Blob") {
+            writer = new zip.BlobWriter();
+            createZipWriter();
+          } else {
+            createTempFile(function(fileEntry) {
+              zipFileEntry = fileEntry;
+              writer = new zip.FileWriter(zipFileEntry);
+              createZipWriter();
+            });
+          }
+        },
         getEntries: function getEntries(file, onend) {
           zip.createReader(new zip.BlobReader(file), function (zipReader) {
             zipReader.getEntries(onend);
@@ -933,14 +1041,29 @@ f.controller('FormCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Upload',
             writer = new zip.BlobWriter();
             getData();
           }
-        } }; // end return
+        },
+        getBlobURL : function(callback) {
+          zipWriter.close(function(blob) {
+            var blobURL = creationMethod == "Blob" ? URL.createObjectURL(blob) : zipFileEntry.toURL();
+            callback(blobURL);
+            zipWriter = null;
+          });
+        },
+        getBlob : function(callback) {
+          zipWriter.close(callback);
+        }
+
+      }; // end return
+
+
     }(); // end var model
 
     // Attach to respective DOM elements and set up listener for change event on file-input
-    // When file is uploaded, it will trigger data to be set to sessionStorage and be parsed.
+    // When file is uploadesd, it will trigger data to be set to sessionStorage and be parsed.
     (function () {
       var fileInput = document.getElementById("file-input");
       var creationMethodInput = document.getElementById("creation-method-input");
+      // var downloadButton = document.getElementById("download-btn");
 
       if (typeof requestFileSystem == "undefined") creationMethodInput.options.length = 1;
 
@@ -965,6 +1088,7 @@ f.controller('FormCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Upload',
               // loop over each csv/jsonld object. sort them into the scope by file type
               angular.forEach(objs, function (obj) {
                 if (obj.type === "json") {
+                  $scope.files.dataSetName = obj.filenameFull.split("/")[0];
                   $scope.files.json = obj.data;
                 } else if (obj.type === "csv") {
                   $scope.files.csv[obj.filenameShort] = obj.data;
@@ -984,6 +1108,32 @@ f.controller('FormCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Upload',
         }); // end model.getEntries
         // once the change even has triggered, it cannot be triggered again until page refreshes.
       }, false);
+
+      // listen for when user wants to zip workspace and download LPD file.
+      // downloadButton.addEventListener("click", function(event) {
+      //   var target = event.target, entry;
+      //   if (!downloadButton.download) {
+      //     if (typeof navigator.msSaveBlob == "function") {
+      //       model.getBlob(function(blob) {
+      //         navigator.msSaveBlob(blob, filenameInput.value);
+      //       });
+      //     } else {
+      //       model.getBlobURL(function(blobURL) {
+      //         var clickEvent;
+      //         clickEvent = document.createEvent("MouseEvent");
+      //         clickEvent.initMouseEvent("click", true, true, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
+      //         downloadButton.href = blobURL;
+      //         downloadButton.download = filenameInput.value;
+      //         downloadButton.dispatchEvent(clickEvent);
+      //         creationMethodInput.disabled = false;
+      //         fileList.innerHTML = "";
+      //       });
+      //       event.preventDefault();
+      //       return false;
+      //     }
+      //   }
+      // }, false);
+
     })();
   })(this);
 }]);
