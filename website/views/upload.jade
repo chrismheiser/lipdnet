@@ -35,11 +35,11 @@ block body
 									// UPLOAD METHOD 1 : use zip.js to unzip the LiPD file into RAM and jsonld file into SessionStorage
 									ol
 										// Method input: this will always be "RAM", so keep the code here but hide the element on the page
-										li(style="display:hide; visibility:hidden;list-style-type: none;")
-											label(style="display:hide; visibility:hidden;")
-												span#form-label Temp storage
-												select#creation-method-input
-													option(value="Blob") RAM
+										//- li(style="display:hide; visibility:hidden;list-style-type: none;")
+										//- 	label(style="display:hide; visibility:hidden;")
+										//- 		span#form-label Temp storage
+										//- 		select#creation-method-input
+										//- 			option(value="Blob") RAM
 										// File chooser: Select a lipd file
 										li#buttons(style="list-style-type: none;")
 											//- span#form-label Load LiPD
@@ -47,7 +47,7 @@ block body
 											input#file-input(ng-model="file.input" name='file' type="file" accept=".lpd" ng-disabled="pageMeta.filePicker" style="max-width:200px; width:175px; padding:4px; display:inline;")
 											
 											// When a LPD file is chosen, all the files inside are listed here.
-											button.valid-btn#download-btn(ng-model="file.down" ng-click="saveZip()") Download
+											button.valid-btn#download-btn(ng-model="file.down") Download
 											//- button.valid-btn#download-btn(ng-model="file.down" ng-disabled="!pageMeta.valid") Download
 
 											// button to push validated lipd file to database
@@ -111,6 +111,7 @@ block js
 	script(src="lib/zip/zip.js")
 	script(src="lib/zip/zip-ext.js")
 	script(src="lib/papaparse.min.js")
+	script(src="lib/FileSaver.min.js")
 	script(src='https://cdnjs.cloudflare.com/ajax/libs/angular-ui-router/0.2.15/angular-ui-router.min.js')
 	script(src='https://cdnjs.cloudflare.com/ajax/libs/angular-google-maps/2.2.0/angular-google-maps.min.js')
 	script(src='https://cdnjs.cloudflare.com/ajax/libs/danialfarid-angular-file-upload/8.0.1/ng-file-upload-shim.min.js')
