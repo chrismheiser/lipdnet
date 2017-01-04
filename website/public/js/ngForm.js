@@ -87,7 +87,7 @@ f.factory("ImportService", ["$q", function ($q) {
       angular.forEach(entries, function (entry) {
         // if the object isn't empty
         if (entry) {
-          // if the entry represents a csv or jsonld file, keep going. If it's a bagit manifest file, skip over it.
+          // filter out the system files that being with '._' These slow down processing and we don't want them
           if (entry.filename.split("/").pop().indexOf("._") !== 0) {
             if (entry.filename.indexOf(".csv") >= 0) {
               // push the promise to the master list
@@ -99,7 +99,7 @@ f.factory("ImportService", ["$q", function ($q) {
             // track the bagit filenames
             else if (entry.filename.indexOf(".txt") >= 0) {
                 promises.push(getText(entry, "bagit"));
-              }
+            }
           }
         }
       });
@@ -121,45 +121,61 @@ f.factory("ImportService", ["$q", function ($q) {
 f.factory("ExportService", ["$q", function ($q) {
 
 
+  var compilePromise = function compilePromise() {
+
+  };
+
+  // get the text from the ZipJs entry object. Parse JSON as-is and pass CSV to next step.
+  var getText = function getText(filename, dat) {
+    var d = $q.defer();
+    d.resolve({filename, dat});
+    return d.promise;
+  };
+
   // prep all files for zip download.
   // make data "write ready" and index by filename
   var prepForDownload = function(_d1){
     var d = $q.defer();
-    var _d2 = {};
+    var promises = [];
 
     // add in the jsonld
     var _jsonFilename = _d1.dataSetName + ".jsonld";
+    // convert formatted json into stringified json
     var _jsonPrepped = JSON.stringify(_d1.json, null, 4)
-    _d2[_jsonFilename] = _jsonPrepped;
+    promises.push(getText(_jsonFilename, _jsonPrepped));
 
     // loop for bagit items
     for (var _filename1 in _d1.bagit) {
       // create entry in flat scope obj. ref by filename, and link data. no special work needed here
-      _d2[_filename1] = _d1.bagit[_filename1]["data"]
+      promises.push(getText(_filename1, _d1.bagit[_filename1]["data"]));
     }
 
     // loop for csv items
     for (var _filename2 in _d1.csv) {
       // skip loop if the property is from prototype
       if (!_d1.csv.hasOwnProperty(_filename2)) continue;
+      // convert formatted csv data from the json obj
       var csvArrs = _d1.csv[_filename2]["data"];
+      // turn the formatted csv data into a compiled 'csv string'
       var csvStr = prepCsvEntry(csvArrs);
-      _d2[_filename2] = csvStr;
-
+      // push the data to the master array
+      promises.push(getText(_filename2, csvStr));
     }
-    d.resolve(_d2)
-    return(d.promise)
+    // resolve the array
+    return $q.all(promises);
   }; // end prepForDownload
 
   // concat all the csv arrays into a flat data string that can be written to file
     var prepCsvEntry = function(csvArrs){
     // header for the csv file
-    var csvContent = "data:text/csv;charset=utf-8,";
+    var csvContent = "";
     angular.forEach(csvArrs, function(entry, idx){
       // turn the array into a joined string by commas.
        dataString = entry.join(",");
        // add this new string onto the growing master string. if it's the end of the data string, then add newline char
-       csvContent += idx < entry.length ? dataString + "\n" : dataString;
+      //  csvContent += idx < entry.length ? dataString + "\n" : dataString;
+      csvContent += dataString + "\n";
+
     });
     return(csvContent);
 
@@ -240,7 +256,7 @@ f.controller('FormCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Upload',
 
   $scope.allFiles = [];
   $scope.allFilenames = [];
-  $scope.allForDownload = {};
+  $scope.downloadPromises = [];
 
   // User data holds all the user selected or imported data
   $scope.files = {
@@ -1129,56 +1145,80 @@ f.controller('FormCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Upload',
         $scope._myPromiseExport = ExportService.prepForDownload($scope.files);
         $scope._myPromiseExport.then(function (res) {
           console.log("ExportService.then()");
+
+          function onProgress(a, b) {
+            console.log("current", a, "end", b);
+          }
+
           var zipWriter;
 
-          function addFiles(files, callback) {
-              console.log("addFiles()");
-              writer = new zip.BlobWriter();
-              zip.createWriter(writer, function(writer) {
-                  zipWriter = writer;
-                  for (var _filename3 in files) {
-                      zipWriter.add(_filename3,
-                      new zip.BlobReader(files[_filename3]), function() {});
-                  }
-                  callback(zipWriter);
-              });
-          }
-          function saveZip(zipWriter) {
-            console.log("saveZip()");
-            zipWriter.close(function(blob) {
-                _zipName = $scope.files.dataSetName + ".lpd"
-                saveAs(blob, _zipName); // uses FileSaver.js
-                document.getElementById("file-input").value = null; // reset input file list
-                zipWriter = null;
-            });
+          function addFiles(files, oninit, onadd, onprogress, onend) {
+              var addIndex = 0;
+              // add the next file to the zip file
+              function nextFile() {
+                  var file = files[addIndex];
+                  onadd(file);
+                  zipWriter.add(file.filename, new zip.TextReader(file.dat), function() {
+                      addIndex++;
+                      if (addIndex < files.length)
+                          nextFile();
+                      else
+                          onend();
+                  }, onprogress);
+              }
+              // create the zip writer, and start adding files
+              function createZipWriter() {
+                  zip.createWriter(writer, function(writer) {
+                      zipWriter = writer;
+                      oninit();
+                      nextFile();
+                  }, onerror);
+              }
+
+              // if zipWriter is created, continue processing files
+              if (zipWriter){
+                nextFile();
+              }
+              // if zipWriter is not created, create it now.
+              else {
+                  writer = new zip.BlobWriter();
+                  createZipWriter();
+              }
           }
 
-          $scope.allForDownload = res;
-          addFiles(res, saveZip);
+          // currently unused function
+          function getBlob(callback) {
+            zipWriter.close(callback);
+          }
+
+          // save file promises to the scope.
+          $scope.downloadPromises = res;
+
+          // Add the files to the zip
+          addFiles(res,
+              function() {
+                  // Init
+                  console.log("init: addFiles()");
+              }, function(file) {
+                  // OnAdd
+                  // console.log("Added file");
+              }, function(current, total) {
+                  // OnProgress
+                  // console.log("%s %s", current, total);
+              }, function() {
+                  // OnEnd
+                  console.log("complete: addFiles()");
+                  zipWriter.close(function(blob) {
+                      _zipName = $scope.files.dataSetName + ".lpd"
+                      console.log("downloading: " + _zipName);
+                      saveAs(blob, _zipName); // uses FileSaver.js
+                      document.getElementById("file-input").value = null; // reset input file list
+                      zipWriter = null;
+                  });
+              });
 
         }); // end ExportService
 
-      //   var target = event.target, entry;
-      //   if (!downloadButton.download) {
-      //     if (typeof navigator.msSaveBlob == "function") {
-      //       model.getBlob(function(blob) {
-      //         navigator.msSaveBlob(blob, filenameInput.value);
-      //       });
-      //     } else {
-      //       model.getBlobURL(function(blobURL) {
-      //         var clickEvent;
-      //         clickEvent = document.createEvent("MouseEvent");
-      //         clickEvent.initMouseEvent("click", true, true, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
-      //         downloadButton.href = blobURL;
-      //         downloadButton.download = filenameInput.value;
-      //         downloadButton.dispatchEvent(clickEvent);
-      //         // creationMethodInput.disabled = false;
-      //         fileList.innerHTML = "";
-      //       });
-      //       event.preventDefault();
-      //       return false;
-      //     }
-      //   }
       }, false);
 
     })();
