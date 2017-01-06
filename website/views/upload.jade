@@ -45,13 +45,15 @@ block body
 											//- span#form-label Load LiPD
 											// Bind this to a 'change' event so that we know when jsonld data is available to start processing.
 											input#file-input(ng-model="file.input" name='file' type="file" accept=".lpd" ng-disabled="pageMeta.filePicker" style="max-width:200px; width:175px; padding:4px; display:inline;")
-											
+																						
 											// When a LPD file is chosen, all the files inside are listed here.
-											button.valid-btn#download-btn(ng-model="file.down") Download
-											//- button.valid-btn#download-btn(ng-model="file.down" ng-disabled="!pageMeta.valid") Download
+											//- button.valid-btn#download-btn(ng-model="file.down") Download
+											button.valid-btn#download-btn(ng-model="file.down" ng-disabled="!pageMeta.valid") Download
 
 											// button to push validated lipd file to database
 											button.valid-btn(ng-model="file.push" ng-disabled="!pageMeta.valid") Upload to Wiki
+											
+											button.valid-btn#generate-tsid(ng-model="feedback.missingTsidCt" ng-if="feedback.missingTsidCt > 0" ng-click="populateTSids1()") Populate TSid's
 											
 										// When a LPD file is chosen, all the files inside are listed here.
 										li(style="list-style-type: none;")
