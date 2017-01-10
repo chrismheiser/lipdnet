@@ -278,7 +278,34 @@ f.controller('FormCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Upload',
     "fileCt": 0,
     "bagit": {},
     "csv": {},
-    "jsonSimple": {},
+    "jsonSimple": {
+      "lipdVersion": 1.2,
+      "archiveType": "",
+      "dataSetName": "",
+      "funding": [{ "agencyName": "", "grant": "" }],
+      "pub": [{ "identifier": [{ "type": "doi",
+          "id": "",
+          "url": "" }] }],
+      "geo": { "geometry": { "coordinates": [0, 0, 0] } },
+      "chronData": [{
+        "chronMeasurementTable": {},
+        "chronModel": [{
+          "method": {},
+          "ensembleTable": {},
+          "summaryTable": {},
+          "distributionTable": []
+        }]
+      }],
+      "paleoData": [{
+        "paleoMeasurementTable": {},
+        "paleoModel": [{
+          "method": {},
+          "ensembleTable": {},
+          "summaryTable": {},
+          "distributionTable": []
+        }]
+      }]
+    },
     "json": {
       "lipdVersion": 1.2,
       "archiveType": "",
@@ -340,6 +367,14 @@ f.controller('FormCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Upload',
   $scope.geoMarkers = [];
 
   // MISC Functions
+
+  $scope.isBagit = function(filename){
+    if (filename.indexOf(".txt") >= 0){
+      return true
+    } else {
+      return false
+    }
+  };
 
   // Generate a TSid. An alphanumeric unique ID.
   $scope.generateTSid = function(){
@@ -546,7 +581,7 @@ f.controller('FormCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Upload',
           // pub must follow BibJSON standards
           $scope.verifyArrObjs(k, v);
         } else if (lowKey === "investigators" || lowKey === "investigator") {
-          $scope.verifyDataType("string", k, v);
+          $scope.verifyDataType("any", k, v);
         } else if (lowKey === "funding") {
           $scope.verifyArrObjs(k, v);
         } else if (lowKey === "geo") {
@@ -579,19 +614,21 @@ f.controller('FormCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Upload',
       // special case: check for object array.
       if (dt === "array") {
         if (!Array.isArray(v)) {
-          $scope.logFeedback("err", "Invalid data type: " + k + ". Expected: " + dt + ", Given: " + (typeof v === 'undefined' ? 'undefined' : _typeof(v)), k);
+          $scope.logFeedback("err", "Invalid data type: " + k + ".\n- Expected: " + dt + ", Given: " + (typeof v === 'undefined' ? 'undefined' : _typeof(v)), k);
           return false;
         }
+      } else if (dt === "any"){
+        return true;
       } else {
         // expecting specified data type, but didn't get it.
         if ((typeof v === 'undefined' ? 'undefined' : _typeof(v)) != dt) {
-          $scope.logFeedback("err", "Invalid data type: " + k + ". Expected: " + dt + ", Given: " + (typeof v === 'undefined' ? 'undefined' : _typeof(v)), k);
+          $scope.logFeedback("err", "Invalid data type: " + k + ".\n- Expected: " + dt + ", Given: " + (typeof v === 'undefined' ? 'undefined' : _typeof(v)), k);
           return false;
         } // end if
       } // end else
     } catch (err) {
       // caught some other unknown error
-      console.log("verifyDataType: Caught error parsing. Expected: " + cdt + ", Given: " + (typeof v === 'undefined' ? 'undefined' : _typeof(v)));
+      console.log("verifyDataType: Caught error parsing.\n- Expected: " + cdt + ", Given: " + (typeof v === 'undefined' ? 'undefined' : _typeof(v)));
     } // end catch
     return true;
   };
@@ -950,7 +987,7 @@ f.controller('FormCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Upload',
       // $scope.feedback.errCt++;
       // Count all TSid errors as a single error
       $scope.feedback.errCt++;
-      $scope.feedback.errMsgs.push("Missing data: TSid from " + $scope.feedback.missingTsidCt + " columns");
+      $scope.feedback.errMsgs.push("Missing data: TSid from " + $scope.feedback.missingTsidCt + " columns. \n- Use 'Populate TSids' button to generate and fill TSids");
     }
     if (!$scope.pageMeta.valid) {
       if ($scope.feedback.errCt === 0) {
@@ -960,6 +997,9 @@ f.controller('FormCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Upload',
   };
 
   // END VERIFY VALID
+
+
+
 
   // CREATE SIMPLE VIEW
 
@@ -1297,7 +1337,12 @@ f.controller('FormCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Upload',
               function nextFile() {
                   var file = files[addIndex];
                   onadd(file);
-                  zipWriter.add(file.filename, new zip.TextReader(file.dat), function() {
+                  if ($scope.isBagit(file.filename)){
+                    var filename  = $scope.files.dataSetName + "/" + file.filename;
+                  } else {
+                    var filename  = $scope.files.dataSetName + "/data/" + file.filename;
+                  }
+                  zipWriter.add(filename, new zip.TextReader(file.dat), function() {
                       addIndex++;
                       if (addIndex < files.length)
                           nextFile();
@@ -1309,7 +1354,9 @@ f.controller('FormCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Upload',
               function createZipWriter() {
                   zip.createWriter(writer, function(writer) {
                       zipWriter = writer;
-                      zipWriter.add("data", null, function(){}, function(){}, {"directory": true} );
+                      var datasetname = $scope.files.dataSetName;
+                      zipWriter.add(datasetname, null, function(){}, function(){}, {"directory": true} );
+                      zipWriter.add(datasetname + "/data", null, function(){}, function(){}, {"directory": true} );
                       oninit();
                       nextFile();
                   }, onerror);
