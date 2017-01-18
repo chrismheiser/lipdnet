@@ -8,11 +8,14 @@ var sys = require('sys');
 var multer = require('multer');
 var favicon = require('serve-favicon');
 var mongo = require('mongodb');
+var JSZip = require("jszip");
 var db = require('monk')('localhost:27017/docs');
-var routes = require('./routes/index');
-var users = require('./routes/users');
 //var port = process.env.PORT || 8080;
 var app = express();
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+var routes = require('./routes/index');
+var users = require('./routes/users');
 // console.log(__dirname + '/public/scripts/test.py');
 
 
@@ -35,8 +38,8 @@ app.set('view engine', 'jade');
 app.use(favicon(__dirname + '/public/favicon.ico'));
 app.use(logger('dev'));
 app.use(cookieParser());
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+// app.use(bodyParser.json());
+// app.use(bodyParser.urlencoded({ extended: true }));
 // app.use(express.bodyParser( { keepExtensions: true, uploadDir: __dirname + '/photos' } ));
 app.use(express.static(path.join(__dirname, 'public')));
 // app.use(express.static(path.join(__dirname, 'bower_components')));

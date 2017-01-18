@@ -45,16 +45,32 @@ block body
 											//- span#form-label Load LiPD
 											// Bind this to a 'change' event so that we know when jsonld data is available to start processing.
 											input#file-input(ng-model="file.input" name='file' type="file" accept=".lpd" ng-disabled="pageMeta.filePicker" style="max-width:200px; width:175px; padding:4px; display:inline;")
-																						
-											// When a LPD file is chosen, all the files inside are listed here.
-											//- button.valid-btn#download-btn(ng-model="file.down") Download
-											button.valid-btn#download-btn(ng-model="file.down" ng-disabled="!pageMeta.valid") Download
+											
+											// download button
+											//- md-button(ng-click="downloadZip()" ng-model='file' name='file' ngf-max-size="50MB") Download
+															
+	
+											button.valid-btn#generate-tsid(ng-model="feedback.missingTsidCt" ng-if="feedback.missingTsidCt > 0" ng-click="populateTSids1()") Populate TSid's
 
+											br 
 											// button to push validated lipd file to database
 											button.valid-btn(ng-model="file.push" ng-disabled="!pageMeta.valid") Upload to Wiki
+																
+											// download button
+											//- button.valid-btn#download-btn(ng-model="file.down" ng-disabled="!pageMeta.valid" ng-show="!pageMeta.dlFallback" ng-click="startCaptcha()") Download
+											button.valid-btn#download-btn(ng-model="file.down" ng-show="!pageMeta.dlFallback" ng-disabled="!pageMeta.valid" ng-click="startCaptcha()") Download
 											
-											button.valid-btn#generate-tsid(ng-model="feedback.missingTsidCt" ng-if="feedback.missingTsidCt > 0" ng-click="populateTSids1()") Populate TSid's
+											// If "download" attribute is not supported by browser, this is a fallback link to Right-click and save. 
+											br
+											a#dl-unsupported(ng-show="pageMeta.dlFallback") {{files.lipdFilename}}
+											br
+											a(ng-show="pageMeta.dlFallback") {{pageMeta.dlFallbackMsg}}
 											
+											// attempt at captcha
+											div(vc-recaptcha key="'6LchMhIUAAAAAGjGCfNGxPkOJPl3ilJ2sQrapbbL'" ng-model="gRecaptchaResponse" on-success="downloadZip()" ng-show="pageMeta.captcha")
+											//- div(ng-show="pageMeta.captcha" class="g-recaptcha" data-sitekey="6LchMhIUAAAAAGjGCfNGxPkOJPl3ilJ2sQrapbbL" data-callback="downloadZip")
+					
+																						
 										// When a LPD file is chosen, all the files inside are listed here.
 										li(style="list-style-type: none;")
 											pre(ng-class="feedback.errCt>0 ? 'on' : 'off'" style="background-color:#FEBABB; border: none;") {{ feedback.errCt}} errors
@@ -114,6 +130,8 @@ block js
 	script(src="lib/zip/zip-ext.js")
 	script(src="lib/papaparse.min.js")
 	script(src="lib/FileSaver.min.js")
+	script(src="https://cdnjs.cloudflare.com/ajax/libs/angular-recaptcha/3.2.1/angular-recaptcha.min.js")
+	script(src="https://www.google.com/recaptcha/api.js?onload=vcRecaptchaApiLoaded&render=explicit" async defer)
 	script(src='https://cdnjs.cloudflare.com/ajax/libs/angular-ui-router/0.2.15/angular-ui-router.min.js')
 	script(src='https://cdnjs.cloudflare.com/ajax/libs/angular-google-maps/2.2.0/angular-google-maps.min.js')
 	script(src='https://cdnjs.cloudflare.com/ajax/libs/danialfarid-angular-file-upload/8.0.1/ng-file-upload-shim.min.js')

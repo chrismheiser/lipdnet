@@ -1,5 +1,9 @@
 var express = require('express');
 var nodemailer = require('nodemailer');
+var zip = require("adm-zip");
+var fs = require("fs");
+var archiver = require('archiver');
+var StringStream = require('string-stream');
 // var sys = require('sys');
 var router = express.Router();
 
@@ -59,34 +63,112 @@ router.get('/upload', function(req, res, next){
 // });
 
 // Upload a file from the upload page, and insert it into the database
-router.post('/upss', function(req, res, next){
-  var result;
-  console.log(req.file);
-  req.file.time = Date.now();
-  res.json(req.file);
-});
+// router.post('/upss', function(req, res, next){
+//   var result;
+//   console.log(req.file);
+//   req.file.time = Date.now();
+//   res.json(req.file);
+// });
 
 // Upload a file from the upload page, and insert it into the database
-router.post('/updb', function(req, res, next){
-  var result;
-  var db = req.db;
-  var collection = db.get('docs');
-  console.log(req.file);
-  req.file.time = Date.now();
-  res.json(req.file);
-  collection.insert(req.file);
+// router.post('/updb', function(req, res, next){
+//   var result;
+//   var db = req.db;
+//   var collection = db.get('docs');
+//   console.log(req.file);
+//   req.file.time = Date.now();
+//   res.json(req.file);
+//   collection.insert(req.file);
+// });
+
+router.post("/zipup", function(req, res, next){
+  // get request data about file
+  var files = req.body.file;
+  var filename = req.body.filename;
+  console.log("Enter /zipup route");
+  // console.log(files);
+  // create path where file will be on server
+  var path = __dirname + "/zips/" + filename;
+  console.log("creating path: " + path);
+
+  // create the zip file
+  console.log("creating zip: " + filename)
+  var zipper = new zip();
+  files.forEach(function(file){
+    console.log("add file to zip: " + file.filename);
+    zipper.addFile(file.filename, file.dat);
+  });
+  // store the zip on the server d
+  console.log("Write zip to server");
+  zipper.writeZip(path, function(){
+    fs.stat(path, function(err, stat) {
+        if(err == null) {
+            console.log('File exists');
+        } else if(err.code == 'ENOENT') {
+            console.log("file does not exist");
+        } else {
+            console.log('Some other error: ', err.code);
+        }
+    });
+
+  });
+
+  //
+  // var archive = archiver('zip');
+  //
+  // //on stream closed we can end the request
+  // archive.on('end', function() {
+  //   console.log('Archive wrote %d bytes', archive.pointer());
+  // });
+  // res.attachment(filename);
+  // archive.pipe(res);
+  // files.forEach(function(file){
+  //   var buffer3 = new Buffer(file.dat);
+  //   archive.append(buffer3, { name: file.filename });
+  // });
+  // archive.finalize();
+
+  // // set up response and point to zip on server
+  // res.setHeader('Content-disposition', 'attachment; filename=' + filename);
+  // res.setHeader('Content-type', "application/zip");
+  //
+  // // send response
+  // console.log("create filestream");
+  // var filestream = fs.createReadStream(path);
+  // filestream.pipe(res);
+  // res.setHeader('Content-disposition', 'attachment; filename=' + filename);
+  // res.setHeader('Content-type', mimetype);
+  // res.download(path);
+  console.log("end /zipup route");
+
+});
+
+router.get("/zipdwn", function(req, res, next){
+  console.log("enter /zipdwn route");
+  var filename = req.body.filename;
+  var path = __dirname + "/zips/" + filename;
+  console.log("retrieving path: " + path);
+
+  // send response
+  console.log("create filestream");
+  var filestream = fs.createReadStream(path);
+  filestream.pipe(res);
+  res.setHeader('Content-disposition', 'attachment; filename=' + filename);
+  res.setHeader('Content-type', mimetype);
+  res.download(path);
+  console.log("end /zipdwn route");
 });
 
 // Download a validated LiPD file, or a file chosen from browsing the DB, to users computer
-router.post("/dwn", function(req, res, next){
-  var result;
-  var db = req.db;
-  var collection = db.get('docs');
-  console.log(req.file);
-  req.file.time = Date.now();
-  res.json(req.file);
-  collection.insert(req.file);
-});
+// router.post("/dwn", function(req, res, next){
+//   var result;
+//   var db = req.db;
+//   var collection = db.get('docs');
+//   console.log(req.file);
+//   req.file.time = Date.now();
+//   res.json(req.file);
+//   collection.insert(req.file);
+// });
 
 // Get the browse page
 // This finds every document since there's no parameters
