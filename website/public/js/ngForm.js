@@ -346,7 +346,6 @@ f.controller('FormCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Upload',
     "dlFallback": false,
     "dlFallbackMsg": "",
     "captcha": false,
-    "captchaValid": false,
   };
 
   // NOTE: to do case insensitve key checking, you'd have to loop over every field. You cannot use "hasOwnProperty"
@@ -1166,16 +1165,16 @@ f.controller('FormCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Upload',
 
   // UPLOAD TO NODE
 
-  // Upload VALIDATED lipd data to the database
+  // Upload VALIDATED lipd data to backend
   $scope.uploadZip = function (zip, cb) {
 
     Upload.upload({
-        url: '/zipup',
+        url: '/files',
         data: {file: zip.dat,
               filename: zip.filename}
     }).then(function (resp) {
         console.log('Success');
-        return zip.filename;
+        cb(zip.filename);
     }, function (resp) {
         console.log('Error status: ' + resp.status);
     }, function (evt) {
@@ -1194,11 +1193,11 @@ f.controller('FormCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Upload',
       console.log("ExportService.then()");
       //upload zip to node backend, then callback and download it afterward.
       $scope.uploadZip({"filename": $scope.files.lipdFilename, "dat": res}, function(filename){
-        // do get request to trigger download file
-        http.get("/zipdwn", filename);
+        // do get request to trigger download file immediately after download
+        window.location.href = "http://localhost:3000/files/" + filename;
+        // window.location.href = "http://www.lipd.net/files/" + filename;
         // reset the captcha
         $scope.pageMeta.captcha = false;
-        $scope.pageMeta.captchaValid = false;
       });
     });
   };
@@ -1364,163 +1363,6 @@ f.controller('FormCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Upload',
         }); // end model.getEntries
         // once the change even has triggered, it cannot be triggered again until page refreshes.
       }, false); // end upload event listener
-
-      // DOWNLOADER SECTION
-
-      // listen for when user wants to zip workspace and download LPD file.
-      // downloadButton.addEventListener("click", function(event) {
-      //
-      //   // use the service to parse data from the ZipJS entries
-      //   $scope._myPromiseExport = ExportService.prepForDownload($scope.files);
-      //   $scope._myPromiseExport.then(function (res) {
-      //     console.log("ExportService.then()");
-
-          // function onProgress(a, b) {
-          //   console.log("current", a, "end", b);
-          // }
-          //
-          // var zipWriter;
-
-          // function addFiles(files, oninit, onadd, onprogress, onend) {
-          //     var addIndex = 0;
-          //     // add the next file to the zip file
-          //     function nextFile() {
-          //         var file = files[addIndex];
-          //         onadd(file);
-          //         // place the file in the zip hierarchy based on filetype
-          //         if ($scope.isBagit(file.filename)){
-          //           var filename  = $scope.files.dataSetName + "/" + file.filename;
-          //         } else {
-          //           var filename  = $scope.files.dataSetName + "/data/" + file.filename;
-          //         }
-          //         zipWriter.add(filename, new zip.TextReader(file.dat), function() {
-          //             addIndex++;
-          //             if (addIndex < files.length)
-          //                 nextFile();
-          //             else
-          //                 onend();
-          //         }, onprogress);
-          //     }
-          //     // create the zip writer, and start adding files
-          //     function createZipWriter() {
-          //         zip.createWriter(writer, function(writer) {
-          //             zipWriter = writer;
-          //             var datasetname = $scope.files.dataSetName;
-          //             zipWriter.add(datasetname, null, function(){}, function(){}, {"directory": true} );
-          //             zipWriter.add(datasetname + "/data", null, function(){}, function(){}, {"directory": true} );
-          //             oninit();
-          //             nextFile();
-          //         }, onerror);
-          //     }
-          //
-          //     // if zipWriter is created, continue processing files
-          //     if (zipWriter){
-          //       nextFile();
-          //     }
-          //     // if zipWriter is not created, create it now.
-          //     else {
-          //         writer = new zip.BlobWriter();
-          //         createZipWriter();
-          //     }
-          // }
-          //
-          // // currently unused function
-          // function downloadSupported(_zipName) {
-          //   zipWriter.close(function(blob){
-          //     saveAs(blob, _zipName); // uses FileSaver.js
-          //   });
-          //   zipWriter = null;
-          // }
-          //
-          // function downloadUnsupported(callback) {
-    			// 	zipWriter.close(function(blob) {
-    			// 		var blobURL = URL.createObjectURL(blob);
-    			// 		callback(blobURL);
-    			// 		zipWriter = null;
-    			// 	});
-    			// }
-
-          // // METHOD 4 : do zipping in backend nodejs
-          // $scope.uploadZip({"filename": $scope.files.lipdFilename, "dat": res}, function(filename){
-          //   http.get()
-          // });
-
-          // save file promises to the scope.
-          // $scope.downloadPromises = res;
-
-          // Add the files to the zip
-          // addFiles(res,
-          //     function() {
-          //         // Init
-          //         console.log("init: addFiles()");
-          //     }, function(file) {
-          //         // OnAdd
-          //         // console.log("Added file");
-          //     }, function(current, total) {
-          //         // OnProgress
-          //         // console.log("%s %s", current, total);
-          //     }, function() {
-          //         // OnEnd
-          //         console.log("complete: addFiles()");
-          //         // METHOD 3
-          //         zipWriter.close(function(blob) {
-          //           var _zipName = $scope.files.lipdFilename;
-          //           var _lipdObj = {"filename": _zipName, "dat": blob};
-          //           $scope.uploadZip(_lipdObj);
-          //         });
-          //
-          //
-          //         // METHOD 1
-          //         var _zipName = $scope.files.lipdFilename;
-          //         var downloadAttrSupported = ("download" in document.createElement("a"));
-          //         if (!downloadAttrSupported){
-          //           var clickEvent;
-          //           clickEvent = document.createEvent("MouseEvent");
-          //           clickEvent.initMouseEvent("click", true, true, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
-          //           downloadUnsupported(function(blobURL){
-          //               $("#dl-unsupported").attr("href", "data:application/zip;base64," + blobURL);
-          //               $("#dl-unsupported").attr("download", _zipName);
-          //               $("#dl-unsupported").trigger('click');
-          //               $scope.$apply(function() {
-          //                 $scope.pageMeta.dlFallback = true;
-          //                 $scope.pageMeta.dlFallbackMsg = 'Right-click and select "Download Linked File"';
-          //               });
-          //
-          //           });
-          //         } else {
-          //           downloadSupported(_zipName);
-          //         }
-          //
-          //         // METHOD 2
-          //         zipWriter.close(function(blob) {
-          //           _zipName = $scope.files.lipdFilename
-          //           console.log("downloading: " + _zipName);
-          //           // check support for download attribute (no support in IE and safari)
-          //           var downloadAttrSupported = ("download" in document.createElement("a"));
-          //           if (!downloadAttrSupported){
-          //             // add the attributes to the fallback element
-          //             getBlobURL(blob, function(blobURL){
-          //               $("#dl-unsupported").attr("href", blobURL);
-          //               $("#dl-unsupported").attr("download", _zipName);
-          //             });
-          //             // turn on the fallback messages and boolean
-          //             $scope.pageMeta.dlFallback = true;
-          //             $scope.pageMeta.dlFallbackMsg = 'Right-click and select "Download Linked File"';
-          //           } else {
-          //             saveAs(blob, _zipName); // uses FileSaver.js
-          //           }
-          //           _zipName = $scope.files.dataSetName + ".lpd"
-          //           console.log("downloading: " + _zipName);
-          //           saveAs(blob, _zipName); // uses FileSaver.js
-          //           document.getElementById("file-input").value = null; // reset input file list
-          //           zipWriter = null;
-          //         });
-          //
-          //     }); // end addFiles
-
-      //   }); // end ExportService
-      //
-      // }, false); // end download listener
 
     })();
   })(this);

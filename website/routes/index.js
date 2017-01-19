@@ -1,7 +1,8 @@
 var express = require('express');
 var nodemailer = require('nodemailer');
-var zip = require("adm-zip");
+// var zip = require("adm-zip");
 var fs = require("fs");
+var request = require("request");
 var archiver = require('archiver');
 var StringStream = require('string-stream');
 // var sys = require('sys');
@@ -52,123 +53,53 @@ router.get('/upload', function(req, res, next){
   res.render('upload', {title: 'Upload'});
 });
 
-
-
-// router.get('/upload/paths', function(req, res, next){
-//   var db = req.db;
-//   var collection = db.get('docs');
-//   collection.find({},{},function(e,docs){
-//     res.json(docs);
-//   });
-// });
-
-// Upload a file from the upload page, and insert it into the database
-// router.post('/upss', function(req, res, next){
-//   var result;
-//   console.log(req.file);
-//   req.file.time = Date.now();
-//   res.json(req.file);
-// });
-
-// Upload a file from the upload page, and insert it into the database
-// router.post('/updb', function(req, res, next){
-//   var result;
-//   var db = req.db;
-//   var collection = db.get('docs');
-//   console.log(req.file);
-//   req.file.time = Date.now();
-//   res.json(req.file);
-//   collection.insert(req.file);
-// });
-
-router.post("/zipup", function(req, res, next){
+router.post("/files", function(req, res, next){
   // get request data about file
   var files = req.body.file;
   var filename = req.body.filename;
-  console.log("Enter /zipup route");
-  // console.log(files);
   // create path where file will be on server
-  var path = __dirname + "/zips/" + filename;
-  console.log("creating path: " + path);
+  var path = __dirname + "/files/" + filename;
 
-  // create the zip file
-  console.log("creating zip: " + filename)
-  var zipper = new zip();
+  // zip with archiver module
+
+  // console.log("create write stream")
+  var output = fs.createWriteStream(path);
+  var archive = archiver('zip');
+
+  output.on('close', function () {
+      console.log(archive.pointer() + ' total bytes');
+      console.log('archiver has been finalized and the output file descriptor has closed.');
+      res.send(filename);
+  });
+
+  archive.on('error', function(err){
+      console.log("archive error");
+      throw err;
+  });
+
+  // console.log("pipe output")
+  archive.pipe(output);
+
   files.forEach(function(file){
-    console.log("add file to zip: " + file.filename);
-    zipper.addFile(file.filename, file.dat);
-  });
-  // store the zip on the server d
-  console.log("Write zip to server");
-  zipper.writeZip(path, function(){
-    fs.stat(path, function(err, stat) {
-        if(err == null) {
-            console.log('File exists');
-        } else if(err.code == 'ENOENT') {
-            console.log("file does not exist");
-        } else {
-            console.log('Some other error: ', err.code);
-        }
-    });
-
+    // console.log(file.filename);
+    // console.log(typeof(file.dat));
+    archive.append(file.dat, { name: file.filename });
   });
 
-  //
-  // var archive = archiver('zip');
-  //
-  // //on stream closed we can end the request
-  // archive.on('end', function() {
-  //   console.log('Archive wrote %d bytes', archive.pointer());
-  // });
-  // res.attachment(filename);
-  // archive.pipe(res);
-  // files.forEach(function(file){
-  //   var buffer3 = new Buffer(file.dat);
-  //   archive.append(buffer3, { name: file.filename });
-  // });
-  // archive.finalize();
-
-  // // set up response and point to zip on server
-  // res.setHeader('Content-disposition', 'attachment; filename=' + filename);
-  // res.setHeader('Content-type', "application/zip");
-  //
-  // // send response
-  // console.log("create filestream");
-  // var filestream = fs.createReadStream(path);
-  // filestream.pipe(res);
-  // res.setHeader('Content-disposition', 'attachment; filename=' + filename);
-  // res.setHeader('Content-type', mimetype);
-  // res.download(path);
-  console.log("end /zipup route");
+  // console.log("finalize");
+  archive.finalize();
 
 });
 
-router.get("/zipdwn", function(req, res, next){
-  console.log("enter /zipdwn route");
-  var filename = req.body.filename;
-  var path = __dirname + "/zips/" + filename;
-  console.log("retrieving path: " + path);
-
-  // send response
-  console.log("create filestream");
-  var filestream = fs.createReadStream(path);
-  filestream.pipe(res);
-  res.setHeader('Content-disposition', 'attachment; filename=' + filename);
-  res.setHeader('Content-type', mimetype);
-  res.download(path);
-  console.log("end /zipdwn route");
+router.get("/files/:filename", function(req, res, next){
+  var filename = req.params.filename;
+  var path = __dirname + "/files/" + filename;
+  if (fs.existsSync(path)) {
+    res.setHeader('Content-disposition', 'attachment; filename=' + filename);
+    res.setHeader('Content-type', "application/zip");
+    res.download(path);
+  }
 });
-
-// Download a validated LiPD file, or a file chosen from browsing the DB, to users computer
-// router.post("/dwn", function(req, res, next){
-//   var result;
-//   var db = req.db;
-//   var collection = db.get('docs');
-//   console.log(req.file);
-//   req.file.time = Date.now();
-//   res.json(req.file);
-//   collection.insert(req.file);
-// });
 
 // Get the browse page
 // This finds every document since there's no parameters
@@ -206,12 +137,5 @@ router.post('/test', function(req, res, next){
   res.json(req.file);
   res.end("END");
 });
-
-// Get the upload page
-// router.get('/upload-tree', function(req, res, next){
-//   res.render('upload-tree', {title: 'Upload JSON Tree'});
-// });
-// TESTING TESTING TESTING TESTING TESTING
-
 
 module.exports = router;
