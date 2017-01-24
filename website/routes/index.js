@@ -1,10 +1,13 @@
 var express = require('express');
 var nodemailer = require('nodemailer');
-// var zip = require("adm-zip");
 var fs = require("fs");
-var request = require("request");
 var archiver = require('archiver');
-var StringStream = require('string-stream');
+var gladstone = require('gladstone');
+var path = require("path");
+var step = require("../node_modules/step/step");
+var request = require("request");
+var process = require("process");
+
 // var sys = require('sys');
 var router = express.Router();
 
@@ -16,6 +19,74 @@ var transporter = nodemailer.createTransport({
         pass: 'aC9Un3Fudd2eJ0loU1wiT1'
     }
 });
+
+var mkdirSync = function (path) {
+  try {
+    fs.mkdirSync(path);
+  } catch(e) {
+    if ( e.code != 'EEXIST' ) throw e;
+  }
+}
+
+
+// use the archiver model to create the LiPD file
+var createArchive = function(pathTmpZip, pathTmpBag, filename, cb){
+  console.log("Creating ZIP/LiPD archive...");
+  var archive = archiver('zip');
+  // path where the LiPD will ultimately be located in "/zip" dir.
+  var pathTmpZipLipd = path.join(pathTmpZip, filename);
+  // open write stream to LiPD file location
+  var output = fs.createWriteStream(pathTmpZipLipd);
+  console.log("Write Stream Open: " + pathTmpZipLipd);
+
+  // "close" event. processing is finished.
+  output.on('close', function () {
+      console.log(archive.pointer() + ' total bytes');
+      // console.log('archiver has been finalized and the output file descriptor has closed.');
+      console.log("LiPD Created at: " + pathTmpZipLipd);
+      // callback to finish POST request
+      cb();
+  });
+
+  // error event
+  archive.on('error', function(err){
+      console.log("archive error");
+      throw err;
+  });
+
+  archive.pipe(output);
+  // Add the data directory to the archive
+  console.log("add dir to archive");
+  try{
+    // read in all filenames from the "/bag" dir
+    var files = fs.readdirSync(pathTmpBag);
+    for(var i in files) {
+      // current file to process
+      var currPath = path.join(pathTmpBag, files[i]);
+
+      // if this is a bagit file (.txt), use "archive.file"
+      if(path.extname(files[i]) === ".txt") {
+        console.log("archiving file from: " + currPath);
+        console.log("archiving file to: " + files[i]);
+        archive.file(currPath, { name: files[i]});
+
+      }
+      // if this is the "/data" directory, use "archive.directory"
+      else {
+        console.log("archiving dir from: " + currPath);
+        console.log("archiving dir to: /" + files[i]);
+        archive.directory(currPath, "/" + files[i]);
+      }
+
+    }
+
+  }catch(err){
+    console.log(err);
+  }
+
+  // all files are done, finalize the archive
+  archive.finalize();
+};
 
 // Get the home page
 router.get('/', function(req, res, next) {
@@ -54,50 +125,77 @@ router.get('/upload', function(req, res, next){
 });
 
 router.post("/files", function(req, res, next){
-  // get request data about file
+  // set data about the file
   var files = req.body.file;
   var filename = req.body.filename;
-  // create path where file will be on server
-  var path = __dirname + "/files/" + filename;
 
-  // zip with archiver module
+  // path that stores lipds
+  var pathTop = path.join(__dirname, "files");
 
-  // console.log("create write stream")
-  var output = fs.createWriteStream(path);
-  var archive = archiver('zip');
-
-  output.on('close', function () {
-      console.log(archive.pointer() + ' total bytes');
-      console.log('archiver has been finalized and the output file descriptor has closed.');
-      res.send(filename);
+  // create tmp folder at "/files/<lipd-xxxxx>"
+  var pathTmp = fs.mkdtempSync(path.join(pathTop, "lipd-"), (err, folder) => {
+    if (err) throw err;
+    console.log(folder);
   });
 
-  archive.on('error', function(err){
-      console.log("archive error");
-      throw err;
-  });
+  console.log("tmp path: " + pathTmp);
 
-  // console.log("pipe output")
-  archive.pipe(output);
+  // tmp bagit level folder. will be removed before zipping.
+  var pathTmpBag = path.join(pathTmp, "bag");
+  var pathTmpZip = path.join(pathTmp, "zip");
+  var pathTmpFiles = path.join(pathTmp, "files");
 
+  mkdirSync(pathTmpZip);
+  mkdirSync(pathTmpFiles);
+
+  console.log("created dir: " + pathTmpZip);
+  console.log("created dir: " + pathTmpFiles);
+
+  // use req data to write csv and jsonld files into "/files/<lipd-xxxxx>/files/"
   files.forEach(function(file){
-    // console.log(file.filename);
-    // console.log(typeof(file.dat));
-    archive.append(file.dat, { name: file.filename });
+    console.log("writing: " + path.join(pathTmpFiles,  file.filename));
+    fs.writeFileSync(path.join(pathTmpFiles, file.filename), file.dat);
   });
 
-  // console.log("finalize");
-  archive.finalize();
-
+  console.log("Initiate Bagit...");
+  // Call bagit process on folder of files
+  gladstone.createBagDirectory({
+     bagName: pathTmpBag,
+     originDirectory: pathTmpFiles,
+     cryptoMethod: 'md5',
+     sourceOrganization: 'LiPD Project',
+     contactName: 'Chris Heiser',
+     contactEmail: 'lipd.contact@gmail.com',
+     externalDescription: 'Source: LiPD Online Validator'
+  }).then(function(resp){
+    // When a successful Bagit Promise returns, start creating the ZIP/LiPD archive
+    if(resp){
+      createArchive(pathTmpZip, pathTmpBag, filename, function(){
+        console.log("Send to Client: " + path.basename(pathTmp));
+        res.send(path.basename(pathTmp));
+      });
+    }
+  });
+  console.log("POST complete");
 });
 
-router.get("/files/:filename", function(req, res, next){
-  var filename = req.params.filename;
-  var path = __dirname + "/files/" + filename;
-  if (fs.existsSync(path)) {
-    res.setHeader('Content-disposition', 'attachment; filename=' + filename);
-    res.setHeader('Content-type', "application/zip");
-    res.download(path);
+router.get("/files/:tmp", function(req, res, next){
+  // Tmp string provided by client
+  var tmpStr = req.params.tmp;
+  // Path to the zip dir that holds the LiPD file
+  var pathTmpZip = path.join(__dirname, "files", tmpStr, "zip");
+  // Read in all filenames from the dir
+  var files = fs.readdirSync(pathTmpZip);
+  // Loop over the files found
+  for(var i in files) {
+    // Get the first lipd file you find (there should only be one)
+     if(path.extname(files[i]) === ".lpd") {
+       // set headers and initiate download.
+       var pathLipd = path.join(pathTmpZip, files[i]);
+       res.setHeader('Content-disposition', 'attachment; filename=' + files[i]);
+       res.setHeader('Content-type', "application/zip");
+       res.download(pathLipd);
+     }
   }
 });
 

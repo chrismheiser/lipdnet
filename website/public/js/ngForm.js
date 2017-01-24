@@ -159,11 +159,12 @@ f.factory("ExportService", ["$q", function ($q) {
     var _jsonPrepped = JSON.stringify(_d1.json, null, 4)
     promises.push(getText(_jsonFilename, _jsonPrepped));
 
+    // BAGIT ITEMS IGNORED. NEW BAGIT FILES WILL BE GENERATED IN BACKEND
     // loop for bagit items
-    for (var _filename1 in _d1.bagit) {
-      // create entry in flat scope obj. ref by filename, and link data. no special work needed here
-      promises.push(getText(_filename1, _d1.bagit[_filename1]["data"]));
-    }
+    // for (var _filename1 in _d1.bagit) {
+    //   // create entry in flat scope obj. ref by filename, and link data. no special work needed here
+    //   promises.push(getText(_filename1, _d1.bagit[_filename1]["data"]));
+    // }
 
     // loop for csv items
     for (var _filename2 in _d1.csv) {
@@ -1174,7 +1175,8 @@ f.controller('FormCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Upload',
               filename: zip.filename}
     }).then(function (resp) {
         console.log('Success');
-        cb(zip.filename);
+        console.log(resp);
+        cb(resp);
     }, function (resp) {
         console.log('Error status: ' + resp.status);
     }, function (evt) {
@@ -1192,9 +1194,11 @@ f.controller('FormCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Upload',
     $scope._myPromiseExport.then(function (res) {
       console.log("ExportService.then()");
       //upload zip to node backend, then callback and download it afterward.
-      $scope.uploadZip({"filename": $scope.files.lipdFilename, "dat": res}, function(filename){
+      $scope.uploadZip({"filename": $scope.files.lipdFilename, "dat": res}, function(tmp){
         // do get request to trigger download file immediately after download
-        window.location.href = "http://localhost:3000/files/" + filename;
+        console.log("client side after upload");
+        console.log(tmp.data);
+        window.location.href = "http://localhost:3000/files/" + tmp.data;
         // window.location.href = "http://www.lipd.net/files/" + filename;
         // reset the captcha
         $scope.pageMeta.captcha = false;
