@@ -1,33 +1,34 @@
 var express = require('express');
-var nodemailer = require('nodemailer');
 var fs = require("fs");
 var archiver = require('archiver');
 var gladstone = require('gladstone');
 var path = require("path");
-var step = require("../node_modules/step/step");
-var request = require("request");
 var process = require("process");
-
-// var sys = require('sys');
+var lipdValidator = require("../public/scripts/validator_node.js");
 var router = express.Router();
 
-// Nodemailer reusable transport object
-var transporter = nodemailer.createTransport({
-    service: 'Gmail',
-    auth: {
-        user: 'lipd.contact@gmail.com',
-        pass: 'aC9Un3Fudd2eJ0loU1wiT1'
-    }
-});
-
+// create a directory, but catch error when the dir already exists.
 var mkdirSync = function (path) {
   try {
     fs.mkdirSync(path);
   } catch(e) {
-    if ( e.code != 'EEXIST' ) throw e;
+    if ( e.code == 'EEXIST' ){
+      console.log("folder exists: " + path);
+    } else {
+      console.log(e);
+    }
   }
-}
+};
 
+// create a random string of numbers/letters for the TMP folder
+var makeid = function(prefix, cb){
+    var text = "";
+    var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    for( var i=0; i < 6; i++ )
+        text += possible.charAt(Math.floor(Math.random() * possible.length));
+    cb(prefix + text);
+    return prefix + text;
+};
 
 // use the archiver model to create the LiPD file
 var createArchive = function(pathTmpZip, pathTmpBag, filename, cb){
@@ -86,7 +87,7 @@ var createArchive = function(pathTmpZip, pathTmpBag, filename, cb){
 
   // all files are done, finalize the archive
   archive.finalize();
-};
+}; // end createArchive
 
 // Get the home page
 router.get('/', function(req, res, next) {
@@ -97,21 +98,6 @@ router.get('/', function(req, res, next) {
 router.post('/', function(req, res, next){
   console.log(req.body);
 
-  // use req data from contact form to build email object
-  var mailOptions = {
-      from: req.body.name + ' <' + req.body.email + '>',
-      to: "LiPD Contact Form <" + req.body.email + '>',
-      subject: "Message from " + req.body.name,
-      text: "Organization:\n" + req.body.org + "\n\nSubject:\n" +
-      req.body.subject + "\n\nMessage:\n" + req.body.message
-  };
-  // send mail with transport object and defined mail options
-  transporter.sendMail(mailOptions, function(error, info){
-      if(error){
-          return console.log(error);
-      }
-      console.log('Message sent: ' + info.response);
-  });
 });
 
 // Get the schema page
@@ -120,44 +106,51 @@ router.get('/schema', function(req, res, next){
 });
 
 // Get the upload page
-router.get('/upload', function(req, res, next){
-  res.render('upload', {title: 'Upload'});
+router.get('/validator', function(req, res, next){
+  res.render('validator', {title: 'Validator'});
 });
 
 router.post("/files", function(req, res, next){
+  console.log("POST: /files");
+
   // set data about the file
   var files = req.body.file;
   var filename = req.body.filename;
+  console.log("POST: build path names");
 
   // path that stores lipds
-  var pathTop = path.join(__dirname, "files");
-
+  var pathTop = path.join(process.cwd(), "tmp");
+  var _pathTmpPrefix = path.join(pathTop, "lipd-");
   // create tmp folder at "/files/<lipd-xxxxx>"
-  var pathTmp = fs.mkdtempSync(path.join(pathTop, "lipd-"), (err, folder) => {
-    if (err) throw err;
-    console.log(folder);
+  console.log("POST: creating tmp dir...");
+  var pathTmp = makeid(_pathTmpPrefix, function(_pathTmp){
+    console.log("POST: created tmp dir str: " + _pathTmp);
+    mkdirSync(_pathTmp);
+    return _pathTmp;
   });
 
-  console.log("tmp path: " + pathTmp);
+  console.log("POST: tmp path: " + pathTmp);
 
   // tmp bagit level folder. will be removed before zipping.
   var pathTmpBag = path.join(pathTmp, "bag");
   var pathTmpZip = path.join(pathTmp, "zip");
   var pathTmpFiles = path.join(pathTmp, "files");
 
+  console.log("POST: make other dirs...");
   mkdirSync(pathTmpZip);
   mkdirSync(pathTmpFiles);
 
-  console.log("created dir: " + pathTmpZip);
-  console.log("created dir: " + pathTmpFiles);
+  console.log("POST: created dir: " + pathTmpZip);
+  console.log("POST: created dir: " + pathTmpFiles);
 
   // use req data to write csv and jsonld files into "/files/<lipd-xxxxx>/files/"
+  console.log("POST: begin writing files");
   files.forEach(function(file){
-    console.log("writing: " + path.join(pathTmpFiles,  file.filename));
+    console.log("POST: writing: " + path.join(pathTmpFiles,  file.filename));
     fs.writeFileSync(path.join(pathTmpFiles, file.filename), file.dat);
   });
 
-  console.log("Initiate Bagit...");
+  console.log("POST: Initiate Bagit...");
   // Call bagit process on folder of files
   gladstone.createBagDirectory({
      bagName: pathTmpBag,
@@ -171,7 +164,7 @@ router.post("/files", function(req, res, next){
     // When a successful Bagit Promise returns, start creating the ZIP/LiPD archive
     if(resp){
       createArchive(pathTmpZip, pathTmpBag, filename, function(){
-        console.log("Send to Client: " + path.basename(pathTmp));
+        console.log("POST: response: " + path.basename(pathTmp));
         res.send(path.basename(pathTmp));
       });
     }
@@ -181,10 +174,14 @@ router.post("/files", function(req, res, next){
 
 router.get("/files/:tmp", function(req, res, next){
   // Tmp string provided by client
+  console.log("GET: /files");
   var tmpStr = req.params.tmp;
+  console.log("GET: tmpStr: " + tmpStr);
   // Path to the zip dir that holds the LiPD file
-  var pathTmpZip = path.join(__dirname, "files", tmpStr, "zip");
+  var pathTmpZip = path.join(process.cwd(), "tmp", tmpStr, "zip");
+  console.log("GET: " + pathTmpZip);
   // Read in all filenames from the dir
+  console.log("GET: read zip dir");
   var files = fs.readdirSync(pathTmpZip);
   // Loop over the files found
   for(var i in files) {
@@ -194,19 +191,14 @@ router.get("/files/:tmp", function(req, res, next){
        var pathLipd = path.join(pathTmpZip, files[i]);
        res.setHeader('Content-disposition', 'attachment; filename=' + files[i]);
        res.setHeader('Content-type', "application/zip");
+       console.log("sending response to client.");
        res.download(pathLipd);
      }
   }
 });
 
-// Get the browse page
-// This finds every document since there's no parameters
-router.get('/browse', function(req, res, next){
-  var db = req.db;
-  var collection = db.get('docs');
-  var push;
-  collection.find({},{},function(e,docs){push = docs;});
-  res.render('browse', {title: 'Browse', docs: push});
+router.get("/create", function(req, res, next){
+  res.render('create', {title: 'Create & Edit LiPD'});
 });
 
 router.get("/modal", function(req, res, next){
@@ -225,15 +217,38 @@ router.get("/modalTxt", function(req, res, next){
   res.render('modalTxt', {title: ''});
 });
 
-// TESTING TESTING TESTING TESTING TESTING
-router.get('/test', function(req, res, next){
-  res.render('test', {title: 'Test'});
+// API
+router.get("/api/validator", function(req, res, next){
+  console.log("enter /api/validator");
+  // We are using this as a validation call for our desktop utilities.
+  // GET with some JSON, and we'll tell you if it pass/fail and what errors came up.
+
+  try {
+    // receive some json data
+    console.log("Parsing JSON request");
+    var json_data = JSON.parse(req.body["json_payload"]);
+    console.log("Starting process...");
+    lipdValidator.sortBeforeValidate(json_data, function(j){
+      console.log("sortBeforeValidate callback: sending to validate");
+      lipdValidator.validate(j, function(x){
+        try {
+          console.log("Validate callback, preparing response");
+          res.setHeader('Content-Type', 'application/json');
+          res.send(JSON.stringify(x, null, 3));
+          console.log("Response sent to origin");
+        } catch(err) {
+          console.log("Error trying to prepare response. Ending request: " + err);
+          res.end();
+        }
+      });
+    });
+  } catch(err) {
+    console.log("Error: overall process failed: " + err);
+    res.end();
+  }
+
+  console.log("exit /api/validator");
 });
 
-router.post('/test', function(req, res, next){
-  console.log(req.file);
-  res.json(req.file);
-  res.end("END");
-});
 
 module.exports = router;

@@ -1,0 +1,294 @@
+/* upload.css */
+
+
+/* BASIC STYLINGS
+============================================================================= */
+body                            { padding-top:20px; }
+
+/* form styling */
+#form-container                { background:#fff; margin-bottom:20px;
+    border-radius:5px; }
+#form-container .page-header   { background: transparent; margin:0; padding:30px;
+    border-top-left-radius:5px; border-top-right-radius:5px; }
+
+/* numbered buttons */
+#status-buttons                 {  }
+#status-buttons a               { color:#111; display:inline-block; font-size:12px; margin-right:10px; text-align:center; text-transform:uppercase; }
+#status-buttons a:hover         { text-decoration:none; }
+
+/* span as the circled number */
+#status-buttons span            { background:#fff; display:block; height:30px; margin:0 auto 10px; padding-top:5px; width:30px;
+    border-radius:50%; }
+
+/* active buttons*/
+#status-buttons a.active span   { background:#71a436; color:#fff }
+
+.md-button.md-small {
+  max-width: 20px;
+  height: 20px;
+  line-height: 20px;
+  min-height: 20px;
+  vertical-align: bottom;
+  font-size: 10px;
+  padding: 0 0;
+  margin: auto auto;
+}
+
+.on {
+  border: none;
+}
+.off {
+  border: none;
+  opacity: 0.2;
+}
+
+
+/* Autocomplete database form (in FileCtrl)
+============================================================================= */
+.ac-db li {
+  border-bottom: 1px solid #ccc;
+  height: auto;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  white-space: normal; }
+
+.ac-db li:last-child {
+  border-bottom-width: 0; }
+
+.ac-db .item-title, .ac-db .item-metadata {
+  display: block;
+  line-height: 2; }
+
+.ac-db .item-title md-icon {
+  height: 18px;
+  width: 18px; }
+
+
+
+/* ANIMATION STYLINGS
+============================================================================= */
+#upload-form            { position:relative; min-height:300px; overflow:hidden; padding:30px; }
+#form-views             { width:auto; }
+
+/* basic styling for entering and leaving */
+/* left and right added to ensure full width */
+#form-views.ng-enter,
+#form-views.ng-leave      { position:absolute; left:30px; right:30px;
+    transition:0.5s all ease; -moz-transition:0.5s all ease; -webkit-transition:0.5s all ease;
+}
+
+/* enter animation */
+#form-views.ng-enter            {
+    -webkit-animation:slideInRight 0.5s both ease;
+    -moz-animation:slideInRight 0.5s both ease;
+    animation:slideInRight 0.5s both ease;
+}
+
+/* leave animation */
+#form-views.ng-leave            {
+    -webkit-animation:slideOutLeft 0.5s both ease;
+    -moz-animation:slideOutLeft 0.5s both ease;
+    animation:slideOutLeft 0.5s both ease;
+}
+
+/* ANIMATIONS
+============================================================================= */
+/* slide out to the left */
+@keyframes slideOutLeft {
+    to      { transform: translateX(-200%); }
+}
+@-moz-keyframes slideOutLeft {
+    to      { -moz-transform: translateX(-200%); }
+}
+@-webkit-keyframes slideOutLeft {
+    to      { -webkit-transform: translateX(-200%); }
+}
+
+/* slide in from the right */
+@keyframes slideInRight {
+    from    { transform:translateX(200%); }
+    to      { transform: translateX(0); }
+}
+@-moz-keyframes slideInRight {
+    from    { -moz-transform:translateX(200%); }
+    to      { -moz-transform: translateX(0); }
+}
+@-webkit-keyframes slideInRight {
+    from    { -webkit-transform:translateX(200%); }
+    to      { -webkit-transform: translateX(0); }
+}
+
+
+
+/* NG - ANIMATE TRANSITIONS
+============================================================================= */
+
+.animate-enter,
+.animate-leave
+{
+    -webkit-transition: 1075ms cubic-bezier(0.645, 0.045, 0.355, 1.000) all;
+    -moz-transition: 1075ms cubic-bezier(0.645, 0.045, 0.355, 1.000) all;
+    -ms-transition: 1075ms cubic-bezier(0.645, 0.045, 0.355, 1.000) all;
+    -o-transition: 1075ms cubic-bezier(0.645, 0.045, 0.355, 1.000) all;
+    transition: 1075ms cubic-bezier(0.645, 0.045, 0.355, 1.000) all;
+}
+
+.animate-enter {
+    left: 100%;
+}
+.animate-enter.animate-enter-active {
+    left: 0;
+}
+
+.animate-leave {
+    left: 0;
+}
+.animate-leave.animate-leave-active{
+    left: -100%;
+}
+
+.datepickerdemoBasicUsage {
+  /** Demo styles for mdCalendar. */ }
+  .datepickerdemoBasicUsage md-content {
+    padding-bottom: 200px; }
+
+.x-button {
+    height: 20px;
+    width: 20px;
+    position:relative;
+    margin-top:5%;}
+
+  body{
+    -webkit-text-size-adjust: none;
+  }
+
+  #container {
+  	width: 700px;
+  }
+
+  #buttons {
+  	padding-bottom: 10px;
+  }
+
+  #demo-container li {
+  	margin-bottom: 1em;
+  	min-height: 40px;
+  }
+
+  #file-list {
+  	padding-left: 10px;
+  	padding-top: 5px;
+  	padding-bottom: 14px;
+  	font-family: 'Droid Sans Mono', courier;
+  	font-size: 10pt;
+  	overflow: hidden;
+  	white-space: nowrap;
+  	margin-top: 14px;
+  	border: solid 1px #gray;
+  	border-radius: 5px;
+  	min-height: 28px;
+  	/*background-color: #eee;*/
+  	background-color:#f9f9f9;
+  }
+
+  }
+
+  #file-list li {
+  	overflow: hidden;
+  	text-overflow: ellipsis;
+  	position: relative;
+  	font-size: 11pt;
+  	margin: .5em;
+  	min-height: 28px;
+  }
+
+  .form-label {
+  	width: 270px;
+  	display: inline-block;
+  	font-size: 12pt;
+  }
+
+  #demo-container {
+  	margin-right: 50px;
+  }
+
+  input[type=text] {
+  	height: 21px;
+  }
+
+  input[type=text],select {
+  	font-size: 12pt;
+  	padding: 4px;
+  	border: solid 1px #AACFE4;
+  	width: 200px;
+  	border-radius: 5px;
+  	text-align: center;
+  	box-shadow: 0px 0px 10px #ccc;
+  }
+
+  select {
+  	width: 212px;
+  }
+
+  input[type=file] {
+  	color: transparent;
+  	font-size: 12pt;
+  }
+
+  input[type=file]::-webkit-file-upload-button {
+  	font-size: 10pt;
+  	color: gray;
+  	border: solid 1px gray;
+  	width: 150px !important;
+  	max-width: 150px;
+  	height: 31px;
+  	border-radius: 5px;
+  	box-sizing:border-box;
+  	background-color: white;
+  }
+
+  input[type=file][disabled]::-webkit-file-upload-button {
+  	font-size: 10pt;
+  	color: #eee;
+  	border: solid 1px #eee;
+  	width: 150px !important;
+  	max-width: 150px;
+  	height: 31px;
+  	border-radius: 5px;
+  	box-sizing:border-box;
+  	background-color: white;
+  }
+
+  .valid-btn{
+  	font-size: 10pt;
+  	background-color: white;
+  	font-family: RobotoDraft,Roboto,'Helvetica Neue',sans-serif;
+  	margin-right: 5px;
+  	padding: 4px;
+  	width: 150px;
+  	height: 31px;
+  	border-radius: 5px;
+  	color: #8FA864;
+  	border: solid 1px #8FA864;
+  }
+
+  .valid-btn[disabled]{
+  	font-size: 10pt;
+  	background-color: white;
+  	font-family: RobotoDraft,Roboto,'Helvetica Neue',sans-serif;
+  	margin-right: 5px;
+  	padding: 4px;
+  	width: 150px;
+  	height: 31px;
+  	border-radius: 5px;
+  	color: #eee;
+  	border: solid 1px #eee;
+  }
+
+  progress {
+  	position: absolute;
+  	right: 0px;
+  	top: 1px;
+  	opacity: .7;
+  	width: 80px;
+  }
