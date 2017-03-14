@@ -1,5 +1,4 @@
 var express = require('express');
-<<<<<<< HEAD
 var fs = require("fs");
 var archiver = require('archiver');
 var gladstone = require('gladstone');
@@ -89,25 +88,6 @@ var createArchive = function(pathTmpZip, pathTmpBag, filename, cb){
   // all files are done, finalize the archive
   archive.finalize();
 }; // end createArchive
-=======
-var nodemailer = require('nodemailer');
-// var zip = require("adm-zip");
-var fs = require("fs");
-var request = require("request");
-var archiver = require('archiver');
-var StringStream = require('string-stream');
-// var sys = require('sys');
-var router = express.Router();
-
-// Nodemailer reusable transport object
-var transporter = nodemailer.createTransport({
-    service: 'Gmail',
-    auth: {
-        user: 'lipd.contact@gmail.com',
-        pass: 'aC9Un3Fudd2eJ0loU1wiT1'
-    }
-});
->>>>>>> parent of 43b6b57... Validator: Bagit working
 
 // Get the home page
 router.get('/', function(req, res, next) {
@@ -131,7 +111,6 @@ router.get('/validator', function(req, res, next){
 });
 
 router.post("/files", function(req, res, next){
-<<<<<<< HEAD
   console.log("POST: /files");
 
   // set data about the file
@@ -151,27 +130,12 @@ router.post("/files", function(req, res, next){
   });
 
   console.log("POST: tmp path: " + pathTmp);
-=======
-  // get request data about file
-  var files = req.body.file;
-  var filename = req.body.filename;
-  // create path where file will be on server
-  var path = __dirname + "/files/" + filename;
 
-  // zip with archiver module
+  // tmp bagit level folder. will be removed before zipping.
+  var pathTmpBag = path.join(pathTmp, "bag");
+  var pathTmpZip = path.join(pathTmp, "zip");
+  var pathTmpFiles = path.join(pathTmp, "files");
 
-  // console.log("create write stream")
-  var output = fs.createWriteStream(path);
-  var archive = archiver('zip');
->>>>>>> parent of 43b6b57... Validator: Bagit working
-
-  output.on('close', function () {
-      console.log(archive.pointer() + ' total bytes');
-      console.log('archiver has been finalized and the output file descriptor has closed.');
-      res.send(filename);
-  });
-
-<<<<<<< HEAD
   console.log("POST: make other dirs...");
   mkdirSync(pathTmpZip);
   mkdirSync(pathTmpFiles);
@@ -230,34 +194,6 @@ router.get("/files/:tmp", function(req, res, next){
        console.log("sending response to client.");
        res.download(pathLipd);
      }
-=======
-  archive.on('error', function(err){
-      console.log("archive error");
-      throw err;
-  });
-
-  // console.log("pipe output")
-  archive.pipe(output);
-
-  files.forEach(function(file){
-    // console.log(file.filename);
-    // console.log(typeof(file.dat));
-    archive.append(file.dat, { name: file.filename });
-  });
-
-  // console.log("finalize");
-  archive.finalize();
-
-});
-
-router.get("/files/:filename", function(req, res, next){
-  var filename = req.params.filename;
-  var path = __dirname + "/files/" + filename;
-  if (fs.existsSync(path)) {
-    res.setHeader('Content-disposition', 'attachment; filename=' + filename);
-    res.setHeader('Content-type', "application/zip");
-    res.download(path);
->>>>>>> parent of 43b6b57... Validator: Bagit working
   }
 });
 

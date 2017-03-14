@@ -41,25 +41,11 @@ var logger = require('morgan');
 var multer = require("multer");
 var sys = require('sys');
 var favicon = require('serve-favicon');
-<<<<<<< HEAD
-var mongo = require('mongodb');
-var JSZip = require("jszip");
-var db = require('monk')('localhost:27017/docs');
-=======
 var routes = require('./routes/index');
 var users = require('./routes/users');
->>>>>>> dev
 //var port = process.env.PORT || 8080;
 
 var app = express();
-<<<<<<< HEAD
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
-var routes = require('./routes/index');
-var users = require('./routes/users');
-// console.log(__dirname + '/public/scripts/test.py');
-=======
->>>>>>> dev
 
 // Recursivley remove all lipd file data in the tmp folder that are older than
 var cleanTmpDir = function(){
@@ -115,14 +101,8 @@ app.set('view engine', 'jade');
 app.use(favicon(__dirname + '/public/favicon.ico'));
 app.use(logger('dev'));
 app.use(cookieParser());
-<<<<<<< HEAD
-// app.use(bodyParser.json());
-// app.use(bodyParser.urlencoded({ extended: true }));
-// app.use(express.bodyParser( { keepExtensions: true, uploadDir: __dirname + '/photos' } ));
-=======
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
->>>>>>> dev
 app.use(express.static(path.join(__dirname, 'public')));
 // app.use(express.static(path.join(__dirname, 'bower_components')));
 app.use(express.static(path.join(__dirname, 'routes', 'files')));

@@ -51,22 +51,18 @@ If *pub* is provided, it must have:
 
 ----------
 
-Preferred Data
+
+Optional Data
 -------------
 
-Preferred data is what we consider useful, but does not detract from the quality of the LiPD file. When any preferred data is missing, the validator will trigger **warning** messages in the **yellow** box.
+Optional data is what we consider useful, but does not detract from the quality of the LiPD file. When any optional data is missing, the validator will trigger **warning** messages in the **yellow** box.
 
 *Warnings will not prevent your file from being a valid nor will they prevent you from finalizing the file.*
 
  - lipdVersion
  - pub
+ - TSid
 
-----------
-
-Optional Data
--------------
-
-Any data that is not listed as "Required Data" or "Preferred Data" is considered **optional**. It may be included or excluded without causing warnings or errors. 
 
 ----------
 
