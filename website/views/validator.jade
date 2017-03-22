@@ -23,8 +23,8 @@ block body
 						// GOOGLE MAP
 						// ng-if="userData.geo.geometry.coordinates"
 						div
-							ui-gmap-google-map(center='map.center', zoom='map.zoom', draggable='true', options='options', bounds='map.bounds')
-								ui-gmap-markers(models='geoMarkers', coords="'self'", events='events', options='options')
+							ui-gmap-google-map(center='map.center', zoom='map.zoom', draggable='true', options='map.options', bounds='map.bounds')
+								ui-gmap-markers(models='mapMarkers', coords="'self'", events='events', options='map.options')
 						br
 						div(cg-busy="myPromise")
 							div(class="span span50" style="padding-right:3em;")
@@ -86,9 +86,11 @@ block body
 
 											pre(ng-class="pageMeta.valid? 'on' : 'off'" style="background-color:#DFF1C1; border: none;") Validation Complete!
 
-												
-											pre#metaPretty(ng-model="files.json")
+											
+											// DEV MODE: Put metadata in pre box, so we can see the metadata behind the json-tree 	
+											//- pre#metaPretty(ng-model="files.json")
 											//- pre#csvPretty
+											
 										li(style="list-style-type: none;")
 											pre(ng-class="files.fileCt > 0? 'on' : 'off'" style="background-color:#eee; border: none;") {{files.fileCt}} files in LiPD
 												ul
@@ -129,7 +131,9 @@ block js
 	script(src="lib/zip/zip-ext.js")
 	script(src="lib/papaparse.min.js")
 	script(src="lib/FileSaver.min.js")
-	script(src="scripts/validator_ext.js")
+	script(src="scripts/map.js")
+	script(src="scripts/misc.js")
+	script(src="scripts/validator_ng.js")
 	script(src="https://cdnjs.cloudflare.com/ajax/libs/angular-recaptcha/3.2.1/angular-recaptcha.min.js")
 	script(src="https://www.google.com/recaptcha/api.js?onload=vcRecaptchaApiLoaded&render=explicit" async defer)
 	script(src='https://cdnjs.cloudflare.com/ajax/libs/angular-ui-router/0.2.15/angular-ui-router.min.js')

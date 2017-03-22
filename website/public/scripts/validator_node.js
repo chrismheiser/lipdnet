@@ -57,7 +57,7 @@ var lipdValidator = (function(){
     // validate_main: (function(files){
     validate: (function(files, cb){
 
-      console.log("In validate");
+        console.log("In validate");
         // VALIDATOR EVENTS
         // receive json data (sorted or not sorted? use splitValidate if necessary)
         // run through validate function

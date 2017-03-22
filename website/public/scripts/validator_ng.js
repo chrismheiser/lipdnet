@@ -13,8 +13,8 @@ var lipdValidator = (function(){
     }),
 
     // Sort data by file type, filename, and gather other metdata
-    sortBeforeValidate: (function (objs) {
-        console.log("sortBeforeValidate");
+    sortBeforeValidate: (function (objs, cb) {
+        console.log("enter sortBeforeValidate");
         // Files: User data holds all the user selected or imported data
         var files = {
             "lipdFilename": "",
@@ -25,29 +25,39 @@ var lipdValidator = (function(){
             "json": {}
           };
         files.fileCt = objs.length;
-        // loop over each csv/jsonld object. sort them into the scope by file type
-        angular.forEach(objs, function (obj) {
-          if (obj.type === "json") {
-            files.dataSetName = obj.filenameFull.split("/")[0];
-            files.lipdFilename = obj.filenameFull.split("/")[0] + ".lpd";
-            files.json = obj.data;
-          } else if (obj.type === "csv") {
-            files.csv[obj.filenameShort] = obj.data;
-          } else if (obj.type === "bagit") {
-            files.bagit[obj.filenameShort] = obj;
-          } else {
-            console.log("Not sure what to do with this file: " + obj.filenameFull);
-          }
-        });
-        return(files);
+        console.log(objs.length);
+        try{
+          // loop over each csv/jsonld object. sort them into the scope by file type
+          objs.forEach(function (obj) {
+            console.log("processing: " + obj.filenameShort);
+            if (obj.type === "json") {
+              files.dataSetName = obj.filenameFull.split("/")[0];
+              files.lipdFilename = obj.filenameFull.split("/")[0] + ".lpd";
+              files.json = obj.data;
+            } else if (obj.type === "csv") {
+              files.csv[obj.filenameShort] = obj.data;
+            } else if (obj.type === "bagit") {
+              files.bagit[obj.filenameShort] = obj;
+            } else {
+              console.log("Not sure what to do with this file: " + obj.filenameFull);
+            }
+          });
+          cb(files);
+        }catch(e){
+          console.log("Error: sortBeforeValidate: " + e);
+          console.log(cb);
+        }
+
+        return;
     }),
     // end sortBeforeValidate
 
     // LiPD Validation: Check data for required fields, proper structure, and proper data types.
     // Attempt to fix invalid data, and return data with and feedback (errors and warnings)
-    validate: (function(files){
+    // validate_main: (function(files){
+    validate: (function(files, cb){
 
-      console.log("In validate");
+        console.log("In validate");
         // VALIDATOR EVENTS
         // receive json data (sorted or not sorted? use splitValidate if necessary)
         // run through validate function
@@ -180,7 +190,8 @@ var lipdValidator = (function(){
           return d;
         };
 
-        // PopulateTSid: Paleo/Chron
+        // PopulateTSid: Paleo/Chron    scrollwheel: false,
+            streetViewControl: false
         // Loop for each paleo/chron entry
         var populateTSids1 = function(files){
           // using files.json
