@@ -4,8 +4,66 @@ var archiver = require('archiver');
 var gladstone = require('gladstone');
 var path = require("path");
 var process = require("process");
+var csv = require("fast-csv");
 var lipdValidator = require("../public/scripts/validator_node.js");
+var misc = require("../public/scripts/misc.js");
 var router = express.Router();
+
+// Use the data in the objects given to update the tsid_master.csv
+var updateTSidMaster = functiofn(_objs, cb){
+  console.log("index: updateTSidMaster");
+  var _path = path.join(process.cwd(), "logs", "tsid_master.csv");
+  for (var _i=0; _i<_objs.length; _i++){
+    var _csv_str = "";
+    if(_i===0){
+      _csv_str += "\r\n";
+    }
+    _csv_str += _objs[_i]["tsid"] + ", " + _objs[_i]["datasetname"] + ", " + _objs[_i]["variableName"] + ", , " +"\r\n";
+    fs.appendFile(_path, _csv_str, function (err) {
+    if (err) throw err;
+    // console.log('data appended!');
+    });
+  }
+  cb(_objs);
+};
+
+// Use the TSids in the objects given to update the tsid_only.csv file.
+var updateTSidOnly = function(_objs){
+  console.log("index: updateTSidOnly");
+  var _path = path.join(process.cwd(), "logs", "tsid_only.csv");
+  for (var _i=0; _i<_objs.length; _i++){
+    var _csv_str = "";
+    if(_i===0){
+      _csv_str += "\r\n";
+    }
+    _csv_str += _objs[_i]["tsid"] + "\r\n";
+    fs.appendFile(_path, _csv_str, function (err) {
+    if (err) console.log(err);
+    // console.log('data appended!');
+    });
+  }
+};
+
+// Read the tsid_only.csv file, and put the TSids in a flat array.
+var readTSidOnly = function(_path, cb){
+  console.log("index: readTSidOnly");
+  var _path = path.join(process.cwd(), "logs", "tsid_only.csv");
+  var _data = [];
+  try{
+    csv
+     .fromPath(_path)
+     .on("data", function(_entry){
+       // row comes as an array of one string. just grab the string.
+        _data.push(_entry[0]);
+     })
+     .on("end", function(){
+      //  console.log(_data);
+       cb(_data);
+     });
+  } catch(err){
+    console.log(err);
+  }
+};
 
 // create a directory, but catch error when the dir already exists.
 var mkdirSync = function (path) {
@@ -20,15 +78,6 @@ var mkdirSync = function (path) {
   }
 };
 
-// create a random string of numbers/letters for the TMP folder
-var makeid = function(prefix, cb){
-    var text = "";
-    var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-    for( var i=0; i < 6; i++ )
-        text += possible.charAt(Math.floor(Math.random() * possible.length));
-    cb(prefix + text);
-    return prefix + text;
-};
 
 // use the archiver model to create the LiPD file
 var createArchive = function(pathTmpZip, pathTmpBag, filename, cb){
@@ -111,46 +160,46 @@ router.get('/validator', function(req, res, next){
 });
 
 router.post("/files", function(req, res, next){
-  console.log("POST: /files");
+  // console.log("POST: /files");
 
   // set data about the file
   var files = req.body.file;
   var filename = req.body.filename;
-  console.log("POST: build path names");
+  // console.log("POST: build path names");
 
   // path that stores lipds
   var pathTop = path.join(process.cwd(), "tmp");
   var _pathTmpPrefix = path.join(pathTop, "lipd-");
   // create tmp folder at "/files/<lipd-xxxxx>"
-  console.log("POST: creating tmp dir...");
-  var pathTmp = makeid(_pathTmpPrefix, function(_pathTmp){
-    console.log("POST: created tmp dir str: " + _pathTmp);
+  // console.log("POST: creating tmp dir...");
+  var pathTmp = misc.makeid(_pathTmpPrefix, function(_pathTmp){
+    // console.log("POST: created tmp dir str: " + _pathTmp);
     mkdirSync(_pathTmp);
     return _pathTmp;
   });
 
-  console.log("POST: tmp path: " + pathTmp);
+  // console.log("POST: tmp path: " + pathTmp);
 
   // tmp bagit level folder. will be removed before zipping.
   var pathTmpBag = path.join(pathTmp, "bag");
   var pathTmpZip = path.join(pathTmp, "zip");
   var pathTmpFiles = path.join(pathTmp, "files");
 
-  console.log("POST: make other dirs...");
+  // console.log("POST: make other dirs...");
   mkdirSync(pathTmpZip);
   mkdirSync(pathTmpFiles);
 
-  console.log("POST: created dir: " + pathTmpZip);
-  console.log("POST: created dir: " + pathTmpFiles);
+  // console.log("POST: created dir: " + pathTmpZip);
+  // console.log("POST: created dir: " + pathTmpFiles);
 
   // use req data to write csv and jsonld files into "/files/<lipd-xxxxx>/files/"
-  console.log("POST: begin writing files");
+  // console.log("POST: begin writing files");
   files.forEach(function(file){
     console.log("POST: writing: " + path.join(pathTmpFiles,  file.filename));
     fs.writeFileSync(path.join(pathTmpFiles, file.filename), file.dat);
   });
 
-  console.log("POST: Initiate Bagit...");
+  // console.log("POST: Initiate Bagit...");
   // Call bagit process on folder of files
   gladstone.createBagDirectory({
      bagName: pathTmpBag,
@@ -169,7 +218,7 @@ router.post("/files", function(req, res, next){
       });
     }
   });
-  console.log("POST complete");
+  // console.log("POST complete");
 });
 
 router.get("/files/:tmp", function(req, res, next){
@@ -227,6 +276,8 @@ router.get("/api/validator", function(req, res, next){
     // receive some json data
     console.log("Parsing JSON request");
     var json_data = JSON.parse(req.body["json_payload"]);
+    console.log("JSON DATA");
+    console.log(json_data);
     console.log("Starting process...");
     lipdValidator.sortBeforeValidate(json_data, function(j){
       console.log("sortBeforeValidate callback: sending to validate");
@@ -248,6 +299,71 @@ router.get("/api/validator", function(req, res, next){
   }
 
   console.log("exit /api/validator");
+});
+
+
+// Use data from a LiPD file to create TSids, register them in the master list, and send data in response
+router.post("/api/tsid/create", function(req, res, next){
+  console.log("/api/tsid/create");
+  // Number of TSids that need to be generated
+  var _count = req.body.count;
+  // One object per variable that needs a TSid created.
+  // example = [{"TSid": "", "dataSetName": "", "variableName": "", "spreadsheetKey": "", "worksheetKey":""}, ..]
+  var _objs = req.body.data;
+  console.log("Creating TSids: " + _count);
+  if (_count > 200){
+    res.status(400).send({"error": "Requested too many TSids. Please request a smaller amount per call."});
+    res.end();
+  }
+  try {
+    // open CSV tsid_only_list
+    readTSidOnly(_objs, function(_tsids){
+      // Now we have an array of all the registered TSids
+      misc.reconcileTSidCreate(_tsids, _objs, function(_x){
+        // console.log("At the end!");
+        // console.log(_x);
+        // append the new TSids to tsid_only.csv
+        updateTSidOnly(_x);
+        // append the new object data (w/ tsids) to tsid_master.csv
+        updateTSidMaster(_x, function(_results){
+          console.log("TSids created successfuly");
+          // since the update was successsful, add the new JSON objects to the response and send.
+          res.setHeader('Content-Type', 'application/json');
+          res.send(JSON.stringify(_results, null));
+        });
+      });
+    });
+  } catch (err) {
+    console.log(err);
+    res.end();
+  }
+});
+
+// Given some TSids from a LiPD file, register its TSids in our master list.
+router.post("/api/tsid/register", function(req, res, next){
+  console.log("/api/tsid/register");
+  // Receive an array of JSON objects. Each with 4 fields:
+  // example = {"TSid", "dataSetName", "variableName", "spreadsheetKey", "worksheetKey"}
+  var _objs = req.body.data;
+  try{
+    readTSidOnly(_objs, function(_tsids){
+      misc.reconcileTSidRegister(_tsids, _objs, function(_x){
+        updateTSidOnly(_x);
+        // append the new object data (w/ tsids) to tsid_master.csv
+        updateTSidMaster(_x, function(_results){
+          // since the update was successsful, add the new JSON objects to the response and send.
+          // res.setHeader('Content-Type', 'application/json');
+          // res.send(JSON.stringify(_results, null));
+          console.log("TSids registered successfuly");
+          res.status(200).send();
+        });
+      });
+    });
+  } catch(err){
+    console.log(err);
+    res.end();
+  }
+
 });
 
 

@@ -3,11 +3,10 @@ var express = require('express');
 var process = require("process");
 var winston = require('winston');
 var rimraf = require("rimraf");
-
 // chdir to the project folder base. Everything we want to do will be in relation to this location
 console.log("app.js: Changing process dir to project root: /lipd/nodejs/website");
 process.chdir(__dirname);
-
+// Create winston logger
 var logger = new (winston.Logger)({
    transports: [
      new winston.transports.File({
@@ -30,9 +29,8 @@ var logger = new (winston.Logger)({
      })
    ]
  });
-
+// Log Exceptions to debug.log
 logger.log("debug", new Error().stack);
-
 var fs = require("fs");
 var path = require("path");
 var cookieParser = require('cookie-parser');
@@ -44,7 +42,6 @@ var favicon = require('serve-favicon');
 var routes = require('./routes/index');
 var users = require('./routes/users');
 //var port = process.env.PORT || 8080;
-
 var app = express();
 
 // Recursivley remove all lipd file data in the tmp folder that are older than
