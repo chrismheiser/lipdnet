@@ -4,15 +4,17 @@ var archiver = require('archiver');
 var gladstone = require('gladstone');
 var path = require("path");
 var process = require("process");
-var csv = require("fast-csv");
-var lipdValidator = require("../public/scripts/validator_node.js");
-var misc = require("../public/scripts/misc.js");
+var fastcsv = require("fast-csv");
+var logger = require("../node_modules_custom/node_log.js");
+var lipdValidator = require("../node_modules_custom/node_validator.js");
+var misc = require("../node_modules_custom/node_misc.js");
 var router = express.Router();
 
 // Use the data in the objects given to update the tsid_master.csv
-var updateTSidMaster = functiofn(_objs, cb){
+var updateTSidMaster = function(_objs, cb){
   console.log("index: updateTSidMaster");
-  var _path = path.join(process.cwd(), "logs", "tsid_master.csv");
+  var _path = path.join(process.cwd(), "tmp", "tsid_master.csv");
+  console.log("path to tsid master: " + _path);
   for (var _i=0; _i<_objs.length; _i++){
     var _csv_str = "";
     if(_i===0){
@@ -30,7 +32,8 @@ var updateTSidMaster = functiofn(_objs, cb){
 // Use the TSids in the objects given to update the tsid_only.csv file.
 var updateTSidOnly = function(_objs){
   console.log("index: updateTSidOnly");
-  var _path = path.join(process.cwd(), "logs", "tsid_only.csv");
+  var _path = path.join(process.cwd(), "tmp", "tsid_only.csv");
+  console.log("path to tsid only: " + _path);
   for (var _i=0; _i<_objs.length; _i++){
     var _csv_str = "";
     if(_i===0){
@@ -45,12 +48,14 @@ var updateTSidOnly = function(_objs){
 };
 
 // Read the tsid_only.csv file, and put the TSids in a flat array.
-var readTSidOnly = function(_path, cb){
+var readTSidOnly = function(cb){
   console.log("index: readTSidOnly");
-  var _path = path.join(process.cwd(), "logs", "tsid_only.csv");
+  var _path = path.join(process.cwd(), "tmp", "tsid_only.csv");
+  console.log("path to tsid only: " + _path);
   var _data = [];
   try{
-    csv
+    console.log("try to read from csv file.");
+    fastcsv
      .fromPath(_path)
      .on("data", function(_entry){
        // row comes as an array of one string. just grab the string.
@@ -77,7 +82,6 @@ var mkdirSync = function (path) {
     }
   }
 };
-
 
 // use the archiver model to create the LiPD file
 var createArchive = function(pathTmpZip, pathTmpBag, filename, cb){
@@ -267,57 +271,67 @@ router.get("/modalTxt", function(req, res, next){
 });
 
 // API
-router.get("/api/validator", function(req, res, next){
+router.post("/api/validator", function(req, res, next){
+  console.log("------------------------");
   console.log("enter /api/validator");
   // We are using this as a validation call for our desktop utilities.
   // GET with some JSON, and we'll tell you if it pass/fail and what errors came up.
 
   try {
     // receive some json data
-    console.log("Parsing JSON request");
-    var json_data = JSON.parse(req.body["json_payload"]);
-    console.log("JSON DATA");
-    console.log(json_data);
-    console.log("Starting process...");
+    try{
+      // When receiving a request from Python (and possibly others),
+      // we have to parse the JSON object from the JSON string first.
+      console.log("index: Parsing JSON.");
+      var json_data = JSON.parse(req.body["json_payload"]);
+    } catch(err){
+      // If parsing didn't work, it's likely we don't need it. This is probably valid JSON already.
+      console.log("index: Parsing JSON failed. Ending request: " + err);
+      res.status(400).send("HTTP 400: Parsing JSON failed: " + err);
+      // var json_data = req.body["json_payload"];
+    }
+    // console.log("JSON DATA");
+    // console.log(json_data);
+    console.log("index: Starting process...");
     lipdValidator.sortBeforeValidate(json_data, function(j){
-      console.log("sortBeforeValidate callback: sending to validate");
+      console.log("index: sortBeforeValidate callback");
       lipdValidator.validate(j, function(x){
         try {
-          console.log("Validate callback, preparing response");
+          console.log("index: Validate callback, preparing response");
           res.setHeader('Content-Type', 'application/json');
           res.send(JSON.stringify(x, null, 3));
-          console.log("Response sent to origin");
+          console.log("index: Response sent to origin");
+          // console.log(x.feedback);
         } catch(err) {
-          console.log("Error trying to prepare response. Ending request: " + err);
-          res.end();
+          console.log("index: Error preparing response. Ending request: " + err);
+          res.status(400).send("HTTP 400: Error preparing response: " + err);
         }
       });
     });
   } catch(err) {
-    console.log("Error: overall process failed: " + err);
-    res.end();
+    console.log("index: Validation failed: " + err);
+    res.status(400).send("HTTP 400: Validation failed: " + err);
   }
 
-  console.log("exit /api/validator");
+  // console.log("exit /api/validator");
 });
 
 
 // Use data from a LiPD file to create TSids, register them in the master list, and send data in response
 router.post("/api/tsid/create", function(req, res, next){
   console.log("/api/tsid/create");
-  // Number of TSids that need to be generated
-  var _count = req.body.count;
-  // One object per variable that needs a TSid created.
-  // example = [{"TSid": "", "dataSetName": "", "variableName": "", "spreadsheetKey": "", "worksheetKey":""}, ..]
-  var _objs = req.body.data;
-  console.log("Creating TSids: " + _count);
-  if (_count > 200){
-    res.status(400).send({"error": "Requested too many TSids. Please request a smaller amount per call."});
-    res.end();
-  }
   try {
-    // open CSV tsid_only_list
-    readTSidOnly(_objs, function(_tsids){
+    // Number of TSids that need to be generated
+    var _count = req.body.count;
+    // One object per variable that needs a TSid created.
+    // example = [{"TSid": "", "dataSetName": "", "variableName": "", "spreadsheetKey": "", "worksheetKey":""}, ..]
+    var _objs = req.body.data;
+    console.log("Creating TSids: " + _count);
+    if (_count > 200){
+      res.status(400).send({"error": "Requested too many TSids. Please request a smaller amount per call."});
+      res.end();
+    }
+    readTSidOnly(function(_tsids){
       // Now we have an array of all the registered TSids
       misc.reconcileTSidCreate(_tsids, _objs, function(_x){
         // console.log("At the end!");
@@ -335,18 +349,19 @@ router.post("/api/tsid/create", function(req, res, next){
     });
   } catch (err) {
     console.log(err);
+    logger.info(err);
     res.end();
   }
 });
 
 // Given some TSids from a LiPD file, register its TSids in our master list.
 router.post("/api/tsid/register", function(req, res, next){
-  console.log("/api/tsid/register");
+  logger.info("/api/tsid/register");
   // Receive an array of JSON objects. Each with 4 fields:
   // example = {"TSid", "dataSetName", "variableName", "spreadsheetKey", "worksheetKey"}
-  var _objs = req.body.data;
   try{
-    readTSidOnly(_objs, function(_tsids){
+    var _objs = req.body.data;
+    readTSidOnly(function(_tsids){
       misc.reconcileTSidRegister(_tsids, _objs, function(_x){
         updateTSidOnly(_x);
         // append the new object data (w/ tsids) to tsid_master.csv
@@ -355,12 +370,13 @@ router.post("/api/tsid/register", function(req, res, next){
           // res.setHeader('Content-Type', 'application/json');
           // res.send(JSON.stringify(_results, null));
           console.log("TSids registered successfuly");
-          res.status(200).send();
+          res.status(200).send({"response": "Registered TSids successfuly"});
         });
       });
     });
   } catch(err){
     console.log(err);
+    logger.info(err);
     res.end();
   }
 

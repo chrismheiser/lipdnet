@@ -1,6 +1,7 @@
 var misc = (function(){
   // 'use strict';
   return {
+
     // create a random string of numbers/letters for the TMP folder
     makeid: (function(prefix, cb){
         var text = "";
@@ -115,7 +116,9 @@ var misc = (function(){
     }),
 
     // Create the "Simple View" data. Copy the "Advanced View" data, and remove what's not necessary.
-    advancedToSimple: (function (d) {
+    advancedToSimple: (function (j) {
+      // make a clone of the dictionary, so we dont ruin the reference.
+      var d = JSON.parse(JSON.stringify(j));
       // remove items from root
       d = misc.rmAdvKeys(d, false);
 
@@ -215,5 +218,3 @@ var misc = (function(){
   }; // end return
 
 }());
-
-module.exports = misc;

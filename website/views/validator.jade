@@ -49,26 +49,19 @@ block body
 											// download button
 											//- md-button(ng-click="downloadZip()" ng-model='file' name='file' ngf-max-size="50MB") Download
 															
-											button.valid-btn#generate-tsid(ng-model="feedback.missingTsidCt" ng-disabled="feedback.missingTsidCt == 0" ng-click="populateTSids1()") Populate TSid's
+											button.valid-btn#generate-tsid(ng-model="feedback.missingTsidCt" ng-disabled="feedback.missingTsidCt == 0" ng-click="populateTSids()") Populate TSid's
 											//- button.valid-btn#generate-tsid(ng-model="feedback.missingTsidCt" ng-if="feedback.missingTsidCt > 0" ng-click="populateTSids1()") Populate TSid's
-											br 
+											//- br 
 											// button to push validated lipd file to database
-											button.valid-btn(ng-model="file.push" ng-disabled="!pageMeta.valid") Upload to Wiki
+											//- button.valid-btn(ng-model="file.push" ng-disabled="!pageMeta.valid") Upload to Wiki
 																
 											// download button
 											//- button.valid-btn#download-btn(ng-model="file.down" ng-disabled="!pageMeta.valid" ng-show="!pageMeta.dlFallback" ng-click="startCaptcha()") Download
-											button.valid-btn#download-btn(ng-model="file.down" ng-show="!pageMeta.dlFallback" ng-disabled="!pageMeta.valid" ng-click="startCaptcha()") Download
-											
-											// If "download" attribute is not supported by browser, this is a fallback link to Right-click and save. 
-											br
-											a#dl-unsupported(ng-show="pageMeta.dlFallback") {{files.lipdFilename}}
-											br
-											a(ng-show="pageMeta.dlFallback") {{pageMeta.dlFallbackMsg}}
+											button.valid-btn#download-btn(ng-model="file.down" ng-show="!pageMeta.dlFallback" ng-disabled="feedback.status!=='PASS'" ng-click="startCaptcha()") Download
 											
 											// attempt at captcha
 											div(vc-recaptcha key="'6LchMhIUAAAAAGjGCfNGxPkOJPl3ilJ2sQrapbbL'" ng-model="gRecaptchaResponse" on-success="downloadZip()" ng-show="pageMeta.captcha")
 											//- div(ng-show="pageMeta.captcha" class="g-recaptcha" data-sitekey="6LchMhIUAAAAAGjGCfNGxPkOJPl3ilJ2sQrapbbL" data-callback="downloadZip")
-					
 																						
 										// When a LPD file is chosen, all the files inside are listed here.
 										li(style="list-style-type: none;")
@@ -84,7 +77,7 @@ block body
 											//- 	ul
 											//- 		li(ng-repeat="pos in feedback.posMsgs track by $index") {{pos}}
 
-											pre(ng-class="pageMeta.valid? 'on' : 'off'" style="background-color:#DFF1C1; border: none;") Validation Complete!
+											pre(ng-class="feedback.status == 'PASS' ? 'on' : 'off'" style="background-color:#DFF1C1; border: none;") Validation Complete!
 
 											
 											// DEV MODE: Put metadata in pre box, so we can see the metadata behind the json-tree 	
@@ -110,7 +103,7 @@ block body
 													option
 										li#buttons(style="list-style-type: none;")
 											// button to download validated lipd file
-											button.valid-btn(ng-click="validate(json.metadata)" ng-disabled="pageMeta.filePicker") Validate
+											button.valid-btn(ng-click="validate()" ng-disabled="pageMeta.filePicker") Validate
 											// toggle simple view: default to simple view
 											button.valid-btn(ng-click="pageMeta.simpleView = !pageMeta.simpleView" ng-disabled="pageMeta.simpleView") Simple
 											// toggle advanced view
@@ -131,9 +124,9 @@ block js
 	script(src="lib/zip/zip-ext.js")
 	script(src="lib/papaparse.min.js")
 	script(src="lib/FileSaver.min.js")
-	script(src="scripts/map.js")
-	script(src="scripts/misc.js")
-	script(src="scripts/validator_ng.js")
+	script(src="modules/ng_map.js")
+	script(src="modules/ng_misc.js")
+	script(src="modules/ng_validator.js")
 	script(src="https://cdnjs.cloudflare.com/ajax/libs/angular-recaptcha/3.2.1/angular-recaptcha.min.js")
 	script(src="https://www.google.com/recaptcha/api.js?onload=vcRecaptchaApiLoaded&render=explicit" async defer)
 	script(src='https://cdnjs.cloudflare.com/ajax/libs/angular-ui-router/0.2.15/angular-ui-router.min.js')

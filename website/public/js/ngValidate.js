@@ -38,16 +38,16 @@ f.config(function (uiGmapGoogleMapApiProvider) {
   });
 });
 
-f.run([function () {
-  if (typeof Storage !== "undefined") {
-    // Code for localStorage/sessionStorage.
-    sessionStorage.clear();
-    console.log("Session Storage has been cleared");
-  } else {
-    // Sorry! No Web Storage support..
-    console.log("There is no support for Session Storage. Please try a different browser.");
-  }
-}]);
+// f.run([function () {
+//   if (typeof Storage !== "undefined") {
+//     // Code for localStorage/sessionStorage.
+//     sessionStorage.clear();
+//     console.log("Session Storage has been cleared");
+//   } else {
+//     // Sorry! No Web Storage support..
+//     console.log("There is no support for Session Storage. Please try a different browser.");
+//   }
+// }]);
 
 // IMPORT SERVICE
 // Parse service for unpacking and sorting LiPD file data
@@ -87,7 +87,12 @@ f.factory("ImportService", ["$q", function ($q) {
         d.resolve(compilePromise(entry, text, type));
       } else if (type === "json") {
         // blindly attempt to parse as jsonld file
-        d.resolve(compilePromise(entry, JSON.parse(text), type));
+        try{
+          var _json_parsed = JSON.parse(text);
+          d.resolve(compilePromise(entry, _json_parsed, type));
+        } catch(err){
+          d.reject("JSONLD file could not be parsed");
+        }
       } else if (type === "csv") {
         // if parsing jsonld file fails, that's because it's a csv file. So parse as csv instead.
         d.resolve(compilePromise(entry, setCsvMeta(text), type));
@@ -374,12 +379,15 @@ f.controller('ValidateCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Uplo
   };
   // STATUS: PASS/FAIL/OTHER status given by validator response.
   $scope.status = "N/A";
+  // ALLFILES: Use this to list all the files found in the LiPD archive. List is shown on page.
+  $scope.allFiles = [];
 
   // MISC Functions
 
   // Reset the page
   // All metadata and data about the page is emptied when the Upload button is clicked. Ready for another file upload.
   $scope.resetPage = function(){
+    $scope.allFiles = [];
     $scope.feedback = {
       "missingTsidCt": 0,
       "wrnCt": 0,
@@ -475,11 +483,11 @@ f.controller('ValidateCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Uplo
   // Watch for updated metadata information, then display the changes in the pre/code box (if it's being shown)
   $scope.$watch("files.json", function () {
     // console.log($scope.files.json);
-    var mp = document.getElementById("metaPretty");
-    if (mp) {
-      console.log(mp);
-      mp.innerHTML = JSON.stringify($scope.files.json, undefined, 2);
-    }
+    // var mp = document.getElementById("metaPretty");
+    // if (mp) {
+    //   console.log(mp);
+    //   mp.innerHTML = JSON.stringify($scope.files.json, undefined, 2);
+    // }
     // Create the Simple View
     $scope.files.jsonSimple = misc.advancedToSimple($scope.files.json);
   }, true);
@@ -520,7 +528,35 @@ f.controller('ValidateCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Uplo
     });
   };
 
+  $scope.validate = function(){
 
+    lipdValidator.validate($scope.files, function(_response_2){
+      try {
+        console.log("Setting validator response to NG scope");
+        $scope.feedback = _response_2.feedback;
+        $scope.status = _response_2.status;
+        // Get coordinates, add markers to map, and shift map.
+        var _coordinates = map.getCoordinates($scope.files.json);
+        if (_coordinates.latitude !== 0 && _coordinates.longitude !== 0){
+          $scope.mapMarkers = map.addMarker($scope.mapMarkers, _coordinates);
+          $scope.map = map.updateMap($scope.map, _coordinates);
+        }
+      } catch(err) {
+        console.log("Error trying to prepare response. Ending request: " + err);
+      }
+    }); // end validate
+  };
+
+  $scope.populateTSids = function(){
+    console.log("populateTsids");
+    lipdValidator.populateTSids($scope.files, function(_data){
+      // set new json to scope.
+      console.log("Setting new JSON with TSids.");
+      console.log(_data);
+      $scope.files = _data;
+      $scope.validate();
+    });
+  };
 
   // ANONYMOUS FUNCTIONS
 
@@ -630,8 +666,9 @@ f.controller('ValidateCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Uplo
 
     }(); // end var model
 
-    // Attach to respective DOM elements and set up listener for change event on file-input
-    // When file is uploadesd, it will trigger data to be set to sessionStorage and be parsed.
+
+    // // Attach to respective DOM elements and set up listener for change event on file-input
+    // // When file is uploadesd, it will trigger data to be set to sessionStorage and be parsed.
     (function () {
       var fileInput = document.getElementById("file-input");
       var creationMethodInput = "Blob";
@@ -639,11 +676,12 @@ f.controller('ValidateCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Uplo
       model.setCreationMethod("Blob");
       // if (typeof requestFileSystem == "undefined") creationMethodInput.options.length = 1;
 
+      fileInput.onclick = function () {
+          this.value = null;
+      };
+
       // When a file is chosen for upload, trigger the change event
       fileInput.addEventListener('change', function () {
-        // disable the file input after a file has been chosen.
-        fileInput.disabled = false;
-        // fileInput.disabled = true;
 
         // get a list of file entries inside this zip
         model.getEntries(fileInput.files[0], function (entries) {
@@ -651,28 +689,19 @@ f.controller('ValidateCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Uplo
           $scope._myPromiseImport = ImportService.parseFiles(entries);
           $scope._myPromiseImport.then(function (res) {
             console.log("ImportService.then()");
-
+            // Set response to allFiles so we can list all the filenames found in the LiPD archive.
+            $scope.allFiles = res;
+            // Gather some metadata about the lipd file, and organize it so it's easier to manage.
             lipdValidator.sortBeforeValidate(res, function(_response_1){
               console.log("sortBeforeValidate callback: sending to validate_ng.js");
-              $scope.files.json = _response_1.json;
-              lipdValidator.validate(_response_1, function(_response_2){
-                try {
-                  console.log("Setting validator response to NG scope");
-                  $scope.feedback = _response_2.feedback;
-                  $scope.status = _response_2.status;
-                  // Get coordinates, add markers to map, and shift map.
-                  var _coordinates = map.getCoordinates($scope.files.json);
-                  if (_coordinates.latitude !== 0 && _coordinates.longitude !== 0){
-                    $scope.mapMarkers = map.addMarker($scope.mapMarkers, _coordinates);
-                    $scope.map = map.updateMap($scope.map, _coordinates);
-                  }
-                } catch(err) {
-                  console.log("Error trying to prepare response. Ending request: " + err);
-                }
-              }); // end validate
+              $scope.files = _response_1;
+              $scope.validate();
             }); // end sortBeforeValidate
             //RETURNS OBJECT : {"dat": files.json, "feedback": feedback, "filename": files.lipdFilename, "status": feedback.status};
 
+          }, function(reason){
+            $scope.resetPage();
+            alert("Error parsing JSON-LD file. File cannot be validated");
           }); // end ImportService
 
         }); // end model.getEntries

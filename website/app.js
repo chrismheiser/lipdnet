@@ -1,36 +1,11 @@
 // app.js
 var express = require('express');
 var process = require("process");
-var winston = require('winston');
+var logger = require("./node_modules_custom/node_log.js");
 var rimraf = require("rimraf");
 // chdir to the project folder base. Everything we want to do will be in relation to this location
-console.log("app.js: Changing process dir to project root: /lipd/nodejs/website");
+logger.info("app.js: Changing process dir to project root: /lipd/nodejs/website");
 process.chdir(__dirname);
-// Create winston logger
-var logger = new (winston.Logger)({
-   transports: [
-     new winston.transports.File({
-     level: "info",
-     filename: './logs/all-logs.log',
-     humanReadableUnhandledException: true,
-     handleExceptions: true,
-     json: false,
-     colorize: true
-    })
-   ],
-   exceptionHandlers: [
-     new winston.transports.File({
-       level: "debug",
-       filename: './logs/exceptions.log',
-       humanReadableUnhandledException: true,
-       handleExceptions: true,
-       json: false,
-       colorize: true
-     })
-   ]
- });
-// Log Exceptions to debug.log
-logger.log("debug", new Error().stack);
 var fs = require("fs");
 var path = require("path");
 var cookieParser = require('cookie-parser');
@@ -46,35 +21,53 @@ var app = express();
 
 // Recursivley remove all lipd file data in the tmp folder that are older than
 var cleanTmpDir = function(){
+  // console.log("logging inside cleanTmpDir");
   // this code will only run when time has ellapsed
   var tmpDir = path.join(process.cwd(), "tmp");
   // logger.log("info", "Starting tmp cleaning...");
-  console.log("Starting tmp cleaning...");
-  fs.readdir(tmpDir, function(err, dirs) {
-    dirs.forEach(function(innerDir, index) {
-      fs.stat(path.join(tmpDir, innerDir), function(err, stat) {
-        var endTime, now;
-        if (err) {
-          return console.error(err);
-        }
-        now = new Date().getTime();
-        // 60000 - one minute
-        // 300000 - five minutes
-        // 3600000 - one hour
-        endTime = new Date(stat.ctime).getTime() + 300000;
-        if (now > endTime) {
-          return rimraf(path.join(tmpDir, innerDir), function(err) {
-            if (err) {
-              return console.error(err);
-            }
-            // logger.log("info", 'Removed Folder: ' + innerDir);
-            console.log('Removed Dir: ' + innerDir);
-          });
-        }
-      });
+  console.log("app: Starting tmp cleaning...");
+  try {
+    fs.readdir(tmpDir, function(err, dirs) {
+      // console.log("Started reading tmp dir");
+      if(dirs){
+        dirs.forEach(function(innerDir, index) {
+          var _isDirectory = fs.lstatSync(path.join(tmpDir, innerDir)).isDirectory();
+          // console.log("Is it a directory?: " + _isDirectory);
+          // Only run the cleanup for directories. Not files.
+          if(_isDirectory){
+            fs.stat(path.join(tmpDir, innerDir), function(err, stat) {
+              var endTime, now;
+              if (err) {
+                return console.error(err);
+              }
+              now = new Date().getTime();
+              // 60000 - one minute
+              // 300000 - five minutes
+              // 3600000 - one hour
+              endTime = new Date(stat.ctime).getTime() + 300000;
+              if (now > endTime) {
+                return rimraf(path.join(tmpDir, innerDir), function(err) {
+                  if (err) {
+                    return console.error(err);
+                  }
+                  // logger.log("info", 'Removed Folder: ' + innerDir);
+                  console.log('app: Removed Dir: ' + innerDir);
+                });
+              }
+            });
+          } // end IF DIR
+         });
+      } else {
+        console.log("No directories found");
+      }
     });
-  });
+  } catch(err){
+    console.log(err);
+  }
+
 };
+
+cleanTmpDir();
 
 // Call the cleaning function every 5 minutes
 setTimeout(cleanTmpDir, 300000);
@@ -85,10 +78,10 @@ var storage = multer.diskStorage({
     cb(null, './tmp');
   },
   onFileUploadStart: function (file) {
-    console.log(file.originalname + ' is starting ...');
+    console.log("app: " + file.originalname + ' is starting ...');
   },
   onFileUploadComplete: function (file) {
-    console.log(file.fieldname + ' uploaded to  ' + file.path);
+    console.log("app: " + file.fieldname + ' uploaded to  ' + file.path);
   }
 });
 

@@ -20,16 +20,16 @@ var map = (function(){
           // get coordinate values
           // GEOJSON specifies [ LONGITUDE , LATITUDE, ELEVATION (optional)]
           var lon = d.geo.geometry.coordinates[0];
-          console.log("longitude: " + lon);
+          // console.log("longitude: " + lon);
           var lat = d.geo.geometry.coordinates[1];
-          console.log("lat: " + lat);
+          // console.log("lat: " + lat);
           // check if values are in range
           lonValid = map.numberInRange(-180, 180, lon);
           latValid = map.numberInRange(-90, 90, lat);
           // both values are in the correct ranges
           if (latValid && lonValid) {
             // start making the marker on the map
-            console.log("two valid coordinates pt 1");
+            // console.log("two valid coordinates pt 1");
             _coords.latitude = lat;
             _coords.longitude = lon;
           } else {
@@ -37,15 +37,15 @@ var map = (function(){
             lonValid = map.numberInRange(-180, 180, lat);
             latValid = map.numberInRange(-90, 90, lon);
             if (latValid && lonValid) {
-              console.log("two valid coordinates (when swapped)");
+              // console.log("two valid coordinates (when swapped)");
               // start making the marker on the map
               _coords.latitude = lon;
               _coords.longitude = lat;
             }
           }
         }
-        console.log("sending back coordinates");
-        console.log(_coords);
+        // console.log("sending back coordinates");
+        // console.log(_coords);
         return _coords;
       } catch (err) {
         console.log("map.getCoordinates: " + err);
@@ -56,8 +56,8 @@ var map = (function(){
     updateMap: (function (map, coordinates) {
       map.center = {"latitude": coordinates.latitude, "longitude": coordinates.longitude };
       map.zoom = 3;
-      console.log("sending back map");
-      console.log(map);
+      // console.log("sending back map");
+      // console.log(map);
       return map;
     }),
 
