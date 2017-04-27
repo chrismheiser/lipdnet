@@ -1,7 +1,7 @@
 // chron DATA
 md-toolbar.md-hue-1
 	h2.md-toolbar-tools
-		span ChronData
+		span chronData *
 
 div(ng-repeat='entry in files.json.chronData track by $index' layout-wrap="")
 	// chronData[1] : Should only be one entry2. Don't need to loop
@@ -50,12 +50,17 @@ div(ng-repeat='entry in files.json.chronData track by $index' layout-wrap="")
 				md-card
 					md-subheader.md-primary column {{$index}}
 					div(layout='', layout-padding='', layout-sm='column')
-						md-input-container(flex='', class="md-input-has-value")
+						md-input-container(flex='33', class="md-input-has-value")
 							label Variable Name *
 							input(ng-model="entry3.variableName")
-						md-input-container(flex='', class="md-input-has-value")
+						md-input-container(flex='33', class="md-input-has-value")
 							label Units *
 							input(ng-model="entry3.units")
+						md-input-container(flex="33")
+							label Archive Type *
+							md-select(ng-model="entry3.archiveType")
+								md-option(ng-repeat="archive in dropdowns.archiveType" ng-value="archive")
+									{{archive}}
 					div(layout='', layout-padding='', layout-sm='column')
 						md-input-container(flex='', class="md-input-has-value")
 							label Description
@@ -86,7 +91,13 @@ div(ng-repeat='entry in files.json.chronData track by $index' layout-wrap="")
 									input(type="checkbox" value="field" ng-checked="entry3.tmp[field]" 
 									ng-click="addRmProperty(entry3, field); entry3.tmp[field] = !entry3.tmp[field]")
 									{{field}}
-										
+									
+						div(layout='', layout-padding='', layout-sm='column')
+							button.invisible(ng-click="addRmProperty(entry3, entry3.tmp.custom); clearCustom(entry3)")
+							md-input-container(flex="25")
+								label Other...
+								input(ng-model="entry3.tmp.custom")
+								
 					div(ng-repeat="(k,v) in entry3" ng-if="showProperty(k) && entry3.tmp.toggle" layout='', layout-padding='', layout-sm='column')
 						md-input-container(flex='', class="md-input-has-value")
 							label {{k}}

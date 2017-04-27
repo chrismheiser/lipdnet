@@ -91,6 +91,7 @@ div(ng-repeat='entry in files.json.paleoData track by $index' layout-wrap="")
 									input(type="checkbox" value="field" ng-checked="entry3.tmp[field]" 
 									ng-click="addRmProperty(entry3, field); entry3.tmp[field] = !entry3.tmp[field]")
 									{{field}}
+									
 						div(layout='', layout-padding='', layout-sm='column')
 							button.invisible(ng-click="addRmProperty(entry3, entry3.tmp.custom); clearCustom(entry3)")
 							md-input-container(flex="25")
