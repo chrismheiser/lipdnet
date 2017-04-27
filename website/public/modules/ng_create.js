@@ -86,10 +86,8 @@ var create = (function(){
       // Add a full data table to an entry.
       var _block = {"tableName": "", "filename": "", "missingValue": "NaN", "columns": []};
       if(pc === "paleo"){
-        console.log("add paleo");
         _block.paleoDataTableName = "";
       } else if (pc === "chron"){
-        console.log("add chron");
         _block.chronDataTableName = "";
       }
       entry.push(_block);
@@ -212,22 +210,16 @@ var create = (function(){
         for (var _key in x){
           // safety check: don't want prototype attributes
           if (x.hasOwnProperty(_key)){
-            console.log(_key);
             if (typeof(x[_key]) === "string" && !x[_key]){
-              console.log("deleting");
               delete x[_key];
             } // if string
             // if this key is in the array of items to be removed, then remove it.
             else if(_removables.includes(_key)){
               // remove this key
-              console.log("removables");
               delete x[_key];
             } // if key in removables
             else if (x[_key].constructor === [].constructor) {
               // value is an array. iterate over array and recursive call
-              console.log(_key);
-              console.log(x[_key]);
-              console.log(x[_key].length);
               if (x[_key].length === 0){
                 delete x[_key];
               } else {
