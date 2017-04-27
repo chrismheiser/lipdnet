@@ -1,27 +1,15 @@
-md-dialog(aria-label='{{ mdDialogData.filenameShort }}')
+md-dialog(aria-label='Add more fields')
   form(ng-cloak='')
     md-toolbar
       .md-toolbar-tools
-        h2 {{mdDialogData.type}} file
+        h2 Add fields
         span(flex='')
-        md-button.md-icon-button(ng-click='cancel()')
-          md-icon(aria-label='Close dialog')
-    md-dialog-content()
+    md-dialog-content
       .md-dialog-content
-        h4 Generic MODAL
-        //- 
-        //- table(ng-table="tableParams" show-filter="true" class="table table-bordered")
-        //-     tr(ng-repeat="line in mdDialogData.data track by $index")
-        //-         td {{ line }}
-
-        // simpler bootstrap modals 
-        // http://www.bootply.com/SLezsLancK
-
-    //- md-dialog-actions(layout='row')
-    //-   md-button(href='http://en.wikipedia.org/wiki/Mango', target='_blank', md-autofocus='')
-    //-     | More on Wikipedia
-    //-   span(flex='')
-      //- md-button(ng-click="answer('not useful')")
-      //-   | Not Useful
-      //- md-button(ng-click="answer('useful')")
-      //-   | Useful
+        div(ng-repeat="(k,v) in fields")
+          h2 {{k}}
+          md-checkbox {{k}}
+        md-grid-list(md-cols-sm="2" md-cols-md="4" md-cols-lg="8" md-cols-gt-lg="12")
+          md-grid-tile(ng-repeat="(k,v) in fields")
+            md-checkbox {{ k }}
+          

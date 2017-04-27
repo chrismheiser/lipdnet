@@ -2,6 +2,105 @@ var misc = (function(){
   // 'use strict';
   return {
 
+
+    removeCsvHeader: (function(_csv){
+      try{
+        // Remove the first array in the .data. Remove index 0, and remove one element
+        _csv.data.splice(0, 1);
+        // Remove the first element of each array in .transposed
+        for(var _y = 0; _y < _csv.transposed.length; _y++){
+          _csv.transposed[_y].splice(0, 1);
+        }
+      } catch (err){
+        console.log("misc: removeCsvHeader: " + err);
+      }
+      return _csv;
+    }),
+
+    putCsvMeta: (function(_csv){
+      _csv.rows = _csv.data.length;
+      _csv.cols = _csv.data[0].length;
+      _csv.delimiter = _csv.meta.delimiter;
+      _csv.transposed = misc.transpose(_csv.data);
+      return _csv;
+    }),
+
+    getDelimiter: (function(_bool){
+      // true == semi-colon
+      // false == comma (default)
+      var _delimiter = ",";
+      if(_bool === true){
+        _delimiter = ";";
+      }
+      return _delimiter;
+    }),
+
+    rmTmpFields: (function(d){
+
+    }),
+
+    // add dataSetNames to
+    renameCsvFilenames: (function(_files, _dataSetName){
+      // skip the process?
+      var _skip = false;
+      var _current = "";
+
+      // initial look at _csv, to see if we can skip this processing
+      for (var _w = 0; _w < _files.csv.length; _w++){
+        // current filename
+        _current = _files.csv[_w];
+        // filename does not currently have the datasetname. must go through process
+        if (_current.indexOf(_dataSetName) === -1){
+          _skip = true;
+          break;
+        }
+      }
+
+      // CSV filenames are missing dataSetName. Have to go through and fix all the filenames.
+      if (!_skip){
+
+        // filename does not currently have the datasetname
+        if (filename.indexOf(_dataSetName) === -1){
+          // append the datasetname to the front of the filename
+
+        }
+
+      }
+
+
+
+
+    }),
+
+    // Transpose CSV rows into CSV columns
+    transpose: (function(a) {
+
+      // Calculate the width and height of the Array
+      var w = a.length ? a.length : 0,
+        h = a[0] instanceof Array ? a[0].length : 0;
+
+      // In case it is a zero matrix, no transpose routine needed.
+      if(h === 0 || w === 0) { return []; }
+
+      var i, j, t = [];
+
+      // Loop through every item in the outer array (height)
+      for(i=0; i<h; i++) {
+
+        // Insert a new row (array)
+        t[i] = [];
+
+        // Loop through every item per item in outer array (width)
+        for(j=0; j<w; j++) {
+
+          // Save transposed data.
+          t[i][j] = a[j][i];
+        }
+      }
+
+      return t;
+    }),
+
     // create a random string of numbers/letters for the TMP folder
     makeid: (function(prefix, cb){
         var text = "";

@@ -3,258 +3,73 @@ extends layout
 // block css will insert css scripts listed in head.jade that are needed on every page.
 block css
 	// files below are page specific
-	link(rel='stylesheet' href='css/create.css')
+	//- link(rel="stylesheet" href="css/angular-busy.css")
+	//- link(rel="stylesheet" href="https://unpkg.com/ng-table@2.0.2/bundles/ng-table.min.css")
+	link(rel='stylesheet' href='css/validate.css')
+	link(rel="stylesheet" href="css/json-tree.css")
+	link(rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons")
 
 block body
-	body(ng-app='createApp' ng-cloak)
+	body(ng-app='validateApp' ng-cloak)
 		#wrapper
 			include ./include/navbar.jade
 			md-toolbar
 				.md-toolbar-tools
-					.md-title Create LiPD
-			br
-			.col-sm-8.col-sm-offset-2
-						
-				#form-container(ng-controller='CreateCtrl')
-					div
-						// METADATA
-						md-toolbar.md-hue-1
-							h2.md-toolbar-tools
-								span Metadata
-						div(layout='', layout-padding='', layout-sm='column')
-							md-input-container(flex='', ng-class="{'md-input-has-value': pageMeta.toggle}")
-								label Archive Type *
-								input(ng-model='meta.archiveType')
-							md-input-container(flex='', ng-class="{'md-input-has-value': pageMeta.toggle}")
-								label Data Set Name *
-								input(ng-model='meta.dataSetName')
-						div(layout='', layout-padding='', layout-sm='column')
-							md-input-container(flex='', ng-class="{'md-input-has-value': pageMeta.toggle}")
-								label Collection Name
-								input(ng-model='meta.collectionName')
-							md-input-container(flex='', ng-class="{'md-input-has-value': pageMeta.toggle}")
-								label Investigators
-								input(ng-model='meta.investigators')
-						div(layout='', layout-padding='', layout-sm='column')
-							md-input-container(flex='', ng-class="{'md-input-has-value': pageMeta.toggle}")
-								label Notes
-								textarea(ng-model='meta.notes', columns='1', md-maxlength='150')
-								
-						// FUNDING
-						md-toolbar.md-hue-1
-							h2.md-toolbar-tools
-								span Funding
-						div(ng-repeat='item in funding' layout-wrap="")
-							div(layout='', layout-padding='', layout-sm='column')
-								md-subheader.md-primary Funding {{item.id}}
-							div(layout='', layout-padding='', layout-sm='column')
-								md-input-container(flex='', ng-class="{'md-input-has-value': pageMeta.toggle}")
-									label Agency
-									input(ng-model='meta.funding[item.id][item.a]')
-								md-input-container(flex='', ng-class="{'md-input-has-value': pageMeta.toggle}")
-									label Grant
-									input(ng-model='meta.funding[item.id][item.f]')
-							div(layout='', layout-padding='', layout-sm='column')
-								md-input-container(flex='', ng-class="{'md-input-has-value': pageMeta.toggle}")
-									label Principal Investigator
-									input(ng-model='meta.funding[item.id][item.p]')
-								md-input-container(flex='', ng-class="{'md-input-has-value': pageMeta.toggle}")
-									label Country
-									input(ng-model='meta.funding[item.id][item.c]')		
-						div(layout='', layout-padding='', layout-sm='column' style="float: right;")
-							button.valid-btn(ng-click='addFunding()' style="margin: 1.5em;")  + Add Funding
-						br
-							
-						// PUBLICATION
-						md-toolbar.md-hue-1
-							h2.md-toolbar-tools
-								span Publication
-								
-						// PUBLICATION DATA
-						div(layout='', layout-padding='', layout-sm='column')
-							md-input-container(flex='', ng-class="{'md-input-has-value': pageMeta.toggle}")
-								label DOI
-								input(ng-model='meta.pub.doi')
-							button.valid-btn(ng-click="fetchPublication()" ng-model='meta.pub.doi' style="margin: 1.5em;") Autocomplete using DOI
-						br
-						div(layout='', layout-padding='', layout-sm='column')
-							md-input-container(flex='', ng-class="{'md-input-has-value': pageMeta.toggle}")
-								label Title *
-								input(ng-model='meta.pub.title')
-						div(layout='', layout-padding='', layout-wrap='', layout-sm='column')
-							md-input-container(flex='', ng-class="{'md-input-has-value': pageMeta.toggle}")
-								label Year *
-								input(ng-model='meta.pub.year')
-							md-input-container(flex='', ng-class="{'md-input-has-value': pageMeta.toggle}")
-								label Journal *
-								input(ng-model='meta.pub.journal')
-							md-input-container(flex='', ng-class="{'md-input-has-value': pageMeta.toggle}")
-								label Volume
-								input(ng-model='meta.pub.volume')
-						div(layout='', layout-padding='', layout-wrap='', layout-sm='column')
-							md-input-container(flex='', ng-class="{'md-input-has-value': pageMeta.toggle}")
-								label Edition
-								input(ng-model='meta.pub.edition')
-							md-input-container(flex='', ng-class="{'md-input-has-value': pageMeta.toggle}")
-								label Issue
-								input(ng-model='meta.pub.issue')
-							md-input-container(flex='', ng-class="{'md-input-has-value': pageMeta.toggle}")
-								label Publication Type
-								input(ng-model='meta.pub.type')
-						div(layout='', layout-padding='', layout-sm='column', ng-repeat='item in authors')
-							md-input-container(flex='', ng-class="{'md-input-has-value': pageMeta.toggle}")
-								label Author *
-								input(ng-model='meta.authors[item.id]')
-						div(layout='', layout-padding='', layout-sm='column' style="float: right;")
-							button.valid-btn(ng-click='addAuthor()' style="margin: 1.5em;")  + Add Author
-							
-							
-						// GEOGRAPHY
-						md-toolbar.md-hue-1
-							h2.md-toolbar-tools
-								span Geography
-																	
-						// GOOGLE MAP
-						// ng-if="userData.geo.geometry.coordinates"
-						br
-						div
-							ui-gmap-google-map(center='map.center', zoom='map.zoom', draggable='true', options='options', bounds='map.bounds')
-								ui-gmap-markers(models='geoMarkers', coords="'self'", events='events', options='options')
-								
-						// COORDINATES
-						div(layout='', layout-padding='', layout-sm='column', ng-repeat='obj in geoMarkers')
-							md-input-container(flex='', ng-class="{'md-input-has-value': pageMeta.toggle}")
-								md-tooltip -90 to 90
-								label Latitude *
-								input(ng-model='geoMarkers[$index].latitude', required, type='number', min='-90', max='90')
-							md-input-container(flex='', ng-class="{'md-input-has-value': pageMeta.toggle}")
-								md-tooltip -180 to 180
-								label Longitude *
-								input(ng-model='geoMarkers[$index].longitude', required, type='number', min='-180', max='180')
-							md-input-container(flex='', ng-class="{'md-input-has-value': pageMeta.toggle}")
-								label Elevation
-								input(type='number', ng-model='geoMarkers[$index].elevation')
-							md-input-container(flex='', class="md-input-has-value")
-								label Units
-								input(value="Meters (m)" disabled)
-								//- md-select(ng-model='geoMarkers[$index].unit')
-								//- 	md-option(ng-repeat='u in unitsDistance', value='{{u.short}}') {{u.long}}
-
-						md-subheader.md-primary Properties
-						div(layout='', layout-padding='', layout-sm='column')
-							md-input-container(flex='', ng-class="{'md-input-has-value': pageMeta.toggle}")
-								label Site Name
-								input(ng-model='meta.geo.properties.siteName')
-							md-input-container(flex='', ng-class="{'md-input-has-value': pageMeta.toggle}")
-								label Location
-								input(ng-model='meta.geo.properties.location')
-							md-input-container(flex='', ng-class="{'md-input-has-value': pageMeta.toggle}")
-								label Country
-								input(ng-model='meta.geo.properties.country')
-
+					.md-title Upload
 									
-						// PALEO DATA
-						//- md-toolbar.md-hue-1
-						//- 	h2.md-toolbar-tools
-						//- 		span PaleoData *
-						//- //- md-subheader.md-primary Core Length
-						//- //- div(layout='', layout-padding='', layout-sm='column')
-						//- //- 	md-input-container(flex='66')
-						//- //- 		label Value
-						//- //- 		input(type='number', ng-model='userData.core.value')
-						//- 	//- md-input-container(flex='')
-						//- 	//- 	label Units
-						//- 	//- 	md-select(ng-model='userData.core.unit')
-						//- 	//- 		md-option(ng-repeat='u in unitsDistance', value='{{u.short}}') {{u.long}}
-						//- div(layout='', layout-padding='', layout-sm='column')
-						//- 	md-input-container(flex='', ng-class="{'md-input-has-value': pageMeta.toggle}")
-						//- 		//- md-tooltip(md-visible='demo.showTooltip') Here is some more helpful information
-						//- 		label Table Name *
-						//- 		input(ng-model='meta.paleoData.paleoMeasurementTable.tableName')
-						//- 	//- md-input-container(flex='', ng-class="{'md-input-has-value': pageMeta.toggle}")
-						//- 	//- 	label Filename
-						//- 	//- 	input(ng-model='meta.paleoData.paleoMeasurementTable.filename')
-						//- div(layout='', layout-padding='', layout-sm='column')
-						//- 	md-subheader.md-primary Columns
-						//- div(layout='', layout-padding='', layout-sm='column', ng-model='f.columns', ng-repeat='i in colsPaleo')
-						//- 	md-input-container(flex='', ng-repeat='(k,v) in i', class="md-input-has-value")
-						//- 		label {{k}}
-						//- 		input(value='{{v}}' disabled)
-						//- div(layout='', layout-padding='', layout-sm='column')
-						//- 	md-button(ng-click='addColumnPaleo()')  + Add Column
-							
-						// CHRONOLOGY
-						md-toolbar.md-hue-1
-							h2.md-toolbar-tools
-								span ChronData
-						div(layout='', layout-padding='', layout-sm='column')
-							md-input-container(flex='', ng-class="{'md-input-has-value': pageMeta.toggle}")
-								//- md-tooltip(md-visible='demo.showTooltip') Here is some more helpful information
-								label Table Name
-								input(ng-model='meta.chronData.chronMeasurementTable.tableName' required)
-							// Filename - currently not used, because we should be generating the fielname for the user.
-							//- md-input-container(flex='', ng-class="{'md-input-has-value': pageMeta.toggle}")
-							//- 	label Filename
-							//- 	input(ng-model='meta.chronData.chronMeasurementTable.filename' required)
-						// Textarea to Copy/Paste CSV data
-						div(layout='', layout-padding='', layout-sm='column')
-							md-subheader.md-primary CSV data
-						div(layout='', layout-padding='', layout-sm='column')
-							textarea(placeholder=' Copy/Paste your CSV data here...' style="border: 0.1em solid #ccc; border-radius: 0.5em; height:10em; width: 80em")
-							button.valid-btn(ng-click="" ng-model='' style="margin: 1.5em; float:right;") Parse CSV
+			.col-sm-12
+				#form-container(ng-controller="ValidateCtrl as vc")
+
+					form#upload-form(ng-submit='')
+						// GOOGLE MAP
+						div
+							ui-gmap-google-map(center='map.config.center', zoom='map.config.zoom', draggable='true', options='map.config.options', bounds='map.config.bounds')
+								ui-gmap-markers(models='map.markers', coords="'self'", events='events', options='map.config.options')
 						br
 
-						// Column Data
-						div(ng-repeat='i in colsChron' layout-wrap="")
-							// when the toggle is true, all fields animate and show to show the input values. ng-class changes.
-							div(layout='', layout-padding='', layout-sm='column')
-								md-subheader.md-primary Column {{i.number}}
-							div(layout='', layout-padding='', layout-sm='column')
-								md-input-container(flex='', class="md-input-has-value")
-									label Variable Name *
-									input(value='{{v}}')
-								md-input-container(flex='', class="md-input-has-value")
-									label Units *
-									input(value='{{i.units}}')
-								md-input-container(flex='', class="md-input-has-value")
-									label Description
-									input(value='{{i.description}}')
-							div(layout='', layout-padding='', layout-sm='column')
-								md-input-container(flex='', class="md-input-has-value")
-									label Values *
-									input(value='{{i.values}}')
-						div(layout='', layout-padding='', layout-sm='column')
-							md-button(ng-click='addColumnChron()')  + Add Column
-							
-					// DEV AREA : Check that everything is binging in angular correctly. 
-					md-toolbar.md-hue-1
-						h2.md-toolbar-tools
-							span Dev Area!
-					li(style="list-style-type: none;")
-						pre(ng-class="feedback.errCt>0 ? 'on' : 'off'" style="background-color:#FEBABB; border: none;") {{ feedback.errCt}} errors
-							ul
-								li(ng-repeat="err in feedback.errMsgs track by $index") {{err}}
-						pre(ng-class="feedback.wrnCt>0 ? 'on' : 'off'" style="background-color:#FEEEB6; border: none;") {{ feedback.wrnCt }} warnings
-							ul
-								li(ng-repeat="wrn in feedback.wrnMsgs track by $index") {{wrn}}
-						pre(ng-class="pageMeta.valid? 'on' : 'off'" style="background-color:#DFF1C1; border: none;") Validation Complete!
-					pre#metaPretty
-
-
-
-
+						//- div(cg-busy="myPromise")
+						div
+							div(class="span span50" style="padding-right:3em;")
+								md-toolbar.md-hue-1
+									h2.md-toolbar-tools
+										span Load & Validate
+								div
+									ol
+										include ./pieces/action_btns.jade									
+										include ./pieces/feedback.jade									
+											
+							div(class="span span50")
+									include ./sections/root.jade
+									include ./sections/funding.jade
+									//- br
+									include ./sections/publication.jade
+									include ./sections/geo.jade												
+									include ./sections/paleo.jade
+									include ./sections/chron.jade
 
 // block js will insert js scripts listed in footer.jade that are needed on every page.
 block js
 	// files below are page specific
-	script(src='apps/createApp.js')
-	script(src='js/ngCreateLipd.js')
+	script(src='apps/validateApp.js')
+	script(src='js/ngValidate.js')
+	//- script(src="lib/angular-busy.js")
+	script(src="lib/zip/zip.js")
+	script(src='lib/json-tree.js')
+	script(src="lib/zip/zip-ext.js")
+	script(src="lib/papaparse.min.js")
+	script(src="lib/FileSaver.min.js")
+	script(src="modules/ng_map.js")
+	script(src="modules/ng_create.js")
+	script(src="modules/ng_misc.js")
+	script(src="modules/ng_validator.js")
+	script(src="https://cdnjs.cloudflare.com/ajax/libs/angular-recaptcha/3.2.1/angular-recaptcha.min.js")
+	script(src="https://www.google.com/recaptcha/api.js?onload=vcRecaptchaApiLoaded&render=explicit" async defer)
 	script(src='https://cdnjs.cloudflare.com/ajax/libs/angular-ui-router/0.2.15/angular-ui-router.min.js')
 	script(src='https://cdnjs.cloudflare.com/ajax/libs/angular-google-maps/2.2.0/angular-google-maps.min.js')
 	script(src='https://cdnjs.cloudflare.com/ajax/libs/danialfarid-angular-file-upload/8.0.1/ng-file-upload-shim.min.js')
 	script(src='https://cdnjs.cloudflare.com/ajax/libs/danialfarid-angular-file-upload/8.0.1/ng-file-upload.min.js')
 	script(src="https://cdnjs.cloudflare.com/ajax/libs/ngStorage/0.3.6/ngStorage.min.js")
 	script(src='https://maps.googleapis.com/maps/api/js?libraries=places&key=AIzaSyA7HRzSi5HhyKTX9Xw7CZ-9XScwq04TZyc')
-	script(src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/2.2.0/ui-bootstrap-tpls.min.js")
+	script(src="http://angular-ui.github.io/bootstrap/ui-bootstrap-tpls-0.4.0.js")
 	script(src="https://cdnjs.cloudflare.com/ajax/libs/angular-sanitize/1.5.8/angular-sanitize.min.js")
-	script(src="https://unpkg.com/ng-table@2.0.2/bundles/ng-table.min.js")
+	//- script(src="https://unpkg.com/ng-table@2.0.2/bundles/ng-table.min.js")

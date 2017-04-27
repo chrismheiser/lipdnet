@@ -23,7 +23,7 @@ var lipdValidator = (function(){
 
     // Sort data by file type, filename, and gather other metdata
     sortBeforeValidate: (function (objs, cb) {
-        console.log("sortBeforeValidate: Start sorting");
+        // console.log("sortBeforeValidate: Start sorting");
         // Files: User data holds all the user selected or imported data
         var files = {
             "lipdFilename": "",
@@ -34,7 +34,7 @@ var lipdValidator = (function(){
             "json": {}
           };
         files.fileCt = objs.length;
-        console.log("Files in LiPD: " + objs.length);
+        console.log("LiPD File Count: " + objs.length);
         try{
           // loop over each csv/jsonld object. sort them into the scope by file type
           objs.forEach(function (obj) {
@@ -53,8 +53,8 @@ var lipdValidator = (function(){
           });
           cb(files);
         }catch(e){
-          console.log("Error: sortBeforeValidate: " + e);
-          console.log(cb);
+          // console.log("Error: sortBeforeValidate: " + e);
+          // console.log(cb);
         }
 
         return;
@@ -79,8 +79,8 @@ var lipdValidator = (function(){
             }
           }
         }
-        console.log("MODIFIED TABLE");
-        console.log(table);
+        // console.log("MODIFIED TABLE");
+        // console.log(table);
         return table;
       };
 
@@ -131,8 +131,8 @@ var lipdValidator = (function(){
             } // end model
           } // end paleoData loop
         } // end if hasOwnProperty
-        console.log("TSIDS 2: MODIFIED" + pcData);
-        console.log(d);
+        // console.log("TSIDS 2: MODIFIED" + pcData);
+        // console.log(d);
         return d;
       };
 
@@ -142,35 +142,35 @@ var lipdValidator = (function(){
         // using files.json
         // run once for paleoData and chronData
         pc = ["paleo", "chron"];
-        console.log("Starting populateTSID loop");
+        // console.log("Starting populateTSID loop");
         for (var _i4 = 0; _i4 < pc.length; _i4++) {
           var _pc1 = pc[_i4];
           var _pc2 = pc[_i4] + "Data";
           // If paleoData found, continue.
-          console.log(_pc2 + " exists?");
+          // console.log(_pc2 + " exists?");
           if(files["json"].hasOwnProperty(_pc2)){
-            console.log("yes, " + _pc2 + " exists");
+            // console.log("yes, " + _pc2 + " exists");
             // Process the paleoData, and replace the data in the json
             files["json"] = populateTSids2(files["json"], _pc1);
           } else {
-            console.log("no, " + _pc2 + " doesnt exist");
-
+            // console.log("no, " + _pc2 + " doesnt exist");
           }
         }
         return files;
       };
 
       // Revalidate to remove TSid errors
-      console.log(_files);
+      // console.log(_files);
       cb(populateTSids1(_files));
     }),
 
     // LiPD Validation: Check data for required fields, proper structure, and proper data types.
     // Attempt to fix invalid data, and return data with and feedback (errors and warnings)
     // validate_main: (function(files){
-    validate: (function(files, cb){
+    validate: (function(files, options, cb){
 
-        console.log("validate: Begin Validation");
+        // console.log("validate: Begin Validation");
+        // console.log(files);
         // VALIDATOR EVENTS
         // receive json data (sorted or not sorted? use splitValidate if necessary)
         // run through validate function
@@ -211,30 +211,14 @@ var lipdValidator = (function(){
                   "minyear", "originaldataurl", "hasminvalue", "hasmaxvalue", "hasmedianvalue", "hasmeanvalue",
                   "hasresolution", "datacontributor", "collectionname", "googledataurl"],
           "reqRootKeys": ["archiveType", "dataSetName", "paleoData", "geo"],
-          "reqPubKeys": ["authors", "title", "year", "journal"],
-          "reqTableKeys": ["number", "variableName", "TSid"],
+          "reqPubKeys": ["author", "title", "year", "journal"],
+          "reqColumnKeys": ["number", "variableName", "TSid", "units"],
+          "reqTableKeys": ["filename", "columns", "missingValue"],
           "reqGeoKeys": ["coordinates"]
         };
 
-        // END GLOBALS
 
-        // Error log: Tally the error counts, and log messages to user
-        var logFeedback = function (errType, msg, key) {
-            if (errType === "warn") {
-              feedback.wrnCt++;
-              feedback.wrnMsgs.push(msg);
-            } else if (key === "TSid") {
-              feedback.missingTsidCt++;
-              feedback.tsidMsgs.push(msg);
-            } else if (errType === "err") {
-              feedback.errCt++;
-              feedback.errMsgs.push(msg);
-            } else if (errType === "pos") {
-              feedback.posMsgs.push(msg);
-            }
-          };
-
-        // Validate: Triggered during file upload, and with "Validate" button click.
+        // VALIDATE
         var validate = function () {
           // console.log("validate");
           console.log("validate: Structure");
@@ -243,20 +227,12 @@ var lipdValidator = (function(){
           verifyRequiredFields(files.json);
           console.log("validate: Bagit");
           verifyBagit(files.bagit);
-          console.log("validate: Valid?");
           verifyValid(feedback);
-          console.log("validate: " + feedback.status);
+          console.log("validate: Status: " + feedback.status);
           // var jsonCopy = JSON.parse(JSON.stringify(files.json));
-          console.log("validate: Complete");
+          // console.log("validate: Complete");
+          console.log(files.json);
           return {"dat": files.json, "feedback": feedback, "filename": files.lipdFilename, "status": feedback.status};
-        };
-
-        // Helper: Check that geo coordinates are within the proper latitude and longitude ranges.
-        var numberInRange = function (start, end, val) {
-          if (val >= start && val <= end) {
-            return true;
-          }
-          return false;
         };
 
         // VERIFY STRUCTURE
@@ -270,12 +246,12 @@ var lipdValidator = (function(){
               v = m[k];
               keys.lowKeys.push(lowKey);
               if (lowKey === "archivetype") {
-                correctType = verifyDataType("string", k, v);
+                correctType = verifyDataType("string", k, v, true);
               } else if (lowKey === "lipdversion") {
                 // Valid LiPD versions: 1.0, 1.1, 1.2
                 // check that the value is a number
                 v = parseInt(v);
-                correctType = verifyDataType("number", k, v);
+                correctType = verifyDataType("number", k, v, true);
                 if (correctType) {
                   if ([1.0, 1.1, 1.2].indexOf(v) == -1) {
                     // LiPD version wasn't valid. Log errors to scope.
@@ -284,14 +260,17 @@ var lipdValidator = (function(){
                 } // end data type check
               } else if (lowKey === "pub") {
                 // pub must follow BibJSON standards
-                verifyArrObjs(k, v);
+                var _pubPassed = verifyArrObjs(k, v, true);
+                if (_pubPassed){
+                  verifyBibJson(v);
+                }
               } else if (lowKey === "investigators" || lowKey === "investigator") {
-                verifyDataType("any", k, v);
+                verifyDataType("any", k, v, true);
               } else if (lowKey === "funding") {
-                verifyArrObjs(k, v);
+                verifyArrObjs(k, v, true);
               } else if (lowKey === "geo") {
                 // geo must follow GeoJSON standards
-                verifyDataType("object", k, v);
+                verifyDataType("object", k, v, true);
               } else if (lowKey == "chrondata") {
                 verifyPaleoChron("chron", k, v);
               } else if (lowKey === "paleodata") {
@@ -309,45 +288,87 @@ var lipdValidator = (function(){
           }
         };
 
-        // TODO: Do I need to verify these for structure????
-        // if pub section exists, make sure it matches the bib json standard
-        // if geo section exists, make sure it matches the geo json standard
+        var verifyBibJson = function(v){
+          try {
+            // these keys muust be an array of objects
+            var _arrs = ["author", "identifier", "editor", "license", "link"];
+            // this key must be an object
+            var _objs = ["journal"];
+            var _crumbs = "";
+            var _idx = 0;
+            // in case author is formatted wrong, convert it to BibJson format
+            v = fixAuthor(v);
+            for (var _p = 0; _p < v.length; _p++){
+              var _pub = v[_p];
+              // loop for each item in this pub
+              for(var _key in _pub){
+                _idx = _p + 1;
+                _crumbs = "publication" + _idx + "." + _key;
+                if(_pub.hasOwnProperty(_key)){
+                 if (_arrs.includes(_key)){
+                   var _isArrObj = verifyArrObjs(_crumbs, _pub[_key], true);
+                 } else if (_key === "journal"){
+                   verifyDataType("object", _crumbs, _pub[_key], false);
+                 } else {
+                   verifyDataType("string", _crumbs, _pub[_key], false);
+                 }
+                }
+              }
+            }
+          } catch (err) {
+            console.log("validate: verifyBibJson: " + err);
+          }
+        };
+
+        var verifyGeoJson = function(v){
+          // TODO might need to do this at some point
+        };
 
         // check if the data type for a given key matches what we expect for that key
-        var verifyDataType = function (dt, k, v) {
+        var verifyDataType = function (dt, k, v, addToLog) {
           try {
             // special case: check for object array.
             if (dt === "array") {
               if (!Array.isArray(v)) {
-                logFeedback("err", "Invalid data type: " + k + ".\n- Expected: " + dt + ", Given: " + (typeof v === 'undefined' ? 'undefined' : _typeof(v)), k);
+                if(addToLog){
+                  logFeedback("err", "Invalid data type: " + k + "\n  Expected: " + dt + ", Given: " + (typeof v === 'undefined' ? 'undefined' : _typeof(v)), k);
+                }
                 return false;
               }
             } else if (dt === "any"){
               return true;
             } else {
               // expecting specified data type, but didn't get it.
-              if ((typeof v === 'undefined' ? 'undefined' : _typeof(v)) != dt) {
-                logFeedback("err", "Invalid data type: " + k + ".\n- Expected: " + dt + ", Given: " + (typeof v === 'undefined' ? 'undefined' : _typeof(v)), k);
-                return false;
+              if (v === undefined)  {
+                if(addToLog){
+                  logFeedback("warn", "Valid structure, empty data: " + k);
+                }
               } // end if
+              else if (_typeof(v) != dt) {
+                if(addToLog){
+                  logFeedback("err", "Invalid data type: " + k + "\n  Expected: " + dt + ", Given: " + (typeof v === 'undefined' ? 'undefined' : _typeof(v)), k);
+                }
+                return false;
+              }
             } // end else
           } catch (err) {
             // caught some other unknown error
-            console.log("verifyDataType: Caught error parsing.\n- Expected: " + cdt + ", Given: " + (typeof v === 'undefined' ? 'undefined' : _typeof(v)));
+            console.log("verifyDataType: Caught error parsing. Expected: " + cdt + ", Given: " + (typeof v === 'undefined' ? 'undefined' : _typeof(v)));
           } // end catch
           return true;
         };
 
         // Check for an Array with objects in it.
-        var verifyArrObjs = function (k, v) {
-          isArr = verifyDataType("array", k, v);
+        var verifyArrObjs = function (k, v, addToLog) {
+          isArr = verifyDataType("array", k, v, addToLog);
           if (isArr) {
-            isObjs = verifyDataType("object", k, v[0]);
-            if (isObjs) {
+            isObjs = verifyDataType("object", k, v[0], addToLog);
+            // this array is only valid if it contains objects or if it's an empty array.
+            if (isObjs || !v[0]) {
               return true;
             }
           }
-          console.log("verifyArrObjs: Invalid data type: expected: obj, given: " + _typeof(v[0]));
+          console.log("verifyArrObjs: Invalid data type: expected: obj, given: " + _typeof(v[0]) + ": " + k);
           return false;
         };
 
@@ -359,7 +380,7 @@ var lipdValidator = (function(){
             logFeedback("err", "Invalid data type: " + k + ". Expected: " + dt + ", Given: " + (typeof v === 'undefined' ? 'undefined' : _typeof(v)), k);
           } else if (Array.isArray(v) && v.length > 0) {
             // check if the root paleoData or chronData is an array with objects.
-            var correctTop = verifyArrObjs(k, v);
+            var correctTop = verifyArrObjs(k, v, true);
 
             if (correctTop) {
               // create table names based on what "mode" we're in. chron or paleo
@@ -368,7 +389,8 @@ var lipdValidator = (function(){
               // check if measurement table exists
               if (v[0].hasOwnProperty(meas)) {
                 // check if measurement table is array with objects
-                verifyArrObjs(meas, v[0][meas]);
+                // console.log("meas: ", v);
+                verifyArrObjs(meas, v[0][meas], true);
               } // end measurement table
               // check if model table exists
               if (v[0].hasOwnProperty(mod)) {
@@ -381,9 +403,9 @@ var lipdValidator = (function(){
                     table = modTables[i];
                     if (v[0][mod][0].hasOwnProperty(table)) {
                       if (table === "distributionTable") {
-                        verifyArrObjs(table, v[0][mod][0][table]);
+                        verifyArrObjs(table, v[0][mod][0][table], true);
                       } else {
-                        verifyDataType("object", table, v[0][mod][0][table]);
+                        verifyDataType("object", table, v[0][mod][0][table], true);
                       }
                     } // if has property
                   } // end model table inner
@@ -393,13 +415,13 @@ var lipdValidator = (function(){
           } // end else
         }; // end verify
 
-        // END VERIFY STRUCTURE
 
         // REQUIRED DATA
         // master for checking for required fields. call sub-routines.
         var verifyRequiredFields = function (m) {
           // call sub-routine checks
           requiredRoot(m);
+          requiredPub(m);
           requiredPaleoChron("paleo", m);
           requiredPaleoChron("chron", m);
         };
@@ -415,27 +437,32 @@ var lipdValidator = (function(){
             // paleoData not found
             if (!m.hasOwnProperty(pdData)) {
               if (pc === "paleo") {
-                logFeedback("err", "Missing data: " + pdData + " section", pdData);
+                logFeedback("err", "Missing data: " + pdData + "0measurementTable0", pdData);
               }
             }
             // paleoData found
             else {
-                if (pc === "paleo" && m[pdData].length === 0) {
+                // paleo data is empty
+                if (pc === "paleo" && !m[pdData]) {
                   logFeedback("err", "Missing data: " + meas, meas);
                 } else {
                   // for each object in the paleoData list
                   for (var i = 0; i < m[pdData].length; i++) {
                     // hold table in variable.
                     var table = m[pdData][i];
-                    var crumbs = pdData + i + meas;
+                    var crumbs = pc + i;
 
                     // measurementTable found
                     if (table.hasOwnProperty(meas)) {
-                      for (var k = 0; k < table[meas].length; k++) {
-                        // hold current meas table object in a variable
-                        var measObj = table[meas][k];
-                        var crumbs = pdData + i + meas + k;
-                        requiredTable(measObj, crumbs);
+                      if (table[meas].length === 0){
+                        logFeedback("err", "Missing data: " + meas, meas);
+                      } else {
+                        for (var _w = 0; _w < table[meas].length; _w++) {
+                          // hold current meas table object in a variable
+                          var measObj = table[meas][_w];
+                          crumbs += "measurement" + _w;
+                          requiredTable(measObj, crumbs);
+                        }
                       }
                     } // end meas
 
@@ -448,20 +475,20 @@ var lipdValidator = (function(){
                     if (table.hasOwnProperty(mod)) {
                       for (var k = 0; k < table[mod].length; k++) {
                         var modObj = table[mod][k];
-                        var crumbs = pdData + i + mod + k;
+                        crumbs += "model" + k;
                         // found summary table
                         if (modObj.hasOwnProperty("summaryTable")) {
-                          requiredTable(modObj.summaryTable, crumbs + ".summaryTable");
+                          requiredTable(modObj.summaryTable, crumbs + "summary");
                         }
                         // found ensemble table
                         if (modObj.hasOwnProperty("ensembleTable")) {
-                          requiredTable(modObj.ensembleTable, crumbs + ".ensembleTable");
+                          requiredTable(modObj.ensembleTable, crumbs + "ensemble");
                         }
                         // found distribution table
                         if (modObj.hasOwnProperty("distributionTable")) {
                           for (var j = 0; j < modObj.distributionTable.length; j++) {
                             var distObj = modObj.distributionTable[j];
-                            requiredTable(distObj, crumbs + ".distributionTable" + j);
+                            requiredTable(distObj, crumbs + "distribution" + j);
                           } // end for
                         } // end dist
                       } // end model loop
@@ -478,25 +505,22 @@ var lipdValidator = (function(){
         // each table must have "filename" and "missingValue"
         // each column must have "number", "tsid", and "variableName"
         var requiredTable = function (t, crumbs) {
-
           // look for table filename
-          var filename = "";
+          var filename = t.filename;
+          var missingValue = t.missingValue;
+          var _pcTableName = "paleoDataTableName";
+          // add in the table name requirement based on table type
+          if (crumbs.indexOf("chron") !== -1){
+            _pcTableName = "chronDataTableName";
+          }
+
           try {
-            if (!t.hasOwnProperty("filename")) {
-              logFeedback("err", "Missing data: " + crumbs + ".filename", "filename");
-            } else {
-              filename = t.filename;
+            // check for table name key
+            if (!t.hasOwnProperty(_pcTableName) || !t[_pcTableName]){
+              logFeedback("err", "Missing data: " + crumbs + "." + _pcTableName, _pcTableName);
             }
 
-            // look for table missing value
-            var missingValue = "";
-            if (!t.hasOwnProperty("missingValue")) {
-              logFeedback("err", "Missing data: " + crumbs + ".missingValue", "missingValue");
-            } else {
-              missingValue = t.missingValue;
-            }
-            // columns not found
-            if (!t.hasOwnProperty("columns")) {
+            if(!t.hasOwnProperty("columns") || t.columns.length === 0){
               logFeedback("err", "Missing data: " + crumbs + ".columns", "columns");
             }
             // columns found
@@ -505,18 +529,32 @@ var lipdValidator = (function(){
                 requiredColumnsCtMatch(filename, t.columns);
               }
               // loop over each column in the table
-              for (var i = 0; i < t["columns"].length; i++) {
+              // console.log(t.columns);
+              for (var i = 0; i < t.columns.length; i++) {
                 // loop over each of the required column keys
-                for (var k in keys.reqTableKeys) {
-                  currKey = keys.reqTableKeys[k];
+                for (var k in keys.reqColumnKeys) {
+                  currKey = keys.reqColumnKeys[k];
                   // see if this column has each of the required keys
-                  if (!t["columns"][i].hasOwnProperty(currKey)) {
+                  if (!t.columns[i].hasOwnProperty(currKey) || !t.columns[i][currKey]) {
                     // required key is missing, log error
                     logFeedback("err", "Missing data: " + crumbs + ".column" + i + "." + currKey, currKey);
                   }
                 } // end table keys
               } // end columns loop
             } // end 'if columns exist'
+
+            // loop over each column in the table
+            for (var _w = 0; _w < keys.reqTableKeys.length; _w++) {
+              // loop over each of the required column keys
+              currKey = keys.reqTableKeys[_w];
+              // see if this column has each of the required keys
+              if (!t.hasOwnProperty(currKey) || !t[currKey]) {
+                // required key is missing, log error
+                logFeedback("err", "Missing data: " + crumbs + "." + currKey, currKey);
+              }
+            } // end columns loop
+
+
           } catch(err){
             console.log("validator: requiredTable: " + err);
           }
@@ -528,7 +566,7 @@ var lipdValidator = (function(){
           var csvCt = 0;
           try{
             // Get the column count for this csv file.
-            csvCt = files.csv[filename]["cols"];
+            csvCt = files.csv[filename].cols;
           } catch(err){
             logFeedback("err", "CSV filename(s) do not match filenames CSV filenames listed in JSONLD metadata", "filename");
             return;
@@ -540,7 +578,7 @@ var lipdValidator = (function(){
               // column counts don't match. Do we have two columns? Might be an ensemble table
               if (columns.length === 2) {
                 // Is column 2 an array of columns? (most likely)
-                if (Array.isArray(columns[1]["number"])) {
+                if (Array.isArray(columns[1].number)) {
                   // calculate how many columns this array REALLY represents.
                   metaCt = columns[1].number.length - 1 + metaCt;
                   // Do the column counts match now?
@@ -550,7 +588,7 @@ var lipdValidator = (function(){
                   }
                 }
                 // is column 1 an array of column numbers? (less likely)
-                else if (Array.isArray(columns[0]["number"])) {
+                else if (Array.isArray(columns[0].number)) {
                     // calculate how many columns this array REALLY represents.
                     metaCt = columns[0].number.length - 1 + metaCt;
                     // Do the column counts match now?
@@ -578,28 +616,26 @@ var lipdValidator = (function(){
         // verify required keys in metadata root level
         var requiredRoot = function (m) {
           try {
+            // console.log(m);
             // loop through and check for required fields. (lipdVersion, archiveType, paleoMeasurementTable..what else???)
             for (var i = 0; i < keys.reqRootKeys.length; i++) {
               // Current key
               var key = keys.reqRootKeys[i];
-              // Pub found. Check for required keys.
-              if (key === "pub" && m.hasOwnProperty(key)) {
-                requiredPub(m);
-              } else if (key === "geo") {
+              // console.log("current key: " + key);
+              if (key === "geo") {
                 // Geo found. Check for valid data.
                 if (m.hasOwnProperty(key)) {
                   requiredGeo(m);
                 }
                 // Geo not found. Coordinates are definitely missing, which triggers an error.
                 else {
-                    logFeedback("err", "Missing data: " + "coordinates", "coordinates");
-                  }
-              }
-              // All other required root keys
-              else if (!m.hasOwnProperty(key)) {
-                  // key not found! log the error
-                  logFeedback("err", "Missing data: " + key, key);
+                  logFeedback("err", "Missing data: " + "coordinates", "coordinates");
                 }
+              } else if (!m.hasOwnProperty(key) || !m[key]) {
+                // All other required root keys
+                // key not found! log the error
+                logFeedback("err", "Missing data: " + key, key);
+              }
             } // end for
           } catch(err){
             console.log("validator: requiredRoot: " + err);
@@ -611,24 +647,27 @@ var lipdValidator = (function(){
         var requiredPub = function (m) {
           try {
             // pub not found, log a warning.
-            if (!m.hasOwnProperty("pub")) {
+            if (!m.hasOwnProperty("pub") || !m.pub) {
               logFeedback("warn", "No publication data", "pub");
             }
             // pub found, make sure it has the required keys
             else {
-                // for each pub in the pub list
-                for (var i = 0; i < m.pub.length; i++) {
-                  var curPub = m.pub[i];
-                  // loop over required keys, and see if this pub has the key
-                  for (var k = 0; k < keys.reqPubKeys.length; k++) {
-                    var key = keys.reqPubKeys[k];
-                    if (!m.pub[i].hasOwnProperty(key)) {
-                      // this pub is missing a required key!
-                      logFeedback("err", "Missing data: " + "pub" + i + key, key);
-                    }
+              // for each pub in the pub list
+              for (var i = 0; i < m.pub.length; i++) {
+                var curPub = m.pub[i];
+                var _idx = i+1;
+                // loop over required keys, and see if this pub has the key
+                for (var k = 0; k < keys.reqPubKeys.length; k++) {
+                  var key = keys.reqPubKeys[k];
+                  if (!m.pub[i].hasOwnProperty(key)) {
+                    // this pub is missing a required key!
+                    logFeedback("err", "Missing data: " + "publication" + _idx + "." + key, key);
+                  } else if (!m.pub[i][key]){
+                    logFeedback("err", "Missing data: " + "publication" + _idx + "." + key, key);
                   }
-                }
-              }
+                } // end for req keys
+              } // end for publication
+            } // end if else
           } catch (err) {
             console.log("validator: requiredPub: " + err);
             logFeedback("warn", "Encountered problem validating: pub");
@@ -648,17 +687,26 @@ var lipdValidator = (function(){
               // check if values are in range
               lonValid = numberInRange(-180, 180, lon);
               latValid = numberInRange(-90, 90, lat);
-              // check if longitude is range
-              if (!lonValid) {
-                logFeedback("error", "Longitude out of range: Enter value from -180 to 180", "longitude");
+
+              if (!m.geo.geometry.coordinates[0]){
+                logFeedback("err", "Missing data: longitude", "coordinates");
+              } else if (!lonValid) {
+                // check if longitude is range
+                logFeedback("err", "Longitude out of range: Enter value from -180 to 180", "longitude");
               }
-              // check if latitude is in range
-              if (!latValid) {
-                logFeedback("error", "Latitude out of range: Enter value from -90 to 90", "latitude");
+
+
+              if (!m.geo.geometry.coordinates[1]){
+                logFeedback("err", "Missing data: latitude", "coordinates");
+              } else if (!latValid) {
+                // check if latitude is in range
+                logFeedback("err", "Latitude out of range: Enter value from -90 to 90", "latitude");
               }
             } else {
-              // there aren't any coordinate values to make the map
-              logFeedback("error", "Missing data: " + "geo - coordinates", "coordinates");
+              if (!m.geo.geometry.coordinates){
+                // there aren't any coordinate values to make the map
+                logFeedback("err", "Missing data: " + "geo - coordinates", "coordinates");
+              }
             }
           } catch (err) {
             logFeedback("warn", "Unable to map location", "geo");
@@ -666,41 +714,131 @@ var lipdValidator = (function(){
           }
         };
 
-        // END REQUIRED DATA
 
+        //  HELPERS
 
-        // VERIFY BAGIT
+        // create a csv filename for a data table
+        var createCsvFilename = function(crumbs){
+          var _filename = crumbs + ".csv";
+          try{
+            if(files.json.dataSetName !== undefined){
+              _filename = files.json.dataSetName + "." + _filename;
+            } else if(files.json.dataSetName.length !== 0){
+              _filename = files.json.dataSetName + "." + _filename;
+            }
+          } catch(err){
+            console.log(err);
+          }
+          return _filename;
+        };
+
+        // Check that geo coordinates are within the proper latitude and longitude ranges.
+        var numberInRange = function (start, end, val) {
+          if (val >= start && val <= end) {
+            return true;
+          }
+          return false;
+        };
+
+        var fixAuthor = function(p){
+          try {
+            var _d = [];
+            for (var _u = 0; _u < p.length; _u++){
+              if(p[_u].hasOwnProperty("authors")){
+                p[_u].author = p[_u].authors;
+                delete p[_u].authors;
+              }
+            } // end for loop authors key
+
+            // for loop each pub
+            for (var _e = 0; _e < p.length; _e++){
+              if(p[_e].hasOwnProperty("author")){
+                if (typeof(p[_e].author) === "string"){
+                  var _split = [];
+                  if (p[_e].author.indexOf("and") !== -1){
+                    _split = p[_e].author.split(" and ");
+                  } // if author string sep by "and"
+                  else if (p[_e].author.indexOf(";") !== -1){
+                    _split = p[_e].author.split(";");
+                  } // if author string sep by ";"
+                  for (var _a = 0; _a < _split.length; _a++){
+                    _d.push({"name": _split[_a]});
+                  }
+                  // set the new object in place of the old string.
+                  p[_e].author = _d;
+                } // end if author value is string
+
+                // author is an array of strings (one name per entry)
+                else if (Array.isArray(p[_e].author)){
+                  try{
+                    if (p[_e].author[0] && typeof(p[_e].author[0])=== "string"){
+                      for (var _c = 0; _c < p[_e].author.length; _c++){
+                        _d.push({"name": p[_e].author[_c]});
+                      }
+                      p[_e].author = _d;
+                    }
+                  } catch (err) {
+                    console.log("validate: fixAuthor: " + err);
+                  }
+                }
+              } // if pub had author entry
+            } // for loop author data type
+          } catch(err){
+            console.log("validate: fixAuthor: " + err);
+          }
+          return p;
+        };
+
+        // Error log: Tally the error counts, and log messages to user
+        var logFeedback = function (errType, msg, key) {
+            if (errType === "warn") {
+              feedback.wrnCt++;
+              feedback.wrnMsgs.push(msg);
+            } else if (key === "TSid") {
+              feedback.missingTsidCt++;
+              feedback.tsidMsgs.push(msg);
+            } else if (errType === "err") {
+              feedback.errCt++;
+              feedback.errMsgs.push(msg);
+            } else if (errType === "pos") {
+              feedback.posMsgs.push(msg);
+            }
+          };
+
         // verify the 4 bagit files are present, indicating a properly bagged LiPD file.
         var verifyBagit = function (files) {
           // Bagit filenames are static. Check that each is present.
           // var validBagitFiles = ["tagmanifest-md5.txt", "manifest-md5.txt", "bagit.txt", "bag-info.txt"];
           // TEMPORARY: Only check for these 3 bagit files, until we figure out how to create the 4th file online.
-          var validBagitFiles = ["manifest-md5.txt", "bagit.txt", "bag-info.txt"];
-          var count = 0;
-          var errors = 0;
-          validBagitFiles.forEach(function (filename) {
-            if (files.hasOwnProperty(filename)) {
-              count++;
-            } else {
-              //
-              errors++;
-              logFeedback("err", "Missing bagit file: " + filename);
+
+          // Only run Verify Bagit when this is an uploaded file. NOT when it's being created from scratch
+          // If create from scratch, it's not possible to have bagit files yet.
+          if(options.fileUploaded){
+            var validBagitFiles = ["manifest-md5.txt", "bagit.txt", "bag-info.txt"];
+            var count = 0;
+            var errors = 0;
+            validBagitFiles.forEach(function (filename) {
+              if (files.hasOwnProperty(filename)) {
+                count++;
+              } else {
+                //
+                errors++;
+                logFeedback("err", "Missing bagit file: " + filename);
+              }
+            });
+            // if all 4 bagit files are found, display valid bagit message
+            // if (count === 4) {
+            //   logFeedback("pos", "Valid Bagit File", "bagit");
+            //   feedback.validBagit = true;
+            // }
+            // TEMPORARY: Only check for 3 bagit files to be valid, since online bagit doesn't include one file.
+            if (count === 3) {
+              logFeedback("pos", "Valid Bagit File", "bagit");
+              feedback.validBagit = true;
             }
-          });
-          // if all 4 bagit files are found, display valid bagit message
-          // if (count === 4) {
-          //   logFeedback("pos", "Valid Bagit File", "bagit");
-          //   feedback.validBagit = true;
-          // }
-          // TEMPORARY: Only check for 3 bagit files to be valid, since online bagit doesn't include one file.
-          if (count === 3) {
-            logFeedback("pos", "Valid Bagit File", "bagit");
-            feedback.validBagit = true;
           }
         };
-        // END VERIFY BAGIT
 
-        // VERIFY VALID
         // Check for Valid LiPD data. If no errors, then it's valid.
         var verifyValid = function () {
             if (feedback.missingTsidCt > 1) {
@@ -720,7 +858,6 @@ var lipdValidator = (function(){
               }
             }
           };
-        // END VERIFY VALID
         // try{
           cb(validate());
         // } catch(err){

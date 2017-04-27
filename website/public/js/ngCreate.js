@@ -1,4 +1,4 @@
-var f = angular.module('ngCreateLipd', ['uiGmapgoogle-maps', 'ngFileUpload']);
+var f = angular.module('ngCreate', ['uiGmapgoogle-maps', 'ngFileUpload']);
 
 // Google Maps API key to allow us to embed the map
 f.config(function(uiGmapGoogleMapApiProvider) {
@@ -8,17 +8,6 @@ f.config(function(uiGmapGoogleMapApiProvider) {
         libraries: 'weather,geometry,visualization'
     });
 });
-
-f.run([function() {
-  if (typeof(Storage) !== "undefined") {
-      // Code for localStorage/sessionStorage.
-      sessionStorage.clear();
-      console.log("Session Storage has been cleared");
-  } else {
-      // Sorry! No Web Storage support..
-      console.log("There is no support for Session Storage. Please try a different browser.");
-  }
-}]);
 
 // Controller for the Upload form
 f.controller('CreateCtrl',['$scope', 'Upload', '$timeout', '$q', '$http', function($scope, $log, $timeout, $default, Upload, $q, $http) {
@@ -106,9 +95,9 @@ f.controller('CreateCtrl',['$scope', 'Upload', '$timeout', '$q', '$http', functi
     $scope.paleoModelCt = 1;
     $scope.chronModelCt = 1;
 
-    $scope.$watch("meta", function(){
-      document.getElementById("metaPretty").innerHTML = JSON.stringify($scope.files.json, undefined, 2);
-    }, true);
+    // $scope.$watch("meta", function(){
+    //   document.getElementById("metaPretty").innerHTML = JSON.stringify($scope.files.json, undefined, 2);
+    // }, true);
 
 
     // LiPD may end up being the only option, but I can foresee where we might accept jsonld files also.

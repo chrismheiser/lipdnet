@@ -1,0 +1,59 @@
+// PUBLICATION
+md-toolbar.md-hue-1
+  h2.md-toolbar-tools
+    span Publication
+// PUBLICATION DATA
+div(ng-repeat="entry in files.json.pub track by $index" layout-wrap="")
+
+  md-card
+    md-subheader.md-primary publication {{$index}}
+    div(layout='', layout-padding='', layout-sm='column')
+      md-input-container(flex='', ng-class="md-input-has-value")
+        label DOI
+        input(ng-model='entry.identifier[0].id')
+        md-tooltip Enter a valid DOI and we'll work some magic
+      button.valid-btn(ng-click="fetchPublication(entry)" style="margin: 1.5em;" ng-disabled="!entry.identifier[0].id") Autocomplete using DOI
+    br
+    div(layout='', layout-padding='', layout-sm='column')
+      md-input-container(flex='', ng-class="md-input-has-value")
+        label Title *
+        textarea(ng-model='entry.title', columns='1', md-maxlength='150')
+    div(layout='', layout-padding='', layout-wrap='', layout-sm='column')
+      md-input-container(flex='', ng-class="md-input-has-value")
+        label Year *
+        input(ng-model='entry.year')
+      md-input-container(flex='', ng-class="md-input-has-value")
+        label Journal *
+        input(ng-model="entry.journal")
+      md-input-container(flex='', ng-class="md-input-has-value")
+        label Volume
+        input(ng-model='entry.volume')
+    div(layout='', layout-padding='', layout-wrap='', layout-sm='column')
+      md-input-container(flex='', ng-class="md-input-has-value")
+        label Edition
+        input(ng-model='entry.edition')
+      md-input-container(flex='', ng-class="md-input-has-value")
+        label Issue
+        input(ng-model='entry.issue')
+      md-input-container(flex='', ng-class="md-input-has-value")
+        label Publication Type
+        input(ng-model='entry.type')
+    div(layout='', layout-padding='', layout-sm='column', ng-repeat='entry2 in entry.author track by $index')
+      md-input-container(flex='', ng-class="md-input-has-value")
+        label Author
+        input(ng-model='entry2.name')
+      div(layout='', layout-padding='', layout-sm='column' style="float: right;")
+        button.valid-btn-sm(ng-click='addBlock(entry.author, "author", null)' style="margin: 1.5em;" type="button")  +
+        button.valid-btn-sm(ng-click='removeBlock(entry.author, $index)' style="margin: 1.5em;" type="button")  -
+    
+    div(layout='', layout-padding='', layout-sm='column' style="float: right;")
+      button.valid-btn(ng-click='removeBlock(files.json.pub, $index)' style="margin: 1.5em;" type="button")  - Remove						
+      
+
+  // DIVIDER LINE
+  //- div(style="text-align:center;box-sizing:border-box;")      
+  //-   md-divider(style="background-color:#efefef; width:100%;align:center;vertical-align:middle; display: inline-block;")
+
+div(layout='', layout-padding='', layout-sm='column' style="float: right;")
+  button.valid-btn(ng-click='addBlock(files.json.pub, "pub", null)' style="margin: 1.5em;" type="button")  + Add Publication									
+  

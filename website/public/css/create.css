@@ -52,6 +52,25 @@ input[type="number"] {
     -moz-appearance: textfield;
 }
 
+
+.span {
+    display: inline-block;
+    vertical-align: top;
+}
+.span25 {
+    width: 25%;
+}
+.span75 {
+    width: 75%;
+}
+
+.invisible {
+    background: transparent;
+    border: none !important;
+    font-size:0;
+}
+
+
 /* Autocomplete database form (in FileCtrl)
 ============================================================================= */
 .ac-db li {

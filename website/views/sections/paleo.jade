@@ -1,0 +1,114 @@
+// PALEO DATA
+md-toolbar.md-hue-1
+	h2.md-toolbar-tools
+		span PaleoData *
+
+div(ng-repeat='entry in files.json.paleoData track by $index' layout-wrap="")
+	// PaleoData[1] : Should only be one entry2. Don't need to loop
+	div(ng-repeat="entry2 in entry.paleoMeasurementTable track by $index" layout-wrap="")
+		md-card 
+			md-subheader.md-primary paleo {{$parent.$index}} measurement {{$index}}
+			div(layout='', layout-padding='', layout-sm='column')
+				md-input-container(flex='', ng-class="md-input-has-value")
+					//- md-tooltip(md-visible='demo.showTooltip') Here is some more helpful information
+					label Table Name *
+					input(ng-model='entry2.paleoDataTableName')
+				md-input-container(flex='', ng-class="md-input-has-value")
+					//- md-tooltip(md-visible='demo.showTooltip') Here is some more helpful information
+					label Missing Value *
+					input(ng-model='entry2.missingValue')
+			div(layout='', layout-padding='', layout-sm='column')
+				md-input-container(flex='', ng-class="md-input-has-value")
+					//- md-tooltip(md-visible='demo.showTooltip') Here is some more helpful information
+					label Filename *
+					input(ng-model='entry2.filename' disabled)
+			// Toggle the csv entry2 box and the parse csv button. Once we parse CSV, these elements are not longer needed.
+			div(ng-hide="entry2.toggle")
+				// Textarea to Copy/Paste CSV data
+				md-subheader.md-primary CSV data
+				div(layout='', layout-padding='', layout-sm='column')
+					i.material-icons(style="font-size:16px;") help
+						md-tooltip Copy/pasting data from a `rich editor like Microsoft Excel will use a Tab delimiter. When in doubt, use the delimiter you see when after you paste your data below.
+					md-input-container
+						md-label Delimiter
+						md-select(ng-model='dropdowns.current.delimiter' ng-model-options="{trackBy: '$value.id'}")
+							md-option(ng-value="delimiter" ng-repeat="delimiter in dropdowns.delimiters") {{ delimiter.view }}
+					md-switch(ng-model='pageMeta.header') Header: {{ pageMeta.header? "On": "Off"}}
+					//- md-switch(ng-model='pageMeta.delimiter') Delimiter: {{ pageMeta.delimiter? "Semi-colon ( ; )" : "Comma ( , ) / Tab / Spaces"}}
+				div(layout='', layout-padding='', layout-sm='column')
+					textarea(placeholder='Copy/Paste your CSV data here...' ng-model="entry2.values" style="border:0.1em solid #ccc;border-radius:0.5em;height:10em;width:80em")
+					button.valid-btn(ng-click="parseCsv(entry2, $index, {'pc': 'paleo', 'tt': 'measurement'}); toggleCsvBox(entry2)" style="margin: 1.5em; float:right;" type="button") Parse CSV
+						//- md-tooltip(md-visible="files.json.dataSetName === ''") DatasetName required before parsing Csv
+						
+			br
+
+			// Column Data
+			div(ng-repeat='entry3 in entry2.columns track by $index' layout-wrap="")
+				// when the toggle is true, all fields animate andqq show to show the input values. ng-class changes.
+					//- button.valid-btn-sm(ng-click='' style="float: right; margin: 1.5em;" type="button")  +
+					//- button.valid-btn-sm(ng-click='' style="float: right; margin: 1.5em;" type="button")  -
+				md-card
+					md-subheader.md-primary column {{$index}}
+					div(layout='', layout-padding='', layout-sm='column')
+						md-input-container(flex='33', class="md-input-has-value")
+							label Variable Name *
+							input(ng-model="entry3.variableName")
+						md-input-container(flex='33', class="md-input-has-value")
+							label Units *
+							input(ng-model="entry3.units")
+						md-input-container(flex="33")
+							label Archive Type *
+							md-select(ng-model="entry3.archiveType")
+								md-option(ng-repeat="archive in dropdowns.archiveType" ng-value="archive")
+									{{archive}}
+					div(layout='', layout-padding='', layout-sm='column')
+						md-input-container(flex='', class="md-input-has-value")
+							label Description
+							textarea(ng-model='entry3.description', columns='1', md-maxlength='150')
+					div(layout='', layout-padding='', layout-sm='column')
+						md-input-container(flex='', class="md-input-has-value")
+							label Values *
+							//- input(format-values ng-model="files.csv[entry2.filename].transposed[$index]")
+							input(space-values ng-model="files.csv[entry2.filename].transposed[$index]")
+					div(layout='', layout-padding='', layout-sm='column' style="float: right;")
+						button.valid-btn(ng-if="entry3.tmp.toggle" ng-click='entry3.tmp.toggle = !entry3.tmp.toggle' style="margin: 1.5em;" type="button")  + Show less
+						button.valid-btn(ng-if="!entry3.tmp.toggle" ng-click='entry3.tmp.toggle = !entry3.tmp.toggle' style="margin: 1.5em;" type="button")  + Show more
+						
+					div(ng-if="entry3.tmp.toggle")
+						md-subheader.md-primary Add Properties
+						//- div(layout='', layout-padding='', layout-sm='column')
+						//- 	md-chips#properties(ng-model='vc.properties.properties', md-require-match='true' md-on-remove="addRmProperty($chip)")
+						//- 		md-autocomplete(md-selected-item='vc.properties.item', md-search-text='vc.properties.search', 
+						//- 						md-items='item in vc.propertiesQuerySearch(vc.properties.search)', md-item-text='item.view',
+						//- 						 md-min-length='0', placeholder='Enter property...', md-autoselect='' md-selected-item-change="addRmProperty(item)")
+						//- 			span(md-highlight-text='vc.properties.search') {{item.view}}
+						//- 		md-chip-template
+						//- 			span {{$chip.view || $chip}}
+						
+						div(layout='', layout-padding='', layout-sm='column')
+							div.form-group
+								label(ng-repeat="field in fields" class="checkbox-inline")
+									input(type="checkbox" value="field" ng-checked="entry3.tmp[field]" 
+									ng-click="addRmProperty(entry3, field); entry3.tmp[field] = !entry3.tmp[field]")
+									{{field}}
+						div(layout='', layout-padding='', layout-sm='column')
+							button.invisible(ng-click="addRmProperty(entry3, entry3.tmp.custom); clearCustom(entry3)")
+							md-input-container(flex="25")
+								label Other...
+								input(ng-model="entry3.tmp.custom")
+								
+					div(ng-repeat="(k,v) in entry3" ng-if="showProperty(k) && entry3.tmp.toggle" layout='', layout-padding='', layout-sm='column')
+						md-input-container(flex='', class="md-input-has-value")
+							label {{k}}
+							input(ng-model="entry3[k]" ng-disabled="k==='TSid'")
+	
+div(layout='', layout-padding='', layout-sm='column' style="float: right;")
+	md-input-container
+		md-label Table Type
+		md-select(ng-model='dropdowns.current.table' ng-model-options="{trackBy: '$value.id'}" disabled)
+			md-option(ng-value="table" ng-repeat="table in dropdowns.tables") {{ table.name }}
+	button.valid-btn(ng-click='addBlock(files.json.paleoData[0].paleoMeasurementTable, dropdowns.current.table.name, "paleo")' style="margin: 1.5em;" type="button")  + Add Table
+	// END MEASUREMENT TABLE
+
+
+// END PALEO DATA

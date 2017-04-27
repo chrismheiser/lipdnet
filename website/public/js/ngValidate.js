@@ -8,28 +8,12 @@ var _typeof = typeof Symbol === "function" && _typeof2(Symbol.iterator) === "sym
   return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj === "undefined" ? "undefined" : _typeof2(obj);
 };
 
-// UPLOAD EVENTS
-// 1. Disable Upload button
-// 2. Use ImportService to parse data
-// 3. Put data in $scope.files, sorted by type (json, csv, bagit)
-// 4a. Start validation
-// 4b. Reset all validation metadata variables (errors, warnings, keys, etc..)
-// 4c. Verify LiPD v1.2 structure
-// 4d. Verify Required Data is given
-// 4e. Verify bagit files are given (is properly bagged LiPD)
-// 4f. Verify valid LiPD file (no errors)
-// 4g. Create the Simple View
-
-// DOWNLOAD EVENTS
-// 1. Use ExportService to organize $scope.files data
-// 2. Open zip file and add files
-// 3. Close zip file and download
-// 4. Reset zip file to null
-
-var f = angular.module('ngValidate', ['uiGmapgoogle-maps', 'json-tree', 'ngFileUpload', "ngMaterial", "ngTable", "cgBusy", "vcRecaptcha"]);
+// deprecated : cgBusy
+var f = angular.module('ngValidate', ['uiGmapgoogle-maps', 'json-tree', 'ngFileUpload', "ngMaterial", "vcRecaptcha", "ui.bootstrap"]);
 
 // Google Maps API key to allow us to embed the map
-f.config(function (uiGmapGoogleMapApiProvider) {
+f.config(function (uiGmapGoogleMapApiProvider, $mdThemingProvider) {
+  // $mdThemingProvider.theme('dark-grey').backgroundPalette('grey').dark();
   uiGmapGoogleMapApiProvider.configure({
     // key: 'AIzaSyB8nllB0zwraQo5qJMGdtcxulsTPJOnd8U',
     key: "AIzaSyA7HRzSi5HhyKTX9Xw7CZ-9XScwq04TZyc",
@@ -38,16 +22,66 @@ f.config(function (uiGmapGoogleMapApiProvider) {
   });
 });
 
-// f.run([function () {
-//   if (typeof Storage !== "undefined") {
-//     // Code for localStorage/sessionStorage.
-//     sessionStorage.clear();
-//     console.log("Session Storage has been cleared");
-//   } else {
-//     // Sorry! No Web Storage support..
-//     console.log("There is no support for Session Storage. Please try a different browser.");
-//   }
-// }]);
+f.directive('formatValues', function () {
+  return {
+    restrict: 'A',
+    require: 'ngModel',
+    scope:{
+      value:'=ngModel',
+      model: "="
+    },
+    link: function (scope, element, attrs, ngModel) {
+      //format text going to user (model to view)
+      ngModel.$formatters.push(function(value) {
+        // console.log(value);
+        var _str = "";
+        // if the array is longer than 5 values, then take snippets from beginning and end of array (common)
+        if(value.length > 5){
+          for(var _i=0; _i<5;_i++){
+            if (_i === 3){
+              _str += "...   " + value[value.length-2];
+            } else if (_i === 4){
+              _str += ",   " + value[value.length-1];
+            } else {
+              _str += value[_i] + ",   ";
+            }
+          }
+        // if array is less than 5 values, then display the whole thing. no truncation.
+        } else {
+          for(var _w=0; _w<value.length;_w++){
+            _str += value[_w];
+            if (_w !== value.length-1){
+              _str += ",   ";
+            }
+          }
+        }
+      return _str;
+      });
+    }
+  };
+});
+
+f.directive("spaceValues", function(){
+  return {
+    restrict: 'A',
+    require: 'ngModel',
+    scope:{
+      value:'=ngModel',
+      model: "="
+    },
+    link: function (scope, element, attrs, ngModel) {
+      //format text going to user (model to view)
+      ngModel.$formatters.push(function(value) {
+        // console.log(value);
+        var _str = "";
+        for(var _i=0; _i<value.length;_i++){
+          _str += value[_i] + ",  ";
+        }
+      return _str;
+      });
+    }
+  };
+});
 
 // IMPORT SERVICE
 // Parse service for unpacking and sorting LiPD file data
@@ -58,9 +92,7 @@ f.factory("ImportService", ["$q", function ($q) {
     // parse the data using Papa module
     var x = Papa.parse(dat);
     // set fields of interest for later validation
-    x.rows = x.data.length;
-    x.cols = x.data[0].length;
-    x.delimiter = x.meta.delimiter;
+    x = misc.putCsvMeta(x);
     return x;
   };
 
@@ -217,66 +249,61 @@ f.factory("ExportService", ["$q", function ($q) {
 
 
 // Controller - Validate Form
-f.controller('ValidateCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Upload', "ImportService", "ExportService", "$mdDialog", "NgTableParams", function ($scope, $log, $timeout, $q, $http, Upload, ImportService, ExportService, $mdDialog, NgTableParams) {
+f.controller('ValidateCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Upload', "ImportService", "ExportService", "$mdDialog",
+                    function ($scope, $log, $timeout, $q, $http, Upload, ImportService, ExportService, $mdDialog) {
+  var vc = this;
+  vc.properties = {
+      item : null,
+      search : null,
+      properties: vc.properties || [],
+      list : [
+        // physical sample
+        // calibration
+        // climate interpretation
+        // {"view": "Climate Interpretation", "name": "climateInterpretation", "checked": false},
+        {"view": "Basis", "name": "basis", "checked": false},
+        {"view": "Proxy", "name": "proxy", "checked": false},
+        {"view": "Material", "name": "material", "checked": false},
+        {"view": "Method", "name": "method", "checked": false},
+        {"view": "Seasonality", "name": "seasonality", "checked": false},
+        {"view": "Data Type", "name": "dataType", "checked": false},
+        {"view": "UseInGlobalTemperatureAnalysis", "name": "useInGlobalTemperatureAnalysis", "checked": false},
 
-  $scope._myPromiseImport = "";
-  $scope._myPromiseExport = "";
-  // something related to modal windows
-  // $scope.status = '  ';
-  // something related to modal windows
-  // $scope.customFullscreen = false;
-
-  // TEST AREA FOR MODAL WINDOWS
-  // var self = this;
-  // $scope.dataToPass = "";
-  // $scope.tableParams = new NgTableParams({}, { dataset: $scope.dataToPass });
-  //
-  // $scope.showAdvanced = function (ev, file) {
-  //
-  //   var modal = "/modal";
-  //   if (file.type === "json") {
-  //     modal = "/modalJson";
-  //   } else if (file.type === "csv") {
-  //     modal = "/modalCsv";
-  //   } else if (file.type === "bagit") {
-  //     modal = "/modalTxt";
-  //   }
-  //
-  //   $mdDialog.show({
-  //     locals: { dataToPass: file },
-  //     controller: mdDialogCtrl,
-  //     templateUrl: modal,
-  //     parent: angular.element(document.body),
-  //     targetEvent: ev,
-  //     clickOutsideToClose: true,
-  //     fullscreen: $scope.customFullscreen // Only for -xs, -sm breakpoints.
-  //   }).then(function (answer) {
-  //     $scope.status = 'You said the information was "' + answer + '".';
-  //   }, function () {
-  //     $scope.status = 'You cancelled the dialog.';
-  //   });
-  // };
-  //
-  // var mdDialogCtrl = function mdDialogCtrl($scope, $mdDialog, dataToPass) {
-  //   $scope.mdDialogData = dataToPass;
-  //   $scope.dataToPass = dataToPass;
-  //
-  //   $scope.hide = function () {
-  //     $mdDialog.hide();
-  //   };
-  //
-  //   $scope.cancel = function () {
-  //     $mdDialog.cancel();
-  //   };
-  //
-  //   $scope.answer = function (answer) {
-  //     $mdDialog.hide(answer);
-  //   };
-  // };
-
-  // END TEST AREA FOR MODAL WINDOWS
-
-
+        {"view": "Sensor Species", "name": "sensorSpecies", "checked": false},
+        {"view": "Sensor Genus", "name": "sensorGenus", "checked": false},
+        {"view": "Variable Type", "name": "variableType", "checked": false},
+        {"view": "Proxy Observation Type", "name": "proxyObservationType", "checked": false},
+        {"view": "Inferred Variable Type", "name": "inferredVariableType", "checked": false},
+        {"view": "Notes", "name": "notes", "checked": false},
+      ]
+  };
+  $scope._myPromiseImport = null;
+  $scope._myPromiseExport = null;
+  $scope.dropdowns = {
+    "current": {
+      "table": { id: 1, name: 'measurement' },
+      "delimiter": { id: 1, name: "\t", view: "Tab ( \\t )"},
+    },
+    "tables": [
+      { id: 1, name: 'measurement' },
+      { id: 2, name: 'summary' },
+      { id: 3, name: 'ensemble' },
+      { id: 4, name: "distribution"}
+    ],
+    "delimiters": [
+      { id: 1, name: "\t", view: "Tab ( \\t )"},
+      { id: 2, name: ",", view: "Comma ( , )"},
+      { id: 3, name: ";", view: "Semi-colon ( ; )" },
+      { id: 4, name: "|", view: "Pipe ( | )"},
+      { id: 5, name: " ", view: "Space"},
+    ],
+    "archiveType": create.archiveTypeList(),
+    "countries" : map.getCountries(),
+  };
+  $scope.fields = [
+    "basis", "proxy", "material", "method", "seasonality", "dataType", "useInGlobalTemperatureAnalysis", "sensorSpecies", "sensorGenus", "variableType", "proxyObservationType", "inferredVariableType", "notes"
+  ];
+  $scope.oneAtATime = true;
   // FILES: User data holds all the user's LiPD data
   $scope.files = {
     "lipdFilename": "",
@@ -284,65 +311,15 @@ f.controller('ValidateCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Uplo
     "fileCt": 0,
     "bagit": {},
     "csv": {},
-    "jsonSimple": {
-      "lipdVersion": 1.2,
-      "archiveType": "",
-      "dataSetName": "",
-      "funding": [{ "agencyName": "", "grant": "" }],
-      "pub": [{ "identifier": [{ "type": "doi",
-          "id": "",
-          "url": "" }] }],
-      "geo": { "geometry": { "coordinates": [0, 0, 0] } },
-      "chronData": [{
-        "chronMeasurementTable": {},
-        "chronModel": [{
-          "method": {},
-          "ensembleTable": {},
-          "summaryTable": {},
-          "distributionTable": []
-        }]
-      }],
-      "paleoData": [{
-        "paleoMeasurementTable": {},
-        "paleoModel": [{
-          "method": {},
-          "ensembleTable": {},
-          "summaryTable": {},
-          "distributionTable": []
-        }]
-      }]
-    },
-    "json": {
-      "lipdVersion": 1.2,
-      "archiveType": "",
-      "dataSetName": "",
-      "funding": [{ "agencyName": "", "grant": "" }],
-      "pub": [{ "identifier": [{ "type": "doi",
-          "id": "",
-          "url": "" }] }],
-      "geo": { "geometry": { "coordinates": [0, 0, 0] } },
-      "chronData": [{
-        "chronMeasurementTable": {},
-        "chronModel": [{
-          "method": {},
-          "ensembleTable": {},
-          "summaryTable": {},
-          "distributionTable": []
-        }]
-      }],
-      "paleoData": [{
-        "paleoMeasurementTable": {},
-        "paleoModel": [{
-          "method": {},
-          "ensembleTable": {},
-          "summaryTable": {},
-          "distributionTable": []
-        }]
-      }]
-    }
+    "jsonSimple": {"lipdVersion": 1.2},
+    "json": {"lipdVersion": 1.2, "pub": [], "funding": [], "dataSetName": "", "geo": {},
+          "paleoData": [{"paleoMeasurementTable": [{"paleoDataTableName": "", "missingValue": "NaN",
+          "filename": "", "columns": []}]}]},
   };
   // PAGEMETA: Data about how to transform the page view based on user input
   $scope.pageMeta = {
+    "header": false,
+    "fileUploaded": false,
     "toggle": "",
     "simpleView": true,
     "valid": false,
@@ -362,31 +339,66 @@ f.controller('ValidateCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Uplo
     "wrnMsgs": [],
     "dataCanDo": []
   };
-  // MAP: Google map location markers
-  $scope.mapMarkers = [];
   // set google map default window to USA
   $scope.map = {
-    center: {
-      latitude: 0,
-      longitude: 0
+    "config": {
+      center: {
+        latitude: 0,
+        longitude: 0
+      },
+      zoom: 2,
+      bounds: {},
+      options: {
+        scrollwheel: false,
+        streetViewControl: false
+      },
     },
-    zoom: 2,
-    bounds: {},
-    options: {
-      scrollwheel: false,
-      streetViewControl: false
-    },
+    "markers": []
   };
   // STATUS: PASS/FAIL/OTHER status given by validator response.
   $scope.status = "N/A";
   // ALLFILES: Use this to list all the files found in the LiPD archive. List is shown on page.
   $scope.allFiles = [];
 
-  // MISC Functions
+  $scope.clearCustom = function(entry){
+    if(entry.tmp.custom){
+      $scope.fields.push(entry.tmp.custom);
+    }
+    entry.tmp[entry.tmp.custom] = true;
+    entry.tmp.custom = "";
+    return entry;
+  };
 
-  // Reset the page
-  // All metadata and data about the page is emptied when the Upload button is clicked. Ready for another file upload.
+  $scope.addRmProperty = function(entry, name) {
+    entry = create.addRmProperty(entry, name);
+    return entry;
+  };
+
+  $scope.showProperty = function(name){
+    if (["number", "variableName", "units", "toggle", "values", "checked", "tmp"].includes(name)){
+      return false;
+    }
+    return true;
+  };
+
+  $scope.toggleCsvBox = function(entry) {
+    entry.toggle=!entry.toggle;
+  };
+
+  $scope.getSet = function(value){
+    $scope.files.dataSetName = value;
+    $scope.files.lipdFilename = value + ".lpd";
+  };
+
+  $scope.setCountry = function(name){
+    if (!$scope.files.json.geo.properties.country){
+      $scope.files.json.geo = create.addBlock($scope.files.json.geo, "geo", null);
+    }
+    $scope.files.json.geo.properties.country = name;
+  };
+
   $scope.resetPage = function(){
+    // All metadata and data about the page is emptied when the Upload button is clicked. Ready for another file upload.
     $scope.allFiles = [];
     $scope.feedback = {
       "missingTsidCt": 0,
@@ -398,7 +410,21 @@ f.controller('ValidateCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Uplo
       "wrnMsgs": [],
       "dataCanDo": []
     };
-    $scope.mapMarkers = [];
+    $scope.map = {
+      "config": {
+        center: {
+          latitude: 0,
+          longitude: 0
+        },
+        zoom: 2,
+        bounds: {},
+        options: {
+          scrollwheel: false,
+          streetViewControl: false
+        },
+      },
+      "markers": []
+    };
     $scope.files = {
       "lipdFilename": "",
       "dataSetName": "",
@@ -475,14 +501,12 @@ f.controller('ValidateCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Uplo
   };
 
   $scope.startCaptcha = function(){
+    // Download button was clicked, show the captcha challenege
     $scope.pageMeta.captcha = true;
   };
 
-
-  // WATCHERS
-  // Watch for updated metadata information, then display the changes in the pre/code box (if it's being shown)
   $scope.$watch("files.json", function () {
-    // console.log($scope.files.json);
+    // Trigger when json data changes
     // var mp = document.getElementById("metaPretty");
     // if (mp) {
     //   console.log(mp);
@@ -492,8 +516,8 @@ f.controller('ValidateCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Uplo
     $scope.files.jsonSimple = misc.advancedToSimple($scope.files.json);
   }, true);
 
-  // UPLOAD TO NODE: Upload *validated* lipd data to backend
   $scope.uploadZip = function (zip, cb) {
+    // Upload *validated* lipd data to backend
     Upload.upload({
         url: '/files',
         data: {file: zip.dat,
@@ -509,17 +533,29 @@ f.controller('ValidateCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Uplo
     });
   };
 
-  // DOWNLOAD TO CLIENT: Download the *validated* LiPD file to client's computer
   $scope.downloadZip = function(){
+
+    // Remove temporary fields from the JSON data
+    var _newJson = JSON.parse(JSON.stringify($scope.files));
+    _newJson.json = create.rmTmpEmptyData(_newJson.json);
+    // Append the DataSetName to the front of all the CSV files.
+    var _addDataSetName = create.addDataSetName($scope.files.dataSetName, $scope.files.csv);
+    if (_addDataSetName){
+      // Add Datasetname to all json and csv filenames.
+      _newJson = create.alterFilenames(_newJson);
+    }
+    // Download the *validated* LiPD file to client's computer
     // use the service to parse data from the ZipJS entries
-    $scope._myPromiseExport = ExportService.prepForDownload($scope.files);
+    $scope._myPromiseExport = ExportService.prepForDownload(_newJson);
     $scope._myPromiseExport.then(function (res) {
-      console.log("ExportService.then()");
+      // console.log("ExportService.then()");
       //upload zip to node backend, then callback and download it afterward.
+      // console.log("Export response");
+      // console.log(res);
       $scope.uploadZip({"filename": $scope.files.lipdFilename, "dat": res}, function(tmp){
         // do get request to trigger download file immediately after download
-        console.log("client side after upload");
-        console.log(tmp.data);
+        // console.log("client side after upload");
+        // console.log(tmp.data);
         window.location.href = "http://localhost:3000/files/" + tmp.data;
         // window.location.href = "http://www.lipd.net/files/" + tmp.data;
         // reset the captcha
@@ -529,46 +565,138 @@ f.controller('ValidateCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Uplo
   };
 
   $scope.validate = function(){
+    // Go through all validations steps, and update scope data.
+    var _options = {"fileUploaded": $scope.pageMeta.fileUploaded};
+    // console.log($scope.files);
+    // rearrange coordinates from dict to array when necessary, and set the map if coordinates exist
+    $scope.files = map.fixCoordinates($scope.files);
+    $scope.map = map.updateMap($scope.map, $scope.files);
 
-    lipdValidator.validate($scope.files, function(_response_2){
-      try {
-        console.log("Setting validator response to NG scope");
-        $scope.feedback = _response_2.feedback;
-        $scope.status = _response_2.status;
-        // Get coordinates, add markers to map, and shift map.
-        var _coordinates = map.getCoordinates($scope.files.json);
-        if (_coordinates.latitude !== 0 && _coordinates.longitude !== 0){
-          $scope.mapMarkers = map.addMarker($scope.mapMarkers, _coordinates);
-          $scope.map = map.updateMap($scope.map, _coordinates);
-        }
-      } catch(err) {
-        console.log("Error trying to prepare response. Ending request: " + err);
-      }
-    }); // end validate
-  };
-
-  $scope.populateTSids = function(){
-    console.log("populateTsids");
+    // start the string of validation events.
     lipdValidator.populateTSids($scope.files, function(_data){
-      // set new json to scope.
-      console.log("Setting new JSON with TSids.");
-      console.log(_data);
+      // console.log("Setting new JSON with TSids.");
+      // console.log(_data);
       $scope.files = _data;
-      $scope.validate();
+      lipdValidator.validate($scope.files, _options, function(_response_2){
+        try {
+          // console.log("Setting validator response to NG scope");
+          $scope.feedback = _response_2.feedback;
+          $scope.status = _response_2.status;
+        } catch(err) {
+          console.log("Error trying to prepare response. Ending request: " + err);
+        }
+      }); // end validate
     });
+
   };
 
-  // ANONYMOUS FUNCTIONS
+  $scope.parseCsv = function(entry, idx, options){
+    _csv = null;
+    // we can't guarantee a datasetname yet, so build this csv filename as best we can for now.
+    var _csvname = options.pc + '0' + options.tt + idx + ".csv";
+    // Semi-colon delimiter is checked. Pass this as an argument to PapaParse
+    // console.log($scope.dropdowns.current.delimiter.name);
+    _csv = Papa.parse(entry.values, {
+      "delimiter": $scope.dropdowns.current.delimiter.name
+    });
 
-  // Set up zip.js object and its corresponding functions
+    // add row, column, and transposed metadata to the parsed CSV object.
+    _csv = misc.putCsvMeta(_csv);
+
+    // set the transposed data to entry.values. Transposed data is needed so we can display column data properly
+    entry.values = _csv.transposed;
+
+    // transpose values so we can store each value array with its column
+    entry.filename = _csvname;
+    // initialize X amount of columns
+    entry.columns = new Array(entry.values.length);
+    // start adding each column to the array
+    for(var _i=0; _i < entry.values.length; _i++){
+      if($scope.pageMeta.header){
+        // Header exists, we can set the variableName field as well! VariableName will be the first index
+        entry.columns[_i] = {"number": _i + 1, "variableName": entry.values[_i][0], "units": "", "values": entry.values[_i].splice(1, entry.values.length)};
+      } else {
+        // Headers do not exist. Set values directly
+        entry.columns[_i] = {"number": _i + 1, "variableName": "", "units": "", "values": entry.values[_i]};
+      }
+    }
+    // If headers are present, we need to do some extra cleanup
+    if ($scope.pageMeta.header){
+      // Remove the header row from _csv.data (first array)  and _csv.transposed (first element of each array)
+      _csv = misc.removeCsvHeader(_csv);
+
+    }
+    // CSV is all finished processing. Set data to scope.
+    $scope.files.csv[_csvname] = _csv;
+    // console.log($scope.files.csv);
+    // console.log(entry);
+    return entry;
+  };
+
+  $scope.addBlock = function(entry, blockType, pc){
+    if (pc === "chron"){
+      $scope.files.json = create.addChronData($scope.files.json);
+    }
+    // Add a block of data to the JSON. (i.e. funding, paleoData table, publication, etc.)
+    entry = create.addBlock(entry, blockType, pc);
+    console.log(entry);
+    return entry;
+  };
+
+  $scope.removeBlock = function(entry, idx){
+    entry = create.rmBlock(entry, idx);
+    return;
+  };
+
+  $scope.fetchPublication = function(entry){
+    console.log(entry);
+    console.log(entry.identifier[0].id);
+    var _re = /\b(10[.][0-9]{3,}(?:[.][0-9]+)*\/(?:(?![\"&\'<>,])\S)+)\b/;
+    var _match = _re.exec(entry.identifier[0].id);
+    console.log(_match);
+    if (_match){
+      var _url =  "http://dx.doi.org/" + entry.identifier[0].id;
+      $http({
+        "method": "GET",
+        "url": _url,
+        "headers": {"accept": "application/rdf+xml;q=0.5, application/citeproc+json;q=1.0"}
+      })
+        .then(function (response) {
+          console.log("DOI Response object");
+          console.log(response);
+          entry = create.sortDoiResponse(response, entry);
+        }, function(response) {
+          console.log("Unable to fetch DOI data: ");
+          // console.log(response);
+          alert("HTTP 404: No data found for that DOI");
+        });
+    } else {
+      alert("DOI entered does not match the DOI format");
+    }
+    return entry;
+  };
+
+  vc.propertiesQuerySearch = function(query) {
+        var results = query ? vc.properties.list.filter(createFilterFor(query)) : vc.properties.list.filter(createFilterFor(''));
+        return results;
+    };
+
+  function createFilterFor(query) {
+      var lowercaseQuery = angular.lowercase(query);
+      return function filterFn(item) {
+          // console.log(item);
+          return (angular.lowercase(item.name).indexOf(lowercaseQuery) === 0) ||
+              (angular.lowercase(item.name).indexOf(lowercaseQuery) === 0);
+      };
+    }
+
+  // Anyonymous
   (function (obj) {
-
+    // Set up zip.js object and its corresponding functions
     var requestFileSystem = obj.webkitRequestFileSystem || obj.mozRequestFileSystem || obj.requestFileSystem;
-
     function onerror(message) {
       alert(message);
     }
-
     function createTempFile(callback) {
       var keysFilename = "keys.dat";
       requestFileSystem(TEMPORARY, 4 * 1024 * 1024 * 1024, function (filesystem) {
@@ -683,6 +811,9 @@ f.controller('ValidateCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Uplo
       // When a file is chosen for upload, trigger the change event
       fileInput.addEventListener('change', function () {
 
+        // if the upload button is clicked && a file is chosen, THEN reset the page and data.
+        $scope.resetPage();
+
         // get a list of file entries inside this zip
         model.getEntries(fileInput.files[0], function (entries) {
           // use the service to parse data from the ZipJS entries
@@ -691,11 +822,13 @@ f.controller('ValidateCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Uplo
             console.log("ImportService.then()");
             // Set response to allFiles so we can list all the filenames found in the LiPD archive.
             $scope.allFiles = res;
+            $scope.pageMeta.fileUploaded = true;
             // Gather some metadata about the lipd file, and organize it so it's easier to manage.
             lipdValidator.sortBeforeValidate(res, function(_response_1){
               console.log("sortBeforeValidate callback: sending to validate_ng.js");
               $scope.files = _response_1;
               $scope.validate();
+              $scope.files.json = create.initColumnTmp($scope.files.json);
             }); // end sortBeforeValidate
             //RETURNS OBJECT : {"dat": files.json, "feedback": feedback, "filename": files.lipdFilename, "status": feedback.status};
 
@@ -710,6 +843,4 @@ f.controller('ValidateCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Uplo
 
     })();
   })(this);
-  }]);
-
-  // END ANONYMOUS FUNCTIONS
+  }]); // end Anonymous

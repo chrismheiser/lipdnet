@@ -1,1 +1,1 @@
-var u = angular.module('createApp', ['ngCreateLipd', 'ngMaterial', 'ngColors', 'ngAnimate']);
+var u = angular.module('createApp', ['ngCreate', 'ngMaterial', 'ngColors', 'ngAnimate']);

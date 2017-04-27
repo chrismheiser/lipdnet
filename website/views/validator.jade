@@ -21,73 +21,21 @@ block body
 				#form-container(ng-controller='ValidateCtrl as vm')
 					form#upload-form(ng-submit='')
 						// GOOGLE MAP
-						// ng-if="userData.geo.geometry.coordinates"
 						div
 							ui-gmap-google-map(center='map.center', zoom='map.zoom', draggable='true', options='map.options', bounds='map.bounds')
 								ui-gmap-markers(models='mapMarkers', coords="'self'", events='events', options='map.options')
 						br
-						div(cg-busy="myPromise")
+						//- div(cg-busy="myPromise")
+						div
 							div(class="span span50" style="padding-right:3em;")
 								md-toolbar.md-hue-1
 									h2.md-toolbar-tools
 										span Load
 								div
-									// UPLOAD METHOD 1 : use zip.js to unzip the LiPD file into RAM and jsonld file into SessionStorage
 									ol
-										// Method input: this will always be "RAM", so keep the code here but hide the element on the page
-										//- li(style="display:hide; visibility:hidden;list-style-type: none;")
-										//- 	label(style="display:hide; visibility:hidden;")
-										//- 		span#form-label Temp storage
-										//- 		select#creation-method-input
-										//- 			option(value="Blob") RAM
-										// File chooser: Select a lipd file 
-										li#buttons(style="list-style-type: none;")
-											//- span#form-label Load LiPD
-											// Bind this to a 'change' event so that we know when jsonld data is available to start processing.
-											input#file-input(ng-model="file.input" name='file' type="file" accept=".lpd" style="max-width:200px; width:175px; padding:4px; display:inline;" ng-click="resetPage()")
+										include ./pieces/action_btns.jade
+										include ./pieces/feedback.jade									
 
-											// download button
-											//- md-button(ng-click="downloadZip()" ng-model='file' name='file' ngf-max-size="50MB") Download
-															
-											button.valid-btn#generate-tsid(ng-model="feedback.missingTsidCt" ng-disabled="feedback.missingTsidCt == 0" ng-click="populateTSids()") Populate TSid's
-											//- button.valid-btn#generate-tsid(ng-model="feedback.missingTsidCt" ng-if="feedback.missingTsidCt > 0" ng-click="populateTSids1()") Populate TSid's
-											//- br 
-											// button to push validated lipd file to database
-											//- button.valid-btn(ng-model="file.push" ng-disabled="!pageMeta.valid") Upload to Wiki
-																
-											// download button
-											//- button.valid-btn#download-btn(ng-model="file.down" ng-disabled="!pageMeta.valid" ng-show="!pageMeta.dlFallback" ng-click="startCaptcha()") Download
-											button.valid-btn#download-btn(ng-model="file.down" ng-show="!pageMeta.dlFallback" ng-disabled="feedback.status!=='PASS'" ng-click="startCaptcha()") Download
-											
-											// attempt at captcha
-											div(vc-recaptcha key="'6LchMhIUAAAAAGjGCfNGxPkOJPl3ilJ2sQrapbbL'" ng-model="gRecaptchaResponse" on-success="downloadZip()" ng-show="pageMeta.captcha")
-											//- div(ng-show="pageMeta.captcha" class="g-recaptcha" data-sitekey="6LchMhIUAAAAAGjGCfNGxPkOJPl3ilJ2sQrapbbL" data-callback="downloadZip")
-																						
-										// When a LPD file is chosen, all the files inside are listed here.
-										li(style="list-style-type: none;")
-											pre(ng-class="feedback.errCt>0 ? 'on' : 'off'" style="background-color:#FEBABB; border: none;") {{ feedback.errCt}} errors
-												ul
-													li(ng-repeat="err in feedback.errMsgs track by $index") {{err}}
-
-											pre(ng-class="feedback.wrnCt>0 ? 'on' : 'off'" style="background-color:#FEEEB6; border: none;") {{ feedback.wrnCt }} warnings
-												ul
-													li(ng-repeat="wrn in feedback.wrnMsgs track by $index") {{wrn}}
-													
-											//- pre(ng-class="feedback.posMsgs.length>0? 'on': 'off'" style="background-color:#DFF1C1; border: none;")
-											//- 	ul
-											//- 		li(ng-repeat="pos in feedback.posMsgs track by $index") {{pos}}
-
-											pre(ng-class="feedback.status == 'PASS' ? 'on' : 'off'" style="background-color:#DFF1C1; border: none;") Validation Complete!
-
-											
-											// DEV MODE: Put metadata in pre box, so we can see the metadata behind the json-tree 	
-											//- pre#metaPretty(ng-model="files.json")
-											//- pre#csvPretty
-											
-										li(style="list-style-type: none;")
-											pre(ng-class="files.fileCt > 0? 'on' : 'off'" style="background-color:#eee; border: none;") {{files.fileCt}} files in LiPD
-												ul
-													li(ng-repeat="file in allFiles track by $index" ng-click="showAdvanced($event, file)") {{ file.filenameShort }}
 											
 							div(class="span span50")
 								md-toolbar.md-hue-1
@@ -102,8 +50,6 @@ block body
 												select
 													option
 										li#buttons(style="list-style-type: none;")
-											// button to download validated lipd file
-											button.valid-btn(ng-click="validate()" ng-disabled="pageMeta.filePicker") Validate
 											// toggle simple view: default to simple view
 											button.valid-btn(ng-click="pageMeta.simpleView = !pageMeta.simpleView" ng-disabled="pageMeta.simpleView") Simple
 											// toggle advanced view

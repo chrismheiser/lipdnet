@@ -1,0 +1,31 @@
+md-toolbar.md-hue-1
+  h2.md-toolbar-tools
+    span Create LiPD 
+div
+  // METADATA
+  //- md-toolbar.md-hue-1
+  //- 	h4.md-toolbar-tools
+  //- 		span Metadata
+  div(layout='', layout-padding='', layout-sm='column')
+  
+    md-input-container(flex="33")
+      label Archive Type *
+      md-select(ng-model="files.json.archiveType")
+        md-option(ng-repeat="archive in dropdowns.archiveType" ng-value="archive")
+          {{archive}}
+    md-input-container(flex='66', ng-class="md-input-has-value")
+      md-tooltip Please include name, location, and year in your dataset name
+      label Dataset Name *
+      input(ng-model='files.json.dataSetName' ng-change="getSet(files.json.dataSetName)")
+  div(layout='', layout-padding='', layout-sm='column')
+    md-input-container(flex='33', ng-class="md-input-has-value")
+      label Collection Name
+      input(ng-model='files.json.collectionName')
+    md-input-container(flex='66', ng-class="md-input-has-value")
+      label Investigators
+      input(ng-model='files.json.investigators')
+  div(layout='', layout-padding='', layout-sm='column')
+    md-input-container(flex='', ng-class="md-input-has-value")
+      label Notes
+      textarea(ng-model='files.json.notes', columns='1', md-maxlength='150')
+      

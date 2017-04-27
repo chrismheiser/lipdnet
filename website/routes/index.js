@@ -295,7 +295,8 @@ router.post("/api/validator", function(req, res, next){
     console.log("index: Starting process...");
     lipdValidator.sortBeforeValidate(json_data, function(j){
       console.log("index: sortBeforeValidate callback");
-      lipdValidator.validate(j, function(x){
+      var _options = {"fileUploaded": true};
+      lipdValidator.validate(j, _options, function(x){
         try {
           console.log("index: Validate callback, preparing response");
           res.setHeader('Content-Type', 'application/json');

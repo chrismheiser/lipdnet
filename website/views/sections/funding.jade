@@ -1,0 +1,29 @@
+// FUNDING
+md-toolbar.md-hue-1
+  h2.md-toolbar-tools
+    span Funding
+div(ng-repeat='entry in files.json.funding track by $index' layout-wrap="")
+  md-card
+    //- div(layout='', layout-padding='', layout-sm='column')
+    md-subheader.md-primary funding {{$index}}
+    div(layout='', layout-padding='', layout-sm='column')
+      md-input-container(flex='', ng-class="md-input-has-value")
+        label Agency
+        input(ng-model='entry.agency')
+      md-input-container(flex='', ng-class="md-input-has-value")
+        label Grant
+        input(ng-model='entry.grant')
+    div(layout='', layout-padding='', layout-sm='column')
+      md-input-container(flex='', ng-class="md-input-has-value")
+        label Principal Investigator
+        input(ng-model='entry.investigator')
+      md-input-container(flex='', ng-class="md-input-has-value")
+        label Country
+        input(ng-model='entry.country')
+        
+    div(layout='', layout-padding='', layout-sm='column' style="float: right;")
+      button.valid-btn(ng-click='removeBlock(files.json.funding, $index)' style="margin: 1.5em;" type="button")  - Remove						
+      
+div(layout='', layout-padding='', layout-sm='column' style="float: right;")
+  button.valid-btn(ng-click='addBlock(files.json.funding, "funding", null)' style="margin: 1.5em;" type="button")  + Add Funding
+  //- button.valid-btn(ng-click='addBlock(entry, "funding")' style="margin: 1.5em;")  + Add Funding

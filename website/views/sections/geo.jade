@@ -1,0 +1,39 @@
+// GEOGRAPHY
+md-toolbar.md-hue-1
+	h2.md-toolbar-tools
+		span Geography
+
+// COORDINATES
+div(layout='', layout-padding='', layout-sm='column')
+	md-input-container(flex='25', ng-class="md-input-has-value")
+		//- md-tooltip -90 to 90
+		label Latitude *
+		input(ng-model='files.json.geo.geometry.coordinates[1]', type='number')
+		//- input(ng-model='files.json.geo.geometry.coordinates[1]', type='number', min='-90', max='90')
+	md-input-container(flex='25', ng-class="md-input-has-value")
+		//- md-tooltip -180 to 180
+		label Longitude *
+		input(ng-model='files.json.geo.geometry.coordinates[0]', type='number')
+		//- input(ng-model='files.json.geo.geometry.coordinates[0]', type='number', min='-180', max='180')
+	md-input-container(flex='25', ng-class="md-input-has-value")
+		label Elevation
+		input(ng-model='files.json.geo.geometry.coordinates[2]', type='number')
+	md-input-container(flex='25', class="md-input-has-value")
+		label Units
+		input(value="Meters (m)" disabled)
+		//- md-select(ng-model='geoMarkers[$index].unit')
+		//- 	md-option(ng-repeat='u in unitsDistance', value='{{u.short}}') {{u.long}}
+
+//- md-subheader.md-primary Properties
+div(layout='', layout-padding='', layout-sm='column')
+	md-input-container(flex='33', ng-class="md-input-has-value")
+		label Site Name
+		input(ng-model='files.json.geo.properties.siteName')
+	md-input-container(flex='33', ng-class="md-input-has-value")
+		label Location
+		input(ng-model='files.json.geo.properties.location')
+	md-input-container(flex="33")
+		label Country
+		md-select(ng-model="files.json.geo.properties.country")
+			md-option(ng-repeat="country in dropdowns.countries" ng-value="country.name")
+				{{country.name}} ({{country.code}})

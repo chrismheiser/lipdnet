@@ -4,13 +4,13 @@ var process = require("process");
 var logger = require("./node_modules_custom/node_log.js");
 var rimraf = require("rimraf");
 // chdir to the project folder base. Everything we want to do will be in relation to this location
-logger.info("app.js: Changing process dir to project root: /lipd/nodejs/website");
+// logger.info("app.js: Changing process dir to project root: /lipd/nodejs/website");
 process.chdir(__dirname);
 var fs = require("fs");
 var path = require("path");
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
-var logger = require('morgan');
+// var logger = require('morgan');
 var multer = require("multer");
 var sys = require('sys');
 var favicon = require('serve-favicon');
@@ -19,55 +19,61 @@ var users = require('./routes/users');
 //var port = process.env.PORT || 8080;
 var app = express();
 
-// Recursivley remove all lipd file data in the tmp folder that are older than
-var cleanTmpDir = function(){
-  // console.log("logging inside cleanTmpDir");
-  // this code will only run when time has ellapsed
-  var tmpDir = path.join(process.cwd(), "tmp");
-  // logger.log("info", "Starting tmp cleaning...");
-  console.log("app: Starting tmp cleaning...");
-  try {
-    fs.readdir(tmpDir, function(err, dirs) {
-      // console.log("Started reading tmp dir");
-      if(dirs){
-        dirs.forEach(function(innerDir, index) {
-          var _isDirectory = fs.lstatSync(path.join(tmpDir, innerDir)).isDirectory();
-          // console.log("Is it a directory?: " + _isDirectory);
-          // Only run the cleanup for directories. Not files.
-          if(_isDirectory){
-            fs.stat(path.join(tmpDir, innerDir), function(err, stat) {
-              var endTime, now;
-              if (err) {
-                return console.error(err);
-              }
-              now = new Date().getTime();
-              // 60000 - one minute
-              // 300000 - five minutes
-              // 3600000 - one hour
-              endTime = new Date(stat.ctime).getTime() + 300000;
-              if (now > endTime) {
-                return rimraf(path.join(tmpDir, innerDir), function(err) {
-                  if (err) {
-                    return console.error(err);
-                  }
-                  // logger.log("info", 'Removed Folder: ' + innerDir);
-                  console.log('app: Removed Dir: ' + innerDir);
-                });
-              }
-            });
-          } // end IF DIR
-         });
-      } else {
-        console.log("No directories found");
+
+// Get a list of all the directories in the Tmp folder.
+var getDirectories = function(srcpath) {
+  return fs.readdirSync(srcpath)
+    .filter(function(file){
+      if(fs.lstatSync(path.join(srcpath, file)).isDirectory()){
+        return file;
       }
     });
+};
+
+// Recursivley remove all lipd file data in the tmp folder that are older than
+var cleanTmpDir = function(){
+  // this code will only run when time has elapsed
+  var tmpDir = path.join(process.cwd(), "tmp");
+  logger.info("app: Starting tmp cleaning...");
+  try {
+    var _dirs = getDirectories(tmpDir);
+    logger.info("Tmp Directories: [" + _dirs + "]");
+    if(_dirs){
+      _dirs.forEach(function(innerDir, index) {
+        console.log("TEST");
+        logger.info("TEST");
+        // console.log("Is it a directory?: " + _isDirectory);
+        // Only run the cleanup for directories. Not files.
+          fs.stat(path.join(tmpDir, innerDir), function(err, stat) {
+            var endTime, now;
+            if (err) {
+              return console.error(err);
+            }
+            now = new Date().getTime();
+            // 60000 - one minute
+            // 300000 - five minutes
+            // 3600000 - one hour
+            endTime = new Date(stat.ctime).getTime() + 300000;
+            if (now > endTime) {
+              return rimraf(path.join(tmpDir, innerDir), function(err) {
+                if (err) {
+                  return console.error(err);
+                }
+                console.log("LOGGER REMOVE DIR");
+                console.log(logger);
+                logger.info("app: Removed Dir: " + innerDir);
+              });
+            }
+          });
+       });
+    }
   } catch(err){
-    console.log(err);
+    console.log("LOGGER CATCH");
+    console.log(logger);
+    logger.info(err);
   }
 
 };
-
-cleanTmpDir();
 
 // Call the cleaning function every 5 minutes
 setTimeout(cleanTmpDir, 300000);
@@ -89,7 +95,7 @@ var storage = multer.diskStorage({
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 app.use(favicon(__dirname + '/public/favicon.ico'));
-app.use(logger('dev'));
+// app.use(logger('dev'));
 app.use(cookieParser());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -136,7 +142,7 @@ app.use(function(err, req, res, next) {
 });
 
 app.listen(app.get('port'), function() {
-  console.log('Node port: ', app.get('port'));
+  logger.info('app: Node port: ', app.get('port'));
 });
 
 module.exports = app;
