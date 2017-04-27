@@ -35,5 +35,4 @@ div(layout='', layout-padding='', layout-sm='column')
 	md-input-container(flex="33")
 		label Country
 		md-select(ng-model="files.json.geo.properties.country")
-			md-option(ng-repeat="country in dropdowns.countries" ng-value="country.name")
-				{{country.name}} ({{country.code}})
+			md-option(ng-repeat="country in dropdowns.countries" ng-value="country.name") {{country.name}} ({{country.code}})

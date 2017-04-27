@@ -40,8 +40,6 @@ var cleanTmpDir = function(){
     logger.info("Tmp Directories: [" + _dirs + "]");
     if(_dirs){
       _dirs.forEach(function(innerDir, index) {
-        console.log("TEST");
-        logger.info("TEST");
         // console.log("Is it a directory?: " + _isDirectory);
         // Only run the cleanup for directories. Not files.
           fs.stat(path.join(tmpDir, innerDir), function(err, stat) {
@@ -59,8 +57,6 @@ var cleanTmpDir = function(){
                 if (err) {
                   return console.error(err);
                 }
-                console.log("LOGGER REMOVE DIR");
-                console.log(logger);
                 logger.info("app: Removed Dir: " + innerDir);
               });
             }
@@ -68,8 +64,6 @@ var cleanTmpDir = function(){
        });
     }
   } catch(err){
-    console.log("LOGGER CATCH");
-    console.log(logger);
     logger.info(err);
   }
 

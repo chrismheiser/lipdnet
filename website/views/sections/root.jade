@@ -11,8 +11,7 @@ div
     md-input-container(flex="33")
       label Archive Type *
       md-select(ng-model="files.json.archiveType")
-        md-option(ng-repeat="archive in dropdowns.archiveType" ng-value="archive")
-          {{archive}}
+        md-option(ng-repeat="archive in dropdowns.archiveType" ng-value="archive") {{archive}}
     md-input-container(flex='66', ng-class="md-input-has-value")
       md-tooltip Please include name, location, and year in your dataset name
       label Dataset Name *
