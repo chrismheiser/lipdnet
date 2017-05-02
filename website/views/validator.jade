@@ -22,8 +22,8 @@ block body
 					form#upload-form(ng-submit='')
 						// GOOGLE MAP
 						div
-							ui-gmap-google-map(center='map.center', zoom='map.zoom', draggable='true', options='map.options', bounds='map.bounds')
-								ui-gmap-markers(models='mapMarkers', coords="'self'", events='events', options='map.options')
+							ui-gmap-google-map(center='map.config.center', zoom='map.config.zoom', draggable='true', options='map.config.options', bounds='map.config.bounds')
+								ui-gmap-markers(models='map.markers', coords="'self'", events='events', options='map.config.options')
 						br
 						//- div(cg-busy="myPromise")
 						div
@@ -61,16 +61,16 @@ block body
 
 // block js will insert js scripts listed in footer.jade that are needed on every page.
 block js
-	// files below are page specific
 	script(src='apps/validateApp.js')
 	script(src='js/ngValidate.js')
-	script(src="lib/angular-busy.js")
-	script(src='lib/json-tree.js')
+	//- script(src="lib/angular-busy.js")
 	script(src="lib/zip/zip.js")
+	script(src='lib/json-tree.js')
 	script(src="lib/zip/zip-ext.js")
 	script(src="lib/papaparse.min.js")
 	script(src="lib/FileSaver.min.js")
 	script(src="modules/ng_map.js")
+	script(src="modules/ng_create.js")
 	script(src="modules/ng_misc.js")
 	script(src="modules/ng_validator.js")
 	script(src="https://cdnjs.cloudflare.com/ajax/libs/angular-recaptcha/3.2.1/angular-recaptcha.min.js")
@@ -81,6 +81,5 @@ block js
 	script(src='https://cdnjs.cloudflare.com/ajax/libs/danialfarid-angular-file-upload/8.0.1/ng-file-upload.min.js')
 	script(src="https://cdnjs.cloudflare.com/ajax/libs/ngStorage/0.3.6/ngStorage.min.js")
 	script(src='https://maps.googleapis.com/maps/api/js?libraries=places&key=AIzaSyA7HRzSi5HhyKTX9Xw7CZ-9XScwq04TZyc')
-	script(src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/2.2.0/ui-bootstrap-tpls.min.js")
+	script(src="http://angular-ui.github.io/bootstrap/ui-bootstrap-tpls-0.4.0.js")
 	script(src="https://cdnjs.cloudflare.com/ajax/libs/angular-sanitize/1.5.8/angular-sanitize.min.js")
-	script(src="https://unpkg.com/ng-table@2.0.2/bundles/ng-table.min.js")

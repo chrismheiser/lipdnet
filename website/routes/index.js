@@ -174,55 +174,64 @@ router.post("/files", function(req, res, next){
   // path that stores lipds
   var pathTop = path.join(process.cwd(), "tmp");
   var _pathTmpPrefix = path.join(pathTop, "lipd-");
-  // create tmp folder at "/files/<lipd-xxxxx>"
+  // create tmp folder at "/tmp/<lipd-xxxxx>"
   // console.log("POST: creating tmp dir...");
-  var pathTmp = misc.makeid(_pathTmpPrefix, function(_pathTmp){
-    // console.log("POST: created tmp dir str: " + _pathTmp);
-    mkdirSync(_pathTmp);
-    return _pathTmp;
-  });
 
-  // console.log("POST: tmp path: " + pathTmp);
+  try {
+    var pathTmp = misc.makeid(_pathTmpPrefix, function(_pathTmp){
+      // console.log("POST: created tmp dir str: " + _pathTmp);
+      try{
+        console.log("make dir: " + _pathTmp);
+        mkdirSync(_pathTmp);
+      } catch(err){
+        console.log("index.js: POST /files: " + err);
+      }
+      return _pathTmp;
+    });
 
-  // tmp bagit level folder. will be removed before zipping.
-  var pathTmpBag = path.join(pathTmp, "bag");
-  var pathTmpZip = path.join(pathTmp, "zip");
-  var pathTmpFiles = path.join(pathTmp, "files");
+    // console.log("POST: tmp path: " + pathTmp);
 
-  // console.log("POST: make other dirs...");
-  mkdirSync(pathTmpZip);
-  mkdirSync(pathTmpFiles);
+    // tmp bagit level folder. will be removed before zipping.
+    var pathTmpBag = path.join(pathTmp, "bag");
+    var pathTmpZip = path.join(pathTmp, "zip");
+    var pathTmpFiles = path.join(pathTmp, "files");
 
-  // console.log("POST: created dir: " + pathTmpZip);
-  // console.log("POST: created dir: " + pathTmpFiles);
+    // console.log("POST: make other dirs...");
+    mkdirSync(pathTmpZip);
+    mkdirSync(pathTmpFiles);
 
-  // use req data to write csv and jsonld files into "/files/<lipd-xxxxx>/files/"
-  // console.log("POST: begin writing files");
-  files.forEach(function(file){
-    console.log("POST: writing: " + path.join(pathTmpFiles,  file.filename));
-    fs.writeFileSync(path.join(pathTmpFiles, file.filename), file.dat);
-  });
+    // console.log("POST: created dir: " + pathTmpZip);
+    // console.log("POST: created dir: " + pathTmpFiles);
 
-  // console.log("POST: Initiate Bagit...");
-  // Call bagit process on folder of files
-  gladstone.createBagDirectory({
-     bagName: pathTmpBag,
-     originDirectory: pathTmpFiles,
-     cryptoMethod: 'md5',
-     sourceOrganization: 'LiPD Project',
-     contactName: 'Chris Heiser',
-     contactEmail: 'lipd.contact@gmail.com',
-     externalDescription: 'Source: LiPD Online Validator'
-  }).then(function(resp){
-    // When a successful Bagit Promise returns, start creating the ZIP/LiPD archive
-    if(resp){
-      createArchive(pathTmpZip, pathTmpBag, filename, function(){
-        console.log("POST: response: " + path.basename(pathTmp));
-        res.send(path.basename(pathTmp));
-      });
-    }
-  });
-  // console.log("POST complete");
+    // use req data to write csv and jsonld files into "/files/<lipd-xxxxx>/files/"
+    // console.log("POST: begin writing files");
+    files.forEach(function(file){
+      console.log("POST: writing: " + path.join(pathTmpFiles,  file.filename));
+      fs.writeFileSync(path.join(pathTmpFiles, file.filename), file.dat);
+    });
+
+    // console.log("POST: Initiate Bagit...");
+    // Call bagit process on folder of files
+    gladstone.createBagDirectory({
+       bagName: pathTmpBag,
+       originDirectory: pathTmpFiles,
+       cryptoMethod: 'md5',
+       sourceOrganization: 'LiPD Project',
+       contactName: 'Chris Heiser',
+       contactEmail: 'lipd.contact@gmail.com',
+       externalDescription: 'Source: LiPD Online Validator'
+    }).then(function(resp){
+      // When a successful Bagit Promise returns, start creating the ZIP/LiPD archive
+      if(resp){
+        createArchive(pathTmpZip, pathTmpBag, filename, function(){
+          console.log("POST: response: " + path.basename(pathTmp));
+          res.send(path.basename(pathTmp));
+        });
+      }
+    });
+  } catch(err) {
+    console.log(err);
+  }
 });
 
 router.get("/files/:tmp", function(req, res, next){
@@ -279,11 +288,12 @@ router.post("/api/validator", function(req, res, next){
 
   try {
     // receive some json data
+    var _json_data = {};
     try{
       // When receiving a request from Python (and possibly others),
       // we have to parse the JSON object from the JSON string first.
       console.log("index: Parsing JSON.");
-      var json_data = JSON.parse(req.body["json_payload"]);
+      _json_data = JSON.parse(req.body.json_payload);
     } catch(err){
       // If parsing didn't work, it's likely we don't need it. This is probably valid JSON already.
       console.log("index: Parsing JSON failed. Ending request: " + err);
@@ -293,7 +303,7 @@ router.post("/api/validator", function(req, res, next){
     // console.log("JSON DATA");
     // console.log(json_data);
     console.log("index: Starting process...");
-    lipdValidator.sortBeforeValidate(json_data, function(j){
+    lipdValidator.sortBeforeValidate(_json_data, function(j){
       console.log("index: sortBeforeValidate callback");
       var _options = {"fileUploaded": true};
       lipdValidator.validate(j, _options, function(x){

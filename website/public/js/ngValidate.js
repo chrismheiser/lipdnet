@@ -528,6 +528,7 @@ f.controller('ValidateCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Uplo
         cb(resp);
     }, function (resp) {
         console.log('Error status: ' + resp.status);
+        cb(resp);
     }, function (evt) {
         var progressPercentage = parseInt(100.0 * evt.loaded / evt.total);
     });
@@ -552,12 +553,13 @@ f.controller('ValidateCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Uplo
       //upload zip to node backend, then callback and download it afterward.
       // console.log("Export response");
       // console.log(res);
-      $scope.uploadZip({"filename": $scope.files.lipdFilename, "dat": res}, function(tmp){
+      $scope.uploadZip({"filename": $scope.files.lipdFilename, "dat": res}, function(resp){
         // do get request to trigger download file immediately after download
         // console.log("client side after upload");
         // console.log(tmp.data);
-        window.location.href = "http://localhost:3000/files/" + tmp.data;
-        // window.location.href = "http://www.lipd.net/files/" + tmp.data;
+        console.log(resp);
+        // window.location.href = "http://localhost:3000/files/" + resp.data;
+        window.location.href = "http://www.lipd.net/files/" + resp.data;
         // reset the captcha
         $scope.pageMeta.captcha = false;
       });
