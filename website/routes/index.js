@@ -221,13 +221,25 @@ router.post("/files", function(req, res, next){
        contactEmail: 'lipd.contact@gmail.com',
        externalDescription: 'Source: LiPD Online Validator'
     }).then(function(resp){
-      // When a successful Bagit Promise returns, start creating the ZIP/LiPD archive
-      if(resp){
-        createArchive(pathTmpZip, pathTmpBag, filename, function(){
-          console.log("POST: response: " + path.basename(pathTmp));
-          res.send(path.basename(pathTmp));
-        });
-      }
+      // create the tagmanifest bagit file. We have to wait because it needs the other bagit files to be written first.
+      gladstone.createTagmanifest({
+        bagName: pathTmpBag,
+        originDirectory: pathTmpFiles,
+        cryptoMethod: 'md5',
+        sourceOrganization: 'LiPD Project',
+        contactName: 'Chris Heiser',
+        contactEmail: 'lipd.contact@gmail.com',
+        externalDescription: 'Source: LiPD Online Validator'
+      }).then(function(resp2){
+        // When a successful Bagit Promise returns, start creating the ZIP/LiPD archive
+        if(resp2){
+          createArchive(pathTmpZip, pathTmpBag, filename, function(){
+            console.log("POST: response: " + path.basename(pathTmp));
+            res.send(path.basename(pathTmp));
+            res.end();
+          });
+        }
+      });
     });
   } catch(err) {
     console.log(err);

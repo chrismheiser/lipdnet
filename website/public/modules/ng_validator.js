@@ -811,13 +811,12 @@ var lipdValidator = (function(){
         // verify the 4 bagit files are present, indicating a properly bagged LiPD file.
         var verifyBagit = function (files) {
           // Bagit filenames are static. Check that each is present.
-          // var validBagitFiles = ["tagmanifest-md5.txt", "manifest-md5.txt", "bagit.txt", "bag-info.txt"];
-          // TEMPORARY: Only check for these 3 bagit files, until we figure out how to create the 4th file online.
+          var validBagitFiles = ["tagmanifest-md5.txt", "manifest-md5.txt", "bagit.txt", "bag-info.txt"];
 
           // Only run Verify Bagit when this is an uploaded file. NOT when it's being created from scratch
           // If create from scratch, it's not possible to have bagit files yet.
           if(options.fileUploaded){
-            var validBagitFiles = ["manifest-md5.txt", "bagit.txt", "bag-info.txt"];
+            // var validBagitFiles = ["manifest-md5.txt", "bagit.txt", "bag-info.txt"];
             var count = 0;
             var errors = 0;
             validBagitFiles.forEach(function (filename) {
