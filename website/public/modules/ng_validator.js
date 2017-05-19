@@ -211,6 +211,7 @@ var lipdValidator = (function(){
                   "hasresolution", "datacontributor", "collectionname", "googledataurl"],
           "reqRootKeys": ["archiveType", "dataSetName", "paleoData", "geo"],
           "reqPubKeys": ["author", "title", "year", "journal"],
+          "reqPubDcKeys": ["author", "title"],
           "reqColumnKeys": ["number", "variableName", "TSid", "units"],
           "reqTableKeys": ["filename", "columns", "missingValue"],
           "reqGeoKeys": ["coordinates"]
@@ -567,6 +568,8 @@ var lipdValidator = (function(){
         // check that column count in a table match the column count in the CSV data
         var requiredColumnsCtMatch = function (filename, columns) {
           var csvCt = 0;
+          console.log("columns");
+          console.log(columns);
           try{
             // Get the column count for this csv file.
             csvCt = files.csv[filename].cols;
@@ -576,10 +579,21 @@ var lipdValidator = (function(){
           }
           var metaCt = columns.length;
           try {
-            // edge case: ensemble table that has "two" columns, but actuall column 2 is a list of columns.
+            // edge case: ensemble table that has "two" columns, but actual column 2 is a list of columns.
             if (csvCt !== metaCt) {
+              console.log("one column");
               // column counts don't match. Do we have two columns? Might be an ensemble table
+              if (columns.length === 1){
+                if (Array.isArray(columns[0].number)){
+                  metaCt = columns[0].number.length - 1 + metaCt;
+                  if (csvCt !== metaCt) {
+                    // Okay, there is actually an error now. Log it.
+                    logFeedback("err", "Mismatched columns: " + filename + " has " + csvCt + ", Jsonld has " + metaCt, filename);
+                  }
+                }
+              }
               if (columns.length === 2) {
+                console.log("two columns");
                 // Is column 2 an array of columns? (most likely)
                 if (Array.isArray(columns[1].number)) {
                   // calculate how many columns this array REALLY represents.
@@ -659,22 +673,45 @@ var lipdValidator = (function(){
               for (var i = 0; i < m.pub.length; i++) {
                 var curPub = m.pub[i];
                 var _idx = i+1;
-                // loop over required keys, and see if this pub has the key
-                for (var k = 0; k < keys.reqPubKeys.length; k++) {
-                  var key = keys.reqPubKeys[k];
-                  if (!m.pub[i].hasOwnProperty(key)) {
-                    // this pub is missing a required key!
-                    logFeedback("err", "Missing data: " + "publication" + _idx + "." + key, key);
-                  } else if (!m.pub[i][key]){
-                    logFeedback("err", "Missing data: " + "publication" + _idx + "." + key, key);
+                // special case: year and journal not required if this publication is a dataCitation
+                if(m.pub[i].hasOwnProperty("type")){
+                  // type is a dataCitation, use the a different set of required keys
+                  if (m.pub[i].type === "dataCitation"){
+                    // loop over required keys, and see if this pub has the key
+                    requiredPubLoop(m, i, keys.reqPubDcKeys);
+                  } // if dataCitation
+                  else{
+                    // type is NOT a dataCitation, use the normal set of required keys
+                    requiredPubLoop(m, i, keys.reqPubKeys);
                   }
-                } // end for req keys
+                } // if has type property
+                // publication does not have a "type" field. assume it's not a dataCitation
+                else{
+                  requiredPubLoop(m, i, keys.reqPubKeys);
+                } // end else
               } // end for publication
             } // end if else
           } catch (err) {
             console.log("validator: requiredPub: " + err);
             logFeedback("warn", "Encountered problem validating: pub");
           }
+        };
+
+        var requiredPubLoop = function(m, i, pubKeys){
+          try{
+            for (var k = 0; k < keys.reqPubKeys.length; k++) {
+              var key = keys.reqPubKeys[k];
+              if (!m.pub[i].hasOwnProperty(key)) {
+                // this pub is missing a required key!
+                logFeedback("err", "Missing data: " + "publication" + _idx + "." + key, key);
+              } else if (!m.pub[i][key]){
+                logFeedback("err", "Missing data: " + "publication" + _idx + "." + key, key);
+              }
+            }
+          } catch(err) {
+            console.log("requiredPubLoop: " + err);
+          }
+          return;
         };
 
         // checks if there is coordinate information needed to plot a map of the location
