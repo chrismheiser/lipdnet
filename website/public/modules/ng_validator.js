@@ -341,7 +341,7 @@ var lipdValidator = (function(){
               // expecting specified data type, but didn't get it.
               if (v === undefined)  {
                 if(addToLog){
-                  logFeedback("warn", "Valid structure, empty data: " + k);
+                  logFeedback("warn", "Missing data: " + k);
                 }
               } // end if
               else if (_typeof(v) != dt) {

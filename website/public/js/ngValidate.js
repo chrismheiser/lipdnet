@@ -249,8 +249,8 @@ f.factory("ExportService", ["$q", function ($q) {
 
 
 // Controller - Validate Form
-f.controller('ValidateCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Upload', "ImportService", "ExportService", "$mdDialog",
-                    function ($scope, $log, $timeout, $q, $http, Upload, ImportService, ExportService, $mdDialog) {
+f.controller('ValidateCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Upload', "ImportService", "ExportService", "$uibModal",
+                    function ($scope, $log, $timeout, $q, $http, Upload, ImportService, ExportService, $uibModal) {
   var vc = this;
   vc.properties = {
       item : null,
@@ -306,6 +306,7 @@ f.controller('ValidateCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Uplo
   $scope.oneAtATime = true;
   // FILES: User data holds all the user's LiPD data
   $scope.files = {
+    "modal": {},
     "lipdFilename": "",
     "dataSetName": "",
     "fileCt": 0,
@@ -357,8 +358,29 @@ f.controller('ValidateCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Uplo
   };
   // STATUS: PASS/FAIL/OTHER status given by validator response.
   $scope.status = "N/A";
-  // ALLFILES: Use this to list all the files found in the LiPD archive. List is shown on page.
+  // ALLFILES: Use this to list all the files found in the LiPD archive, and their contents. Used in "feedback.jade"
   $scope.allFiles = [];
+
+  // Showing contents of individual file links
+  $scope.showContentsModal = function(data){
+    // if this is a csv
+    $scope.modal = data;
+    var modalInstance = $uibModal.open({
+      templateUrl: 'modalCsv',
+      controller: 'ModalCtrl',
+      size: "lg",
+      resolve: {
+        data: function () {
+          return $scope.modal;
+        }
+      }
+    });
+
+    // if this is a text file
+
+    // if this is a json file
+
+  };
 
   $scope.clearCustom = function(entry){
     if(entry.tmp.custom){
@@ -846,3 +868,19 @@ f.controller('ValidateCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Uplo
     })();
   })(this);
   }]); // end Anonymous
+
+
+angular.module('ngValidate').controller('ModalCtrl', function ($scope, $uibModalInstance, data) {
+  $scope.data = data;
+  $scope.pretty = data.pretty;
+  console.log(data);
+  console.log($scope.data.type);
+  if ($scope.data.type === "jsonld" || $scope.data.type === "bagit"){
+    $scope.pretty = $scope.pretty.replace(/\\n/g, '\n').replace(/"/g, "");
+    console.log("replaced newlines");
+    console.log($scope.pretty);
+  }
+  $scope.close = function () {
+    $modalInstance.dismiss('cancel');
+  };
+});
