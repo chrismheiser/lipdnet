@@ -33,6 +33,7 @@ var getDirectories = function(srcpath) {
 // Recursivley remove all lipd file data in the tmp folder that are older than
 var cleanTmpDir = function(){
   // this code will only run when time has elapsed
+
   var tmpDir = path.join(process.cwd(), "tmp");
   logger.info("app: Starting tmp cleaning...");
   try {

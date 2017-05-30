@@ -366,7 +366,7 @@ f.controller('ValidateCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Uplo
     // if this is a csv
     $scope.modal = data;
     var modalInstance = $uibModal.open({
-      templateUrl: 'modalCsv',
+      templateUrl: 'modalContent',
       controller: 'ModalCtrl',
       size: "lg",
       resolve: {

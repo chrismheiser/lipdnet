@@ -279,18 +279,6 @@ router.get("/modal", function(req, res, next){
   res.render('modal', {title: ''});
 });
 
-router.get("/modalJson", function(req, res, next){
-  res.render('modalJson', {title: ''});
-});
-
-router.get("/modalCsv", function(req, res, next){
-  res.render('modalCsv', {title: ''});
-});
-
-router.get("/modalTxt", function(req, res, next){
-  res.render('modalTxt', {title: ''});
-});
-
 // API
 router.post("/api/validator", function(req, res, next){
   console.log("------------------------");
