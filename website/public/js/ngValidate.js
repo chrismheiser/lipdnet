@@ -524,8 +524,7 @@ f.controller('ValidateCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Uplo
 
   $scope.startCaptcha = function(){
     // Download button was clicked, show the captcha challenege
-    $scope.pageMeta.captcha = true;
-  };
+    $scope.pageMeta.captcha = true;  };
 
   $scope.$watch("files.json", function () {
     // Trigger when json data changes
@@ -874,13 +873,10 @@ angular.module('ngValidate').controller('ModalCtrl', function ($scope, $uibModal
   $scope.data = data;
   $scope.pretty = data.pretty;
   console.log(data);
-  console.log($scope.data.type);
   if ($scope.data.type === "jsonld" || $scope.data.type === "bagit"){
     $scope.pretty = $scope.pretty.replace(/\\n/g, '\n').replace(/"/g, "");
-    console.log("replaced newlines");
-    console.log($scope.pretty);
   }
   $scope.close = function () {
-    $modalInstance.dismiss('cancel');
+    $uibModalInstance.dismiss('cancel');
   };
 });

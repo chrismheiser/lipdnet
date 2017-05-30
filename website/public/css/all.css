@@ -82,9 +82,9 @@ h1,h2, h3, h4, h5, h6 {
 /*  SCHEMA TABLE  */
 
 /* remove borders from all table elements */
-table, tr, td{
+/*table, tr, td{
 	border : none !important;
-}
+}*/
 
 /* change highlight color of hover on table elements */
 /*tr:hover td {
