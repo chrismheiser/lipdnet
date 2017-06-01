@@ -119,28 +119,29 @@ block body
 				h3.title Questions, comments, concerns...
 				
 				// show this when form has not been submitted yet
-				.content(layout='row' layout-align='space-around center' ng-cloak ng-switch='sent')
+				.content(layout='row' layout-align='space-around center' ng-cloak ng-switch='fmsnt')
 					.f(ng-switch-when="false" flex='30')
 						h4 Tell us what you think
 						p We're working hard to make our LiPD utilities better every day. Let us know what you like, what you don't like, and what can be improved!
-						//- pre {{mailer}}
-					form.f(ng-switch-when="false" flex='60' method='post' ng-model='mailer')
+					form.f(ng-switch-when="false" flex='60' method='post' ng-model='fm')
 						md-input-container
 							label Name
-							input(type="text" name='name' ng-model='mailer.name' required max-length='10')
+							input(type="text" name='fn' ng-model='fm.fn' required max-length='30' ng-blur="checkForm();checkInput('fn')")
+							md-tooltip Numbers are not allowed in this field
 						md-input-container
 							label Organization
-							input(type="text" name='org' ng-model='mailer.org' required max-length='10')
+							input(type="text" name='fo' ng-model='fm.fo' required max-length='30' ng-blur="checkForm();checkInput('fo')")
+							md-tooltip Numbers are not allowed in this field
 						md-input-container
 							label E-Mail
-							input(type="email" name='email' ng-model='mailer.email' required max-length='10')
+							input(type="text" name='fe' ng-model='fm.fe' required max-length='30' ng-blur="checkForm()")
 						md-input-container
 							label Subject
-							input(type="text" name='subject' ng-model='mailer.subject' required max-length='10')
+							input(type="text" name='fs' ng-model='fm.fs' required max-length='30' ng-blur="checkForm()")
 						md-input-container
 							label Message
-							textarea(type="text" name='message' ng-model='mailer.message' required max-length='10')
-						md-button.send(type='submit' ng-click='sendMail(mailer)' ng-model='sent') Send
+							textarea(type="text" name='fmm' ng-model='fm.fmm' required max-length='150' ng-blur="checkForm()")
+						md-button.send(type='submit' ng-click='sendMail()' ng-model="fmsnt" ng-disabled="!complete") Send
 					.f(ng-switch-when="true")
 						h1(style='font-weight:500;') Message Sent!
 						p We'll get back to you as soon as possible. 
