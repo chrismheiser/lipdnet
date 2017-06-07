@@ -1,12 +1,12 @@
 // 'use strict';
 
-var _typeof2 = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+// var _typeof2 = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
-var _typeof = typeof Symbol === "function" && _typeof2(Symbol.iterator) === "symbol" ? function (obj) {
-  return typeof obj === "undefined" ? "undefined" : _typeof2(obj);
-} : function (obj) {
-  return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj === "undefined" ? "undefined" : _typeof2(obj);
-};
+// var _typeof = typeof Symbol === "function" && _typeof2(Symbol.iterator) === "symbol" ? function (obj) {
+//   return typeof obj === "undefined" ? "undefined" : _typeof2(obj);
+// } : function (obj) {
+//   return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj === "undefined" ? "undefined" : _typeof2(obj);
+// };
 
 // deprecated : cgBusy
 var f = angular.module('ngValidate', ['uiGmapgoogle-maps', 'json-tree', 'ngFileUpload', "ngMaterial", "vcRecaptcha", "ui.bootstrap"]);
@@ -366,7 +366,7 @@ f.controller('ValidateCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Uplo
     // if this is a csv
     $scope.modal = data;
     var modalInstance = $uibModal.open({
-      templateUrl: 'modalContent',
+      templateUrl: 'modal',
       controller: 'ModalCtrl',
       size: "lg",
       resolve: {
@@ -548,8 +548,9 @@ f.controller('ValidateCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Uplo
         console.log(resp);
         cb(resp);
     }, function (resp) {
-        console.log('Error status: ' + resp.status);
-        cb(resp);
+      console.log(resp);
+      console.log('Error status: ' + resp.status);
+      cb(resp);
     }, function (evt) {
         var progressPercentage = parseInt(100.0 * evt.loaded / evt.total);
     });
@@ -572,15 +573,20 @@ f.controller('ValidateCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Uplo
     $scope._myPromiseExport.then(function (res) {
       // console.log("ExportService.then()");
       //upload zip to node backend, then callback and download it afterward.
-      // console.log("Export response");
-      // console.log(res);
+      console.log("Export response");
+      console.log(res);
+      console.log($scope.files.lipdFilename);
       $scope.uploadZip({"filename": $scope.files.lipdFilename, "dat": res}, function(resp){
         // do get request to trigger download file immediately after download
         // console.log("client side after upload");
         // console.log(tmp.data);
-        console.log(resp);
-        // window.location.href = "http://localhost:3000/files/" + resp.data;
-        window.location.href = "http://www.lipd.net/files/" + resp.data;
+        // console.log(resp);
+        if (resp.status !== 200){
+          window.alert("Error downloading file");
+        } else {
+          window.location.href = "http://localhost:3000/files/" + resp.data;
+          // window.location.href = "http://www.lipd.net/files/" + resp.data;
+        }
         // reset the captcha
         $scope.pageMeta.captcha = false;
       });
@@ -872,7 +878,7 @@ f.controller('ValidateCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Uplo
 angular.module('ngValidate').controller('ModalCtrl', function ($scope, $uibModalInstance, data) {
   $scope.data = data;
   $scope.pretty = data.pretty;
-  console.log(data);
+  // console.log(data);
   if ($scope.data.type === "jsonld" || $scope.data.type === "bagit"){
     $scope.pretty = $scope.pretty.replace(/\\n/g, '\n').replace(/"/g, "");
   }

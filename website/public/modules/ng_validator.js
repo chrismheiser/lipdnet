@@ -568,8 +568,8 @@ var lipdValidator = (function(){
         // check that column count in a table match the column count in the CSV data
         var requiredColumnsCtMatch = function (filename, columns) {
           var csvCt = 0;
-          console.log("columns");
-          console.log(columns);
+          // console.log("columns");
+          // console.log(columns);
           try{
             // Get the column count for this csv file.
             csvCt = files.csv[filename].cols;
@@ -581,7 +581,7 @@ var lipdValidator = (function(){
           try {
             // edge case: ensemble table that has "two" columns, but actual column 2 is a list of columns.
             if (csvCt !== metaCt) {
-              console.log("one column");
+              // console.log("one column");
               // column counts don't match. Do we have two columns? Might be an ensemble table
               if (columns.length === 1){
                 if (Array.isArray(columns[0].number)){
@@ -593,7 +593,7 @@ var lipdValidator = (function(){
                 }
               }
               if (columns.length === 2) {
-                console.log("two columns");
+                // console.log("two columns");
                 // Is column 2 an array of columns? (most likely)
                 if (Array.isArray(columns[1].number)) {
                   // calculate how many columns this array REALLY represents.
@@ -703,9 +703,9 @@ var lipdValidator = (function(){
               var key = keys.reqPubKeys[k];
               if (!m.pub[i].hasOwnProperty(key)) {
                 // this pub is missing a required key!
-                logFeedback("err", "Missing data: " + "publication" + _idx + "." + key, key);
+                logFeedback("err", "Missing data: " + "publication" + i + "." + key, key);
               } else if (!m.pub[i][key]){
-                logFeedback("err", "Missing data: " + "publication" + _idx + "." + key, key);
+                logFeedback("err", "Missing data: " + "publication" + i + "." + key, key);
               }
             }
           } catch(err) {

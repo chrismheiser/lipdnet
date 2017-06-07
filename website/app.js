@@ -1,6 +1,8 @@
 // app.js
 var express = require('express');
 var process = require("process");
+process.env.NODE_ENV = "development";
+// process.env.NODE_ENV = "production";
 var logger = require("./node_modules_custom/node_log.js");
 var rimraf = require("rimraf");
 // chdir to the project folder base. Everything we want to do will be in relation to this location
@@ -38,7 +40,7 @@ var cleanTmpDir = function(){
   logger.info("app: Starting tmp cleaning...");
   try {
     var _dirs = getDirectories(tmpDir);
-    logger.info("Tmp Directories: [" + _dirs + "]");
+    // logger.info("Tmp Directories: [" + _dirs + "]");
     if(_dirs){
       _dirs.forEach(function(innerDir, index) {
         // console.log("Is it a directory?: " + _isDirectory);
@@ -87,6 +89,7 @@ var storage = multer.diskStorage({
 });
 
 // view engine setup
+app.set("environment", "development");
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 app.use(favicon(__dirname + '/public/favicon.ico'));
@@ -97,7 +100,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 // app.use(express.static(path.join(__dirname, 'bower_components')));
 app.use(express.static(path.join(__dirname, 'routes', 'files')));
-app.use(multer({ storage: storage }).single('file'));
+app.use(multer({ storage: storage, limits:{ fieldSize: 25 * 1024 * 1024 }}).single('file'));
 
 // Give DB access to our routes
 // app.use(function(req, res, next){
@@ -111,14 +114,15 @@ app.use('/users', users);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
-  res.status(404).render('404.jade');
+  res.status(404).render('404');
 });
 
 // development error handler
 // will print stacktrace
-if (app.get('env') === 'development') {
+if (app.get("environment") === 'development') {
   app.use(function(err, req, res, next) {
     res.status(err.status || 500);
+    logger.info(err.message);
     res.render('error', {
       message: err.message,
       error: err
@@ -138,6 +142,7 @@ app.use(function(err, req, res, next) {
 
 app.listen(app.get('port'), function() {
   logger.info('app: Node port: ', app.get('port'));
+  logger.info("app: Node Env: ", app.get("environment"));
 });
 
 module.exports = app;

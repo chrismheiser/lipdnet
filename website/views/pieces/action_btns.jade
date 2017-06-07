@@ -1,23 +1,23 @@
-// File chooser: Select a lipd file 
+//- File chooser: Select a lipd file 
 li#buttons(style="list-style-type: none;")
   //- span#form-label Load LiPD
-  // Bind this to a 'change' event so that we know when jsonld data is available to start processing.
+  //- Bind this to a 'change' event so that we know when jsonld data is available to start processing.
   input#file-input(name='file' type="file" accept=".lpd" style="max-width:200px; width:175px; padding:4px; display:inline;")
 
-  // download button
+  //- download button
   //- md-button(ng-click="downloadZip()" ng-model='file' name='file' ngf-max-size="50MB") Download
           
   //- button.valid-btn#generate-tsid(ng-model="feedback.missingTsidCt" ng-disabled="feedback.missingTsidCt == 0" ng-click="populateTSids()") Populate TSid's
   //- button.valid-btn#generate-tsid(ng-model="feedback.missingTsidCt" ng-if="feedback.missingTsidCt > 0" ng-click="populateTSids1()") Populate TSid's
   //- br 
-  // button to push validated lipd file to database
+  //- button to push validated lipd file to database
   //- button.valid-btn(ng-model="file.push" ng-disabled="!pageMeta.valid") Upload to Wiki
   button.valid-btn(ng-click="validate()" ng-disabled="pageMeta.filePicker" type="button") Validate
 
-  // download button
+  //- download button
   //- button.valid-btn#download-btn(ng-model="file.down" ng-disabled="!pageMeta.valid" ng-show="!pageMeta.dlFallback" ng-click="startCaptcha()") Download
   button.valid-btn#download-btn(ng-show="!pageMeta.dlFallback" ng-disabled="feedback.status!=='PASS'" ng-click="startCaptcha()" type="button") Download
   
-  // attempt at captcha
+  //- attempt at captcha
   div(vc-recaptcha key="'6LchMhIUAAAAAGjGCfNGxPkOJPl3ilJ2sQrapbbL'" ng-model="gRecaptchaResponse" on-success="downloadZip()" ng-show="pageMeta.captcha")
   //- div(ng-show="pageMeta.captcha" class="g-recaptcha" data-sitekey="6LchMhIUAAAAAGjGCfNGxPkOJPl3ilJ2sQrapbbL" data-callback="downloadZip")

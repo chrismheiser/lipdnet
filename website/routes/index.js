@@ -10,11 +10,70 @@ var lipdValidator = require("../node_modules_custom/node_validator.js");
 var misc = require("../node_modules_custom/node_misc.js");
 var router = express.Router();
 
+var parseRequest = function(master, req){
+  try {
+    // set data about the file
+    master.files = req.body.file;
+    master.filename = req.body.filename;
+
+    // path that stores lipds
+    master.pathTop = path.join(process.cwd(), "tmp");
+    master.pathTmpPrefix = path.join(master.pathTop, "lipd-");
+    return master;
+  } catch (err){ 
+    logger.info("index.js: parseRequest: " + err);
+    res.status(500).send("POST: parseRequest: Error creating LiPD: " + err);
+  }
+};
+
+var createTmpDir = function(master){
+  logger.info("createTmpDir");
+  try {
+    // create tmp folder at "/tmp/<lipd-xxxxx>"
+    // logger.info("POST: creating tmp dir...");
+    master.pathTmp = misc.makeid(master.pathTmpPrefix, function(_pathTmp){
+      // logger.info("POST: created tmp dir str: " + _pathTmp);
+      try{
+        logger.info("make dir: " + _pathTmp);
+        mkdirSync(_pathTmp);
+      } catch(err){
+        logger.info("index.js: POST /files: " + err);
+      }
+      return _pathTmp;
+    });
+    return master;
+  }catch(err){
+    logger.info("index.js: createTmpDir: " + err);
+    res.status(500).send("POST: createTmpDir: Error creating LiPD: " + err);
+  };
+};
+
+// Create the subfolders
+var createSubdirs = function(master, pathTmp){
+    logger.info("createSubdirs");
+    try{
+      // tmp bagit level folder. will be removed before zipping.
+      master.pathTmpBag = path.join(master.pathTmp, "bag");
+      master.pathTmpZip = path.join(master.pathTmp, "zip");
+      master.pathTmpFiles = path.join(master.pathTmp, "files");
+
+      // logger.info("POST: make other dirs...");
+      mkdirSync(master.pathTmpZip);
+      mkdirSync(master.pathTmpFiles);
+      return master;
+      // logger.info("POST: created dir: " + pathTmpZip);
+      // logger.info("POST: created dir: " + pathTmpFiles);
+    } catch(err){
+      logger.info("index.js: createSubdirs: " + err);
+      res.status(500).send("POST: createSubdirs: Error creating LiPD: " + err);
+    }
+};
+
 // Use the data in the objects given to update the tsid_master.csv
 var updateTSidMaster = function(_objs, cb){
-  console.log("index: updateTSidMaster");
+  logger.info("index: updateTSidMaster");
   var _path = path.join(process.cwd(), "tmp", "tsid_master.csv");
-  console.log("path to tsid master: " + _path);
+  logger.info("path to tsid master: " + _path);
   for (var _i=0; _i<_objs.length; _i++){
     var _csv_str = "";
     if(_i===0){
@@ -23,7 +82,7 @@ var updateTSidMaster = function(_objs, cb){
     _csv_str += _objs[_i]["tsid"] + ", " + _objs[_i]["datasetname"] + ", " + _objs[_i]["variableName"] + ", , " +"\r\n";
     fs.appendFile(_path, _csv_str, function (err) {
     if (err) throw err;
-    // console.log('data appended!');
+    // logger.info('data appended!');
     });
   }
   cb(_objs);
@@ -31,9 +90,9 @@ var updateTSidMaster = function(_objs, cb){
 
 // Use the TSids in the objects given to update the tsid_only.csv file.
 var updateTSidOnly = function(_objs){
-  console.log("index: updateTSidOnly");
+  logger.info("index: updateTSidOnly");
   var _path = path.join(process.cwd(), "tmp", "tsid_only.csv");
-  console.log("path to tsid only: " + _path);
+  logger.info("path to tsid only: " + _path);
   for (var _i=0; _i<_objs.length; _i++){
     var _csv_str = "";
     if(_i===0){
@@ -41,20 +100,20 @@ var updateTSidOnly = function(_objs){
     }
     _csv_str += _objs[_i]["tsid"] + "\r\n";
     fs.appendFile(_path, _csv_str, function (err) {
-    if (err) console.log(err);
-    // console.log('data appended!');
+    if (err) logger.info(err);
+    // logger.info('data appended!');
     });
   }
 };
 
 // Read the tsid_only.csv file, and put the TSids in a flat array.
 var readTSidOnly = function(cb){
-  console.log("index: readTSidOnly");
+  logger.info("index: readTSidOnly");
   var _path = path.join(process.cwd(), "tmp", "tsid_only.csv");
-  console.log("path to tsid only: " + _path);
+  logger.info("path to tsid only: " + _path);
   var _data = [];
   try{
-    console.log("try to read from csv file.");
+    logger.info("try to read from csv file.");
     fastcsv
      .fromPath(_path)
      .on("data", function(_entry){
@@ -62,11 +121,11 @@ var readTSidOnly = function(cb){
         _data.push(_entry[0]);
      })
      .on("end", function(){
-      //  console.log(_data);
+      //  logger.info(_data);
        cb(_data);
      });
   } catch(err){
-    console.log(err);
+    logger.info(err);
   }
 };
 
@@ -76,41 +135,41 @@ var mkdirSync = function (path) {
     fs.mkdirSync(path);
   } catch(e) {
     if ( e.code == 'EEXIST' ){
-      console.log("folder exists: " + path);
+      logger.info("folder exists: " + path);
     } else {
-      console.log(e);
+      logger.info(e);
     }
   }
 };
 
 // use the archiver model to create the LiPD file
 var createArchive = function(pathTmpZip, pathTmpBag, filename, cb){
-  console.log("Creating ZIP/LiPD archive...");
+  logger.info("Creating ZIP/LiPD archive...");
   var archive = archiver('zip');
   // path where the LiPD will ultimately be located in "/zip" dir.
   var pathTmpZipLipd = path.join(pathTmpZip, filename);
   // open write stream to LiPD file location
   var output = fs.createWriteStream(pathTmpZipLipd);
-  console.log("Write Stream Open: " + pathTmpZipLipd);
+  logger.info("Write Stream Open: " + pathTmpZipLipd);
 
   // "close" event. processing is finished.
   output.on('close', function () {
-      console.log(archive.pointer() + ' total bytes');
-      // console.log('archiver has been finalized and the output file descriptor has closed.');
-      console.log("LiPD Created at: " + pathTmpZipLipd);
+      logger.info(archive.pointer() + ' total bytes');
+      // logger.info('archiver has been finalized and the output file descriptor has closed.');
+      logger.info("LiPD Created at: " + pathTmpZipLipd);
       // callback to finish POST request
       cb();
   });
 
   // error event
   archive.on('error', function(err){
-      console.log("archive error");
+      logger.info("archive error");
       throw err;
   });
 
   archive.pipe(output);
   // Add the data directory to the archive
-  console.log("add dir to archive");
+  logger.info("add dir to archive");
   try{
     // read in all filenames from the "/bag" dir
     var files = fs.readdirSync(pathTmpBag);
@@ -120,22 +179,22 @@ var createArchive = function(pathTmpZip, pathTmpBag, filename, cb){
 
       // if this is a bagit file (.txt), use "archive.file"
       if(path.extname(files[i]) === ".txt") {
-        console.log("archiving file from: " + currPath);
-        console.log("archiving file to: " + files[i]);
+        logger.info("archiving file from: " + currPath);
+        logger.info("archiving file to: " + files[i]);
         archive.file(currPath, { name: files[i]});
 
       }
       // if this is the "/data" directory, use "archive.directory"
       else {
-        console.log("archiving dir from: " + currPath);
-        console.log("archiving dir to: /" + files[i]);
+        logger.info("archiving dir from: " + currPath);
+        logger.info("archiving dir to: /" + files[i]);
         archive.directory(currPath, "/" + files[i]);
       }
 
     }
 
   }catch(err){
-    console.log(err);
+    logger.info(err);
   }
 
   // all files are done, finalize the archive
@@ -149,7 +208,7 @@ router.get('/', function(req, res, next) {
 
 // Receive a POST from the contact form on the home page
 router.post('/', function(req, res, next){
-  console.log(req.body);
+  logger.info(req.body);
 
 });
 
@@ -164,57 +223,24 @@ router.get('/validator', function(req, res, next){
 });
 
 router.post("/files", function(req, res, next){
-  // console.log("POST: /files");
-
-  // set data about the file
-  var files = req.body.file;
-  var filename = req.body.filename;
-  // console.log("POST: build path names");
-
-  // path that stores lipds
-  var pathTop = path.join(process.cwd(), "tmp");
-  var _pathTmpPrefix = path.join(pathTop, "lipd-");
-  // create tmp folder at "/tmp/<lipd-xxxxx>"
-  // console.log("POST: creating tmp dir...");
-
-  try {
-    var pathTmp = misc.makeid(_pathTmpPrefix, function(_pathTmp){
-      // console.log("POST: created tmp dir str: " + _pathTmp);
-      try{
-        console.log("make dir: " + _pathTmp);
-        mkdirSync(_pathTmp);
-      } catch(err){
-        console.log("index.js: POST /files: " + err);
-      }
-      return _pathTmp;
-    });
-
-    // console.log("POST: tmp path: " + pathTmp);
-
-    // tmp bagit level folder. will be removed before zipping.
-    var pathTmpBag = path.join(pathTmp, "bag");
-    var pathTmpZip = path.join(pathTmp, "zip");
-    var pathTmpFiles = path.join(pathTmp, "files");
-
-    // console.log("POST: make other dirs...");
-    mkdirSync(pathTmpZip);
-    mkdirSync(pathTmpFiles);
-
-    // console.log("POST: created dir: " + pathTmpZip);
-    // console.log("POST: created dir: " + pathTmpFiles);
-
+  logger.info("POST: /files");
+  var master = {};
+  master = parseRequest(master, req);
+  master = createTmpDir(master);
+  master = createSubdirs(master);
+  try{
     // use req data to write csv and jsonld files into "/files/<lipd-xxxxx>/files/"
-    // console.log("POST: begin writing files");
-    files.forEach(function(file){
-      console.log("POST: writing: " + path.join(pathTmpFiles,  file.filename));
-      fs.writeFileSync(path.join(pathTmpFiles, file.filename), file.dat);
+    // logger.info("POST: begin writing files");
+    master.files.forEach(function(file){
+      logger.info("POST: writing: " + path.join(master.pathTmpFiles,  file.filename));
+      fs.writeFileSync(path.join(master.pathTmpFiles, file.filename), file.dat);
     });
 
-    // console.log("POST: Initiate Bagit...");
+    logger.info("Start Bagit...");
     // Call bagit process on folder of files
     gladstone.createBagDirectory({
-       bagName: pathTmpBag,
-       originDirectory: pathTmpFiles,
+       bagName: master.pathTmpBag,
+       originDirectory: master.pathTmpFiles,
        cryptoMethod: 'md5',
        sourceOrganization: 'LiPD Project',
        contactName: 'Chris Heiser',
@@ -223,8 +249,8 @@ router.post("/files", function(req, res, next){
     }).then(function(resp){
       // create the tagmanifest bagit file. We have to wait because it needs the other bagit files to be written first.
       gladstone.createTagmanifest({
-        bagName: pathTmpBag,
-        originDirectory: pathTmpFiles,
+        bagName: master.pathTmpBag,
+        originDirectory: master.pathTmpFiles,
         cryptoMethod: 'md5',
         sourceOrganization: 'LiPD Project',
         contactName: 'Chris Heiser',
@@ -233,41 +259,49 @@ router.post("/files", function(req, res, next){
       }).then(function(resp2){
         // When a successful Bagit Promise returns, start creating the ZIP/LiPD archive
         if(resp2){
-          createArchive(pathTmpZip, pathTmpBag, filename, function(){
-            console.log("POST: response: " + path.basename(pathTmp));
-            res.send(path.basename(pathTmp));
-            res.end();
+          createArchive(master.pathTmpZip, master.pathTmpBag, master.filename, function(){
+            logger.info("POST: response: " + path.basename(master.pathTmp));
+            res.status(200).send(path.basename(master.pathTmp));
           });
+        } else {
+          logger.info(resp2);
+          res.status(500).send("POST: Error: Bagit promise not fulfilled");
         }
       });
     });
   } catch(err) {
-    console.log(err);
+    logger.info(err);
+    res.status(500).send("POST: Error creating LiPD: " + err);
   }
 });
 
 router.get("/files/:tmp", function(req, res, next){
-  // Tmp string provided by client
-  console.log("GET: /files");
-  var tmpStr = req.params.tmp;
-  console.log("GET: tmpStr: " + tmpStr);
-  // Path to the zip dir that holds the LiPD file
-  var pathTmpZip = path.join(process.cwd(), "tmp", tmpStr, "zip");
-  console.log("GET: " + pathTmpZip);
-  // Read in all filenames from the dir
-  console.log("GET: read zip dir");
-  var files = fs.readdirSync(pathTmpZip);
-  // Loop over the files found
-  for(var i in files) {
-    // Get the first lipd file you find (there should only be one)
-     if(path.extname(files[i]) === ".lpd") {
-       // set headers and initiate download.
-       var pathLipd = path.join(pathTmpZip, files[i]);
-       res.setHeader('Content-disposition', 'attachment; filename=' + files[i]);
-       res.setHeader('Content-type', "application/zip");
-       console.log("sending response to client.");
-       res.download(pathLipd);
-     }
+  try {
+    // Tmp string provided by client
+    logger.info("GET: /files");
+    var tmpStr = req.params.tmp;
+    logger.info("GET: tmpStr: " + tmpStr);
+    // Path to the zip dir that holds the LiPD file
+    var pathTmpZip = path.join(process.cwd(), "tmp", tmpStr, "zip");
+    logger.info("GET: " + pathTmpZip);
+    // Read in all filenames from the dir
+    logger.info("GET: read zip dir");
+    var files = fs.readdirSync(pathTmpZip);
+    // Loop over the files found
+    for(var i in files) {
+      // Get the first lipd file you find (there should only be one)
+       if(path.extname(files[i]) === ".lpd") {
+         // set headers and initiate download.
+         var pathLipd = path.join(pathTmpZip, files[i]);
+         res.setHeader('Content-disposition', 'attachment; filename=' + files[i]);
+         res.setHeader('Content-type', "application/zip");
+         logger.info("sending response to client.");
+         res.download(pathLipd);
+       }
+    }
+  } catch(err) {
+    logger.info(err);
+    res.status(500).send("GET: Error downloading LiPD file: " + err);
   }
 });
 
@@ -281,8 +315,8 @@ router.get("/modal", function(req, res, next){
 
 // API
 router.post("/api/validator", function(req, res, next){
-  console.log("------------------------");
-  console.log("enter /api/validator");
+  logger.info("------------------------");
+  logger.info("enter /api/validator");
   // We are using this as a validation call for our desktop utilities.
   // GET with some JSON, and we'll tell you if it pass/fail and what errors came up.
 
@@ -292,52 +326,52 @@ router.post("/api/validator", function(req, res, next){
     try{
       // When receiving a request from Python (and possibly others),
       // we have to parse the JSON object from the JSON string first.
-      console.log("index: Parsing JSON.");
+      logger.info("index: Parsing JSON.");
       _json_data = JSON.parse(req.body.json_payload);
     } catch(err){
       // If parsing didn't work, it's likely we don't need it. This is probably valid JSON already.
-      console.log("index: Parsing JSON failed. Ending request: " + err);
+      logger.info("index: Parsing JSON failed. Ending request: " + err);
       res.status(400).send("HTTP 400: Parsing JSON failed: " + err);
       // var json_data = req.body["json_payload"];
     }
-    // console.log("JSON DATA");
-    // console.log(json_data);
-    console.log("index: Starting process...");
+    // logger.info("JSON DATA");
+    // logger.info(json_data);
+    logger.info("index: Starting process...");
     lipdValidator.sortBeforeValidate(_json_data, function(j){
-      console.log("index: sortBeforeValidate callback");
+      logger.info("index: sortBeforeValidate callback");
       var _options = {"fileUploaded": true};
       lipdValidator.validate(j, _options, function(x){
         try {
-          console.log("index: Validate callback, preparing response");
+          logger.info("index: Validate callback, preparing response");
           res.setHeader('Content-Type', 'application/json');
           res.send(JSON.stringify(x, null, 3));
-          console.log("index: Response sent to origin");
-          // console.log(x.feedback);
+          logger.info("index: Response sent to origin");
+          // logger.info(x.feedback);
         } catch(err) {
-          console.log("index: Error preparing response. Ending request: " + err);
+          logger.info("index: Error preparing response. Ending request: " + err);
           res.status(400).send("HTTP 400: Error preparing response: " + err);
         }
       });
     });
   } catch(err) {
-    console.log("index: Validation failed: " + err);
+    logger.info("index: Validation failed: " + err);
     res.status(400).send("HTTP 400: Validation failed: " + err);
   }
 
-  // console.log("exit /api/validator");
+  // logger.info("exit /api/validator");
 });
 
 
 // Use data from a LiPD file to create TSids, register them in the master list, and send data in response
 router.post("/api/tsid/create", function(req, res, next){
-  console.log("/api/tsid/create");
+  logger.info("/api/tsid/create");
   try {
     // Number of TSids that need to be generated
     var _count = req.body.count;
     // One object per variable that needs a TSid created.
     // example = [{"TSid": "", "dataSetName": "", "variableName": "", "spreadsheetKey": "", "worksheetKey":""}, ..]
     var _objs = req.body.data;
-    console.log("Creating TSids: " + _count);
+    logger.info("Creating TSids: " + _count);
     if (_count > 200){
       res.status(400).send({"error": "Requested too many TSids. Please request a smaller amount per call."});
       res.end();
@@ -345,13 +379,13 @@ router.post("/api/tsid/create", function(req, res, next){
     readTSidOnly(function(_tsids){
       // Now we have an array of all the registered TSids
       misc.reconcileTSidCreate(_tsids, _objs, function(_x){
-        // console.log("At the end!");
-        // console.log(_x);
+        // logger.info("At the end!");
+        // logger.info(_x);
         // append the new TSids to tsid_only.csv
         updateTSidOnly(_x);
         // append the new object data (w/ tsids) to tsid_master.csv
         updateTSidMaster(_x, function(_results){
-          console.log("TSids created successfuly");
+          logger.info("TSids created successfuly");
           // since the update was successsful, add the new JSON objects to the response and send.
           res.setHeader('Content-Type', 'application/json');
           res.send(JSON.stringify(_results, null));
@@ -359,7 +393,7 @@ router.post("/api/tsid/create", function(req, res, next){
       });
     });
   } catch (err) {
-    console.log(err);
+    logger.info(err);
     logger.info(err);
     res.end();
   }
@@ -380,13 +414,13 @@ router.post("/api/tsid/register", function(req, res, next){
           // since the update was successsful, add the new JSON objects to the response and send.
           // res.setHeader('Content-Type', 'application/json');
           // res.send(JSON.stringify(_results, null));
-          console.log("TSids registered successfuly");
+          logger.info("TSids registered successfuly");
           res.status(200).send({"response": "Registered TSids successfuly"});
         });
       });
     });
   } catch(err){
-    console.log(err);
+    logger.info(err);
     logger.info(err);
     res.end();
   }

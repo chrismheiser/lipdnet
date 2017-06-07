@@ -1,8 +1,8 @@
 extends layout
 
-// block css will insert css scripts listed in head.jade that are needed on every page.
+//- block css will insert css scripts listed in head.jade that are needed on every page.
 block css
-	// files below are page specific
+	//- files below are page specific
 	link(rel='stylesheet' href='css/validate.css')
 	link(rel="stylesheet" href="css/json-tree.css")
 	link(rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons")
@@ -19,7 +19,7 @@ block body
 				#form-container(ng-controller="ValidateCtrl as vc")
 
 					form#upload-form(ng-submit='')
-						// GOOGLE MAP
+						//- GOOGLE MAP
 						div
 							ui-gmap-google-map(center='map.config.center', zoom='map.config.zoom', draggable='true', options='map.config.options', bounds='map.config.bounds')
 								ui-gmap-markers(models='map.markers', coords="'self'", events='events', options='map.config.options')
@@ -45,9 +45,9 @@ block body
 									include ./sections/paleo.jade
 									include ./sections/chron.jade
 
-// block js will insert js scripts listed in footer.jade that are needed on every page.
+//- block js will insert js scripts listed in footer.jade that are needed on every page.
 block js
-	// files below are page specific
+	//- files below are page specific
 	script(src='apps/validateApp.js')
 	script(src='js/ngValidate.js')
 	//- script(src="lib/angular-busy.js")

@@ -1,13 +1,13 @@
 extends layout
 
-// block css will insert css scripts listed in head.jade that are needed on every page.
+//- block css will insert css scripts listed in head.jade that are needed on every page.
 block css
-	// files below are page specific
-	link(rel="stylesheet" href="css/angular-busy.css")
-	link(rel="stylesheet" href="https://unpkg.com/ng-table@2.0.2/bundles/ng-table.min.css")
+	//- files below are page specific
+	//- link(rel="stylesheet" href="css/angular-busy.css")
+	//- link(rel="stylesheet" href="https://unpkg.com/ng-table@2.0.2/bundles/ng-table.min.css")
 	link(rel='stylesheet' href='css/validate.css')
 	link(rel="stylesheet" href="css/json-tree.css")
-
+	link(rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons")
 
 block body
 	body(ng-app='validateApp' ng-cloak)
@@ -59,7 +59,7 @@ block body
 								div#tree-contain(ng-if="!pageMeta.simpleView" ng-model="files.json")
 									json-tree(json="files.json" node="nodeOptions" collapsed-level="2" edit-level="high")
 
-// block js will insert js scripts listed in footer.jade that are needed on every page.
+//- block js will insert js scripts listed in footer.jade that are needed on every page.
 block js
 	script(src='apps/validateApp.js')
 	script(src='js/ngValidate.js')
@@ -81,5 +81,6 @@ block js
 	script(src='https://cdnjs.cloudflare.com/ajax/libs/danialfarid-angular-file-upload/8.0.1/ng-file-upload.min.js')
 	script(src="https://cdnjs.cloudflare.com/ajax/libs/ngStorage/0.3.6/ngStorage.min.js")
 	script(src='https://maps.googleapis.com/maps/api/js?libraries=places&key=AIzaSyA7HRzSi5HhyKTX9Xw7CZ-9XScwq04TZyc')
-	script(src="http://angular-ui.github.io/bootstrap/ui-bootstrap-tpls-0.4.0.js")
+	script(src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/2.5.0/ui-bootstrap-tpls.min.js")
 	script(src="https://cdnjs.cloudflare.com/ajax/libs/angular-sanitize/1.5.8/angular-sanitize.min.js")
+	script(src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js")

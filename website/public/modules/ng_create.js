@@ -175,16 +175,16 @@ var create = (function(){
                 // loop for each property in one column
                 for (var _prop in _col){
                   if (_col.hasOwnProperty(_prop) && _col[_prop] !== undefined){
-                    console.log(_prop);
+                    // console.log(_prop);
                     if(!_ignore.includes(_prop)){
-                      console.log("adding prop");
+                      // console.log("adding prop");
                       _col.tmp[_prop] = true;
                     }
                   }
                 }
-                console.log(_col);
+                // console.log(_col);
               }
-              console.log(_x);
+              // console.log(_x);
             } else if (x[_key].constructor === [].constructor && x[_key].length > 0) {
               // value is an array. iterate over array and recursive call
               for (var _g=0; _g < x[_key].length; _g++){
