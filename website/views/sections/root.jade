@@ -9,7 +9,7 @@ div
   div(layout='', layout-padding='', layout-sm='column')
   
     md-input-container(flex="33")
-      label Archive Type *
+      label Archive Type
       md-select(ng-model="files.json.archiveType")
         md-option(ng-repeat="archive in dropdowns.archiveType" ng-value="archive") {{archive}}
     md-input-container(flex='66', ng-class="md-input-has-value")

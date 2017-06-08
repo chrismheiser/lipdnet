@@ -9,7 +9,14 @@
 // };
 
 // deprecated : cgBusy
-var f = angular.module('ngValidate', ['uiGmapgoogle-maps', 'json-tree', 'ngFileUpload', "ngMaterial", "vcRecaptcha", "ui.bootstrap"]);
+var f = angular.module('ngValidate', ['uiGmapgoogle-maps', 'json-tree', 'ngFileUpload', "ngMaterial", "vcRecaptcha", "ui.bootstrap", "cgBusy"]);
+
+
+f.value('cgBusyDefaults',{
+  message:'Loading...',
+  backdrop: true,
+  minDuration: 700,
+});
 
 // Google Maps API key to allow us to embed the map
 f.config(function (uiGmapGoogleMapApiProvider, $mdThemingProvider) {
@@ -97,7 +104,7 @@ f.factory("ImportService", ["$q", function ($q) {
   };
 
   var compilePromise = function compilePromise(entry, dat, type) {
-    console.log("compilePromse: " + entry.filename.split("/").pop());
+    console.log("parsing: " + entry.filename.split("/").pop());
     var d = $q.defer();
     var x = {};
     x.type = type;
@@ -135,7 +142,6 @@ f.factory("ImportService", ["$q", function ($q) {
 
   // parse array of ZipJS entry objects into usable objects with more relevant information added.
   var parseFiles = function parseFiles(entries) {
-    console.log("parseFiles");
     // array of promises
     var promises = [];
     try {
@@ -160,7 +166,6 @@ f.factory("ImportService", ["$q", function ($q) {
         }
       });
       // return when all promises are filled
-      console.log("Exiting parseFiles");
       return $q.all(promises);
     } catch (err) {
       console.log(err);
@@ -236,7 +241,7 @@ f.factory("ExportService", ["$q", function ($q) {
 
   // parse array of ZipJS entry objects into usable objects with more relevant information added.
   var prepZip = function prepZip(dat) {
-    console.log("enter prepZip");
+    console.log("prepZip");
     return(dat);
   };
 
@@ -277,8 +282,6 @@ f.controller('ValidateCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Uplo
         {"view": "Notes", "name": "notes", "checked": false},
       ]
   };
-  $scope._myPromiseImport = null;
-  $scope._myPromiseExport = null;
   $scope.dropdowns = {
     "current": {
       "table": { id: 1, name: 'measurement' },
@@ -410,6 +413,7 @@ f.controller('ValidateCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Uplo
   $scope.getSet = function(value){
     $scope.files.dataSetName = value;
     $scope.files.lipdFilename = value + ".lpd";
+    console.log("getSet: filename = " + $scope.files.lipdFilename);
   };
 
   $scope.setCountry = function(name){
@@ -518,6 +522,7 @@ f.controller('ValidateCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Uplo
       "dlFallback": false,
       "dlFallbackMsg": "",
       "captcha": false,
+      "busyPromise": null,
     };
     $scope.status = "N/A";
   };
@@ -537,13 +542,15 @@ f.controller('ValidateCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Uplo
     $scope.files.jsonSimple = misc.advancedToSimple($scope.files.json);
   }, true);
 
-  $scope.uploadZip = function (zip, cb) {
+  $scope.uploadZip = function (_file, cb) {
     // Upload *validated* lipd data to backend
-    Upload.upload({
+    $scope.pageMeta.busyPromise = Upload.upload({
         url: '/files',
-        data: {file: zip.dat,
-              filename: zip.filename}
-    }).then(function (resp) {
+        data: {file: _file.dat,
+              filename: _file.filename}
+    });
+
+    $scope.pageMeta.busyPromise.then(function (resp) {
         console.log('Success');
         console.log(resp);
         cb(resp);
@@ -570,12 +577,13 @@ f.controller('ValidateCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Uplo
     // Download the *validated* LiPD file to client's computer
     // use the service to parse data from the ZipJS entries
     $scope._myPromiseExport = ExportService.prepForDownload(_newJson);
+    $scope.pageMeta.busyPromise = $scope._myPromiseExport;
     $scope._myPromiseExport.then(function (res) {
       // console.log("ExportService.then()");
       //upload zip to node backend, then callback and download it afterward.
-      console.log("Export response");
-      console.log(res);
-      console.log($scope.files.lipdFilename);
+      // console.log("Export response");
+      // console.log(res);
+      // console.log("downloadZip: Filename: " + $scope.files.lipdFilename);
       $scope.uploadZip({"filename": $scope.files.lipdFilename, "dat": res}, function(resp){
         // do get request to trigger download file immediately after download
         // console.log("client side after upload");
@@ -600,23 +608,15 @@ f.controller('ValidateCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Uplo
     // rearrange coordinates from dict to array when necessary, and set the map if coordinates exist
     $scope.files = map.fixCoordinates($scope.files);
     $scope.map = map.updateMap($scope.map, $scope.files);
-
-    // start the string of validation events.
-    lipdValidator.populateTSids($scope.files, function(_data){
-      // console.log("Setting new JSON with TSids.");
-      // console.log(_data);
-      $scope.files = _data;
-      lipdValidator.validate($scope.files, _options, function(_response_2){
-        try {
-          // console.log("Setting validator response to NG scope");
-          $scope.feedback = _response_2.feedback;
-          $scope.status = _response_2.status;
-        } catch(err) {
-          console.log("Error trying to prepare response. Ending request: " + err);
-        }
-      }); // end validate
+    lipdValidator.validate($scope.files, _options, function(_results){
+      try{
+        $scope.files = _results.files;
+        $scope.feedback = _results.feedback;
+        $scope.status = _results.status;
+      } catch(err){
+        console.log("validate: Error trying to prepare results: " + err);
+      }
     });
-
   };
 
   $scope.parseCsv = function(entry, idx, options){
@@ -665,6 +665,9 @@ f.controller('ValidateCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Uplo
   $scope.addBlock = function(entry, blockType, pc){
     if (pc === "chron"){
       $scope.files.json = create.addChronData($scope.files.json);
+    }
+    if (!entry || entry === undefined){
+      entry =[];
     }
     // Add a block of data to the JSON. (i.e. funding, paleoData table, publication, etc.)
     entry = create.addBlock(entry, blockType, pc);
@@ -846,18 +849,18 @@ f.controller('ValidateCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Uplo
         // get a list of file entries inside this zip
         model.getEntries(fileInput.files[0], function (entries) {
           // use the service to parse data from the ZipJS entries
-          $scope._myPromiseImport = ImportService.parseFiles(entries);
-          $scope._myPromiseImport.then(function (res) {
-            console.log("ImportService.then()");
+          $scope.pageMeta.busyPromise = ImportService.parseFiles(entries);
+          $scope.pageMeta.busyPromise.then(function (res) {
             // Set response to allFiles so we can list all the filenames found in the LiPD archive.
             $scope.allFiles = res;
             $scope.pageMeta.fileUploaded = true;
             // Gather some metadata about the lipd file, and organize it so it's easier to manage.
-            lipdValidator.sortBeforeValidate(res, function(_response_1){
-              console.log("sortBeforeValidate callback: sending to validate_ng.js");
+            lipdValidator.restructure(res, function(_response_1){
+              // console.log(_response_1);
               $scope.files = _response_1;
               $scope.validate();
               $scope.files.json = create.initColumnTmp($scope.files.json);
+              $scope.files.json = create.initMissingArrs($scope.files.json);
             }); // end sortBeforeValidate
             //RETURNS OBJECT : {"dat": files.json, "feedback": feedback, "filename": files.lipdFilename, "status": feedback.status};
 

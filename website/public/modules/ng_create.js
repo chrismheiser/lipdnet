@@ -50,6 +50,9 @@ var create = (function(){
 
     addFunding: (function(entry){
       var _block = {"agency": "", "grant": "", "investigator": "", "country": ""};
+      if (!entry){
+        entry = [];
+      }
       entry.push(_block);
       return entry;
     }),
@@ -198,6 +201,27 @@ var create = (function(){
         }
       } catch (err){
         console.log(err);
+      }
+      return x;
+    }),
+
+    // When a LiPD file is uploaded, it needs an Array for these fields. Empty or not. If missing, put in empty arrays. 
+    initMissingArrs: (function(x){
+      var currKey = "";
+      var keys = ["pub", "funding", "chronData", "paleoData"];
+      for (var key in keys){
+        try {
+          currKey = keys[key];
+          if(!x.hasOwnProperty(currKey)){
+             x[currKey] = [];
+          } else {
+            if(x[currKey] === 'undefined' || !x[currKey]){
+              x[currKey] = [];
+            }
+          }
+        } catch (err){
+          console.log("initMissingArrs: " + err);
+        }
       }
       return x;
     }),

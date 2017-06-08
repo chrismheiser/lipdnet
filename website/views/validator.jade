@@ -8,6 +8,7 @@ block css
 	link(rel='stylesheet' href='css/validate.css')
 	link(rel="stylesheet" href="css/json-tree.css")
 	link(rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons")
+	link(rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/angular-busy/4.1.4/angular-busy.min.css")
 
 block body
 	body(ng-app='validateApp' ng-cloak)
@@ -63,7 +64,6 @@ block body
 block js
 	script(src='apps/validateApp.js')
 	script(src='js/ngValidate.js')
-	//- script(src="lib/angular-busy.js")
 	script(src="lib/zip/zip.js")
 	script(src='lib/json-tree.js')
 	script(src="lib/zip/zip-ext.js")
@@ -73,6 +73,7 @@ block js
 	script(src="modules/ng_create.js")
 	script(src="modules/ng_misc.js")
 	script(src="modules/ng_validator.js")
+	script(src="https://cdnjs.cloudflare.com/ajax/libs/angular-busy/4.1.4/angular-busy.min.js")
 	script(src="https://cdnjs.cloudflare.com/ajax/libs/angular-recaptcha/3.2.1/angular-recaptcha.min.js")
 	script(src="https://www.google.com/recaptcha/api.js?onload=vcRecaptchaApiLoaded&render=explicit" async defer)
 	script(src='https://cdnjs.cloudflare.com/ajax/libs/angular-ui-router/0.2.15/angular-ui-router.min.js')

@@ -175,7 +175,7 @@ var misc = (function(){
       // VAL prefix for tracability back to validator
       // 8 alphanumeric characters to match TSid standard format.
       _tsid = "WEB" + s4() + s4();
-      console.log("misc: Generated TSid: " + _tsid);
+      console.log("misc: Generating TSid: " + _tsid);
       return _tsid;
     }),
 

@@ -334,24 +334,18 @@ router.post("/api/validator", function(req, res, next){
       res.status(400).send("HTTP 400: Parsing JSON failed: " + err);
       // var json_data = req.body["json_payload"];
     }
-    // logger.info("JSON DATA");
-    // logger.info(json_data);
     logger.info("index: Starting process...");
-    lipdValidator.sortBeforeValidate(_json_data, function(j){
-      logger.info("index: sortBeforeValidate callback");
-      var _options = {"fileUploaded": true};
-      lipdValidator.validate(j, _options, function(x){
-        try {
-          logger.info("index: Validate callback, preparing response");
-          res.setHeader('Content-Type', 'application/json');
-          res.send(JSON.stringify(x, null, 3));
-          logger.info("index: Response sent to origin");
-          // logger.info(x.feedback);
-        } catch(err) {
-          logger.info("index: Error preparing response. Ending request: " + err);
-          res.status(400).send("HTTP 400: Error preparing response: " + err);
-        }
-      });
+    lipdValidator.validate_w_restructure(_json_data, {"fileUploaded": true}, function(j){
+      logger.info("index: validate_w_restructure callback");
+      try {
+        logger.info("index: Validate callback, preparing response");
+        res.setHeader('Content-Type', 'application/json');
+        res.send(JSON.stringify(j, null, 3));
+        logger.info("index: Response sent to origin");
+      } catch(err) {
+        logger.info("index: Error preparing response. Ending request: " + err);
+        res.status(400).send("HTTP 400: Error preparing response: " + err);
+      }
     });
   } catch(err) {
     logger.info("index: Validation failed: " + err);

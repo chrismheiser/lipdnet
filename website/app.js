@@ -90,6 +90,7 @@ var storage = multer.diskStorage({
 
 // view engine setup
 app.set("environment", "development");
+// app.set("environment", "production");
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 app.use(favicon(__dirname + '/public/favicon.ico'));

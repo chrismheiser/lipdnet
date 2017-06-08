@@ -4,6 +4,43 @@ var lipdValidator = (function(){
   // 'use strict';
   return {
 
+
+    // Wrapper function: Call all validation steps
+    validate: (function(files, options, cb){
+      try{
+        _output = {};
+        lipdValidator.populateTSids(files, function(files_1){
+          _output.files = files_1;
+          lipdValidator.processData(files_1, options, function(_results){
+            try{
+              _output.feedback = _results.feedback;
+              _output.status = _results.status;
+              cb(_output);
+            } catch(err){
+              console.log("validate: processData cb: " + err);
+              return;
+            }
+          });
+        });
+      } catch(err){
+        console.log("validate: " + err);
+        return;
+      }
+    }),
+
+    // Wrapper function: Call all the  validation steps INCLUDING restructuring the raw data
+    validate_w_restructure: (function(files, options, cb){
+      try{
+        lipdValidator.restructure(files, function(files_2){
+          lipdValidator.validate(files_2, options, function(_results){
+            cb(_results);
+          });
+        });
+      } catch(err){
+        console.log("validate_w_restructure: " + err);
+      }
+    }),
+
     // Generate a TSid. An alphanumeric unique ID. Prefix + 8 chars.
     generateTSid: (function(){
       var _tsid = "";
@@ -21,8 +58,8 @@ var lipdValidator = (function(){
       return _tsid;
     }),
 
-    // Sort data by file type, filename, and gather other metdata
-    sortBeforeValidate: (function (objs, cb) {
+    // Restructure data by file type, filename, and gather other metdata
+    restructure: (function (objs, cb) {
         // console.log("sortBeforeValidate: Start sorting");
         // Files: User data holds all the user selected or imported data
         var files = {
@@ -38,7 +75,7 @@ var lipdValidator = (function(){
         try{
           // loop over each csv/jsonld object. sort them into the scope by file type
           objs.forEach(function (obj) {
-            console.log("processing: " + obj.filenameShort);
+            console.log("restructure: " + obj.filenameShort);
             if (obj.type === "json") {
               files.dataSetName = obj.filenameFull.split("/")[0];
               files.lipdFilename = obj.filenameFull.split("/")[0] + ".lpd";
@@ -48,17 +85,17 @@ var lipdValidator = (function(){
             } else if (obj.type === "bagit") {
               files.bagit[obj.filenameShort] = obj;
             } else {
-              console.log("sortBeforeValidate: Unknown file: " + obj.filenameFull);
+              console.log("restructure: Unknown File: " + obj.filenameFull);
             }
           });
           cb(files);
-        }catch(e){
-          console.log("Error: sortBeforeValidate: " + e);
+        }catch(err){
+          console.log("restructure: " + err);
           // console.log(cb);
         }
         return;
     }),
-    // end sortBeforeValidate
+    // end restructure
 
 
     populateTSids: (function(_files, cb){
@@ -166,7 +203,7 @@ var lipdValidator = (function(){
     // LiPD Validation: Check data for required fields, proper structure, and proper data types.
     // Attempt to fix invalid data, and return data with and feedback (errors and warnings)
     // validate_main: (function(files){
-    validate: (function(files, options, cb){
+    processData: (function(files, options, cb){
 
         // console.log("validate: Begin Validation");
         // console.log(files);
@@ -221,17 +258,18 @@ var lipdValidator = (function(){
         // VALIDATE
         var validate = function () {
           // console.log("validate");
-          console.log("validate: Structure");
+          console.log("validate: LiPD Structure");
           verifyStructure(files.json);
-          console.log("validate: Required Fields");
+          console.log("validate: LiPD Required Fields");
           verifyRequiredFields(files.json);
           console.log("validate: Bagit");
           verifyBagit(files.bagit);
           verifyValid(feedback);
-          console.log("validate: Status: " + feedback.status);
+          console.log("validate: Validation Status: " + feedback.status);
           // var jsonCopy = JSON.parse(JSON.stringify(files.json));
           // console.log("validate: Complete");
-          console.log(files.json);
+          // console.log(files.json);
+          console.log("validate: LiPD Filename: " + files.lipdFilename);
           return {"dat": files.json, "feedback": feedback, "filename": files.lipdFilename, "status": feedback.status};
         };
 
@@ -283,7 +321,7 @@ var lipdValidator = (function(){
                 }
               }
             } catch (err) {
-              console.log("verifyStructure: Caught error parsing: " + k);
+              console.log("verifyStructure: Caught error parsing: " + k + ": " + err);
             }
           }
         };
@@ -353,7 +391,7 @@ var lipdValidator = (function(){
             } // end else
           } catch (err) {
             // caught some other unknown error
-            console.log("verifyDataType: Caught error parsing. Expected: " + cdt + ", Given: " + (typeof v === 'undefined' ? 'undefined' : _typeof(v)));
+            console.log("verifyDataType: Caught error parsing. Expected: " + dt + ", Given: " + (typeof v === 'undefined' ? 'undefined' : _typeof(v)));
           } // end catch
           return true;
         };
@@ -754,7 +792,6 @@ var lipdValidator = (function(){
           }
         };
 
-
         //  HELPERS
 
         // create a csv filename for a data table
@@ -853,25 +890,18 @@ var lipdValidator = (function(){
           // Only run Verify Bagit when this is an uploaded file. NOT when it's being created from scratch
           // If create from scratch, it's not possible to have bagit files yet.
           if(options.fileUploaded){
-            // var validBagitFiles = ["manifest-md5.txt", "bagit.txt", "bag-info.txt"];
             var count = 0;
             var errors = 0;
             validBagitFiles.forEach(function (filename) {
               if (files.hasOwnProperty(filename)) {
                 count++;
               } else {
-                //
                 errors++;
-                logFeedback("err", "Missing bagit file: " + filename);
+                logFeedback("warn", "Missing bagit file: " + filename);
               }
             });
-            // if all 4 bagit files are found, display valid bagit message
-            // if (count === 4) {
-            //   logFeedback("pos", "Valid Bagit File", "bagit");
-            //   feedback.validBagit = true;
-            // }
-            // TEMPORARY: Only check for 3 bagit files to be valid, since online bagit doesn't include one file.
-            if (count === 3) {
+            // Requires 4 bagit files to be valid bagit
+            if (count === 4) {
               logFeedback("pos", "Valid Bagit File", "bagit");
               feedback.validBagit = true;
             }
@@ -897,13 +927,9 @@ var lipdValidator = (function(){
               }
             }
           };
-        // try{
+          // Call the local validate function, inside of processData
           cb(validate());
-        // } catch(err){
-        //   console.log("validate: err: " + err);
-        // }
         return;
-        // return validate(files);
 
     }) // end validate
 
