@@ -224,7 +224,7 @@ f.factory("ExportService", ["$q", function ($q) {
   }; // end prepForDownload
 
   // concat all the csv arrays into a flat data string that can be written to file
-    var prepCsvEntry = function(csvArrs){
+  var prepCsvEntry = function(csvArrs){
     // header for the csv file
     var csvContent = "";
     angular.forEach(csvArrs, function(entry, idx){
@@ -233,10 +233,8 @@ f.factory("ExportService", ["$q", function ($q) {
        // add this new string onto the growing master string. if it's the end of the data string, then add newline char
       //  csvContent += idx < entry.length ? dataString + "\n" : dataString;
       csvContent += dataString + "\n";
-
     });
     return(csvContent);
-
   }; // end prepCsvEntry
 
   // parse array of ZipJS entry objects into usable objects with more relevant information added.
@@ -307,7 +305,7 @@ f.controller('ValidateCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Uplo
     "basis", "proxy", "material", "method", "seasonality", "dataType", "useInGlobalTemperatureAnalysis", "sensorSpecies", "sensorGenus", "variableType", "proxyObservationType", "inferredVariableType", "notes"
   ];
   $scope.oneAtATime = true;
-  // FILES: User data holds all the user's LiPD data
+  // Compilation of all LiPD file data
   $scope.files = {
     "modal": {},
     "lipdFilename": "",
@@ -320,7 +318,7 @@ f.controller('ValidateCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Uplo
           "paleoData": [{"paleoMeasurementTable": [{"paleoDataTableName": "", "missingValue": "NaN",
           "filename": "", "columns": []}]}]},
   };
-  // PAGEMETA: Data about how to transform the page view based on user input
+  // Metadata about the page view, and manipulations
   $scope.pageMeta = {
     "header": false,
     "fileUploaded": false,
@@ -332,7 +330,7 @@ f.controller('ValidateCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Uplo
     "dlFallbackMsg": "",
     "captcha": false,
   };
-  // FEEDBACK: All warnings, errors, and messages received from the validator
+  // All feedback warnings, errors, and messages received from the validator
   $scope.feedback = {
     "missingTsidCt": 0,
     "wrnCt": 0,
@@ -343,7 +341,7 @@ f.controller('ValidateCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Uplo
     "wrnMsgs": [],
     "dataCanDo": []
   };
-  // set google map default window to USA
+  // Set google map default view
   $scope.map = {
     "config": {
       center: {
@@ -361,28 +359,26 @@ f.controller('ValidateCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Uplo
   };
   // STATUS: PASS/FAIL/OTHER status given by validator response.
   $scope.status = "N/A";
-  // ALLFILES: Use this to list all the files found in the LiPD archive, and their contents. Used in "feedback.jade"
+  // All files, w/ contents, found in the LiPD archive. Used in "feedback.jade"
   $scope.allFiles = [];
 
-  // Showing contents of individual file links
-  $scope.showContentsModal = function(data){
-    // if this is a csv
-    $scope.modal = data;
-    var modalInstance = $uibModal.open({
-      templateUrl: 'modal',
-      controller: 'ModalCtrl',
-      size: "lg",
-      resolve: {
-        data: function () {
-          return $scope.modal;
-        }
-      }
-    });
+  $scope.$watch("files.json", function () {
+    // Create the Simple View
+    $scope.files.jsonSimple = misc.advancedToSimple($scope.files.json);
+  }, true);
 
-    // if this is a text file
+  $scope.addBlock = function(entry, blockType, pc){
+    if (pc === "chron"){
+      $scope.files.json = create.addChronData($scope.files.json);
+    }
+    // Add a block of data to the JSON. (i.e. funding, paleoData table, publication, etc.)
+    entry = create.addBlock(entry, blockType, pc);
+    return entry;
+  };
 
-    // if this is a json file
-
+  $scope.addRmProperty = function(entry, name) {
+    entry = create.addRmProperty(entry, name);
+    return entry;
   };
 
   $scope.clearCustom = function(entry){
@@ -394,20 +390,70 @@ f.controller('ValidateCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Uplo
     return entry;
   };
 
-  $scope.addRmProperty = function(entry, name) {
-    entry = create.addRmProperty(entry, name);
-    return entry;
-  };
+  $scope.downloadZip = function(){
 
-  $scope.showProperty = function(name){
-    if (["number", "variableName", "units", "toggle", "values", "checked", "tmp"].includes(name)){
-      return false;
+    // Remove temporary fields from the JSON data
+    var _newJson = JSON.parse(JSON.stringify($scope.files));
+    _newJson.json = create.rmTmpEmptyData(_newJson.json);
+    // Append the DataSetName to the front of all the CSV files.
+    var _addDataSetName = create.addDataSetName($scope.files.dataSetName, $scope.files.csv);
+    if (_addDataSetName){
+      // Add Datasetname to all json and csv filenames.
+      _newJson = create.alterFilenames(_newJson);
     }
-    return true;
+    // Download the *validated* LiPD file to client's computer
+    // use the service to parse data from the ZipJS entries
+    $scope._myPromiseExport = ExportService.prepForDownload(_newJson);
+    $scope.pageMeta.busyPromise = $scope._myPromiseExport;
+    $scope._myPromiseExport.then(function (res) {
+      // console.log("ExportService.then()");
+      //upload zip to node backend, then callback and download it afterward.
+      // console.log("Export response");
+      // console.log(res);
+      // console.log("downloadZip: Filename: " + $scope.files.lipdFilename);
+      $scope.uploadZip({"filename": $scope.files.lipdFilename, "dat": res}, function(resp){
+        // do get request to trigger download file immediately after download
+        // console.log("client side after upload");
+        // console.log(tmp.data);
+        // console.log(resp);
+        if (resp.status !== 200){
+          window.alert("Error downloading file");
+        } else {
+          window.location.href = "http://localhost:3000/files/" + resp.data;
+          // window.location.href = "http://www.lipd.net/files/" + resp.data;
+        }
+        // reset the captcha
+        $scope.pageMeta.captcha = false;
+      });
+    });
   };
 
-  $scope.toggleCsvBox = function(entry) {
-    entry.toggle=!entry.toggle;
+  $scope.fetchPublication = function(entry){
+    console.log(entry);
+    console.log(entry.identifier[0].id);
+    var _re = /\b(10[.][0-9]{3,}(?:[.][0-9]+)*\/(?:(?![\"&\'<>,])\S)+)\b/;
+    var _match = _re.exec(entry.identifier[0].id);
+    console.log(_match);
+    if (_match){
+      var _url =  "http://dx.doi.org/" + entry.identifier[0].id;
+      $http({
+        "method": "GET",
+        "url": _url,
+        "headers": {"accept": "application/rdf+xml;q=0.5, application/citeproc+json;q=1.0"}
+      })
+        .then(function (response) {
+          console.log("DOI Response object");
+          console.log(response);
+          entry = create.sortDoiResponse(response, entry);
+        }, function(response) {
+          console.log("Unable to fetch DOI data: ");
+          // console.log(response);
+          alert("HTTP 404: No data found for that DOI");
+        });
+    } else {
+      alert("DOI entered does not match the DOI format");
+    }
+    return entry;
   };
 
   $scope.getSet = function(value){
@@ -416,11 +462,52 @@ f.controller('ValidateCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Uplo
     console.log("getSet: filename = " + $scope.files.lipdFilename);
   };
 
-  $scope.setCountry = function(name){
-    if (!$scope.files.json.geo.properties.country){
-      $scope.files.json.geo = create.addBlock($scope.files.json.geo, "geo", null);
+  $scope.parseCsv = function(entry, idx, options){
+    _csv = null;
+    // we can't guarantee a datasetname yet, so build this csv filename as best we can for now.
+    var _csvname = options.pc + '0' + options.tt + idx + ".csv";
+    // Semi-colon delimiter is checked. Pass this as an argument to PapaParse
+    // console.log($scope.dropdowns.current.delimiter.name);
+    _csv = Papa.parse(entry.values, {
+      "delimiter": $scope.dropdowns.current.delimiter.name
+    });
+
+    // add row, column, and transposed metadata to the parsed CSV object.
+    _csv = misc.putCsvMeta(_csv);
+
+    // set the transposed data to entry.values. Transposed data is needed so we can display column data properly
+    entry.values = _csv.transposed;
+
+    // transpose values so we can store each value array with its column
+    entry.filename = _csvname;
+    // initialize X amount of columns
+    entry.columns = new Array(entry.values.length);
+    // start adding each column to the array
+    for(var _i=0; _i < entry.values.length; _i++){
+      if($scope.pageMeta.header){
+        // Header exists, we can set the variableName field as well! VariableName will be the first index
+        entry.columns[_i] = {"number": _i + 1, "variableName": entry.values[_i][0], "units": "", "values": entry.values[_i].splice(1, entry.values.length)};
+      } else {
+        // Headers do not exist. Set values directly
+        entry.columns[_i] = {"number": _i + 1, "variableName": "", "units": "", "values": entry.values[_i]};
+      }
     }
-    $scope.files.json.geo.properties.country = name;
+    // If headers are present, we need to do some extra cleanup
+    if ($scope.pageMeta.header){
+      // Remove the header row from _csv.data (first array)  and _csv.transposed (first element of each array)
+      _csv = misc.removeCsvHeader(_csv);
+
+    }
+    // CSV is all finished processing. Set data to scope.
+    $scope.files.csv[_csvname] = _csv;
+    // console.log($scope.files.csv);
+    // console.log(entry);
+    return entry;
+  };
+
+  $scope.removeBlock = function(entry, idx){
+    entry = create.rmBlock(entry, idx);
+    return;
   };
 
   $scope.resetPage = function(){
@@ -527,20 +614,47 @@ f.controller('ValidateCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Uplo
     $scope.status = "N/A";
   };
 
+  $scope.setCountry = function(name){
+    if (!$scope.files.json.geo.properties.country){
+      $scope.files.json.geo = create.addBlock($scope.files.json.geo, "geo", null);
+    }
+    $scope.files.json.geo.properties.country = name;
+  };
+
+  // Showing contents of individual file links
+  $scope.showContentsModal = function(data){
+    // if this is a csv
+    $scope.modal = data;
+    var modalInstance = $uibModal.open({
+      templateUrl: 'modal',
+      controller: 'ModalCtrl',
+      size: "lg",
+      resolve: {
+        data: function () {
+          return $scope.modal;
+        }
+      }
+    });
+
+    // if this is a text file
+
+    // if this is a json file
+  };
+
+  $scope.showProperty = function(name){
+    if (["number", "variableName", "units", "toggle", "values", "checked", "tmp"].includes(name)){
+      return false;
+    }
+    return true;
+  };
+
   $scope.startCaptcha = function(){
     // Download button was clicked, show the captcha challenege
     $scope.pageMeta.captcha = true;  };
 
-  $scope.$watch("files.json", function () {
-    // Trigger when json data changes
-    // var mp = document.getElementById("metaPretty");
-    // if (mp) {
-    //   console.log(mp);
-    //   mp.innerHTML = JSON.stringify($scope.files.json, undefined, 2);
-    // }
-    // Create the Simple View
-    $scope.files.jsonSimple = misc.advancedToSimple($scope.files.json);
-  }, true);
+  $scope.toggleCsvBox = function(entry) {
+    entry.toggle=!entry.toggle;
+  };
 
   $scope.uploadZip = function (_file, cb) {
     // Upload *validated* lipd data to backend
@@ -563,44 +677,6 @@ f.controller('ValidateCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Uplo
     });
   };
 
-  $scope.downloadZip = function(){
-
-    // Remove temporary fields from the JSON data
-    var _newJson = JSON.parse(JSON.stringify($scope.files));
-    _newJson.json = create.rmTmpEmptyData(_newJson.json);
-    // Append the DataSetName to the front of all the CSV files.
-    var _addDataSetName = create.addDataSetName($scope.files.dataSetName, $scope.files.csv);
-    if (_addDataSetName){
-      // Add Datasetname to all json and csv filenames.
-      _newJson = create.alterFilenames(_newJson);
-    }
-    // Download the *validated* LiPD file to client's computer
-    // use the service to parse data from the ZipJS entries
-    $scope._myPromiseExport = ExportService.prepForDownload(_newJson);
-    $scope.pageMeta.busyPromise = $scope._myPromiseExport;
-    $scope._myPromiseExport.then(function (res) {
-      // console.log("ExportService.then()");
-      //upload zip to node backend, then callback and download it afterward.
-      // console.log("Export response");
-      // console.log(res);
-      // console.log("downloadZip: Filename: " + $scope.files.lipdFilename);
-      $scope.uploadZip({"filename": $scope.files.lipdFilename, "dat": res}, function(resp){
-        // do get request to trigger download file immediately after download
-        // console.log("client side after upload");
-        // console.log(tmp.data);
-        // console.log(resp);
-        if (resp.status !== 200){
-          window.alert("Error downloading file");
-        } else {
-          window.location.href = "http://localhost:3000/files/" + resp.data;
-          // window.location.href = "http://www.lipd.net/files/" + resp.data;
-        }
-        // reset the captcha
-        $scope.pageMeta.captcha = false;
-      });
-    });
-  };
-
   $scope.validate = function(){
     // Go through all validations steps, and update scope data.
     var _options = {"fileUploaded": $scope.pageMeta.fileUploaded};
@@ -619,94 +695,7 @@ f.controller('ValidateCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Uplo
     });
   };
 
-  $scope.parseCsv = function(entry, idx, options){
-    _csv = null;
-    // we can't guarantee a datasetname yet, so build this csv filename as best we can for now.
-    var _csvname = options.pc + '0' + options.tt + idx + ".csv";
-    // Semi-colon delimiter is checked. Pass this as an argument to PapaParse
-    // console.log($scope.dropdowns.current.delimiter.name);
-    _csv = Papa.parse(entry.values, {
-      "delimiter": $scope.dropdowns.current.delimiter.name
-    });
 
-    // add row, column, and transposed metadata to the parsed CSV object.
-    _csv = misc.putCsvMeta(_csv);
-
-    // set the transposed data to entry.values. Transposed data is needed so we can display column data properly
-    entry.values = _csv.transposed;
-
-    // transpose values so we can store each value array with its column
-    entry.filename = _csvname;
-    // initialize X amount of columns
-    entry.columns = new Array(entry.values.length);
-    // start adding each column to the array
-    for(var _i=0; _i < entry.values.length; _i++){
-      if($scope.pageMeta.header){
-        // Header exists, we can set the variableName field as well! VariableName will be the first index
-        entry.columns[_i] = {"number": _i + 1, "variableName": entry.values[_i][0], "units": "", "values": entry.values[_i].splice(1, entry.values.length)};
-      } else {
-        // Headers do not exist. Set values directly
-        entry.columns[_i] = {"number": _i + 1, "variableName": "", "units": "", "values": entry.values[_i]};
-      }
-    }
-    // If headers are present, we need to do some extra cleanup
-    if ($scope.pageMeta.header){
-      // Remove the header row from _csv.data (first array)  and _csv.transposed (first element of each array)
-      _csv = misc.removeCsvHeader(_csv);
-
-    }
-    // CSV is all finished processing. Set data to scope.
-    $scope.files.csv[_csvname] = _csv;
-    // console.log($scope.files.csv);
-    // console.log(entry);
-    return entry;
-  };
-
-  $scope.addBlock = function(entry, blockType, pc){
-    if (pc === "chron"){
-      $scope.files.json = create.addChronData($scope.files.json);
-    }
-    if (!entry || entry === undefined){
-      entry =[];
-    }
-    // Add a block of data to the JSON. (i.e. funding, paleoData table, publication, etc.)
-    entry = create.addBlock(entry, blockType, pc);
-    console.log(entry);
-    return entry;
-  };
-
-  $scope.removeBlock = function(entry, idx){
-    entry = create.rmBlock(entry, idx);
-    return;
-  };
-
-  $scope.fetchPublication = function(entry){
-    console.log(entry);
-    console.log(entry.identifier[0].id);
-    var _re = /\b(10[.][0-9]{3,}(?:[.][0-9]+)*\/(?:(?![\"&\'<>,])\S)+)\b/;
-    var _match = _re.exec(entry.identifier[0].id);
-    console.log(_match);
-    if (_match){
-      var _url =  "http://dx.doi.org/" + entry.identifier[0].id;
-      $http({
-        "method": "GET",
-        "url": _url,
-        "headers": {"accept": "application/rdf+xml;q=0.5, application/citeproc+json;q=1.0"}
-      })
-        .then(function (response) {
-          console.log("DOI Response object");
-          console.log(response);
-          entry = create.sortDoiResponse(response, entry);
-        }, function(response) {
-          console.log("Unable to fetch DOI data: ");
-          // console.log(response);
-          alert("HTTP 404: No data found for that DOI");
-        });
-    } else {
-      alert("DOI entered does not match the DOI format");
-    }
-    return entry;
-  };
 
   vc.propertiesQuerySearch = function(query) {
         var results = query ? vc.properties.list.filter(createFilterFor(query)) : vc.properties.list.filter(createFilterFor(''));

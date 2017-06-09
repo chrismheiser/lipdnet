@@ -5,13 +5,14 @@ var lipdValidator = (function(){
   return {
 
 
-    // Wrapper function: Call all validation steps
+    // Wrapper: Call all validation steps
     validate: (function(files, options, cb){
       try{
         _output = {};
         lipdValidator.populateTSids(files, function(files_1){
-          _output.files = files_1;
-          lipdValidator.processData(files_1, options, function(_results){
+          _output.files = files_1.files;
+          options.tsids_generated = files_1.tsids_generated;
+          lipdValidator.processData(files_1.files, options, function(_results){
             try{
               _output.feedback = _results.feedback;
               _output.status = _results.status;
@@ -28,7 +29,7 @@ var lipdValidator = (function(){
       }
     }),
 
-    // Wrapper function: Call all the  validation steps INCLUDING restructuring the raw data
+    // Wrapper: Call all the  validation steps INCLUDING restructuring the raw data
     validate_w_restructure: (function(files, options, cb){
       try{
         lipdValidator.restructure(files, function(files_2){
@@ -99,6 +100,9 @@ var lipdValidator = (function(){
 
 
     populateTSids: (function(_files, cb){
+
+      var _generated_count = 0; 
+
       // PopulateTSid: Columns
       // Check all columns in a table with TSid's where necessary
       var populateTSids3 = function(table){
@@ -112,6 +116,7 @@ var lipdValidator = (function(){
               // populate if doesn't exist.
               var _tsid = lipdValidator.generateTSid();
               table["columns"][_i2]["TSid"] =  _tsid;
+              _generated_count++;
             }
           }
         }
@@ -192,7 +197,8 @@ var lipdValidator = (function(){
             // console.log("no, " + _pc2 + " doesnt exist");
           }
         }
-        return files;
+        var output = {"files": files, "tsids_generated": _generated_count};
+        return output;
       };
 
       // Revalidate to remove TSid errors
@@ -262,13 +268,12 @@ var lipdValidator = (function(){
           verifyStructure(files.json);
           console.log("validate: LiPD Required Fields");
           verifyRequiredFields(files.json);
+          console.log("validate: TSids Generated: " + options.tsids_generated);          
           console.log("validate: Bagit");
           verifyBagit(files.bagit);
           verifyValid(feedback);
           console.log("validate: Validation Status: " + feedback.status);
           // var jsonCopy = JSON.parse(JSON.stringify(files.json));
-          // console.log("validate: Complete");
-          // console.log(files.json);
           console.log("validate: LiPD Filename: " + files.lipdFilename);
           return {"dat": files.json, "feedback": feedback, "filename": files.lipdFilename, "status": feedback.status};
         };
@@ -458,10 +463,19 @@ var lipdValidator = (function(){
         // master for checking for required fields. call sub-routines.
         var verifyRequiredFields = function (m) {
           // call sub-routine checks
+          requiredTsids();
           requiredRoot(m);
           requiredPub(m);
           requiredPaleoChron("paleo", m);
           requiredPaleoChron("chron", m);
+        };
+
+        // note if there were any tsids that were auto-generated, and warn the user these only persist 
+        // if they download (web) or save (api) the new file.
+        var requiredTsids = function(){
+          if (options.tsids_generated > 0){
+            logFeedback("warn", options.tsids_generated + " TSid(s) were created. You must download the file to keep these changes.", "TSid");
+          }
         };
 
         // verify required fields at all levels of paleoData & chronData
