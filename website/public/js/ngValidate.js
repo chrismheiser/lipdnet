@@ -15,7 +15,7 @@ var f = angular.module('ngValidate', ['uiGmapgoogle-maps', 'json-tree', 'ngFileU
 f.value('cgBusyDefaults',{
   message:'Please wait...',
   backdrop: true,
-  minDuration: 2500,
+  minDuration: 0,
   templateUrl: "loading",
 });
 

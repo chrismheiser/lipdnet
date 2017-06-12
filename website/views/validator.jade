@@ -26,8 +26,7 @@ block body
 							ui-gmap-google-map(center='map.config.center', zoom='map.config.zoom', draggable='true', options='map.config.options', bounds='map.config.bounds')
 								ui-gmap-markers(models='map.markers', coords="'self'", events='events', options='map.config.options')
 						br
-						//- div(cg-busy="myPromise")
-						div
+						div(cg-busy="pageMeta.busyPromise")
 							div(class="span span50" style="padding-right:3em;")
 								md-toolbar.md-hue-1
 									h2.md-toolbar-tools
