@@ -313,6 +313,10 @@ router.get("/modal", function(req, res, next){
   res.render('modal', {title: ''});
 });
 
+router.get("/loading", function(req, res, next){
+  res.render("loading", {title: ""});
+});
+
 // API
 router.post("/api/validator", function(req, res, next){
   logger.info("------------------------");

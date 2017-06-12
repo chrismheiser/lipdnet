@@ -1,8 +1,7 @@
 // app.js
 var express = require('express');
 var process = require("process");
-process.env.NODE_ENV = "development";
-// process.env.NODE_ENV = "production";
+var port = process.env.PORT || 3000;
 var logger = require("./node_modules_custom/node_log.js");
 var rimraf = require("rimraf");
 // chdir to the project folder base. Everything we want to do will be in relation to this location
@@ -18,7 +17,6 @@ var sys = require('sys');
 var favicon = require('serve-favicon');
 var routes = require('./routes/index');
 var users = require('./routes/users');
-//var port = process.env.PORT || 8080;
 var app = express();
 
 
@@ -88,13 +86,17 @@ var storage = multer.diskStorage({
   }
 });
 
+if (port === 3000){
+  app.set("environment", "development");
+} else {
+  app.set("environment", "production");
+}
+
+
 // view engine setup
-app.set("environment", "development");
-// app.set("environment", "production");
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 app.use(favicon(__dirname + '/public/favicon.ico'));
-// app.use(logger('dev'));
 app.use(cookieParser());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));

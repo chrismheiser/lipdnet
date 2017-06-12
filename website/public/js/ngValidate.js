@@ -13,9 +13,10 @@ var f = angular.module('ngValidate', ['uiGmapgoogle-maps', 'json-tree', 'ngFileU
 
 
 f.value('cgBusyDefaults',{
-  message:'Loading...',
+  message:'Please wait...',
   backdrop: true,
-  minDuration: 700,
+  minDuration: 2500,
+  templateUrl: "loading",
 });
 
 // Google Maps API key to allow us to embed the map
@@ -419,8 +420,8 @@ f.controller('ValidateCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Uplo
         if (resp.status !== 200){
           window.alert("Error downloading file");
         } else {
-          window.location.href = "http://localhost:3000/files/" + resp.data;
-          // window.location.href = "http://www.lipd.net/files/" + resp.data;
+          // window.location.href = "http://localhost:3000/files/" + resp.data;
+          window.location.href = "http://www.lipd.net/files/" + resp.data;
         }
         // reset the captcha
         $scope.pageMeta.captcha = false;
