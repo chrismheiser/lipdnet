@@ -186,7 +186,7 @@ f.factory("ExportService", ["$q", function ($q) {
   // get the text from the ZipJs entry object. Parse JSON as-is and pass CSV to next step.
   var getText = function getText(filename, dat) {
     var d = $q.defer();
-    d.resolve({filename, dat});
+    d.resolve({filename: dat});
     return d.promise;
   };
 
@@ -314,10 +314,10 @@ f.controller('ValidateCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Uplo
     "fileCt": 0,
     "bagit": {},
     "csv": {},
-    "jsonSimple": {"lipdVersion": 1.2},
-    "json": {"lipdVersion": 1.2, "pub": [], "funding": [], "dataSetName": "", "geo": {},
+    "jsonSimple": {"lipdVersion": 1.3},
+    "json": {"lipdVersion": 1.3, "pub": [], "funding": [], "dataSetName": "", "geo": {},
           "paleoData": [{"paleoMeasurementTable": [{"paleoDataTableName": "", "missingValue": "NaN",
-          "filename": "", "columns": []}]}]},
+          "filename": "", "columns": []}]}]}
   };
   // Metadata about the page view, and manipulations
   $scope.pageMeta = {
@@ -329,10 +329,11 @@ f.controller('ValidateCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Uplo
     "filePicker": false,
     "dlFallback": false,
     "dlFallbackMsg": "",
-    "captcha": false,
+    "captcha": false
   };
   // All feedback warnings, errors, and messages received from the validator
   $scope.feedback = {
+    "lipdVersion": "NA",
     "missingTsidCt": 0,
     "wrnCt": 0,
     "errCt": 0,
@@ -464,12 +465,11 @@ f.controller('ValidateCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Uplo
   };
 
   $scope.parseCsv = function(entry, idx, options){
-    _csv = null;
     // we can't guarantee a datasetname yet, so build this csv filename as best we can for now.
     var _csvname = options.pc + '0' + options.tt + idx + ".csv";
     // Semi-colon delimiter is checked. Pass this as an argument to PapaParse
     // console.log($scope.dropdowns.current.delimiter.name);
-    _csv = Papa.parse(entry.values, {
+    var _csv = Papa.parse(entry.values, {
       "delimiter": $scope.dropdowns.current.delimiter.name
     });
 
@@ -507,8 +507,7 @@ f.controller('ValidateCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Uplo
   };
 
   $scope.removeBlock = function(entry, idx){
-    entry = create.rmBlock(entry, idx);
-    return;
+    create.rmBlock(entry, idx);
   };
 
   $scope.resetPage = function(){
@@ -546,7 +545,7 @@ f.controller('ValidateCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Uplo
       "bagit": {},
       "csv": {},
       "jsonSimple": {
-        "lipdVersion": 1.2,
+        "lipdVersion": 1.3,
         "archiveType": "",
         "dataSetName": "",
         "funding": [{ "agencyName": "", "grant": "" }],
@@ -574,7 +573,7 @@ f.controller('ValidateCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Uplo
         }]
       },
       "json": {
-        "lipdVersion": 1.2,
+        "lipdVersion": 1.3,
         "archiveType": "",
         "dataSetName": "",
         "funding": [{ "agencyName": "", "grant": "" }],
@@ -699,8 +698,7 @@ f.controller('ValidateCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Uplo
 
 
   vc.propertiesQuerySearch = function(query) {
-        var results = query ? vc.properties.list.filter(createFilterFor(query)) : vc.properties.list.filter(createFilterFor(''));
-        return results;
+        return query ? vc.properties.list.filter(createFilterFor(query)) : vc.properties.list.filter(createFilterFor(''));
     };
 
   function createFilterFor(query) {

@@ -2,85 +2,88 @@ extends layout
 
 //- block css will insert css scripts listed in head.jade that are needed on every page.
 block css
-	//- files below are page specific
-	//- link(rel="stylesheet" href="css/angular-busy.css")
-	//- link(rel="stylesheet" href="https://unpkg.com/ng-table@2.0.2/bundles/ng-table.min.css")
-	link(rel='stylesheet' href='css/validate.css')
-	link(rel="stylesheet" href="css/json-tree.css")
-	link(rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons")
-	link(rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/angular-busy/4.1.4/angular-busy.min.css")
+    //- files below are page specific
+    //- link(rel="stylesheet" href="css/angular-busy.css")
+    //- link(rel="stylesheet" href="https://unpkg.com/ng-table@2.0.2/bundles/ng-table.min.css")
+    link(rel='stylesheet' href='css/validate.css')
+    link(rel="stylesheet" href="css/json-tree.css")
+    link(rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons")
+    link(rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/angular-busy/4.1.4/angular-busy.min.css")
 
 block body
-	body(ng-app='validateApp' ng-cloak)
-		#wrapper
-			include ./include/navbar.jade
-			md-toolbar
-				.md-toolbar-tools
-					.md-title Upload
-				
-			.col-sm-12
-				#form-container(ng-controller='ValidateCtrl as vm')
-					form#upload-form(ng-submit='')
-						// GOOGLE MAP
-						div
-							ui-gmap-google-map(center='map.config.center', zoom='map.config.zoom', draggable='true', options='map.config.options', bounds='map.config.bounds')
-								ui-gmap-markers(models='map.markers', coords="'self'", events='events', options='map.config.options')
-						br
-						div(cg-busy="pageMeta.busyPromise")
-							div(class="span span50" style="padding-right:3em;")
-								md-toolbar.md-hue-1
-									h2.md-toolbar-tools
-										span Load
-								div
-									ol
-										include ./pieces/action_btns.jade
-										include ./pieces/feedback.jade									
+    body(ng-app='validateApp' ng-cloak)
+        #wrapper
+            include ./include/navbar.jade
+            md-toolbar
+                .md-toolbar-tools
+                    .md-title Upload
 
-											
-							div(class="span span50")
-								md-toolbar.md-hue-1
-									h2.md-toolbar-tools
-										span Edit & Validate
-								div
-									ol
-										// this is strictly a placeholder to mirror the spacing on the other column. it has no function. 
-										li(style="display:hide; visibility:hidden;list-style-type: none;")
-											label(style="display:hide; visibility:hidden;")
-												span
-												select
-													option
-										li#buttons(style="list-style-type: none;")
-											// toggle simple view: default to simple view
-											button.valid-btn(ng-click="pageMeta.simpleView = !pageMeta.simpleView" ng-disabled="pageMeta.simpleView") Simple
-											// toggle advanced view
-											button.valid-btn(ng-click="pageMeta.simpleView = !pageMeta.simpleView" ng-disabled="!pageMeta.simpleView") Advanced
-								div#tree-contain(ng-if="pageMeta.simpleView")
-									json-tree(json="files.jsonSimple" node="nodeOptions" collapsed-level="2" edit-level="low")
-								div#tree-contain(ng-if="!pageMeta.simpleView" ng-model="files.json")
-									json-tree(json="files.json" node="nodeOptions" collapsed-level="2" edit-level="high")
+            .col-sm-12
+                #form-container(ng-controller='ValidateCtrl as vm')
+                    form#upload-form(ng-submit='')
+                        // GOOGLE MAP
+                        div
+                            ui-gmap-google-map(center='map.config.center', zoom='map.config.zoom', draggable='true', options='map.config.options', bounds='map.config.bounds')
+                                ui-gmap-markers(models='map.markers', coords="'self'", events='events', options='map.config.options')
+                        br
+                        div(cg-busy="pageMeta.busyPromise")
+
+                            include ./pieces/version.jade
+
+                            div(class="span span50" style="padding-right:3em;")
+                                md-toolbar.md-hue-1
+                                    h2.md-toolbar-tools
+                                        span Load
+                                div
+                                    ol
+                                        include ./pieces/action_btns.jade
+                                        include ./pieces/feedback.jade
+
+
+                            div(class="span span50")
+                                md-toolbar.md-hue-1
+                                    h2.md-toolbar-tools
+                                        span Edit & Validate
+                                div
+                                    ol
+                                        // this is strictly a placeholder to mirror the spacing on the other column. it has no function.
+                                        li(style="display:hide; visibility:hidden;list-style-type: none;")
+                                            label(style="display:hide; visibility:hidden;")
+                                                span
+                                                select
+                                                    option
+                                        li#buttons(style="list-style-type: none;")
+                                            // toggle simple view: default to simple view
+                                            button.valid-btn(ng-click="pageMeta.simpleView = !pageMeta.simpleView" ng-disabled="pageMeta.simpleView") Simple
+                                            // toggle advanced view
+                                            button.valid-btn(ng-click="pageMeta.simpleView = !pageMeta.simpleView" ng-disabled="!pageMeta.simpleView") Advanced
+                                div#tree-contain(ng-if="pageMeta.simpleView")
+                                    json-tree(json="files.jsonSimple" node="nodeOptions" collapsed-level="2" edit-level="low")
+                                div#tree-contain(ng-if="!pageMeta.simpleView" ng-model="files.json")
+                                    json-tree(json="files.json" node="nodeOptions" collapsed-level="2" edit-level="high")
 
 //- block js will insert js scripts listed in footer.jade that are needed on every page.
 block js
-	script(src='apps/validateApp.js')
-	script(src='js/ngValidate.js')
-	script(src="lib/zip/zip.js")
-	script(src='lib/json-tree.js')
-	script(src="lib/zip/zip-ext.js")
-	script(src="lib/papaparse.min.js")
-	script(src="lib/FileSaver.min.js")
-	script(src="modules/ng_map.js")
-	script(src="modules/ng_create.js")
-	script(src="modules/ng_misc.js")
-	script(src="modules/ng_validator.js")
-	script(src="https://cdnjs.cloudflare.com/ajax/libs/angular-busy/4.1.4/angular-busy.min.js")
-	script(src="https://cdnjs.cloudflare.com/ajax/libs/angular-recaptcha/3.2.1/angular-recaptcha.min.js")
-	script(src="https://www.google.com/recaptcha/api.js?onload=vcRecaptchaApiLoaded&render=explicit" async defer)
-	script(src='https://cdnjs.cloudflare.com/ajax/libs/angular-ui-router/0.2.15/angular-ui-router.min.js')
-	script(src='https://cdnjs.cloudflare.com/ajax/libs/angular-google-maps/2.2.0/angular-google-maps.min.js')
-	script(src='https://cdnjs.cloudflare.com/ajax/libs/danialfarid-angular-file-upload/8.0.1/ng-file-upload-shim.min.js')
-	script(src='https://cdnjs.cloudflare.com/ajax/libs/danialfarid-angular-file-upload/8.0.1/ng-file-upload.min.js')
-	script(src="https://cdnjs.cloudflare.com/ajax/libs/ngStorage/0.3.6/ngStorage.min.js")
-	script(src='https://maps.googleapis.com/maps/api/js?libraries=places&key=AIzaSyA7HRzSi5HhyKTX9Xw7CZ-9XScwq04TZyc')
-	script(src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/2.5.0/ui-bootstrap-tpls.min.js")
-	script(src="https://cdnjs.cloudflare.com/ajax/libs/angular-sanitize/1.5.8/angular-sanitize.min.js")
-	script(src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js")
+    script(src='apps/validateApp.js')
+    script(src='js/ngValidate.js')
+    script(src="lib/zip/zip.js")
+    script(src='lib/json-tree.js')
+    script(src="lib/zip/zip-ext.js")
+    script(src="lib/papaparse.min.js")
+    script(src="lib/FileSaver.min.js")
+    script(src="modules/ng_map.js")
+    script(src="modules/ng_create.js")
+    script(src="modules/ng_misc.js")
+    script(src="modules/ng_validator.js")
+    script(src="https://cdnjs.cloudflare.com/ajax/libs/angular-busy/4.1.4/angular-busy.min.js")
+    script(src="https://cdnjs.cloudflare.com/ajax/libs/angular-recaptcha/3.2.1/angular-recaptcha.min.js")
+    script(src="https://www.google.com/recaptcha/api.js?onload=vcRecaptchaApiLoaded&render=explicit" async defer)
+    script(src='https://cdnjs.cloudflare.com/ajax/libs/angular-ui-router/0.2.15/angular-ui-router.min.js')
+    script(src='https://cdnjs.cloudflare.com/ajax/libs/angular-google-maps/2.2.0/angular-google-maps.min.js')
+    script(src='https://cdnjs.cloudflare.com/ajax/libs/danialfarid-angular-file-upload/8.0.1/ng-file-upload-shim.min.js')
+    script(src='https://cdnjs.cloudflare.com/ajax/libs/danialfarid-angular-file-upload/8.0.1/ng-file-upload.min.js')
+    script(src="https://cdnjs.cloudflare.com/ajax/libs/ngStorage/0.3.6/ngStorage.min.js")
+    script(src='https://maps.googleapis.com/maps/api/js?libraries=places&key=AIzaSyA7HRzSi5HhyKTX9Xw7CZ-9XScwq04TZyc')
+    script(src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/2.5.0/ui-bootstrap-tpls.min.js")
+    script(src="https://cdnjs.cloudflare.com/ajax/libs/angular-sanitize/1.5.8/angular-sanitize.min.js")
+    script(src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js")

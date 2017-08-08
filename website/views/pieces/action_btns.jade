@@ -15,8 +15,9 @@ li#buttons(style="list-style-type: none;")
   button.valid-btn(ng-click="validate()" ng-disabled="pageMeta.filePicker" type="button") Validate
 
   //- download button
-  //- button.valid-btn#download-btn(ng-model="file.down" ng-disabled="!pageMeta.valid" ng-show="!pageMeta.dlFallback" ng-click="startCaptcha()") Download
-  button.valid-btn#download-btn(ng-show="!pageMeta.dlFallback" ng-disabled="feedback.status!=='PASS'" ng-click="startCaptcha()" type="button") Download
+  //- Temporary switch until other things get fixed. Allow the Download button at any time.
+  button.valid-btn#download-btn(ng-show="!pageMeta.dlFallback" ng-click="startCaptcha()" type="button") Download
+  //- button.valid-btn#download-btn(ng-show="!pageMeta.dlFallback" ng-disabled="feedback.status!=='PASS'" ng-click="startCaptcha()" type="button") Download
   
   //- attempt at captcha
   div(vc-recaptcha key="'6LchMhIUAAAAAGjGCfNGxPkOJPl3ilJ2sQrapbbL'" ng-model="gRecaptchaResponse" on-success="downloadZip()" ng-show="pageMeta.captcha")

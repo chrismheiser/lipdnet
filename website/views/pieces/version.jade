@@ -1,0 +1,10 @@
+//
+   Created by chrisheiser1 on 8/7/17.
+
+div
+   pre(ng-hide="feedback.lipdVersion == 'NA' || feedback.lipdVersion == '1.3'" style="background-color:#FEEEB6; border: none;")
+      p LiPD Version: {{feedback.lipdVersion}}
+      p This is not the current LiPD version (v1.3)
+   pre(ng-show="feedback.lipdVersion == '1.3'" style="background-color:#DFF1C1; border: none;")
+      p LiPD Version: {{feedback.lipdVersion}}
+      p This is the current LiPD version
