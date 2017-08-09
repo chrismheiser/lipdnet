@@ -48,6 +48,13 @@ input[type=number]::-webkit-outer-spin-button {
   margin: 0;
 }
 
+.alert-info {
+    margin-bottom:0;
+    background-color: #FDEDB9;
+    border-color: white;
+    color: black;
+}
+
 /* Autocomplete database form (in FileCtrl)
 ============================================================================= */
 .ac-db li {

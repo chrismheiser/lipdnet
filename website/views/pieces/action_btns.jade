@@ -2,7 +2,7 @@
 li#buttons(style="list-style-type: none;")
   //- span#form-label Load LiPD
   //- Bind this to a 'change' event so that we know when jsonld data is available to start processing.
-  input#file-input(name='file' type="file" accept=".lpd" style="max-width:200px; width:175px; padding:4px; display:inline;")
+  input#file-input(title="Upload your LiPD file for validation" name='file' type="file" accept=".lpd" style="max-width:200px; width:175px; padding:4px; display:inline;")
 
   //- download button
   //- md-button(ng-click="downloadZip()" ng-model='file' name='file' ngf-max-size="50MB") Download
@@ -12,11 +12,11 @@ li#buttons(style="list-style-type: none;")
   //- br 
   //- button to push validated lipd file to database
   //- button.valid-btn(ng-model="file.push" ng-disabled="!pageMeta.valid") Upload to Wiki
-  button.valid-btn(ng-click="validate()" ng-disabled="pageMeta.filePicker" type="button") Validate
+  button.valid-btn(title="LiPD data is validated during upload. If you make any corrections to the file, validate again to show updated results." ng-click="validate()" ng-disabled="pageMeta.filePicker" type="button") Validate
 
   //- download button
   //- Temporary switch until other things get fixed. Allow the Download button at any time.
-  button.valid-btn#download-btn(ng-show="!pageMeta.dlFallback" ng-click="startCaptcha()" type="button") Download
+  button.valid-btn#download-btn(title="Download the LiPD file when all errors are corrected" ng-show="!pageMeta.dlFallback" ng-click="startCaptcha()" type="button") Download
   //- button.valid-btn#download-btn(ng-show="!pageMeta.dlFallback" ng-disabled="feedback.status!=='PASS'" ng-click="startCaptcha()" type="button") Download
   
   //- attempt at captcha

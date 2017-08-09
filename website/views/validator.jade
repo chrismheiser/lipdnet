@@ -54,9 +54,9 @@ block body
                                                     option
                                         li#buttons(style="list-style-type: none;")
                                             // toggle simple view: default to simple view
-                                            button.valid-btn(ng-click="pageMeta.simpleView = !pageMeta.simpleView" ng-disabled="pageMeta.simpleView") Simple
+                                            button.valid-btn(title="Simple view shows important and required fields. Your file may contain more data than is shown here." ng-click="pageMeta.simpleView = !pageMeta.simpleView" ng-disabled="pageMeta.simpleView") Simple
                                             // toggle advanced view
-                                            button.valid-btn(ng-click="pageMeta.simpleView = !pageMeta.simpleView" ng-disabled="!pageMeta.simpleView") Advanced
+                                            button.valid-btn(title="Advanced view shows all fields and adds edit buttons. You may add, remove, or edit any field." ng-click="pageMeta.simpleView = !pageMeta.simpleView" ng-disabled="!pageMeta.simpleView") Advanced
                                 div#tree-contain(ng-if="pageMeta.simpleView")
                                     json-tree(json="files.jsonSimple" node="nodeOptions" collapsed-level="2" edit-level="low")
                                 div#tree-contain(ng-if="!pageMeta.simpleView" ng-model="files.json")
