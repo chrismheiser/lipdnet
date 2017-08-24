@@ -35,7 +35,7 @@ var misc = (function(){
       return _delimiter;
     }),
 
-    // TODO : Not sure what this is for
+    // TODO : Recursive function to remove all temporary fields created for angular views (i.e. column metadata)
     rmTmpFields: (function(d){
     }),
 
@@ -190,7 +190,7 @@ var misc = (function(){
     tsidExists: (function(_tsid_master, _tsid){
       try{
         console.log("TSid exists?: " + _tsid);
-        if (_tsid_master.indexOf(_tsid) > -1){
+        if(_tsid_master.indexOf(_tsid) > -1){
           return true;
         } else {
           return false;
@@ -202,7 +202,7 @@ var misc = (function(){
 
     // Checks if the file is a .txt file, if yes, then assume it's a bagit file
     isBagit: (function(filename){
-      if (filename.indexOf(".txt") >= 0){
+      if(filename.indexOf(".txt") >= 0){
         return true;
       } else {
         return false;
