@@ -307,7 +307,7 @@ var misc = (function(){
         console.log("rmAdvKeys: " + err);
       }
       return d;
-    }),
+    })
 
   }; // end return
 

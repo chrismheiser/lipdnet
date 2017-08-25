@@ -642,7 +642,7 @@ f.controller('ValidateCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Uplo
   };
 
   $scope.showProperty = function(name){
-    if (["number", "variableName", "units", "toggle", "values", "checked", "tmp"].includes(name)){
+    if(["number", "variableName", "units", "toggle", "values", "checked", "tmp"].includes(name)){
       return false;
     }
     return true;
@@ -684,15 +684,21 @@ f.controller('ValidateCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Uplo
     // rearrange coordinates from dict to array when necessary, and set the map if coordinates exist
     $scope.files = map.fixCoordinates($scope.files);
     $scope.map = map.updateMap($scope.map, $scope.files);
-    lipdValidator.validate($scope.files, _options, function(_results){
-      try{
-        $scope.files = _results.files;
-        $scope.feedback = _results.feedback;
-        $scope.status = _results.status;
-      } catch(err){
-        console.log("validate: Error trying to prepare results: " + err);
-      }
-    });
+    versions.update_lipd_version($scope.files, function(_results1){
+      console.log("Updated Versions");
+      console.log(_results1);
+      lipdValidator.validate(_results1, _options, function(_results){
+        try{
+          $scope.files = _results.files;
+          $scope.feedback = _results.feedback;
+          $scope.status = _results.status;
+        } catch(err){
+          console.log("validate: Error trying to prepare results: " + err);
+        }
+      });
+    }
+  );
+
   };
 
 

@@ -1,28 +1,3 @@
-VER_1_3 = {
-  "tables": ["chronTableName", "paleoTableName", "paleoDataTableName", "chronDataTableName",
-    "chronMeasurementTableName", "paleoMeasurementTableName"],
-  "swap": {
-    "paleoMeasurementTable": "measurementTable",
-    "chronMeasurementTable": "measurementTable",
-
-    "paleoModel": "model",
-    "chronModel": "model",
-
-    "paleoDataMD5": "dataMD5",
-    "chronDataMD5": "dataMD5",
-
-    "chronEnsembleMD5": "tableMD5",
-    "paleoEnsembleMD5": "tableMD5",
-
-    "chronEnsembleTableMD5": "tableMD5",
-    "paleoEnsembleTableMD5": "tableMD5",
-
-    "paleoMeasurementTableMD5": "tableMD5",
-    "chronMeasurementTableMD5": "tableMD5"
-  },
-  "interpretations": ["climateInterpretation", "isotopeInterpretation"]
-};
-
 var versions = (function(){
   // 'use strict';
   return {
@@ -36,20 +11,40 @@ var versions = (function(){
      * @param {object} options Validation options {"fileUploaded": true/false}
      * @param {callback} cb Callback sorts the validation results
      */
-    update_lipd_version: (function(L) {
+    update_lipd_version: (function(files, cb) {
 
-      L = versions.get_lipd_version(L);
-
-      if(L.lipdVersion.indexOf(['1.0', 1.0, 1])){
-        L = versions.update_lipd_v1_1(L);
+      try{
+        files.json = versions.get_lipd_version(files.json, function(_dat){
+          files.json = _dat;
+          if(['1.0', 1.0, 1].indexOf(files.json.lipdVersion) !== -1){
+            versions.update_lipd_v1_1(files.json, function(d){
+              versions.update_lipd_v1_2(d, function(d2){
+                versions.update_lipd_v1_3(d2, function(d3){
+                  files["json"] = d3;
+                  cb(files);
+                });
+              });
+            });
+          }
+          else if (['1.1', 1.1].indexOf(files.json.lipdVersion) !== -1){
+            versions.update_lipd_v1_2(files.json, function(d2){
+              versions.update_lipd_v1_3(d2, function(d3){
+                files.json = d3;
+                cb(files);
+              });
+            });
+          }
+          else if (['1.2', 1.2].indexOf(files.json.lipdVersion) !== -1){
+            versions.update_lipd_v1_3(files.json, function(d3){
+              files.json = d3;
+              cb(files);
+            });
+          }
+        });
+      } catch(err){
+        console.log("update_lipd_version: " + err);
+        cb(files);
       }
-      else if (L.lipdVersion.indexOf(["1.1", 1.1])){
-        L = versions.update_lipd_v1_2(L);
-      }
-      else if (L.lipdVersion.indexOf(["1.2", 1.2])){
-        L = versions.update_lipd_v1_3(L);
-      }
-      return L;
     }),
 
 
@@ -63,22 +58,28 @@ var versions = (function(){
      * @return {object} L Metadata
      *
      */
-    get_lipd_version: (function(L){
-      var _version = 1.3;
+    get_lipd_version: (function(L, cb){
+      var _version = null;
       var _keys = ["lipdVersion", "liPDVersion", "LiPDVersion"];
-      for(var _m=0; _m < _keys.length; _m++){
-        var _key = _keys[_m];
-        if(L.hasOwnProperty(_key)){
-          _version = parseFloat(L[_key]);
-          L[_key].pop();
+      try{
+        for(var _m=0; _m < _keys.length; _m++){
+          var _key = _keys[_m];
+          if(L.hasOwnProperty(_key)){
+            _version = parseFloat(L[_key]);
+            delete L[_key];
+          }
         }
+        if(_version){
+          L["lipdVersion"] = _version;
+        } else {
+          console.log("Error: Unable to find a lipdVersion. Assuming v1.3");
+          L["lipdVersion"] = 1.3;
+        }
+        cb(L);
+      } catch(err){
+        console.log("get_lipd_version: " + err);
+        cb(L);
       }
-      if(_version){
-        L["lipdVersion"] = _version;
-      } else {
-        console.log("Error: Unable to find a lipdVersion. Assuming v1.3");
-      }
-      return(L);
     }),
 
     /**
@@ -92,7 +93,7 @@ var versions = (function(){
      * @return {object} d Metadata
      *
      */
-    merge_interpretations: (function(d){
+    merge_interpretations: (function(d, cb){
       var _tmp = [];
       var _keys = ["climateInterpretation", "isotopeInterpretation", "interpretation"];
 
@@ -106,15 +107,16 @@ var versions = (function(){
                 _tmp.push(d[_key][_h]);
               }
             } else if (typeof(d[_key]) === "object"){
-              _tmp.append(d[_key]);
+              _tmp.push(d[_key]);
             }
           }
         }
         d["interpretation"] = _tmp;
+        cb(d);
       } catch(err){
         console.log("merge_interpretations: " + err);
+        cb(d);
       }
-      return d;
     }),
 
     /**
@@ -128,8 +130,9 @@ var versions = (function(){
      * @param {object} d Metadata
      * @return {object} d Metadata
      */
-    update_lipd_v1_1: (function(d){
+    update_lipd_v1_1: (function(d, cb){
 
+      console.log("Updating to v1.1");
       var _tmp = [];
 
       try{
@@ -142,25 +145,25 @@ var versions = (function(){
             var _table = d.chronData[_b];
             // Typical case: the file has table data right at the top
             if(!_table.hasOwnProperty("chronMeasurementTable")){
-              _tmp.push({"chronMeasurementTable": [table]});
+              _tmp.push({"chronMeasurementTable": [_table]});
             }
             // Atypical case:  The table exists, but it is a dictionary. Turn it into a list with one entry.
-            else if (table.hasOwnProperty("chronMeasurementTable")){
-              if(!Array.isArray(table.chronMeasurementTable)){
-                _tmp.push({"chronMeasurementTable": [table.chronMeasurementTable]});
+            else if (_table.hasOwnProperty("chronMeasurementTable")){
+              if(!Array.isArray(_table.chronMeasurementTable)){
+                _tmp.push({"chronMeasurementTable": [_table.chronMeasurementTable]});
               }
             }
           }
           if(_tmp){
             d.chronData = _tmp;
           }
-          d.lipdVersion = 1.1;
         }
+        d.lipdVersion = 1.1;
+        cb(d);
       } catch(err){
         console.log("update_lipd_v1_1: " + err);
+        cb(d);
       }
-
-      return d;
     }),
 
 
@@ -175,11 +178,23 @@ var versions = (function(){
      * @return {object} d Metadata v1.2
      *
      */
-    update_lipd_v1_2: (function(d){
+    update_lipd_v1_2: (function(d, cb){
 
+      var VER_1_2 = {
+        "swap": {
+          "calibratedAges": "distributionTable",
+          "calibratedAge": "distributionTable",
+          "chronModelTable": "summaryTable",
+          "paleoModelTable": "summaryTable"
+        }
+      };
+
+      console.log("Updating to v1.2");
+      console.log(d);
       var _tmp = [];
       try{
-        // PaleoData is the only structure update
+
+        // Structure: paleoData is the only update
         if(d.hasOwnProperty("paleoData")){
           // As of 1.2, PaleoData should match the structure of v1.1 chronData.
           // There is an extra level of abstraction and room for models, ensembles, calibrations, etc.
@@ -196,15 +211,40 @@ var versions = (function(){
               }
             }
           }
+
+          // Keys: chronData keys are the only update
+          if(d.hasOwnProperty("chronData")){
+            for(var _i=0; _i < d["chronData"].length; _i++){
+              if(d["chronData"][_i].hasOwnProperty("chronModel")){
+                for(var _b=0; _b < d["chronData"][_i]["chronModel"].length; _b++){
+                  var _model = d["chronData"][_i]["chronModel"][_b];
+                  for(var _key in VER_1_2["swap"]){
+                    if(VER_1_2["swap"].hasOwnProperty(_key)){
+                      if(_model.hasOwnProperty(_key)){
+                        var _tmp_table = _model[_key];
+                        delete _model[_key];
+                        _model[VER_1_2["swap"][_key]] = _tmp_table;
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
           if(_tmp){
+            console.log("v12: paleodata");
+            console.log(_tmp);
             d.paleoData = _tmp;
           }
         }
         d.lipdVersion = 1.2;
+        console.log("done with 1.2");
+        console.log(d);
+        cb(d);
       } catch(err){
         console.log("update_lipd_v1_2: " + err);
+        cb(d);
       }
-      return d;
     }),
 
     /**
@@ -221,15 +261,24 @@ var versions = (function(){
      * @param {object} d: Metadata v1.2
      * @return {object} d: Metadata v1.3
      */
-    update_lipd_v1_3: (function(d){
+    update_lipd_v1_3: (function(d, cb){
+      console.log("Updating to v1.3");
+
       try{
-        d = versions.update_lipd_v1_3_names(d);
-        d = versions.update_lipd_v1_3_structure(d);
-        d.lipdVersion = 1.3;
+        versions.update_lipd_v1_3_names(d, function(d2){
+           console.log("done v1.3 names:");
+           console.log(d2);
+          versions.update_lipd_v1_3_structure(d2, function(d3){
+            console.log("done v1.3 structure: ");
+            console.log(d3);
+            d3.lipdVersion = 1.3;
+            cb(d3);
+          });
+        });
       } catch(err) {
         console.log("update_lipd_v1_3: " + err);
+        cb(d);
       }
-      return d;
     }),
 
     /**
@@ -239,14 +288,46 @@ var versions = (function(){
      * @return {object} d Metadata
      *
      */
-    update_lipd_v1_3_names: (function(d){
-
+    update_lipd_v1_3_names: (function(d, cb){
       try{
+        d = versions.update_lipd_v1_3_names_rec(d);
+        cb(d);
+      } catch(err){
+        console.log("update_lipd_v1_3_names: " + err);
+        cb(d);
+      }
+    }),
+
+    update_lipd_v1_3_names_rec: (function(d){
+      var VER_1_3 = {
+        "tables": ["chronTableName", "paleoTableName", "paleoDataTableName", "chronDataTableName",
+          "chronMeasurementTableName", "paleoMeasurementTableName"],
+        "swap": {
+          "paleoMeasurementTable": "measurementTable",
+          "chronMeasurementTable": "measurementTable",
+
+          "paleoModel": "model",
+          "chronModel": "model",
+
+          "paleoDataMD5": "dataMD5",
+          "chronDataMD5": "dataMD5",
+
+          "chronEnsembleMD5": "tableMD5",
+          "paleoEnsembleMD5": "tableMD5",
+
+          "chronEnsembleTableMD5": "tableMD5",
+          "paleoEnsembleTableMD5": "tableMD5",
+
+          "paleoMeasurementTableMD5": "tableMD5",
+          "chronMeasurementTableMD5": "tableMD5"
+        },
+        "interpretations": ["climateInterpretation", "isotopeInterpretation"]
+      };
         // for arrays
         if(Array.isArray(d)){
           for(var _e=0; _e<d.length; _e++){
             // dive down
-            d[_e] = versions.update_lipd_v1_3_names(d[_e]);
+            d[_e] = versions.update_lipd_v1_3_names_rec(d[_e]);
           }
         }
         // for objects
@@ -254,9 +335,9 @@ var versions = (function(){
           for(var _key in d){
             if(d.hasOwnProperty(_key)){
               // dive down
-              d[_key] = versions.update_lipd_v1_3_names(d[_key]);
-              if(VER_1_3.swap.indexOf(_key) !== -1){
-                var _key_swap = VER_1_3.swap[_key];
+              d[_key] = versions.update_lipd_v1_3_names_rec(d[_key]);
+              if(Object.keys(VER_1_3["swap"]).indexOf(_key) !== -1){
+                var _key_swap = VER_1_3["swap"][_key];
                 d[_key_swap] = d[_key];
                 delete d[_key];
               }
@@ -265,18 +346,16 @@ var versions = (function(){
               }
             }
             // merge interpretations where necessary
-            for(var _c=0; _c<VER_1_3.interpretations.length; _c++){
-              if(d.hasOwnProperty(VER_1_3.interpretations[_c])){
-                d = versions.merge_interpretations(d);
+            for(var _c=0; _c < VER_1_3["interpretations"].length; _c++){
+              if(d.hasOwnProperty(VER_1_3["interpretations"][_c])){
+                versions.merge_interpretations(d, function(d2){
+                  d = d2;
+                });
               }
             }
           }
         }
-      } catch(err){
-        console.log("update_lipd_v1_3_names: " + err);
-      }
-      return d;
-
+        return(d);
     }),
 
     /**
@@ -286,33 +365,42 @@ var versions = (function(){
      * @return {object} d Metadata
      *
      */
-    update_lipd_v1_3_structure: (function(d){
+    update_lipd_v1_3_structure: (function(d, cb){
       var _pcs = ["paleoData", "chronData"];
       var _tbs = ["summaryTable", "ensembleTable"];
       // root
-      for(var _y=0; _y < _pcs.length; _y++){
-        var _pc = _pcs[_y];
-        // Section
-        if(d.hasOwnProperty(_pc)){
-          for(var _r=0; _r < d[_pc].length; _r++){
-            // Section entry
-            var _section = d[_pc][_r];
-            // Model
-            if(_section.hasOwnProperty("model")){
-              for(var _w=0; _w < _section["model"].length; _w++){
-                // Model entry
-                var _model = _section["model"][_w];
-                for(var _e=0; _e<_tbs.length; _e++){
-                  if(_model.hasOwnProperty(_tbs[_e])){
-                    // It's an object, but not an array object
-                    if(!Array.isArray(_model[_tbs[_e]]) && typeof(_model[_tbs[_e]]) === "object"){
-                      try{
-                        // Swap out the object for an array, then add the table to the array.
-                        var _tmp = _model[_tbs[_e]];
-                        _model[_tbs[_e]] = [];
-                        _model[_tbs[_e]].push(_tmp);
-                      } catch(err){
-                        console.log("update_lipd_v1_3_structure: " + err);
+
+      try{
+        for(var _y=0; _y < _pcs.length; _y++){
+          var _pc = _pcs[_y];
+          // Section
+          if(d.hasOwnProperty(_pc)){
+            console.log("1.3 sections: ");
+            console.log(d[_pc]);
+            for(var _r=0; _r < d[_pc].length; _r++){
+              // Section entry
+              var _section = d[_pc][_r];
+              // Model
+              if(_section.hasOwnProperty("model")){
+                console.log("1.3 models: ");
+                console.log(_section["model"]);
+                for(var _w=0; _w < _section["model"].length; _w++){
+                  // Model entry
+                  var _model = _section["model"][_w];
+                  console.log("model entry");
+                  console.log(_model);
+                  for(var _e=0; _e<_tbs.length; _e++){
+                    if(_model.hasOwnProperty(_tbs[_e])){
+                      // It's an object, but not an array object
+                      if(!Array.isArray(_model[_tbs[_e]]) && typeof(_model[_tbs[_e]]) === "object"){
+                        try{
+                          // Swap out the object for an array, then add the table to the array.
+                          var _tmp = _model[_tbs[_e]];
+                          _model[_tbs[_e]] = [];
+                          _model[_tbs[_e]].push(_tmp);
+                        } catch(err){
+                          console.log("update_lipd_v1_3_structure: " + err);
+                        }
                       }
                     }
                   }
@@ -321,8 +409,12 @@ var versions = (function(){
             }
           }
         }
+        cb(d);
+      } catch(err){
+        console.log("update_lipd_v1_3_structure: " + err);
+        cb(d);
       }
-      return d;
+
     })
   }
 
