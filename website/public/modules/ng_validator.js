@@ -658,7 +658,7 @@ var lipdValidator = (function(){
               // check if measurement table exists
               if (d[0].hasOwnProperty("measurementTable")) {
                 // check if measurement table is array with objects
-                verifyArrObjs("measurementTable", d[0]["measurementTable"], true);
+                verifyArrObjs(pc + ".measurementTable", d[0]["measurementTable"], true);
               } // end measurement table
               // check if model table exists
               if (d[0].hasOwnProperty("model")) {
