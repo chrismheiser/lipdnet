@@ -1538,7 +1538,7 @@ var lipdValidator = (function(){
             }
           }
           if(!_found){
-            logFeedback("warn", "LiPD Version unknown. Defaulting to v1.0. Results may be inaccurate");
+            logFeedback("warn", "LiPD Version unknown. Defaulting to v1.3. Results may be inaccurate");
           }
           // The given lipdVersion is not one of the allowed values
           if (["1.0", "1.1", "1.2", "1.3", 1.0, 1.1, 1.2, 1.3].indexOf(_lipdVersion) === -1){

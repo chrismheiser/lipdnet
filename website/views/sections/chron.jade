@@ -5,14 +5,14 @@ md-toolbar.md-hue-1
 
 div(ng-repeat='entry in files.json.chronData track by $index' layout-wrap="")
 	// chronData[1] : Should only be one entry2. Don't need to loop
-	div(ng-repeat="entry2 in entry.chronMeasurementTable track by $index" layout-wrap="")
+	div(ng-repeat="entry2 in entry.measurementTable track by $index" layout-wrap="")
 		md-card 
 			md-subheader.md-primary chron {{$parent.$index}} measurement {{$index}}
 			div(layout='', layout-padding='', layout-sm='column')
 				md-input-container(flex='', ng-class="md-input-has-value")
 					//- md-tooltip(md-visible='demo.showTooltip') Here is some more helpful information
 					label Table Name *
-					input(ng-model='entry2.chronDataTableName')
+					input(ng-model='entry2.tableName')
 				md-input-container(flex='', ng-class="md-input-has-value")
 					//- md-tooltip(md-visible='demo.showTooltip') Here is some more helpful information
 					label Missing Value *
@@ -107,7 +107,7 @@ div(layout='', layout-padding='', layout-sm='column' style="float: right;")
 		md-label Table Type
 		md-select(ng-model='dropdowns.current.table' ng-model-options="{trackBy: '$value.id'}" disabled)
 			md-option(ng-value="table" ng-repeat="table in dropdowns.tables") {{ table.name }}
-	button.valid-btn(ng-click='addBlock(files.json.chronData[0].chronMeasurementTable, dropdowns.current.table.name, "chron")' style="margin: 1.5em;" type="button")  + Add Table
+	button.valid-btn(ng-click='addBlock(files.json.chronData[0].measurementTable, dropdowns.current.table.name, "chron")' style="margin: 1.5em;" type="button")  + Add Table
 	// END MEASUREMENT TABLE
 
 

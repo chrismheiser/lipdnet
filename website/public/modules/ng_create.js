@@ -12,13 +12,13 @@ var create = (function(){
 
       if(pc !== null){
         if (blockType === "measurement"){
-          entry = create.addTable(entry, pc);
+          entry = create.addTable(entry);
         } else if (blockType === "summary"){
-          entry = create.addTable(entry, pc);
+          entry = create.addTable(entry);
         } else if (blockType === "distribution"){
-          entry = create.addTable(entry, pc);
+          entry = create.addTable(entry);
         } else if (blockType === "ensemble"){
-          entry = create.addTable(entry, pc);
+          entry = create.addTable(entry);
         }
       } else {
         // This is a block that doesn't require a "paleo" or "chron" designation
@@ -39,10 +39,10 @@ var create = (function(){
 
     addChronData :(function(entry){
       try{
-        var _ignore = entry.chronData[0].chronMeasurementTable[0];
+        var _ignore = entry.chronData[0].measurementTable[0];
       }catch (err) {
         entry.chronData = [
-          {"chronMeasurementTable": [{"chronDataTableName": "", "missingValue": "NaN",
+          {"measurementTable": [{"tableName": "", "missingValue": "NaN",
         "filename": "", "columns": []}]}];
       }
       return entry;
@@ -57,7 +57,7 @@ var create = (function(){
       return entry;
     }),
 
-    // TODO ???
+    // TODO: Is this even a needed function? Should be fixed to one entry?
     addGeo: (function(entry){
       return entry;
     }),
@@ -82,18 +82,12 @@ var create = (function(){
       return entry;
     }),
 
-    addTable: (function(entry, pc){
+    addTable: (function(entry){
       if(typeof(entry)=== "undefined"){
         entry = [];
       }
       // Add a full data table to an entry.
-      var _block = {"tableName": "", "filename": "", "missingValue": "NaN", "columns": []};
-      if(pc === "paleo"){
-        _block.paleoDataTableName = "";
-      } else if (pc === "chron"){
-        _block.chronDataTableName = "";
-      }
-      entry.push(_block);
+      entry.push({"tableName": "", "filename": "", "missingValue": "NaN", "columns": []});
       return entry;
     }),
 
@@ -114,7 +108,7 @@ var create = (function(){
           _newCsv[_dsn + "." + _key]  = _json.csv[_key];
         }
       }
-      // change all the csv filesnames in the table data
+      // change all the csv filenames in the table data
       var _newJson = create.alterJsonFilenames(_json.json, _dsn);
       _json.csv = _newCsv;
       _json.json = _newJson;

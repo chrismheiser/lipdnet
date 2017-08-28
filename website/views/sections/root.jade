@@ -7,12 +7,14 @@ div
   //- 	h4.md-toolbar-tools
   //- 		span Metadata
   div(layout='', layout-padding='', layout-sm='column')
-  
+    md-input-container(flex="33")
+      label LiPD Version
+      input(ng-model='files.json.lipdVersion' disabled)
     md-input-container(flex="33")
       label Archive Type
       md-select(ng-model="files.json.archiveType")
         md-option(ng-repeat="archive in dropdowns.archiveType" ng-value="archive") {{archive}}
-    md-input-container(flex='66', ng-class="md-input-has-value")
+    md-input-container(flex='33', ng-class="md-input-has-value")
       md-tooltip Please include name, location, and year in your dataset name
       label Dataset Name *
       input(ng-model='files.json.dataSetName' ng-change="getSet(files.json.dataSetName)")

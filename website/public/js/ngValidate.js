@@ -316,7 +316,7 @@ f.controller('ValidateCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Uplo
     "csv": {},
     "jsonSimple": {"lipdVersion": 1.3},
     "json": {"lipdVersion": 1.3, "pub": [], "funding": [], "dataSetName": "", "geo": {},
-          "paleoData": [{"paleoMeasurementTable": [{"paleoDataTableName": "", "missingValue": "NaN",
+          "paleoData": [{"measurementTable": [{"tableName": "", "missingValue": "NaN",
           "filename": "", "columns": []}]}]}
   };
   // Metadata about the page view, and manipulations
@@ -329,7 +329,8 @@ f.controller('ValidateCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Uplo
     "filePicker": false,
     "dlFallback": false,
     "dlFallbackMsg": "",
-    "captcha": false
+    "captcha": false,
+    "oldVersion": "NA"
   };
   // All feedback warnings, errors, and messages received from the validator
   $scope.feedback = {
@@ -370,7 +371,8 @@ f.controller('ValidateCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Uplo
   }, true);
 
   $scope.addBlock = function(entry, blockType, pc){
-    if (pc === "chron"){
+    // Need to initialize the first entry of chronData measurement table, when it doesn't yet exist.
+    if (pc === "chron" && typeof(entry) === "undefined"){
       $scope.files.json = create.addChronData($scope.files.json);
     }
     // Add a block of data to the JSON. (i.e. funding, paleoData table, publication, etc.)
@@ -686,8 +688,9 @@ f.controller('ValidateCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Uplo
     $scope.map = map.updateMap($scope.map, $scope.files);
     versions.update_lipd_version($scope.files, function(_results1){
       console.log("Updated Versions");
-      console.log(_results1);
-      lipdValidator.validate(_results1, _options, function(_results){
+      console.log(_results1.files);
+      $scope.pageMeta.oldVersion = _results1.version;
+      lipdValidator.validate(_results1.files, _options, function(_results){
         try{
           $scope.files = _results.files;
           $scope.feedback = _results.feedback;

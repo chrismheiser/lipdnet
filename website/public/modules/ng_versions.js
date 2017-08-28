@@ -3,7 +3,7 @@ var versions = (function(){
   return {
 
     /**
-     * Validator: Entry point for the validation process.
+     * Validator: Entry point for the validation process. Callback layer
      *
      * @param {array} files LiPD data sorted by type.
      *   files = { "modal": {}, "lipdFilename": "", "dataSetName": "", "fileCt": 0, "bagit": {}, "csv": {},
@@ -12,13 +12,15 @@ var versions = (function(){
      * @param {callback} cb Callback sorts the validation results
      */
     update_lipd_version: (function(files, cb) {
-
+      var _d = {"files": {}, "version": 1.0};
       try{
         versions.get_lipd_version(files.json, function(_dat){
-          files.json = _dat;
+          files.json = _dat.meta;
+          _d.version =  _dat.version;
           versions.update_lipd_version_2(files, function(_dat2){
             files.json = _dat2;
-            cb(files);
+            _d.files = files;
+            cb(_d);
           });
         });
       } catch(err){
@@ -81,7 +83,7 @@ var versions = (function(){
       } catch(err){
         console.log("get_lipd_version: " + err);
       }
-      cb(L);
+      cb({"meta": L, "version": _version});
     }),
 
     /**
