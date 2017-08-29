@@ -323,6 +323,10 @@ var create = (function(){
         "peat", "rock", "sclerosponge", "speleothem", "wood"];
     }),
 
+    createdByList: (function(){
+      return ["excel", "lipd.net", "wiki", "noaa", "unknown"];
+    }),
+
     inferredVariableTypeList: (function(){
       return ['Temperature', 'Sea Surface Temperature', 'Bottom Water Temperature', 'Ocean Mixed Layer Temperature',
       'Surface air temperature', 'Carbon dioxide concentration', 'Methane concentration', 'Nitrous oxide concentration',

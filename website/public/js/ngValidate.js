@@ -300,6 +300,7 @@ f.controller('ValidateCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Uplo
       { id: 5, name: " ", view: "Space"},
     ],
     "archiveType": create.archiveTypeList(),
+    "createdBy": create.createdByList(),
     "countries" : map.getCountries(),
   };
   $scope.fields = [

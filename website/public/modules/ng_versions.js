@@ -49,6 +49,9 @@ var versions = (function(){
         versions.update_lipd_v1_3(files.json, function(d3){
           cb(d3);
         });
+      } else {
+        // already at v1.3
+        cb(files.json)
       }
 
     }),
