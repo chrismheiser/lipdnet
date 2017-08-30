@@ -290,7 +290,7 @@ f.controller('ValidateCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Uplo
       { id: 1, name: 'measurement' },
       { id: 2, name: 'summary' },
       { id: 3, name: 'ensemble' },
-      { id: 4, name: "distribution"}
+      // { id: 4, name: "distribution"}
     ],
     "delimiters": [
       { id: 1, name: "\t", view: "Tab ( \\t )"},
@@ -378,6 +378,8 @@ f.controller('ValidateCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Uplo
     }
     // Add a block of data to the JSON. (i.e. funding, paleoData table, publication, etc.)
     entry = create.addBlock(entry, blockType, pc);
+    console.log("exit add block");
+    console.log(entry);
     return entry;
   };
 

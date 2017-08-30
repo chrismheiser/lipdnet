@@ -9,32 +9,46 @@ var create = (function(){
     }),
 
     addBlock: (function(entry, blockType, pc){
-
-      if(pc !== null){
-        if (blockType === "measurement"){
-          entry = create.addTable(entry);
-        } else if (blockType === "summary"){
-          entry = create.addTable(entry);
-        } else if (blockType === "distribution"){
-          entry = create.addTable(entry);
-        } else if (blockType === "ensemble"){
-          entry = create.addTable(entry);
+      try{
+        if(pc !== null){
+          console.log("Entry inbound");
+          console.log(entry);
+          // measurement tables
+          if (blockType === "measurement"){
+            entry["measurementTable"] = create.addTable(entry["measurementTable"]);
+          }
+          // model tables
+          else if (["summary", "ensemble", "distribution"].indexOf(blockType) !== -1){
+            console.log("sendto prepModelTable");
+            console.log(entry);
+            create.prepModelTable(entry, blockType, function(entry2){
+              if (blockType === "summary"){
+                entry2["model"][0]["summaryTable"] = create.addTable(entry2.model[0].summaryTable);
+              } else if (blockType === "distribution"){
+                entry2["model"][0]["distributionTable"] = create.addTable(entry2.model[0].distributionTable);
+              } else if (blockType === "ensemble"){
+                entry2["model"][0]["ensembleTable"] = create.addTable(entry2.model[0].ensembleTable);
+              }
+            });
+          }
+        } else {
+          // This is a block that doesn't require a "paleo" or "chron" designation
+          if(blockType === "funding"){
+            entry = create.addFunding(entry);
+          } else if (blockType === "pub"){
+            entry = create.addPublication(entry);
+          } else if (blockType === "author"){
+            entry = create.addAuthor(entry);
+          } else if (blockType === "column"){
+            entry = create.addTableColumn(entry);
+          } else if (blockType === "geo"){
+            entry = create.addGeo(entry);
+          }
         }
-      } else {
-        // This is a block that doesn't require a "paleo" or "chron" designation
-        if(blockType === "funding"){
-          entry = create.addFunding(entry);
-        } else if (blockType === "pub"){
-          entry = create.addPublication(entry);
-        } else if (blockType === "author"){
-          entry = create.addAuthor(entry);
-        } else if (blockType === "column"){
-          entry = create.addTableColumn(entry);
-        } else if (blockType === "geo"){
-          entry = create.addGeo(entry);
-        }
+        return entry;
+      } catch (err){
+       console.log("create:addBlock: " + err);
       }
-      return entry;
     }),
 
     addChronData :(function(entry){
@@ -83,12 +97,17 @@ var create = (function(){
     }),
 
     addTable: (function(entry){
-      if(typeof(entry)=== "undefined"){
-        entry = [];
+      try{
+        if(typeof(entry)=== "undefined"){
+          entry = [];
+        }
+        // Add a full data table to an entry.
+        entry.push({"tableName": "", "filename": "", "missingValue": "NaN", "columns": []});
+        return entry;
+      } catch(err){
+        console.log("addTable: " + err);
+        console.log(entry);
       }
-      // Add a full data table to an entry.
-      entry.push({"tableName": "", "filename": "", "missingValue": "NaN", "columns": []});
-      return entry;
     }),
 
     addTableColumn: (function(entry){
@@ -346,6 +365,24 @@ var create = (function(){
 
     interpretationScopeList: (function(){
       return ["climate", "ecology", "isotope"];
+    }),
+
+    prepModelTable: (function(entry, blockType, cb){
+      try{
+        if(entry.hasOwnProperty("model")){
+          if(!entry["model"][0].hasOwnProperty(blockType + "Table")){
+            entry["model"][0][blockType] = [];
+          }
+        }
+        // model doesnt exist. create it
+        else {
+          entry["model"] = [{"summaryTable": [], "ensembleTable": [], "distributionTable": [], "method": {}}];
+        }
+        cb(entry);
+      } catch(err){
+        console.log("create: prepModelTable: " + err);
+        console.log(entry);
+      }
     }),
 
     proxyObservationTypeList: (function(){
