@@ -19,7 +19,6 @@ var lipdValidator = (function(){
      * @param {callback} cb Callback sorts the validation results
      */
     validate: (function(files, options, cb){
-
       try{
         var _output = {};
         lipdValidator.populateTSids(files, function(files_1){
@@ -97,9 +96,10 @@ var lipdValidator = (function(){
             "csv": {},
             "json": {}
           };
-        files.fileCt = objs.length;
-        console.log("LiPD File Count: " + objs.length);
         try{
+          files.fileCt = objs.length;
+          console.log("LiPD File Count: " + objs.length);
+
           // loop over each csv/jsonld object. sort them into the scope by file type
           objs.forEach(function (obj) {
             console.log("restructure: " + obj.filenameShort);
@@ -139,22 +139,25 @@ var lipdValidator = (function(){
       // PopulateTSid: Columns
       // Check all columns in a table with TSid's where necessary
       var populateTSids3 = function(table){
-        // Safe check. Make sure table has "columns"
-        if (table.hasOwnProperty("columns")) {
-          // Loop over all columns in the table
-          for (var _i2 = 0; _i2 < table["columns"].length; _i2++) {
-            var col = table["columns"][_i2];
-            // Check for TSid key in column
-            if(!col.hasOwnProperty("TSid")){
-              // populate if doesn't exist.
-              var _tsid = lipdValidator.generateTSid();
-              table["columns"][_i2]["TSid"] =  _tsid;
-              _generated_count++;
+        try{
+          // Safe check. Make sure table has "columns"
+          if (table.hasOwnProperty("columns")) {
+            // Loop over all columns in the table
+            for (var _i2 = 0; _i2 < table["columns"].length; _i2++) {
+              var col = table["columns"][_i2];
+              // Check for TSid key in column
+              if(!col.hasOwnProperty("TSid")){
+                // populate if doesn't exist.
+                table["columns"][_i2]["TSid"] =  lipdValidator.generateTSid();
+                _generated_count++;
+              }
             }
           }
+          // console.log("MODIFIED TABLE");
+          // console.log(table);
+        } catch(err){
+          console.log("populateTSids3: " + err);
         }
-        // console.log("MODIFIED TABLE");
-        // console.log(table);
         return table;
       };
 
@@ -162,76 +165,83 @@ var lipdValidator = (function(){
       // Loop for each data table
       var populateTSids2 = function(d, pc){
         var pcData = pc + "Data";
-        var meas = pc + "MeasurementTable";
-        var mod = pc + "Model";
-        // Check for entry
-        if (d.hasOwnProperty(pcData)) {
-          // Loop for each paleoData/chronData table
-          for (var _k2 = 0; _k2 < d[pcData].length; _k2++) {
-            // Is there a measurement table?
-            if (d[pcData][_k2].hasOwnProperty(meas)) {
-              var table = d[pcData][_k2][meas];
-              // Loop for all meas tables
-              for (var _j = 0; _j < table.length; _j++) {
-                // Process table entry
-                d[pcData][_k2][meas][_j] = populateTSids3(table[_j]);
+        try{
+          // Check for entry
+          if (d.hasOwnProperty(pcData)) {
+            // Loop for each paleoData/chronData table
+            for (var _k2 = 0; _k2 < d[pcData].length; _k2++) {
+              // Is there a measurement table?
+              if (d[pcData][_k2].hasOwnProperty("measurementTable")) {
+                var _table1 = d[pcData][_k2]["measurementTable"];
+                // Loop for all meas tables
+                for (var _j = 0; _j < _table1.length; _j++) {
+                  // Process table entry
+                  d[pcData][_k2]["measurementTable"][_j] = populateTSids3(_table1[_j]);
+                }
               }
-            }
-            // Is there a model table?
-            if (d[pcData][_k2].hasOwnProperty(mod)) {
-              var table = d[pcData][_k2][mod];
-              // Loop for each paleoModel table
-              for (var _j2 = 0; _j2 < table.length; _j2++) {
-                // Is there a summaryTable?
-                if (d[pcData][_k2][mod][_j2].hasOwnProperty("summaryTable")) {
-                  // Process table
-                  d[pcData][_k2][mod][_j2]["summaryTable"] = populateTSids3(table[_j2]["summaryTable"]);
-                } // end summary
-                // Is there a ensembleTable?
-                if (table[_j2].hasOwnProperty("ensembleTable")) {
-                  // Process table
-                  d[pcData][_k2][mod][_j2]["ensembleTable"] = populateTSids3(table[_j2]["ensembleTable"]);
-                } // end ensemble
-                // Is there a distributionTable?
-                if (table[_j2].hasOwnProperty("distributionTable")) {
-                  table2 = table[_j2]["distributionTable"];
-                  // Loop for all dist tables
-                  for (var p = 0; p < table[_j2]["distributionTable"].length; p++) {
+              // Is there a model table?
+              if (d[pcData][_k2].hasOwnProperty("model")) {
+                var table = d[pcData][_k2]["model"];
+                // Loop for each paleoModel table
+                for (var _j2 = 0; _j2 < table.length; _j2++) {
+                  // Is there a summaryTable?
+                  if (d[pcData][_k2]["model"][_j2].hasOwnProperty("summaryTable")) {
                     // Process table
-                    d[pcData][_k2][mod][_j2]["distributionTable"][p] = populateTSids3(table2[p]);
-                  }
-                } // end dist
-              } // end model loop
-            } // end model
-          } // end paleoData loop
-        } // end if hasOwnProperty
-        // console.log("TSIDS 2: MODIFIED" + pcData);
-        // console.log(d);
+                    d[pcData][_k2]["model"][_j2]["summaryTable"] = populateTSids3(table[_j2]["summaryTable"]);
+                  } // end summary
+                  // Is there a ensembleTable?
+                  if (table[_j2].hasOwnProperty("ensembleTable")) {
+                    // Process table
+                    d[pcData][_k2]["model"][_j2]["ensembleTable"] = populateTSids3(table[_j2]["ensembleTable"]);
+                  } // end ensemble
+                  // Is there a distributionTable?
+                  if (table[_j2].hasOwnProperty("distributionTable")) {
+                    var _table2 = table[_j2]["distributionTable"];
+                    // Loop for all dist tables
+                    for (var p = 0; p < _table2[_j2]["distributionTable"].length; p++) {
+                      // Process table
+                      d[pcData][_k2]["model"][_j2]["distributionTable"][p] = populateTSids3(_table2[p]);
+                    }
+                  } // end dist
+                } // end model loop
+              } // end model
+            } // end paleoData loop
+          } // end if hasOwnProperty
+          // console.log("TSIDS 2: MODIFIED" + pcData);
+          // console.log(d);
+        } catch(err){
+          console.log("populateTSids2: " + err);
+        }
+
         return d;
       };
 
       // PopulateTSid: Paleo/Chron
       // Loop for each paleo/chron entry
-      var populateTSids1 = function(files, cb){
+      var populateTSids1 = function(files){
         // using files.json
         // run once for paleoData and chronData
-        pc = ["paleo", "chron"];
-        // console.log("Starting populateTSID loop");
-        for (var _i4 = 0; _i4 < pc.length; _i4++) {
-          var _pc1 = pc[_i4];
-          var _pc2 = pc[_i4] + "Data";
-          // If paleoData found, continue.
-          // console.log(_pc2 + " exists?");
-          if(files["json"].hasOwnProperty(_pc2)){
-            // console.log("yes, " + _pc2 + " exists");
-            // Process the paleoData, and replace the data in the json
-            files["json"] = populateTSids2(files["json"], _pc1);
-          } else {
-            // console.log("no, " + _pc2 + " doesnt exist");
+        try{
+          var pc = ["paleo", "chron"];
+          // console.log("Starting populateTSID loop");
+          for (var _i4 = 0; _i4 < pc.length; _i4++) {
+            var _pc1 = pc[_i4];
+            var _pc2 = pc[_i4] + "Data";
+            // If paleoData found, continue.
+            // console.log(_pc2 + " exists?");
+            if(files["json"].hasOwnProperty(_pc2)){
+              // console.log("yes, " + _pc2 + " exists");
+              // Process the paleoData, and replace the data in the json
+              files["json"] = populateTSids2(files["json"], _pc1);
+            } else {
+              // console.log("no, " + _pc2 + " doesnt exist");
+            }
           }
+        } catch(err) {
+          console.log("populateTSids1: " + err);
         }
-        var output = {"files": files, "tsids_generated": _generated_count};
-        return output;
+
+        return {"files": files, "tsids_generated": _generated_count};
       };
 
       // Revalidate to remove TSid errors
@@ -526,49 +536,53 @@ var lipdValidator = (function(){
        * @param {Array} d Metadata
        */
       var structureSection_1_1 = function(pc, d){
-        var _k = pc+"Data";
+        try{
+          var _k = pc+"Data";
 
-        // paleoData || chronData NOT an array
-        if (!Array.isArray(d)) {
-          logFeedback("err", "Invalid data type: " + _k + ". Expected: Array, Given: " + (typeof d === 'undefined' ? 'undefined' : _typeof(d)));
-        }
+          // paleoData || chronData NOT an array
+          if (!Array.isArray(d)) {
+            logFeedback("err", "Invalid data type: " + _k + ". Expected: Array, Given: " + (typeof d === 'undefined' ? 'undefined' : _typeof(d)));
+          }
 
-        // paleoData || chronData are an array
-        else if (Array.isArray(d) && d.length > 0) {
+          // paleoData || chronData are an array
+          else if (Array.isArray(d) && d.length > 0) {
 
-          // paleoData || chronData are an array of objects
-          var valid_section = verifyArrObjs(_k, d, true);
+            // paleoData || chronData are an array of objects
+            var valid_section = verifyArrObjs(_k, d, true);
 
-          // In v1.1, only chron has nested tables.
-          if (valid_section && pc === "chron") {
-            // create table names based on what "mode" we're in. chron or paleo
-            var meas = pc + "MeasurementTable";
-            var mod = pc + "Model";
-            // check if measurement table exists
-            if (d[0].hasOwnProperty(meas)) {
-              // check if measurement table is an object
-              verifyDataType("object", meas, d[0][meas], true);
-            } // end measurement table
-            // check if model table exists
-            if (d[0].hasOwnProperty(mod)) {
-              // check if model table is array with objects
-              var valid_model = verifyArrObjs(mod, d[0][mod]);
-              var _table_names = [ pc + "ModelTable", "calibratedAges", "method", "ensembleTable"];
-              if (valid_model) {
-                // correct so far, so check if items in model table [0] are correct types
-                for (var _i = 0; _i < _table_names.length; _i++) {
-                  var _table_name = _table_names[_i];
-                  if (d[0][mod][0].hasOwnProperty(_table_name)) {
-                    if (_table_name === "calibratedAges") {
-                      verifyArrObjs(_table_name, d[0][mod][0][_table_name], true);
-                    } else {
-                      verifyDataType("object", _table_name, d[0][mod][0][_table_name], true);
+            // In v1.1, only chron has nested tables.
+            if (valid_section && pc === "chron") {
+              // create table names based on what "mode" we're in. chron or paleo
+              var meas = pc + "MeasurementTable";
+              var mod = pc + "Model";
+              // check if measurement table exists
+              if (d[0].hasOwnProperty(meas)) {
+                // check if measurement table is an object
+                verifyDataType("object", meas, d[0][meas], true);
+              } // end measurement table
+              // check if model table exists
+              if (d[0].hasOwnProperty(mod)) {
+                // check if model table is array with objects
+                var valid_model = verifyArrObjs(mod, d[0][mod]);
+                var _table_names = [ pc + "ModelTable", "calibratedAges", "method", "ensembleTable"];
+                if (valid_model) {
+                  // correct so far, so check if items in model table [0] are correct types
+                  for (var _i = 0; _i < _table_names.length; _i++) {
+                    var _table_name = _table_names[_i];
+                    if (d[0][mod][0].hasOwnProperty(_table_name)) {
+                      if (_table_name === "calibratedAges") {
+                        verifyArrObjs(_table_name, d[0][mod][0][_table_name], true);
+                      } else {
+                        verifyDataType("object", _table_name, d[0][mod][0][_table_name], true);
+                      }
                     }
                   }
                 }
-              }
-            } // end model
-          } // end valid_section
+              } // end model
+            } // end valid_section
+          }
+        } catch(err){
+          console.log("structureSection_1_1: " + err);
         }
       };
 
@@ -587,48 +601,52 @@ var lipdValidator = (function(){
        * @param {Array} d Metadata
        */
       var structureSection_1_2 = function (pc, d) {
-        var _k = pc+"Data";
+        try {
+          var _k = pc+"Data";
 
-        // paleoData || chronData NOT an array
-        if (!Array.isArray(d)) {
-          logFeedback("err", "Invalid data type: " + _k + ". Expected: Array, Given: " + (typeof d === 'undefined' ? 'undefined' : _typeof(d)));
-        }
+          // paleoData || chronData NOT an array
+          if (!Array.isArray(d)) {
+            logFeedback("err", "Invalid data type: " + _k + ". Expected: Array, Given: " + (typeof d === 'undefined' ? 'undefined' : _typeof(d)));
+          }
 
-        // paleoData || chronData are an array
-        else if (Array.isArray(d) && d.length > 0) {
+          // paleoData || chronData are an array
+          else if (Array.isArray(d) && d.length > 0) {
 
-          // paleoData || chronData are an array of objects
-          var valid_section = verifyArrObjs(_k, d, true);
+            // paleoData || chronData are an array of objects
+            var valid_section = verifyArrObjs(_k, d, true);
 
-          if (valid_section) {
-            // create table names based on what "mode" we're in. chron or paleo
-            var meas = pc + "MeasurementTable";
-            var mod = pc + "Model";
-            // check if measurement table exists
-            if (d[0].hasOwnProperty(meas)) {
-              // check if measurement table is array with objects
-              verifyArrObjs(meas, d[0][meas], true);
-            } // end measurement table
-            // check if model table exists
-            if (d[0].hasOwnProperty(mod)) {
-              // check if model table is array with objects
-              var valid_model = verifyArrObjs(mod, d[0][mod]);
-              var _table_names = ["summaryTable", "distributionTable", "method", "ensembleTable"];
-              if (valid_model) {
-                // correct so far, so check if items in model table [0] are correct types
-                for (var _i = 0; _i < _table_names.length; _i++) {
-                  var table = _table_names[_i];
-                  if (d[0][mod][0].hasOwnProperty(table)) {
-                    if (table === "distributionTable") {
-                      verifyArrObjs(table, d[0][mod][0][table], true);
-                    } else {
-                      verifyDataType("object", table, d[0][mod][0][table], true);
+            if (valid_section) {
+              // create table names based on what "mode" we're in. chron or paleo
+              var meas = pc + "MeasurementTable";
+              var mod = pc + "Model";
+              // check if measurement table exists
+              if (d[0].hasOwnProperty(meas)) {
+                // check if measurement table is array with objects
+                verifyArrObjs(meas, d[0][meas], true);
+              } // end measurement table
+              // check if model table exists
+              if (d[0].hasOwnProperty(mod)) {
+                // check if model table is array with objects
+                var valid_model = verifyArrObjs(mod, d[0][mod]);
+                var _table_names = ["summaryTable", "distributionTable", "method", "ensembleTable"];
+                if (valid_model) {
+                  // correct so far, so check if items in model table [0] are correct types
+                  for (var _i = 0; _i < _table_names.length; _i++) {
+                    var table = _table_names[_i];
+                    if (d[0][mod][0].hasOwnProperty(table)) {
+                      if (table === "distributionTable") {
+                        verifyArrObjs(table, d[0][mod][0][table], true);
+                      } else {
+                        verifyDataType("object", table, d[0][mod][0][table], true);
+                      }
                     }
                   }
                 }
-              }
-            } // end model
-          } // end valid_section
+              } // end model
+            } // end valid_section
+          }
+        } catch(err){
+          console.log("structureSection_1_2: " + err);
         }
       };
 
@@ -647,40 +665,44 @@ var lipdValidator = (function(){
        * @param {Array} d Metadata
        */
       var structureSection_1_3 = function(pc, d){
-        var _k = pc+"Data";
-        // value is an array
-        if (!Array.isArray(d)) {
-          logFeedback("err", "Invalid data type: " + _k + ". Expected: Array, Given: " + (typeof d === 'undefined' ? 'undefined' : _typeof(d)));
-        } else if (Array.isArray(d) && d.length > 0) {
-          // check if the root paleoData or chronData is an array with objects.
-          var _valid_section = verifyArrObjs(_k, d, true);
-          if (_valid_section) {
-            // create table names based on what "mode" we're in. chron or paleo
-            // check if measurement table exists
-            if (d[0].hasOwnProperty("measurementTable")) {
-              // check if measurement table is array with objects
-              verifyArrObjs(pc + ".measurementTable", d[0]["measurementTable"], true);
-            } // end measurement table
-            // check if model table exists
-            if (d[0].hasOwnProperty("model")) {
-              // check if model table is array with objects
-              var _valid_model = verifyArrObjs("model", d[0]["model"]);
-              var _table_names = ["summaryTable", "distributionTable", "method", "ensembleTable"];
-              if (_valid_model) {
-                // correct so far, so check if items in model table [0] are correct types
-                for (var _i = 0; _i < _table_names.length; _i++) {
-                  var table = _table_names[_i];
-                  if (d[0]["model"][0].hasOwnProperty(table)) {
-                    if (table === "method") {
-                      verifyDataType("object", table, d[0]["model"][0][table], true);
-                    } else {
-                      verifyArrObjs(table, d[0]["model"][0][table], true);
+        try{
+          var _k = pc+"Data";
+          // value is an array
+          if (!Array.isArray(d)) {
+            logFeedback("err", "Invalid data type: " + _k + ". Expected: Array, Given: " + (typeof d === 'undefined' ? 'undefined' : _typeof(d)));
+          } else if (Array.isArray(d) && d.length > 0) {
+            // check if the root paleoData or chronData is an array with objects.
+            var _valid_section = verifyArrObjs(_k, d, true);
+            if (_valid_section) {
+              // create table names based on what "mode" we're in. chron or paleo
+              // check if measurement table exists
+              if (d[0].hasOwnProperty("measurementTable")) {
+                // check if measurement table is array with objects
+                verifyArrObjs(pc + ".measurementTable", d[0]["measurementTable"], true);
+              } // end measurement table
+              // check if model table exists
+              if (d[0].hasOwnProperty("model")) {
+                // check if model table is array with objects
+                var _valid_model = verifyArrObjs("model", d[0]["model"]);
+                var _table_names = ["summaryTable", "distributionTable", "method", "ensembleTable"];
+                if (_valid_model) {
+                  // correct so far, so check if items in model table [0] are correct types
+                  for (var _i = 0; _i < _table_names.length; _i++) {
+                    var table = _table_names[_i];
+                    if (d[0]["model"][0].hasOwnProperty(table)) {
+                      if (table === "method") {
+                        verifyDataType("object", table, d[0]["model"][0][table], true);
+                      } else {
+                        verifyArrObjs(table, d[0]["model"][0][table], true);
+                      }
                     }
                   }
                 }
-              }
-            } // end model
-          } // end valid_section
+              } // end model
+            } // end valid_section
+          }
+        } catch(err){
+         console.log("structureSection_1_3: " + err);
         }
       };
 
@@ -1068,6 +1090,7 @@ var lipdValidator = (function(){
             // current key exists in table?
             if (!table.hasOwnProperty(currKey) || !table[currKey]) {
               if (currKey === "missingValue"){
+                table["missingValue"] = "nan";
                 feedback.missingMvCt++;
               } else {
                 logFeedback("err", "Missing data: " + crumbs + "." + currKey);
@@ -1109,6 +1132,7 @@ var lipdValidator = (function(){
                   // current key exists in this column?
                   if (!table.columns[i].hasOwnProperty(currKey) || !table.columns[i][currKey]) {
                     if(currKey === "units"){
+                      table.columns[i]["units"] = "unitless";
                       feedback.missingUnitCt++;
                     } else {
                       logFeedback("err", "Missing data: " + crumbs + ".column" + i + "." + currKey, currKey);
@@ -1134,14 +1158,19 @@ var lipdValidator = (function(){
        * they only persist if the file is downloaded (web) or saved (API)
        */
       var logSpecialFeedback = function(){
-        if (feedback.missingTsidCt > 0){
-          logFeedback("warn", feedback.missingTsidCt + " columns without 'TSid'\nTSids has been generated and added automatically", "TSid");
-        }
-        if(feedback.missingUnitCt > 0){
-          logFeedback("warn", feedback.missingUnitCt + " columns without 'units'\nThese columns have been assumed unitless and given a 'unitless' value")
-        }
-        if(feedback.missingMvCt > 0){
-          logFeedback("warn", feedback.missingMvCt + " columns without a 'missingValue'\nThese columns have been given the standard 'NaN' missing value")
+        try{
+          console.log(feedback);
+          if (feedback.missingTsidCt > 0){
+            logFeedback("warn", feedback.missingTsidCt + " columns without 'TSid'\nTSids has been generated and added automatically", "TSid");
+          }
+          if(feedback.missingUnitCt > 0){
+            logFeedback("warn", feedback.missingUnitCt + " columns without 'units'\nThese columns have been assumed unitless and given a 'unitless' value")
+          }
+          if(feedback.missingMvCt > 0){
+            logFeedback("warn", feedback.missingMvCt + " columns without a 'missingValue'\nThese columns have been given the standard 'NaN' missing value")
+          }
+        } catch(err){
+          console.log("logSpecialFeedback: " + err);
         }
       };
 
@@ -1222,16 +1251,21 @@ var lipdValidator = (function(){
 
       // Check for an Array with objects in it.
       var verifyArrObjs = function (k, v, addToLog) {
-        var isArr = verifyDataType("array", k, v, addToLog);
-        if (isArr) {
-          var isObjs = verifyDataType("object", k, v[0], addToLog);
-          // this array is only valid if it contains objects or if it's an empty array.
-          if (isObjs || !v[0]) {
-            return true;
+        try{
+          var isArr = verifyDataType("array", k, v, addToLog);
+          if (isArr) {
+            var isObjs = verifyDataType("object", k, v[0], addToLog);
+            // this array is only valid if it contains objects or if it's an empty array.
+            if (isObjs || !v[0]) {
+              return true;
+            }
           }
+          console.log("verifyArrObjs: Invalid data type: expected: obj, given: " + _typeof(v[0]) + ": " + k);
+          return false;
+        } catch(err){
+          console.log("verifyArrObjs: " + err);
+          return false;
         }
-        console.log("verifyArrObjs: Invalid data type: expected: obj, given: " + _typeof(v[0]) + ": " + k);
-        return false;
       };
 
       // check that column count in a table match the column count in the CSV data
@@ -1246,8 +1280,8 @@ var lipdValidator = (function(){
           logFeedback("err", "CSV filename(s) do not match filenames CSV filenames listed in JSONLD metadata", "filename");
           return;
         }
-        var metaCt = columns.length;
         try {
+          var metaCt = columns.length;
           // edge case: ensemble table that has "two" columns, but actual column 2 is a list of columns.
           if (csvCt !== metaCt) {
             // console.log("one column");
@@ -1403,64 +1437,76 @@ var lipdValidator = (function(){
 
       // Error log: Tally the error counts, and log messages to user
       var logFeedback = function (errType, msg, key) {
-        key = key || "";
-        if (errType === "warn") {
-          feedback.wrnCt++;
-          feedback.wrnMsgs.push(msg);
-        } else if (key === "TSid") {
-          feedback.missingTsidCt++;
-          feedback.tsidMsgs.push(msg);
-        } else if (errType === "err") {
-          feedback.errCt++;
-          feedback.errMsgs.push(msg);
-        } else if (errType === "pos") {
-          feedback.posMsgs.push(msg);
+        try{
+          key = key || "";
+          if (errType === "warn") {
+            feedback.wrnCt++;
+            feedback.wrnMsgs.push(msg);
+          } else if (key === "TSid") {
+            feedback.missingTsidCt++;
+            feedback.tsidMsgs.push(msg);
+          } else if (errType === "err") {
+            feedback.errCt++;
+            feedback.errMsgs.push(msg);
+          } else if (errType === "pos") {
+            feedback.posMsgs.push(msg);
+          }
+        } catch(err){
+          console.log("logFeedback: " + err);
         }
       };
 
       // verify the 4 bagit files are present, indicating a properly bagged LiPD file.
       var verifyBagit = function (files) {
-        // Bagit filenames are static. Check that each is present.
-        var validBagitFiles = ["tagmanifest-md5.txt", "manifest-md5.txt", "bagit.txt", "bag-info.txt"];
+        try{
+          // Bagit filenames are static. Check that each is present.
+          var validBagitFiles = ["tagmanifest-md5.txt", "manifest-md5.txt", "bagit.txt", "bag-info.txt"];
 
-        // Only run Verify Bagit when this is an uploaded file. NOT when it's being created from scratch
-        // If create from scratch, it's not possible to have bagit files yet.
-        if(options.fileUploaded){
-          var count = 0;
-          var errors = 0;
-          validBagitFiles.forEach(function (filename) {
-            if (files.hasOwnProperty(filename)) {
-              count++;
-            } else {
-              errors++;
-              logFeedback("warn", "Missing bagit file: " + filename);
+          // Only run Verify Bagit when this is an uploaded file. NOT when it's being created from scratch
+          // If create from scratch, it's not possible to have bagit files yet.
+          if(options.fileUploaded){
+            var count = 0;
+            var errors = 0;
+            validBagitFiles.forEach(function (filename) {
+              if (files.hasOwnProperty(filename)) {
+                count++;
+              } else {
+                errors++;
+                logFeedback("warn", "Missing bagit file: " + filename);
+              }
+            });
+            // Requires 4 bagit files to be valid bagit
+            if (count === 4) {
+              logFeedback("pos", "Valid Bagit File", "bagit");
+              feedback.validBagit = true;
             }
-          });
-          // Requires 4 bagit files to be valid bagit
-          if (count === 4) {
-            logFeedback("pos", "Valid Bagit File", "bagit");
-            feedback.validBagit = true;
           }
+        } catch(err){
+          console.log("verifyBagit: " + err);
         }
       };
 
       // Check for Valid LiPD data. If no errors, then it's valid.
       var verifyValid = function () {
-        if (feedback.missingTsidCt > 1) {
-          // Count all TSid errors as one cumulative error
-          // $scope.feedback.errCt++;
-          // Count all TSid errors as a single error
-          feedback.errCt++;
-          // feedback.errMsgs.push("Missing data: TSid from " + feedback.missingTsidCt + " columns");
-          feedback.status = "FAIL";
-        }
-        if (!valid) {
-          if (feedback.errCt === 0) {
-            valid = true;
-            feedback.status = "PASS";
-          } else {
-            feedback.status = "FAIL";
+        // if (feedback.missingTsidCt > 1) {
+        //   // Count all TSid errors as one cumulative error
+        //   // $scope.feedback.errCt++;
+        //   // Count all TSid errors as a single error
+        //   feedback.errCt++;
+        //   // feedback.errMsgs.push("Missing data: TSid from " + feedback.missingTsidCt + " columns");
+        //   feedback.status = "FAIL";
+        // }
+        try{
+          if (!valid) {
+            if (feedback.errCt === 0) {
+              valid = true;
+              feedback.status = "PASS";
+            } else {
+              feedback.status = "FAIL";
+            }
           }
+        } catch(err){
+          console.log("verifyValid: " + err);
         }
       };
 
