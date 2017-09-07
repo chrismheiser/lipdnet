@@ -209,7 +209,6 @@ router.get('/', function(req, res, next) {
 // Receive a POST from the contact form on the home page
 router.post('/', function(req, res, next){
   logger.info(req.body);
-
 });
 
 // Get the schema page

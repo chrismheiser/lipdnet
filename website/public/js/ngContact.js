@@ -5,48 +5,60 @@ c.controller('ContactCtrl', ['$scope', '$http', "$window", function($scope, $htt
 
   $scope.fmsnt = false;
   $scope.complete = false;
-  // using generic vars to avoid spam bots sending messages on the form. 
   $scope.fm = {"fn": "", "fo": "", "fs": "", "fmm": "", "fe": ""};
+
+
   $scope.checkForm = function(){
-  	// check if the keys are empty or filled. 
-  	for (var key in $scope.fm){
-  		if ($scope.fm.hasOwnProperty(key)){
-  			var i = $scope.fm.key;
-  			if (!i || i === " " || i === "" || i === undefined){
-  				$scope.complete = false;
-  				return;
-  			}
-  		}
-  	}
-  	$scope.complete = true;
-  	return;
+  	$scope.countFields(function(_ct){
+      if(_ct === 5){
+        $scope.complete = true;
+      }
+		});
   };
 
-  $scope.checkInput = function(t){
-  	var trigger = false;
-  	if (t === "fn"){
-	  	if (!(!/[^a-z]/i.test($scope.fm.fn))){
-	  		$scope.fm.fn = "";
-	  		trigger = true;
-	  	}
-  	} else if (t === "fo"){
-	  	if (!(!/[^a-z]/i.test($scope.fm.fo))){
-	  		$scope.fm.fo = "";
-	  		trigger = true;
-	  	}
-  	}
-  	if(trigger){
-  		$window.alert("Numbers and special characters not allowed in this field")
-  		$scope.complete = false;
-  	}
-  	return;
-  }
+  $scope.countFields = function(cb){
+    var _ct = 0;
+    // check if the keys are empty or filled.
+    for (var key in $scope.fm){
+      if ($scope.fm.hasOwnProperty(key)){
+        var i = $scope.fm[key];
+        if (i && i !== " " && i !== "" && i !== undefined && typeof(i) !== "undefined"){
+        	$scope.checkInput(key, i, function(clean){
+        		if(clean){
+        			_ct++;
+						}
+					});
+        }
+      }
+    }
+    cb(_ct);
+	};
 
-  $scope.sendMail = function(m){
+  $scope.checkInput = function(key, t, cb){
+
+  	var _re_field =/[^a-z]/i;
+  	var _re_email = /^(([^<>()\\[\\]\\.,;:\\s@\\\"]+(\\.[^<>()\\[\\]\\.,;:\\s@\\\"]+)*)|(\\\".+\\\"))@(([^<>()[\\]\\.,;:\\s@\\\"]+\\.)+[^<>()[\\]\\.,;:\\s@\\\"]{2,})$/i;
+  	var _clean = true;
+  	if(key === "fe"){
+  		if(!(!_re_email.test(t))){
+  			_clean = false;
+  			$scope.complete = false;
+			}
+		} else {
+      if (!(!_re_field.test(t))){
+        _clean = false;
+        $scope.complete = false;
+      }
+		}
+
+  	cb(_clean);
+  };
+
+  $scope.sendMail = function(){
     $scope.sent = true;
-    // $http.post('/', m).success(
-    //   $scope.sent = true
-    // );
+    $http.post('/', $scope.fm).success(
+      $scope.sent = true
+    );
   };
 
 }]);

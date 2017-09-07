@@ -126,12 +126,10 @@ block body
 					form.f(ng-switch-when="false" flex='60' method='post' ng-model='fm')
 						md-input-container
 							label Name
-							input(type="text" name='fn' ng-model='fm.fn' required max-length='30' ng-blur="checkForm();checkInput('fn')")
-							md-tooltip Numbers are not allowed in this field
+							input(type="text" name='fn' ng-model='fm.fn' required max-length='30' ng-blur="checkForm();")
 						md-input-container
 							label Organization
-							input(type="text" name='fo' ng-model='fm.fo' required max-length='30' ng-blur="checkForm();checkInput('fo')")
-							md-tooltip Numbers are not allowed in this field
+							input(type="text" name='fo' ng-model='fm.fo' required max-length='30' ng-blur="checkForm();")
 						md-input-container
 							label E-Mail
 							input(type="email" name='fe' ng-model='fm.fe' required max-length='30' ng-blur="checkForm()")
