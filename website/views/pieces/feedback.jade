@@ -1,10 +1,11 @@
 // When a LPD file is chosen, all the files inside are listed here.
+
 li(style="list-style-type: none;")
-  pre(ng-class="feedback.errCt>0 ? 'on' : 'off'" style="background-color:#FEBABB; border: none;") {{ feedback.errCt}} errors
+  pre(ng-class="feedback.errCt>0 ? 'on' : 'off'" style="background-color:#FEBABB; border: none;" uib-popover="Errors are caused by missing required data or malformed data structures" popover-trigger="'mouseenter'") {{ feedback.errCt}} errors
     ul
       li(ng-repeat="err in feedback.errMsgs track by $index") {{err}}
 
-  pre(ng-class="feedback.wrnCt>0 ? 'on' : 'off'" style="background-color:#FEEEB6; border: none;") {{ feedback.wrnCt }} warnings
+  pre(ng-class="feedback.wrnCt>0 ? 'on' : 'off'" style="background-color:#FEEEB6; border: none;" uib-popover="Warnings are highly suggested fixes, but not required. A file may still be valid with warnings present" popover-trigger="'mouseenter'") {{ feedback.wrnCt }} warnings
     ul
       li(ng-repeat="wrn in feedback.wrnMsgs track by $index") {{wrn}}
       
@@ -12,9 +13,13 @@ li(style="list-style-type: none;")
   //- 	ul
   //- 		li(ng-repeat="pos in feedback.posMsgs track by $index") {{pos}}
 
-  pre(ng-class="feedback.status == 'PASS' ? 'on' : 'off'" style="background-color:#DFF1C1; border: none;") Validation Complete!
+  pre(ng-hide="feedback.validLipd == 'PASS'" style="background-color:#FEBABB; border: none;" uib-popover-html="lipdPopover" popover-trigger="'mouseenter'") Invalid LiPD file
+  pre(ng-show="feedback.validLipd == 'PASS'" style="background-color:#DFF1C1; border: none;" uib-popover-html="lipdPopover" popover-trigger="'mouseenter'") Valid LiPD file
+  pre(ng-hide="feedback.validWiki == 'PASS'" style="background-color:#FEBABB; border: none;" uib-popover-html="wikiPopover" popover-trigger="'mouseenter'") Wiki requirements not met
+  pre(ng-show="feedback.validWiki == 'PASS'" style="background-color:#DFF1C1; border: none;" uib-popover-html="wikiPopover" popover-trigger="'mouseenter'") Wiki requirements met
+  pre(ng-hide="feedback.validNoaa == 'PASS'" style="background-color:#FEBABB; border: none;" uib-popover-html="noaaPopover" popover-trigger="'mouseenter'") NOAA requirements not met
+  pre(ng-show="feedback.validNoaa == 'PASS'" style="background-color:#DFF1C1; border: none;" uib-popover-html="noaaPopover" popover-trigger="'mouseenter'") NOAA requirements met
 
-  
   // DEV MODE: Put metadata in pre box, so we can see the metadata behind the json-tree 	
   //- pre#metaPretty(ng-model="files.json")
   //- pre#csvPretty

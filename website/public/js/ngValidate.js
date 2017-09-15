@@ -253,8 +253,64 @@ f.factory("ExportService", ["$q", function ($q) {
 
 
 // Controller - Validate Form
-f.controller('ValidateCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Upload', "ImportService", "ExportService", "$uibModal",
-                    function ($scope, $log, $timeout, $q, $http, Upload, ImportService, ExportService, $uibModal) {
+f.controller('ValidateCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Upload', "ImportService", "ExportService", "$uibModal","$sce",
+                    function ($scope, $log, $timeout, $q, $http, Upload, ImportService, ExportService, $uibModal, $sce) {
+
+  // var url = "http://wiki.linked.earth/store/ds/query?query=";
+  // var params = "PREFIX%20core%3A%20%3Chttp%3A%2F%2Flinked.earth%2Fontology%23%3E%0APREFIX%20wiki%3A%20%3Chttp%3A%2F%2Fwiki.linked.earth%2FSpecial%3AURIResolver%2F%3E%0ASELECT%20DISTINCT%20%3Flabel%0AWHERE%20%7B%0A%20%20%3Fs%20a%20core%3AInferredVariable%20.%0A%20%20%3Fs%20%3Fproperty%20%3Fc%20.%0A%20%20%3Fproperty%20%3Chttp%3A%2F%2Fwww.w3.org%2F2000%2F01%2Frdf-schema%23label%3E%20%3Flabel.%0A%7D";
+  // var xhr = new XMLHttpRequest();
+  // xhr.open("POST", url+params, true);
+  // //Send the proper header information along with the request
+  // xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+  // xhr.send(params);
+  // xhr.onreadystatechange = function() {
+  //   if (xhr.readyState === 4) {
+  //     console.log("fields");
+  //     console.log(xhr.response); //Outputs a DOMString by default
+  //   }
+  // };
+  //
+  // var url2 = "http://wiki.linked.earth/store/ds/query?query=";
+  // var params2 = "PREFIX%20core%3A%20%3Chttp%3A%2F%2Flinked.earth%2Fontology%23%3E%0APREFIX%20wiki%3A%20%3Chttp%3A%2F%2Fwiki.linked.earth%2FSpecial%3AURIResolver%2F%3E%0ASELECT%20%3Fds%20%3Fname%0AWHERE%20%7B%0A%20%20%3Fds%20a%20core%3ADataset%20.%0A%20%20%3Fds%20core%3Aname%20%3Fname%0A%7D";
+  // var xhr2 = new XMLHttpRequest();
+  // xhr2.open("GET", url2+params2, true);
+  // xhr2.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+  // xhr2.send(params2);
+  // xhr2.onreadystatechange = function() {
+  //   if (xhr2.readyState === 4) {
+  //     console.log("datasets");
+  //     console.log(xhr2.response); //Outputs a DOMString by default
+  //   }
+  // };
+
+  $scope.lipdPopover = $sce.trustAsHtml('' +
+    '<h5>LiPD Requirements</h5><br>' +
+    '<p>Root Level:</p><ul>' +
+    '<li>dataSetName</li>' +
+    '<li>archiveType</li>' +
+    '<li>createdBy</li>' +
+    '<li>geo coordinates</li>' +
+    '<li>paleoData measurementTable</li>' +
+    '</ul><br><p>Column Level:</p><ul>' +
+    '<li>variableName</li>' +
+    '<li>units ("unitless" if units not applicable)</li>' +
+    '<li>values</li>' +
+    '</ul>');
+
+  $scope.wikiPopover = $sce.trustAsHtml('' +
+    '<h5>Linked Earth Wiki Requirements</h5><br>' +
+    '<p>Root Level:</p><ul>' +
+    '<li>dataSetName</li>' +
+    '<li>archiveType</li>' +
+    '</ul><br><p>Column Level:</p><ul>' +
+    '<li>proxyObservationType</li>' +
+    '<li>variableName</li>' +
+    '<li>variableType</li>' +
+    '<li>takenAtDepth</li>' +
+    '<li>inferredVariableType</li>' +
+    '</ul>');
+  $scope.noaaPopover = $sce.trustAsHtml('<p><strong>NOAA Requirements</strong></p><br><p>Coming Soon!</p>');
+
   var vc = this;
   vc.properties = {
       item : null,
@@ -339,6 +395,9 @@ f.controller('ValidateCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Uplo
     "missingTsidCt": 0,
     "wrnCt": 0,
     "errCt": 0,
+    "validLipd": "NA",
+    "validWiki": "NA",
+    "validNoaa": "NA",
     "tsidMsgs": [],
     "posMsgs": [],
     "errMsgs": [],
@@ -386,6 +445,13 @@ f.controller('ValidateCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Uplo
   $scope.addRmProperty = function(entry, name) {
     entry = create.addRmProperty(entry, name);
     return entry;
+  };
+
+  $scope.makeWikiReady = function(){
+    create.addWikiReady($scope.files.json, function(_d2){
+      window.alert("Wiki fields were added to the dataset root, and each table column. Don't forget to fill them out!");
+      $scope.files.json = _d2;
+    });
   };
 
   $scope.clearCustom = function(entry){
@@ -698,6 +764,7 @@ f.controller('ValidateCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Uplo
           $scope.files = _results.files;
           $scope.feedback = _results.feedback;
           $scope.status = _results.status;
+          console.log(_results);
         } catch(err){
           console.log("validate: Error trying to prepare results: " + err);
         }

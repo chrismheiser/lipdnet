@@ -26,7 +26,7 @@ div(ng-repeat='entry in files.json.paleoData track by $index' layout-wrap="")
                         md-tooltip Copy/pasting data from a `rich editor like Microsoft Excel will use a Tab delimiter. When in doubt, use the delimiter you see when after you paste your data below.
                     md-input-container
                         md-label Delimiter
-                        md-select(ng-model='dropdowns.current.delimiter' ng-model-options="{trackBy: '$value.id'}")
+                        md-select(ng-model='dropdowns.current.delimiter' ng-model-options="{trackBy: '$value.id'}" aria-label="filler")
                             md-option(ng-value="delimiter" ng-repeat="delimiter in dropdowns.delimiters") {{ delimiter.view }}
                     md-switch(ng-model='pageMeta.header') Header: {{ pageMeta.header? "On": "Off"}}
                     //- md-switch(ng-model='pageMeta.delimiter') Delimiter: {{ pageMeta.delimiter? "Semi-colon ( ; )" : "Comma ( , ) / Tab / Spaces"}}
@@ -65,7 +65,7 @@ div(ng-repeat='entry in files.json.paleoData track by $index' layout-wrap="")
                             //- input(format-values ng-model="files.csv[entry2.filename].transposed[$index]")
                             input(space-values ng-model="files.csv[entry2.filename].transposed[$index]")
                     div(layout='', layout-padding='', layout-sm='column' style="float: right;")
-                        button.valid-btn(ng-if="entry3.tmp.toggle" ng-click='entry3.tmp.toggle = !entry3.tmp.toggle' style="margin: 1.5em;" type="button")  + Show less
+                        button.valid-btn(ng-if="entry3.tmp.toggle" ng-click='entry3.tmp.toggle = !entry3.tmp.toggle' style="margin: 1.5em;" type="button")  - Show less
                         button.valid-btn(ng-if="!entry3.tmp.toggle" ng-click='entry3.tmp.toggle = !entry3.tmp.toggle' style="margin: 1.5em;" type="button")  + Show more
 
                     div(ng-if="entry3.tmp.toggle")

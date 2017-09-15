@@ -12,6 +12,8 @@ li#buttons(style="list-style-type: none;")
   //- br 
   //- button to push validated lipd file to database
   //- button.valid-btn(ng-model="file.push" ng-disabled="!pageMeta.valid") Upload to Wiki
+  button.valid-btn(title="If you want your data to meet Linked Earth Wiki requirements, this will insert the fields necessary. NOTE: This will only insert column-level fields for currently existing columns" ng-click="makeWikiReady()" type="button") Wiki Ready
+  button.valid-btn(disabled title="If you want your data to meet NOAA requirements, this will insert the fields necessary. NOTE: This will only insert fields for currently existing tables" ng-click="makeNoaaReady()" type="button") NOAA Ready
   button.valid-btn(title="LiPD data is validated during upload. If you make any corrections to the file, validate again to show updated results." ng-click="validate()" ng-disabled="pageMeta.filePicker" type="button") Validate
 
   //- download button

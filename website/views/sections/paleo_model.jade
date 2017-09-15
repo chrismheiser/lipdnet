@@ -80,7 +80,7 @@ div(ng-repeat='entry in files.json.paleoData track by $index' layout-wrap="")
                             //- input(format-values ng-model="files.csv[entry2.filename].transposed[$index]")
                             input(space-values ng-model="files.csv[entry2.filename].transposed[$index]")
                     div(layout='', layout-padding='', layout-sm='column' style="float: right;")
-                        button.valid-btn(ng-if="entry3.tmp.toggle" ng-click='entry3.tmp.toggle = !entry3.tmp.toggle' style="margin: 1.5em;" type="button")  + Show less
+                        button.valid-btn(ng-if="entry3.tmp.toggle" ng-click='entry3.tmp.toggle = !entry3.tmp.toggle' style="margin: 1.5em;" type="button")  - Show less
                         button.valid-btn(ng-if="!entry3.tmp.toggle" ng-click='entry3.tmp.toggle = !entry3.tmp.toggle' style="margin: 1.5em;" type="button")  + Show more
 
                     div(ng-if="entry3.tmp.toggle")
@@ -179,7 +179,7 @@ div(ng-repeat='entry in files.json.paleoData track by $index' layout-wrap="")
                         //    //- input(format-values ng-model="files.csv[entry2.filename].transposed[$index]")
                         //    input(space-values ng-model="files.csv[entry2.filename].transposed[$index]")
                     div(layout='', layout-padding='', layout-sm='column' style="float: right;")
-                        button.valid-btn(ng-if="entry3.tmp.toggle" ng-click='entry3.tmp.toggle = !entry3.tmp.toggle' style="margin: 1.5em;" type="button")  + Show less
+                        button.valid-btn(ng-if="entry3.tmp.toggle" ng-click='entry3.tmp.toggle = !entry3.tmp.toggle' style="margin: 1.5em;" type="button")  - Show less
                         button.valid-btn(ng-if="!entry3.tmp.toggle" ng-click='entry3.tmp.toggle = !entry3.tmp.toggle' style="margin: 1.5em;" type="button")  + Show more
 
                     div(ng-if="entry3.tmp.toggle")

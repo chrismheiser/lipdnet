@@ -173,6 +173,75 @@ var create = (function(){
       return true;
     }),
 
+    /**
+     * Add the wiki required fields to the
+     */
+    addWikiReady: (function(D, cb){
+      var _pcs = ["paleoData", "chronData"];
+      // var _required_wiki = {
+      //   "root": ["dataSetName", "archiveType"],
+      //   "column": ["takenAtDepth", "variableName", "inferredVariableType", "proxyObservationType"]
+      // };
+
+      // We don't need to add the root fields, because those are already standard.
+
+      for (var _u=0; _u < _pcs.length; _u++){
+        var _pc = _pcs[_u];
+        if(D.hasOwnProperty(_pc)){
+          var _section = D[_pc];
+          for(var _s=0; _s < _section.length; _s++){
+            if(_section[_s].hasOwnProperty("measurementTable")){
+              D[_pc][_s]["measurementTable"] = create.addWikiReadyTables(_section[_s]["measurementTable"]);
+            }
+            if(_section[_s].hasOwnProperty("model")){
+              D[_pc][_s]["model"] = create.addWikiReadyModels(_section[_s]["model"]);
+            }
+          }
+        }
+      }
+
+      cb(D);
+    }),
+
+    addWikiReadyModels: (function(models){
+      for(var _p = 0; _p <models.length; _p++){
+        var _model = models[_p];
+        if (_model.hasOwnProperty("summaryTable")){
+          models[_p]["summaryTable"] = create.addWikiReadyModels(models[_p]["summaryTable"]);
+
+        }
+        if (_model.hasOwnProperty("ensembleTable")){
+          models[_p]["ensembleTable"] = create.addWikiReadyModels(models[_p]["ensembleTable"]);
+        }
+        // if (_model.hasOwnProperty("distributionTable")){
+        //   models[_p]["distributionTable"] = create.addWikiReadyModels(models[_p]["distributionTable"]);
+        // }
+      }
+      return(models);
+    }),
+
+    /**
+     * Add the required column keys to each column if they don't exist.
+     *
+     * @param {Array} tables Metadata
+     * @return {Array} tables Metadata
+     */
+    addWikiReadyTables: (function(tables){
+      var _required = ["takenAtDepth", "variableName", "inferredVariableType", "proxyObservationType"];
+      for(var _t = 0; _t<tables.length; _t++){
+        var _columns = tables[_t]["columns"];
+        for(var _c = 0; _c < _columns.length; _c++){
+          for (var _k = 0; _k < _required.length; _k++){
+            var _key = _required[_k];
+            if(!_columns[_c].hasOwnProperty(_key)){
+              tables[_t]["columns"][_c][_key] = "";
+            }
+          }
+        }
+      }
+      return(tables);
+    }),
+
     initColumnTmp: (function(x){
       // when uploading a file, we need to add in the column property booleans for the "Add Properties" section of each
       // column. That way, an uploaded file that already has properties from our list will trigger the checkbox to be on.

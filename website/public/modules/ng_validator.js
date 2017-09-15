@@ -283,17 +283,20 @@ var lipdValidator = (function(){
       // Feedback: Store all output messages; Errors, warnings, and other.
       var feedback = {
         "validBagit": false,
+        "validWiki": "NA",
+        "validNoaa": "NA",
+        "validLipd": "NA",
+        "lipdVersion": "NA",
         "missingTsidCt": 0,
         "missingUnitCt": 0,
         "missingMvCt": 0,
         "wrnCt": 0,
         "errCt": 0,
+        "errCtWiki": 0,
         "tsidMsgs": [],
         "posMsgs": [],
         "errMsgs": [],
-        "wrnMsgs": [],
-        "status": "NA",
-        "lipdVersion": "NA"
+        "wrnMsgs": []
       };
 
       /** v1.0  - constant keys */
@@ -334,6 +337,10 @@ var lipdValidator = (function(){
         "reqTableNameKeys": ["tableName", "name"]
       };
 
+      var _required_wiki = {
+        "root": ["dataSetName", "archiveType"],
+        "column": ["takenAtDepth", "variableName", "inferredVariableType", "proxyObservationType"]
+      };
 
       /**
        *  Validate
@@ -350,6 +357,8 @@ var lipdValidator = (function(){
           feedback.lipdVersion = lipdVersion;
           console.log("Validating version: " + lipdVersion);
 
+          /* DEPRECATED: This code should never run */
+          /* Since all files are updated to v1.3, this code is unreachable, but kept for fallback reasons.*/
           if(lipdVersion === "1.0"){
             console.log("validate_1_0: LiPD Structure");
             structureBase(files.json, keys_base.miscKeys.concat(keys_1_1.miscKeys));
@@ -374,6 +383,8 @@ var lipdValidator = (function(){
             requiredBase(files.json);
             required_1_2(files.json);
           }
+          /* END DEPRECATED*/
+
           else if (lipdVersion === "1.3"){
             console.log("validate_1_3: LiPD Structure");
             structureBase(files.json, keys_base.miscKeys.concat(keys_1_3.miscKeys));
@@ -385,16 +396,18 @@ var lipdValidator = (function(){
           console.log("validate: Bagit");
           logSpecialFeedback();
           verifyBagit(files.bagit);
-          verifyValid(feedback);
-
-          console.log("validate: LiPD Filename: " + files.lipdFilename);
-          console.log("validate: TSids Generated: " + options.tsids_generated);
-          console.log("validate: Validation Status: " + feedback.status);
+          verifyWiki(files.json);
+          verifyValid();
+          console.log("VALIDATE STATUS REPORT: ");
+          console.log("LiPD filename: " + files.lipdFilename);
+          console.log("TSids created: " + options.tsids_generated);
+          console.log("Wiki Ready: " + feedback.validWiki);
+          console.log("Result: " + feedback.validLipd);
           // var jsonCopy = JSON.parse(JSON.stringify(files.json));
         } catch (err){
           console.log(err);
         }
-        return {"dat": files.json, "feedback": feedback, "filename": files.lipdFilename, "status": feedback.status};
+        return {"dat": files.json, "feedback": feedback, "filename": files.lipdFilename, "status": feedback.validLipd};
       };
 
 
@@ -1054,7 +1067,6 @@ var lipdValidator = (function(){
        */
       var requiredTables = function(tables, crumbs, tnks){
         try{
-          console.log
           if (tables.length === 0){
             logFeedback("err", "Missing data: " + crumbs + "0");
           } else {
@@ -1159,7 +1171,6 @@ var lipdValidator = (function(){
        */
       var logSpecialFeedback = function(){
         try{
-          console.log(feedback);
           if (feedback.missingTsidCt > 0){
             logFeedback("warn", feedback.missingTsidCt + " columns without 'TSid'\nTSids has been generated and added automatically", "TSid");
           }
@@ -1486,6 +1497,127 @@ var lipdValidator = (function(){
         }
       };
 
+      /**
+       * Verify that the WIKI-required fields are present in the metadata
+       * Log missing fields as a warning with a WIKI notation.
+       *
+       * @param D Metadata
+       *
+       */
+      var verifyWiki = function (D){
+        var _pcs = ["paleoData", "chronData"];
+        var _required_wiki = {
+          "root": ["dataSetName", "archiveType"],
+          "columns": ["takenAtDepth", "variableName", "inferredVariableType", "proxyObservationType"]
+        };
+        try{
+          // Look for the ROOT keys required by the WIKI
+          for(var _w = 0; _w<_required_wiki["root"].length; _w++){
+              if(!D.hasOwnProperty(_required_wiki["root"][_w])){
+                logFeedback("warn", "Missing data (Wiki): " + _required_wiki["root"][_w]);
+              }
+          }
+
+          // Look got the COLUMN keys required by the WIKI
+          for (var _y=0; _y<_pcs.length; _y++) {
+            var _pc = _pcs[_y];
+            if(D.hasOwnProperty(_pc)){
+              for (var i = 0; i < D[_pc].length; i++) {
+                var section = D[_pc][i];
+
+                // measurement
+                if (section.hasOwnProperty("measurementTable")) {
+                  requiredTablesWiki(section["measurementTable"], _pc + i + "measurement", _required_wiki["columns"])
+                }
+
+                // model
+                if (section.hasOwnProperty("model")) {
+                  for (var _k = 0; _k < section["model"].length; _k++) {
+                    var modTables = section["model"][_k];
+                    // summary
+                    if (modTables.hasOwnProperty("summaryTable")) {
+                      requiredTablesWiki(modTables.summaryTable, _pc + i + "model" + _k + "summary", _required_wiki["columns"])
+                    }
+                    // ensemble
+                    if (modTables.hasOwnProperty("ensembleTable")) {
+                      requiredTablesWiki(modTables.ensembleTable, _pc + i + "model" + _k + "ensemble", _required_wiki["columns"])
+                    }
+                    // distribution
+                    // if (modTables.hasOwnProperty("distributionTable")) {
+                    //   requiredTablesWiki(modTables.distributionTable, pc + _i + "model" + _k + "distribution", _required_wiki["columns"])
+                    // }
+                  }
+                } // end model
+              } // end pcData loop
+            }
+
+            } // end else
+          checkWikiErr();
+        } catch(err){
+          console.log("verifyWiki: " + err);
+        }
+
+      };
+
+      /**
+       * Check _multiple_ tables for required keys
+       *
+       * @param {object} tables Metadata
+       * @param {string} crumbs
+       * @param {object} tnks tableName keys for this version
+       */
+      var requiredTablesWiki = function(tables, crumbs, tnks){
+        try{
+          for (var _w = 0; _w < tables.length; _w++) {
+            requiredTableWiki(tables[_w], crumbs + _w, tnks);
+          }
+        } catch(err){
+          console.log("requiredTablesWiki: " + crumbs + ": " + err);
+        }
+
+      };
+
+
+      /**
+       * Check _one_ table for required keys
+       *
+       * @param {object} table Metadata
+       * @param {string} crumbs
+       * @param {object} tnks Required keys for this LiPD Version
+       */
+      var requiredTableWiki = function (table, crumbs, tnks) {
+        try {
+          if (table.hasOwnProperty("columns")) {
+            // Required column keys
+            for (var i = 0; i < table.columns.length; i++) {
+              // required column keys
+              for (var k in tnks) {
+                if(tnks.hasOwnProperty(k)){
+                  // current key
+                  var currKey = tnks[k];
+                  // current key exists in this column?
+                  if (!table.columns[i].hasOwnProperty(currKey) || !table.columns[i][currKey]) {
+                    logFeedback("warn", "Missing data (Wiki): " + crumbs + ".column" + i + "." + currKey, currKey);
+                    feedback.errCtWiki++;
+                  }
+                }
+              } // end table keys
+            } // end columns loop
+          }
+        } catch(err){
+          console.log("requiredTableWiki: " + err);
+        }
+
+      }; // end requiredTable fn
+
+      var checkWikiErr = function(){
+        if(feedback.errCtWiki === 0){
+          feedback.validWiki = "PASS";
+        } else {
+          feedback.validWiki = "FAIL";
+        }
+      };
+
       // Check for Valid LiPD data. If no errors, then it's valid.
       var verifyValid = function () {
         // if (feedback.missingTsidCt > 1) {
@@ -1500,9 +1632,9 @@ var lipdValidator = (function(){
           if (!valid) {
             if (feedback.errCt === 0) {
               valid = true;
-              feedback.status = "PASS";
+              feedback.validLipd = "PASS";
             } else {
-              feedback.status = "FAIL";
+              feedback.validLipd = "FAIL";
             }
           }
         } catch(err){

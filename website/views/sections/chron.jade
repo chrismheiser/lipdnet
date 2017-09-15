@@ -10,7 +10,7 @@ include ./chron_model.jade
 div(layout='', layout-padding='', layout-sm='column' style="float: right;")
 	md-input-container
 		md-label Table Type
-		md-select(ng-model='dropdowns.current.table' ng-model-options="{trackBy: '$value.id'}")
+		md-select(ng-model='dropdowns.current.table' ng-model-options="{trackBy: '$value.id'}" aria-label="Filler")
 			md-option(ng-value="table" ng-repeat="table in dropdowns.tables") {{ table.name }}
 	button.valid-btn(ng-click='addBlock(files.json.chronData[0], dropdowns.current.table.name, "chron")' style="margin: 1.5em;" type="button")  + Add Table
 	// END MEASUREMENT TABLE
