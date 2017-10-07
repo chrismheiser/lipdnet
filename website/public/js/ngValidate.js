@@ -186,7 +186,9 @@ f.factory("ExportService", ["$q", function ($q) {
   // get the text from the ZipJs entry object. Parse JSON as-is and pass CSV to next step.
   var getText = function getText(filename, dat) {
     var d = $q.defer();
-    d.resolve({filename: dat});
+    var _t = {};
+    _t[filename] = dat;
+    d.resolve(_t);
     return d.promise;
   };
 
@@ -221,6 +223,7 @@ f.factory("ExportService", ["$q", function ($q) {
       promises.push(getText(_filename2, csvStr));
     }
     // resolve the array
+    console.log(promises);
     return $q.all(promises);
   }; // end prepForDownload
 
@@ -478,12 +481,16 @@ f.controller('ValidateCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Uplo
     // use the service to parse data from the ZipJS entries
     $scope._myPromiseExport = ExportService.prepForDownload(_newJson);
     $scope.pageMeta.busyPromise = $scope._myPromiseExport;
+    console.log("BEFORE");
+    console.log(_newJson);
     $scope._myPromiseExport.then(function (res) {
       // console.log("ExportService.then()");
       //upload zip to node backend, then callback and download it afterward.
       // console.log("Export response");
       // console.log(res);
       // console.log("downloadZip: Filename: " + $scope.files.lipdFilename);
+      console.log("AFTER");
+      console.log(res);
       $scope.uploadZip({"filename": $scope.files.lipdFilename, "dat": res}, function(resp){
         // do get request to trigger download file immediately after download
         // console.log("client side after upload");
@@ -492,8 +499,8 @@ f.controller('ValidateCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Uplo
         if (resp.status !== 200){
           window.alert("Error downloading file");
         } else {
-          // window.location.href = "http://localhost:3000/files/" + resp.data;
-          window.location.href = "http://www.lipd.net/files/" + resp.data;
+          window.location.href = "http://localhost:3000/files/" + resp.data;
+          // window.location.href = "http://www.lipd.net/files/" + resp.data;
         }
         // reset the captcha
         $scope.pageMeta.captcha = false;

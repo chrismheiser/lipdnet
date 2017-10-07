@@ -45,7 +45,7 @@ var createTmpDir = function(master){
   }catch(err){
     logger.info("index.js: createTmpDir: " + err);
     res.status(500).send("POST: createTmpDir: Error creating LiPD: " + err);
-  };
+  }
 };
 
 // Create the subfolders
@@ -223,6 +223,8 @@ router.get('/validator', function(req, res, next){
 
 router.post("/files", function(req, res, next){
   logger.info("POST: /files");
+  // REQ
+  //
   var master = {};
   master = parseRequest(master, req);
   master = createTmpDir(master);
@@ -230,9 +232,19 @@ router.post("/files", function(req, res, next){
   try{
     // use req data to write csv and jsonld files into "/files/<lipd-xxxxx>/files/"
     // logger.info("POST: begin writing files");
+
+    // console.log(master.files);
     master.files.forEach(function(file){
-      logger.info("POST: writing: " + path.join(master.pathTmpFiles,  file.filename));
-      fs.writeFileSync(path.join(master.pathTmpFiles, file.filename), file.dat);
+      console.log(typeof(file));
+      for(var _filename in file){
+        try{
+          logger.info("POST: writing: " + path.join(master.pathTmpFiles,  _filename));
+          fs.writeFileSync(path.join(master.pathTmpFiles, _filename), file[_filename]);
+        } catch(err){
+          res.status(500).send("Unable to process file: " + _filename);
+        }
+      }
+
     });
 
     logger.info("Start Bagit...");

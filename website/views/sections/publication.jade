@@ -17,7 +17,7 @@ div(ng-repeat="entry in files.json.pub track by $index" layout-wrap="")
     div(layout='', layout-padding='', layout-sm='column')
       md-input-container(flex='', ng-class="md-input-has-value")
         label Title *
-        textarea(ng-model='entry.title', columns='1', md-maxlength='150')
+        textarea(ng-model='entry.title', columns='1')
     div(layout='', layout-padding='', layout-wrap='', layout-sm='column')
       md-input-container(flex='', ng-class="md-input-has-value")
         label Year *

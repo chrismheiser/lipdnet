@@ -51,10 +51,6 @@ div(ng-repeat='entry in files.json.chronData track by $index' layout-wrap="")
                         md-input-container(flex='33', class="md-input-has-value")
                             label Units *
                             input(ng-model="entry3.units")
-                        md-input-container(flex="33")
-                            label Archive Type *
-                            md-select(ng-model="entry3.archiveType")
-                                md-option(ng-repeat="archive in dropdowns.archiveType" ng-value="archive") {{archive}}
                     div(layout='', layout-padding='', layout-sm='column')
                         md-input-container(flex='', class="md-input-has-value")
                             label Description
