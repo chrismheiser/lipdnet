@@ -3,6 +3,34 @@ var misc = (function(){
   return {
 
 
+    checkCoordinatesDms: (function(D, dms, ddOn){
+
+      // Only attempt conversion process if the decimal degrees switch is OFF (i.e., DMS is on)
+      if(!ddOn){
+       var _dd = misc.convertDecimalDegrees(dms);
+       // longitude
+       D.geo.geometry.coordinates[0] = _dd[0];
+       // latitude
+       D.geo.geometry.coordinates[1] = _dd[1];
+      }
+      return(D);
+    }),
+
+
+    convertDecimalDegrees: (function(dms){
+      // FORMULA : DD = d + (min/60) + (sec/3600)
+      // lat, lon
+      var _dd = [0, 0];
+      try{
+        _dd[0] = dms.lon.d + (dms.lon.m/60) + (dms.lon.s/3600);
+        _dd[1] = dms.lat.d + (dms.lat.m/60) + (dms.lat.s/3600);
+      } catch(err){
+        console.log("Error converting decimal degrees! " + err);
+      }
+      return _dd;
+    }),
+
+
     removeCsvHeader: (function(_csv){
       try{
         // Remove the first array in the .data. Remove index 0, and remove one element

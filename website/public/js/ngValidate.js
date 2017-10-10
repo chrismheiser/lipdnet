@@ -382,6 +382,7 @@ f.controller('ValidateCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Uplo
   // Metadata about the page view, and manipulations
   $scope.pageMeta = {
     "header": false,
+    "decimalDegrees": true,
     "fileUploaded": false,
     "toggle": "",
     "simpleView": true,
@@ -406,6 +407,19 @@ f.controller('ValidateCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Uplo
     "errMsgs": [],
     "wrnMsgs": [],
     "dataCanDo": []
+  };
+  // Degrees minutes seconds for coordinate conversions
+  $scope.dms = {
+    "lon": {
+      "d": 0,
+      "m": 0,
+      "s": 0
+    },
+    "lat":{
+      "d": 0,
+      "m": 0,
+      "s": 0
+    }
   };
   // Set google map default view
   $scope.map = {
@@ -761,6 +775,8 @@ f.controller('ValidateCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Uplo
     // console.log($scope.files);
     // rearrange coordinates from dict to array when necessary, and set the map if coordinates exist
     $scope.files = map.fixCoordinates($scope.files);
+    // convert dms coordinates where necessary
+    $scope.files.json = misc.checkCoordinatesDms($scope.files.json, $scope.dms, $scope.pageMeta.decimalDegrees);
     $scope.map = map.updateMap($scope.map, $scope.files);
     versions.update_lipd_version($scope.files, function(_results1){
       console.log("Updated Versions");

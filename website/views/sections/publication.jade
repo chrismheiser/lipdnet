@@ -18,15 +18,21 @@ div(ng-repeat="entry in files.json.pub track by $index" layout-wrap="")
       md-input-container(flex='', ng-class="md-input-has-value")
         label Title *
         textarea(ng-model='entry.title', columns='1')
+
+    div(layout='', layout-padding='', layout-sm='column')
+      md-input-container(flex='', ng-class="md-input-has-value")
+        label Journal
+        textarea(ng-model='entry.journal', columns='1')
+
     div(layout='', layout-padding='', layout-wrap='', layout-sm='column')
       md-input-container(flex='', ng-class="md-input-has-value")
         label Year *
         input(ng-model='entry.year')
         md-tooltip Year is not required for dataCitations
       md-input-container(flex='', ng-class="md-input-has-value")
-        label Journal *
-        input(ng-model="entry.journal")
-        md-tooltip Journal is not required for dataCitations
+        label Pages
+        input(ng-model="entry.pages")
+        md-tooltip Pages are not required for dataCitations
       md-input-container(flex='', ng-class="md-input-has-value")
         label Volume
         input(ng-model='entry.volume')

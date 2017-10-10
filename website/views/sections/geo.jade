@@ -4,21 +4,54 @@ md-toolbar.md-hue-1
 		span Geography
 
 // COORDINATES
-div(layout='', layout-padding='', layout-sm='column')
-	md-input-container(flex='25', ng-class="md-input-has-value")
+
+
+md-switch(ng-model='pageMeta.decimalDegrees') {{pageMeta.decimalDegrees? "Decimal Degrees": "Degrees-Minutes-Seconds"}}
+	md-tooltip LiPD stores coordinates as Decimal Degrees. You may switch to DMS format and we will convert the values for you.
+
+div(layout='', layout-padding='', layout-sm='column' ng-if="pageMeta.decimalDegrees")
+	md-input-container(flex='50', ng-class="md-input-has-value")
 		//- md-tooltip -90 to 90
 		label Latitude *
 		input(ng-model='files.json.geo.geometry.coordinates[1]', type='number')
 		//- input(ng-model='files.json.geo.geometry.coordinates[1]', type='number', min='-90', max='90')
-	md-input-container(flex='25', ng-class="md-input-has-value")
+	md-input-container(flex='50', ng-class="md-input-has-value")
 		//- md-tooltip -180 to 180
 		label Longitude *
 		input(ng-model='files.json.geo.geometry.coordinates[0]', type='number')
 		//- input(ng-model='files.json.geo.geometry.coordinates[0]', type='number', min='-180', max='180')
-	md-input-container(flex='25', ng-class="md-input-has-value")
+
+div(ng-if="!pageMeta.decimalDegrees")
+	md-subheader.md-primary Latitude
+	div(layout='', layout-padding='', layout-sm='column')
+		md-input-container(flex='33', ng-class="md-input-has-value")
+			label Degrees
+			input(ng-model='dms.lat.d', type='number')
+		md-input-container(flex='33', ng-class="md-input-has-value")
+			label Minutes
+			input(ng-model='dms.lat.m', type='number')
+		md-input-container(flex='33', ng-class="md-input-has-value")
+			label Seconds
+			input(ng-model='dms.lat.s', type='number')
+
+	md-subheader.md-primary Longitude
+	div(layout='', layout-padding='', layout-sm='column')
+		md-input-container(flex='33', ng-class="md-input-has-value")
+			label Degrees
+			input(ng-model='dms.lon.d', type='number')
+		md-input-container(flex='33', ng-class="md-input-has-value")
+			label Minutes
+			input(ng-model='dms.lon.m', type='number')
+		md-input-container(flex='33', ng-class="md-input-has-value")
+			label Seconds
+			input(ng-model='dms.lon.s', type='number')
+
+
+div(layout='', layout-padding='', layout-sm='column')
+	md-input-container(flex='50', ng-class="md-input-has-value")
 		label Elevation
 		input(ng-model='files.json.geo.geometry.coordinates[2]', type='number')
-	md-input-container(flex='25', class="md-input-has-value")
+	md-input-container(flex='50', class="md-input-has-value")
 		label Units
 		input(value="Meters (m)" disabled)
 		//- md-select(ng-model='geoMarkers[$index].unit')
