@@ -54,7 +54,7 @@ div(ng-repeat='entry in files.json.chronData track by $index' layout-wrap="")
                     div(layout='', layout-padding='', layout-sm='column')
                         md-input-container(flex='', class="md-input-has-value")
                             label Description
-                            textarea(ng-model='entry3.description', columns='1', md-maxlength='150')
+                            textarea(ng-model='entry3.description', columns='1', md-maxlength='500')
                     div(layout='', layout-padding='', layout-sm='column')
                         md-input-container(flex='', class="md-input-has-value")
                             label Values *
@@ -84,6 +84,7 @@ div(ng-repeat='entry in files.json.chronData track by $index' layout-wrap="")
 
                         div(layout='', layout-padding='', layout-sm='column')
                             button.invisible(ng-click="addRmProperty(entry3, entry3.tmp.custom); clearCustom(entry3)")
+                            md-tooltip If there is other data you'd like to add that isn't listed above, please enter it here.
                             md-input-container(flex="25")
                                 label Other...
                                 input(ng-model="entry3.tmp.custom")
