@@ -324,6 +324,10 @@ router.get("/modal", function(req, res, next){
   res.render('modal', {title: ''});
 });
 
+router.get("/modalInterp", function(req, res, next){
+  res.render('modalInterp', {title: ''});
+});
+
 router.get("/loading", function(req, res, next){
   res.render("loading", {title: ""});
 });

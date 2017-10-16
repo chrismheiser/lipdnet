@@ -1,19 +1,36 @@
-angular.module('ngValidate').controller('InterpModalCtrl', function ($scope, $uibModalInstance, data) {
+angular.module('ngValidate').controller('ModalCtrlInterp', function ($scope, $uibModalInstance) {
+  $scope.required = ["variable", "direction", "scope"];
+  $scope.standard = ["variableDetail", "seasonality", "rank"];
+  $scope.optional = ["basis", "coefficient", "equilibriumEvidence", "fraction", "inferredMaterial",
+    "integrationTime", "integrationTimeBasis", "integrationTimeUncertainty",
+    "integrationTimeUnits", "mathematicalRelation", "integrationTimeUncertaintyType"];
+  $scope.selected = ["variable", "direction", "scope", "variableDetail", "seasonality", "rank"];
 
-  $scope.items = [1,2,3,4,5];
-  $scope.selected = [];
-
-  $scope.toggle = function (item, list) {
-    var idx = list.indexOf(item);
+  $scope.toggle = function (key) {
+    var idx = $scope.selected.indexOf(key);
     if (idx > -1) {
-      list.splice(idx, 1);
+      $scope.selected.splice(idx, 1);
     }
     else {
-      list.push(item);
+      $scope.selected.push(key);
     }
   };
 
-  $scope.exists = function (item, list) {
-    return list.indexOf(item) > -1;
+  $scope.exists = function(key){
+    if ( $scope.selected.indexOf(key) > -1) {
+      return true;
+    }
+  };
+
+  $scope.close = function () {
+    var _interp = {};
+    for(var _t = 0; _t<$scope.selected.length; _t++){
+      _interp[$scope.selected[_t]] = "";
+    }
+    $uibModalInstance.close(_interp);
+  };
+
+  $scope.dismiss = function() {
+    $uibModalInstance.close("cancel");
   };
 });

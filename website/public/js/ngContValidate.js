@@ -204,7 +204,9 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
 
     $scope.addRmProperty = function(entry, name) {
       if (name === "interpretation"){
-        window.alert("THIS IS INTERPRETATION");
+        $scope.showModalInterpretation(function(selected){
+          entry["interpretation"] = selected;
+        });
       }
       else{
         entry = create.addRmProperty(entry, name);
@@ -466,30 +468,23 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       $scope.files.json.geo.properties.country = name;
     };
 
-    $scope.showInterpretationModal = function(){
-      // if this is a csv
-      $scope.modal = data;
+    // Show options for creating interpretation block
+    $scope.showModalInterpretation= function(cb){
       var modalInstance = $uibModal.open({
-        templateUrl: 'modalInterpretation',
-        controller: 'ModalCtrl',
-        size: "lg",
-        resolve: {
-          data: function () {
-            return $scope.modal;
-          }
-        }
+        templateUrl: 'modalInterp',
+        controller: 'ModalCtrlInterp',
+        size: "lg"
       });
 
-      modalInstance.result.then(function (data) {
-        $scope.selected = data;
-      }, function () {
-        $log.info('Modal dismissed at: ' + new Date());
+      modalInstance.result.then(function (selected) {
+        $scope.selected = selected;
+        cb(selected);
       });
+
     };
 
     // Showing contents of individual file links
-    $scope.showContentsModal = function(data){
-      // if this is a csv
+    $scope.showModalFileContent = function(data){
       $scope.modal = data;
       var modalInstance = $uibModal.open({
         templateUrl: 'modal',
@@ -501,10 +496,6 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
           }
         }
       });
-
-      // if this is a text file
-
-      // if this is a json file
     };
 
     $scope.showProperty = function(name){

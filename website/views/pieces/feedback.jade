@@ -25,6 +25,6 @@ li(style="list-style-type: none;")
   //- pre#csvPretty
   
 li(style="list-style-type: none;")
-  pre(ng-class="files.fileCt > 0? 'on' : 'off'" style="background-color:#eee; border: none;") {{files.fileCt}} files in LiPD
+  pre(ng-class="files.fileCt > 0? 'on' : 'off'" style="background-color:#eee; border: none;" uib-popover="Click any filename to view the data within that specific file" popover-trigger="'mouseenter'") {{files.fileCt}} files in LiPD
     ul
-      li(ng-repeat="file in allFiles track by $index" ng-click="showContentsModal(file)") {{ file.filenameShort }}
+      li(ng-repeat="file in allFiles track by $index" ng-click="showModalFileContent(file)") {{ file.filenameShort }}

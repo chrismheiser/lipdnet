@@ -17,12 +17,17 @@ block body
 					div
 						h1.md-display-3 { Linked Paleo Data }
 						br
+						img(ng-src="img/logo_trans.png" width="250px")
+						br
+						br
 						p.md-subhead Linked Paleo Data (LiPD) is a community data framework being designed to simplify the sharing, reuse and analysis of paleoclimate data. By combining a flexible, hierarchical data container with linked data concepts, LiPD lets paleoscientists spend less time wrangling data, and more time doing science.
 						p.md-subhead We’re currently working hard to develop more and better utilities for interacting with LiPD, both for the creation and validation of LiPD datasets, and for tools to interact with LiPD data in Python, R, and Matlab. We’re always looking for more people interested in  
 							a(href='#contact') contributing to the effort.
 						p.md-subhead.
 							A technical description of the LiPD framework is available
 							#[a(href='http://www.clim-past-discuss.net/11/4309/2015/cpd-11-4309-2015-discussion.html') here.]
+
+
 			#buttons(layout='row')
 				//- .md-button.schematic-btn.left(ng-mouseenter="sch=true" ng-mouseleave="sch=false") Schematic
 				a.right.smoothScroll(href="#schematic")
@@ -33,7 +38,7 @@ block body
 			h1.subject.md-display-3(layout layout-align="center center") { Schematic }
 			.subject.third
 				.content(layout='row' layout-align='space-around center' ng-cloak)
-					img(ng-src="img/schematic.jpg" style='width:100%;')
+					img(ng-src="img/schematic.png" style='width:100%;')
 
 	.container.cf#about
 		.animation-element.bounce-up.cf
@@ -105,44 +110,43 @@ block body
 				.content
 					div(ng-controller='MapCtrl' ng-cloak)
 						ui-gmap-google-map(center="map.center" zoom="map.zoom" options="options")
-	
 
 	
-	.container.cf#contact(ng-controller='ContactCtrl')
-		.animation-element.bounce-up.cf(ng-init="sent=false")
-			h1.subject.md-display-3(layout layout-align="center center") Contact
-			.subject.third
-				.category-color
-				.icon
-					i.fa.fa-envelope
-				.header.cf
-				h3.title Questions, comments, concerns...
-				
-				// show this when form has not been submitted yet
-				.content(layout='row' layout-align='space-around center' ng-cloak ng-switch='fmsnt')
-					.f(ng-switch-when="false" flex='30')
-						h4 Tell us what you think
-						p We're working hard to make our LiPD utilities better every day. Let us know what you like, what you don't like, and what can be improved!
-					form.f(ng-switch-when="false" flex='60' method='post' ng-model='fm')
-						md-input-container
-							label Name
-							input(type="text" name='fn' ng-model='fm.fn' required max-length='30' ng-blur="checkForm();")
-						md-input-container
-							label Organization
-							input(type="text" name='fo' ng-model='fm.fo' required max-length='30' ng-blur="checkForm();")
-						md-input-container
-							label E-Mail
-							input(type="email" name='fe' ng-model='fm.fe' required max-length='30' ng-blur="checkForm()")
-						md-input-container
-							label Subject
-							input(type="text" name='fs' ng-model='fm.fs' required max-length='30' ng-blur="checkForm()")
-						md-input-container
-							label Message
-							textarea(type="text" name='fmm' ng-model='fm.fmm' required max-length='150' ng-blur="checkForm()")
-						md-button.send(type='submit' ng-click='sendMail()' ng-model="fmsnt" ng-disabled="!complete") Send
-					.f(ng-switch-when="true")
-						h1(style='font-weight:500;') Message Sent!
-						p We'll get back to you as soon as possible. 
+	//.container.cf#contact(ng-controller='ContactCtrl')
+	//	.animation-element.bounce-up.cf(ng-init="sent=false")
+	//		h1.subject.md-display-3(layout layout-align="center center") Contact
+	//		.subject.third
+	//			.category-color
+	//			.icon
+	//				i.fa.fa-envelope
+	//			.header.cf
+	//			h3.title Questions, comments, concerns...
+	//
+	//			// show this when form has not been submitted yet
+	//			.content(layout='row' layout-align='space-around center' ng-cloak ng-switch='fmsnt')
+	//				.f(ng-switch-when="false" flex='30')
+	//					h4 Tell us what you think
+	//					p We're working hard to make our LiPD utilities better every day. Let us know what you like, what you don't like, and what can be improved!
+	//				form.f(ng-switch-when="false" flex='60' method='post' ng-model='fm')
+	//					md-input-container
+	//						label Name
+	//						input(type="text" name='fn' ng-model='fm.fn' required max-length='30' ng-blur="checkForm();")
+	//					md-input-container
+	//						label Organization
+	//						input(type="text" name='fo' ng-model='fm.fo' required max-length='30' ng-blur="checkForm();")
+	//					md-input-container
+	//						label E-Mail
+	//						input(type="email" name='fe' ng-model='fm.fe' required max-length='30' ng-blur="checkForm()")
+	//					md-input-container
+	//						label Subject
+	//						input(type="text" name='fs' ng-model='fm.fs' required max-length='30' ng-blur="checkForm()")
+	//					md-input-container
+	//						label Message
+	//						textarea(type="text" name='fmm' ng-model='fm.fmm' required max-length='150' ng-blur="checkForm()")
+	//					md-button.send(type='submit' ng-click='sendMail()' ng-model="fmsnt" ng-disabled="!complete") Send
+	//				.f(ng-switch-when="true")
+	//					h1(style='font-weight:500;') Message Sent!
+	//					p We'll get back to you as soon as possible.
 
 
 	footer

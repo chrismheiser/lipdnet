@@ -32,7 +32,7 @@ div(ng-repeat='entry in files.json.paleoData track by $index' layout-wrap="")
                     //- md-switch(ng-model='pageMeta.delimiter') Delimiter: {{ pageMeta.delimiter? "Semi-colon ( ; )" : "Comma ( , ) / Tab / Spaces"}}
                 div(layout='', layout-padding='', layout-sm='column')
                     textarea(placeholder='Copy/Paste your CSV data here...' ng-model="entry2.values" style="border:0.1em solid #ccc;border-radius:0.5em;height:10em;width:80em")
-                    button.valid-btn(ng-click="parseCsv(entry2, $index, {'pc': 'paleo', 'tt': 'measurement'}); toggleCsvBox(entry2)" style="margin: 1.5em; float:right;" type="button") Parse CSV
+                    button.valid-btn(ng-click="parseCsv(entry2, $index, {'pc': 'paleo', 'tt': 'measurement'}); toggleCsvBox(entry2)" style="margin:1.5em; float:right;height:auto;" type="button") Parse CSV
                         //- md-tooltip(md-visible="files.json.dataSetName === ''") DatasetName required before parsing Csv
 
             br
@@ -61,8 +61,8 @@ div(ng-repeat='entry in files.json.paleoData track by $index' layout-wrap="")
                             //- input(format-values ng-model="files.csv[entry2.filename].transposed[$index]")
                             input(space-values ng-model="files.csv[entry2.filename].transposed[$index]")
                     div(layout='', layout-padding='', layout-sm='column' style="float: right;")
-                        button.valid-btn(ng-if="entry3.tmp.toggle" ng-click='entry3.tmp.toggle = !entry3.tmp.toggle' style="margin: 1.5em;" type="button")  - Show less
-                        button.valid-btn(ng-if="!entry3.tmp.toggle" ng-click='entry3.tmp.toggle = !entry3.tmp.toggle' style="margin: 1.5em;" type="button")  + Show more
+                        button.valid-btn(ng-if="entry3.tmp.toggle" ng-click='entry3.tmp.toggle = !entry3.tmp.toggle' style="margin: 1.5em;" type="button")  - Other Fields
+                        button.valid-btn(ng-if="!entry3.tmp.toggle" ng-click='entry3.tmp.toggle = !entry3.tmp.toggle' style="margin: 1.5em;" type="button")  + Other Fields
 
                     div(ng-if="entry3.tmp.toggle")
                         md-subheader.md-primary Add Properties
