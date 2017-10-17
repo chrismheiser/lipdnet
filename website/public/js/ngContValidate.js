@@ -205,7 +205,15 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
     $scope.addRmProperty = function(entry, name) {
       if (name === "interpretation"){
         $scope.showModalInterpretation(function(selected){
-          entry["interpretation"] = selected;
+          if(selected === "cancel"){
+            entry.tmp[name] = !entry.tmp[name];
+          } else{
+            if (entry.interpretation === undefined){
+              entry.interpretation = [selected];
+            } else {
+              entry["interpretation"].push(selected);
+            }
+          }
         });
       }
       else{
@@ -477,7 +485,6 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       });
 
       modalInstance.result.then(function (selected) {
-        $scope.selected = selected;
         cb(selected);
       });
 
@@ -499,7 +506,7 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
     };
 
     $scope.showProperty = function(name){
-      if(["number", "variableName", "units", "toggle", "values", "checked", "tmp"].includes(name)){
+      if(["number", "variableName", "units", "toggle", "values", "checked", "tmp", "interpretation"].includes(name)){
         return false;
       }
       return true;

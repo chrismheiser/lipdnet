@@ -92,5 +92,9 @@ div(ng-repeat='entry in files.json.paleoData track by $index' layout-wrap="")
                         md-input-container(flex='', class="md-input-has-value")
                             label {{k}}
                             input(ng-model="entry3[k]" ng-disabled="k==='TSid'")
-
+                    div(ng-repeat="interpretation in entry3.interpretation track by $index" ng-if="showProperty(k) && entry3.tmp.toggle" layout='', layout-padding='', layout-sm='column')
+                        md-subheader.md-primary interpretation {{$index}}
+                        md-input-container(flex='', class="md-input-has-value" ng-repeat="(k,v) in interpretation")
+                            label {{k}}
+                            input(ng-model="entry3.interpretation[k]")
 

@@ -12,7 +12,7 @@ div(ng-repeat="entry in files.json.pub track by $index" layout-wrap="")
         label DOI
         input(ng-model='entry.identifier[0].id')
         md-tooltip Enter a valid DOI and we'll work some magic
-      button.valid-btn(ng-click="fetchPublication(entry)" style="margin: 1.5em;" ng-disabled="!entry.identifier[0].id") Autocomplete using DOI
+      button.valid-btn(ng-click="fetchPublication(entry)" style="margin:1.5em; float:right;height:auto;" ng-disabled="!entry.identifier[0].id") Autocomplete using DOI
     br
     div(layout='', layout-padding='', layout-sm='column')
       md-input-container(flex='', ng-class="md-input-has-value")
