@@ -320,12 +320,16 @@ router.get("/create", function(req, res, next){
   res.render('create', {title: 'Create & Edit LiPD'});
 });
 
-router.get("/modal", function(req, res, next){
-  res.render('modal', {title: ''});
+router.get("/modal-file", function(req, res, next){
+  res.render('modal/modal-file', {title: ''});
 });
 
-router.get("/modalInterp", function(req, res, next){
-  res.render('modalInterp', {title: ''});
+router.get("/modal-interp", function(req, res, next){
+  res.render('modal/modal-interp', {title: ''});
+});
+
+router.get("/modal-alert", function(req, res, next){
+  res.render('modal/modal-alert', {title: ''});
 });
 
 router.get("/loading", function(req, res, next){

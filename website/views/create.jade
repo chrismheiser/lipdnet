@@ -20,7 +20,7 @@ block body
 			include ./include/navbar.jade
 			md-toolbar
 				.md-toolbar-tools
-					.md-title Upload
+					.md-title Create LiPD
 									
 			.col-sm-12
 				#form-container(ng-controller="ValidateCtrl as vc")
@@ -43,7 +43,8 @@ block body
 										span Load & Validate
 								div
 									ol
-										include ./pieces/action_btns.jade									
+										include ./pieces/action_btns.jade
+										include ./pieces/noaa_wiki_btns.jade
 										include ./pieces/feedback.jade									
 											
 							div(class="span span50")
@@ -61,8 +62,9 @@ block js
 	script(src='apps/validateApp.js')
 	script(src='js/ngValidate.js')
 	script(src='js/ngContValidate.js')
-	script(src='js/ngContModals.js')
-	script(src='js/ngContInterp.js')
+	script(src='js/ngContModFile.js')
+	script(src='js/ngContModInt.js')
+	script(src='js/ngContModAlert.js')
 	script(src="lib/zip/zip.js")
 	script(src='lib/json-tree.js')
 	script(src="lib/zip/zip-ext.js")

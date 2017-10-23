@@ -106,7 +106,7 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       "countries" : map.getCountries(),
     };
     $scope.fields = [
-      "basis", "proxy", "material", "method", "seasonality", "dataType", "useInGlobalTemperatureAnalysis", "sensorSpecies", "sensorGenus", "variableType", "proxyObservationType", "inferredVariableType", "notes", "interpretation"
+      "proxy", "material", "method", "dataType", "sensorSpecies", "sensorGenus", "variableType", "proxyObservationType", "inferredVariableType", "notes", "interpretation"
     ];
     $scope.oneAtATime = true;
     // Compilation of all LiPD file data
@@ -134,7 +134,9 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       "dlFallback": false,
       "dlFallbackMsg": "",
       "captcha": false,
-      "oldVersion": "NA"
+      "oldVersion": "NA",
+      "noaaReady": false,
+      "wikiReady": false
     };
     // All feedback warnings, errors, and messages received from the validator
     $scope.feedback = {
@@ -197,8 +199,6 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       }
       // Add a block of data to the JSON. (i.e. funding, paleoData table, publication, etc.)
       entry = create.addBlock(entry, blockType, pc);
-      console.log("exit add block");
-      console.log(entry);
       return entry;
     };
 
@@ -222,10 +222,37 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       return entry;
     };
 
+    $scope.makeNoaaReady = function(){
+      create.addNoaaFields($scope.files.json, function(_d2){
+        window.alert("NOAA fields have been added. Please fill out each field.");
+        $scope.file.json = _d2;
+      })
+    };
+
     $scope.makeWikiReady = function(){
-      create.addWikiReady($scope.files.json, function(_d2){
-        window.alert("Wiki fields were added to the dataset root, and each table column. Don't forget to fill them out!");
-        $scope.files.json = _d2;
+      if(!$scope.pageMeta.wikiReady){
+        // Make Ready
+        create.addWikiReady($scope.files.json, function(_d2){
+          $scope.genericModalAlert({"title": "Wiki Fields Added", "message": "Wiki required fields have been added. Please fill out each field"});
+          $scope.files.json = _d2;
+        });
+      } else {
+        // Don't remove fields. just alert
+        $scope.genericModalAlert({"title": "Fields may be ignored", "message": "The Wiki fields have not been removed, but they may be ignored. Continue normally. "});
+      }
+    };
+
+    $scope.genericModalAlert = function(msg){
+      $scope.modal = msg;
+      var modalInstance = $uibModal.open({
+        templateUrl: 'modal-alert',
+        controller: 'ModalCtrlAlert',
+        size: "md",
+        resolve: {
+          data: function () {
+            return $scope.modal;
+          }
+        }
       });
     };
 
@@ -240,26 +267,13 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
 
     $scope.downloadZip = function(){
 
-      // Remove temporary fields from the JSON data
-      var _newJson = JSON.parse(JSON.stringify($scope.files));
+      // Fix up the json a bit so it's ready to be sorted and downloaded
+      var _newJson = create.closingWorkflow($scope.files, $scope.files.dataSetName, $scope.files.csv);
 
-
-      // TODO replicate the dataset level archiveType over every table column
-
-
-      _newJson.json = create.rmTmpEmptyData(_newJson.json);
-      // Append the DataSetName to the front of all the CSV files.
-      var _addDataSetName = create.addDataSetName($scope.files.dataSetName, $scope.files.csv);
-      if (_addDataSetName){
-        // Add Datasetname to all json and csv filenames.
-        _newJson = create.alterFilenames(_newJson);
-      }
       // Download the *validated* LiPD file to client's computer
       // use the service to parse data from the ZipJS entries
       $scope._myPromiseExport = ExportService.prepForDownload(_newJson);
       $scope.pageMeta.busyPromise = $scope._myPromiseExport;
-      console.log("BEFORE");
-      console.log(_newJson);
       $scope._myPromiseExport.then(function (res) {
         // console.log("ExportService.then()");
         //upload zip to node backend, then callback and download it afterward.
@@ -479,7 +493,7 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
     // Show options for creating interpretation block
     $scope.showModalInterpretation= function(cb){
       var modalInstance = $uibModal.open({
-        templateUrl: 'modalInterp',
+        templateUrl: 'modal-interp',
         controller: 'ModalCtrlInterp',
         size: "lg"
       });
@@ -494,8 +508,8 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
     $scope.showModalFileContent = function(data){
       $scope.modal = data;
       var modalInstance = $uibModal.open({
-        templateUrl: 'modal',
-        controller: 'ModalCtrl',
+        templateUrl: 'modal-file',
+        controller: 'ModalCtrlFile',
         size: "lg",
         resolve: {
           data: function () {

@@ -62,17 +62,27 @@ var create = (function(){
       return entry;
     }),
 
+    addDataSetName: (function(_dsn, _csv){
+      // Check if the datasetname is in the CSV filenames or not.
+      for (var _key in _csv){
+        if(_csv.hasOwnProperty(_key)){
+          // if the datasetname exists in this csv file.
+          if(_key.indexOf(_dsn) !== -1){
+            // don't need to add a datasetname. We found it.
+            return false;
+          }
+        }
+      }
+      // no datasetname found. We need to add them throughout the JSON data and _csv names.
+      return true;
+    }),
+
     addFunding: (function(entry){
       var _block = {"agency": "", "grant": "", "investigator": "", "country": ""};
       if (!entry){
         entry = [];
       }
       entry.push(_block);
-      return entry;
-    }),
-
-    // TODO: Is this even a needed function? Should be fixed to one entry?
-    addGeo: (function(entry){
       return entry;
     }),
 
@@ -118,59 +128,8 @@ var create = (function(){
       return entry;
     }),
 
-    alterFilenames: (function(_json){
-      var _dsn = _json.dataSetName;
-      var _newCsv = {};
-      // change all the csv filenames in the csv section
-      for (var _key in _json.csv){
-        if (_json.csv.hasOwnProperty(_key)){
-          _newCsv[_dsn + "." + _key]  = _json.csv[_key];
-        }
-      }
-      // change all the csv filenames in the table data
-      var _newJson = create.alterJsonFilenames(_json.json, _dsn);
-      _json.csv = _newCsv;
-      _json.json = _newJson;
-      return _json;
-    }),
-
-    alterJsonFilenames: (function(x, dsn){
-      // find any filename entries and append the datasetname to the front of it.
-
-      // loop over this data structure
-      for (var _key in x){
-        // safety check: don't want prototype attributes
-        if (x.hasOwnProperty(_key) && x[_key] !== undefined){
-          // found a filename entry. change it.
-          if(_key === "filename"){
-            x[_key] = dsn + "." + x[_key];
-          } else if (x[_key].constructor === [].constructor && x[_key].length > 0) {
-            // value is an array. iterate over array and recursive call
-            for (var _g=0; _g < x[_key].length; _g++){
-              // process, then return in place.
-              x[_key][_g] = create.alterJsonFilenames(x[_key][_g], dsn);
-            }
-          } else if (x[_key].constructor === {}.constructor && x[_key].length > 0){
-            x[_key] = create.alterJsonFilenames(x[_key], dsn);
-          }
-        }
-      }
-      return x;
-    }),
-
-    addDataSetName: (function(_dsn, _csv){
-      // Check if the datasetname is in the CSV filenames or not.
-      for (var _key in _csv){
-        if(_csv.hasOwnProperty(_key)){
-          // if the datasetname exists in this csv file.
-          if(_key.indexOf(_dsn) !== -1){
-            // don't need to add a datasetname. We found it.
-            return false;
-          }
-        }
-      }
-      // no datasetname found. We need to add them throughout the JSON data and _csv names.
-      return true;
+    addNoaaReady: (function(D, cb){
+      cb(D);
     }),
 
     /**
@@ -240,6 +199,67 @@ var create = (function(){
         }
       }
       return(tables);
+    }),
+
+    alterFilenames: (function(_json){
+      var _dsn = _json.dataSetName;
+      var _newCsv = {};
+      // change all the csv filenames in the csv section
+      for (var _key in _json.csv){
+        if (_json.csv.hasOwnProperty(_key)){
+          _newCsv[_dsn + "." + _key]  = _json.csv[_key];
+        }
+      }
+      // change all the csv filenames in the table data
+      var _newJson = create.alterJsonFilenames(_json.json, _dsn);
+      _json.csv = _newCsv;
+      _json.json = _newJson;
+      return _json;
+    }),
+
+    alterJsonFilenames: (function(x, dsn){
+      // find any filename entries and append the datasetname to the front of it.
+
+      // loop over this data structure
+      for (var _key in x){
+        // safety check: don't want prototype attributes
+        if (x.hasOwnProperty(_key) && x[_key] !== undefined){
+          // found a filename entry. change it.
+          if(_key === "filename"){
+            x[_key] = dsn + "." + x[_key];
+          } else if (x[_key].constructor === [].constructor && x[_key].length > 0) {
+            // value is an array. iterate over array and recursive call
+            for (var _g=0; _g < x[_key].length; _g++){
+              // process, then return in place.
+              x[_key][_g] = create.alterJsonFilenames(x[_key][_g], dsn);
+            }
+          } else if (x[_key].constructor === {}.constructor && x[_key].length > 0){
+            x[_key] = create.alterJsonFilenames(x[_key], dsn);
+          }
+        }
+      }
+      return x;
+    }),
+
+    /**
+     * Wrapper for multiple closing functions before initiating a file download
+     *
+     * For example: removing temporary fields, fixing filenames, and moving data around.
+     *
+     */
+    closingWorkflow: (function(_scopeFiles, _dsn, _csv){
+      // Remove temporary fields from the JSON data
+      var _newJson = JSON.parse(JSON.stringify(_scopeFiles.files));
+      // TODO copy the archiveType from the root, to each data table column
+
+      _newJson.json = create.rmTmpEmptyData(_newJson.json);
+      // Append the DataSetName to the front of all the CSV files.
+      var _addDataSetName = create.addDataSetName(_dsn, _csv);
+      if (_addDataSetName){
+        // Add Datasetname to all json and csv filenames.
+        _newJson = create.alterFilenames(_newJson);
+      }
+      return _newJson;
     }),
 
     initColumnTmp: (function(x){
@@ -404,7 +424,7 @@ var create = (function(){
       return entry;
     }),
 
-    // STORED DATA LISTS
+    // STORED DATA LISTS -----
 
     archiveTypeList: (function(){
       return ["coral", "document", "glacier ice", "hybrid","lake sediment", "marine sediment", "mollusks shells",

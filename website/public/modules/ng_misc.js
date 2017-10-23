@@ -2,7 +2,6 @@ var misc = (function(){
   // 'use strict';
   return {
 
-
     checkCoordinatesDms: (function(D, dms, ddOn){
 
       // Only attempt conversion process if the decimal degrees switch is OFF (i.e., DMS is on)
@@ -16,7 +15,6 @@ var misc = (function(){
       return(D);
     }),
 
-
     convertDecimalDegrees: (function(dms){
       // FORMULA : DD = d + (min/60) + (sec/3600)
       // lat, lon
@@ -29,7 +27,6 @@ var misc = (function(){
       }
       return _dd;
     }),
-
 
     removeCsvHeader: (function(_csv){
       try{
@@ -61,10 +58,6 @@ var misc = (function(){
         _delimiter = ";";
       }
       return _delimiter;
-    }),
-
-    // TODO : Recursive function to remove all temporary fields created for angular views (i.e. column metadata)
-    rmTmpFields: (function(d){
     }),
 
     // add dataSetNames to
@@ -203,11 +196,10 @@ var misc = (function(){
     // Generate a TSid. An alphanumeric unique ID. Prefix + 8 chars.
     generateTSids: (function(_count){
       try{
-        _data = [];
+        var _data = [];
         for(var _i=0; _i < _count; _i++){
           _data.push(misc.generateTSid());
         }
-        _data.push("LPD1479bfe1");
         return _data;
       } catch(err){
         console.log(err);

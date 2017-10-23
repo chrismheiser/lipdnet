@@ -1,6 +1,6 @@
 md-toolbar.md-hue-1
   h2.md-toolbar-tools
-    span Create LiPD 
+    span Root
 div
   // METADATA
   //- md-toolbar.md-hue-1
@@ -30,8 +30,9 @@ div
     md-input-container(flex='66', ng-class="md-input-has-value")
       label Investigators
       input(ng-model='files.json.investigators')
+      md-tooltip Use the format: LastName, FirstName; LastName, FirstName; ...
   div(layout='', layout-padding='', layout-sm='column')
     md-input-container(flex='', ng-class="md-input-has-value")
       label Notes
-      textarea(ng-model='files.json.notes', columns='1', md-maxlength='150')
+      textarea(ng-model='files.json.notes', columns='1', md-maxlength='500')
       
