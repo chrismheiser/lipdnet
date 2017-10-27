@@ -35,8 +35,10 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       '<li>dataSetName</li>' +
       '<li>archiveType</li>' +
       '<li>createdBy</li>' +
-      '<li>geo coordinates</li>' +
-      '<li>paleoData measurementTable</li>' +
+      '</ul><br><p>Geo:</p><ul>' +
+      '<li>coordinates</li>' +
+      '</ul><br><p>paleoData:</p><ul>' +
+      '<li>measurementTable</li>' +
       '</ul><br><p>Column Level:</p><ul>' +
       '<li>variableName</li>' +
       '<li>units ("unitless" if units not applicable)</li>' +
@@ -45,17 +47,35 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
 
     $scope.wikiPopover = $sce.trustAsHtml('' +
       '<h5>Linked Earth Wiki Requirements</h5><br>' +
-      '<p>Root Level:</p><ul>' +
-      '<li>dataSetName</li>' +
-      '<li>archiveType</li>' +
+      '<p>In addition to the normal LiPD Requirements: </p>' +
+
       '</ul><br><p>Column Level:</p><ul>' +
       '<li>proxyObservationType</li>' +
-      '<li>variableName</li>' +
       '<li>variableType</li>' +
       '<li>takenAtDepth</li>' +
       '<li>inferredVariableType</li>' +
       '</ul>');
-    $scope.noaaPopover = $sce.trustAsHtml('<p><strong>NOAA Requirements</strong></p><br><p>Coming Soon!</p>');
+    $scope.noaaPopover = $sce.trustAsHtml('' +
+      '<h5>NOAA Requirements</h5><br>' +
+      '<p>In addition to the normal LiPD Requirements: </p>' +
+
+      '</ul><br><p>NOAA specific:</p><ul>' +
+      '<li>maxYear</li>' +
+      '<li>minYear</li>' +
+      '<li>timeUnit</li>' +
+      '<li>onlineResource</li>' +
+      '<li>onlineResourceDescription</li>' +
+      '<li>modifiedDate</li><br>' +
+      '</ul><p>Root Level:</p><ul>' +
+      '<li>investigators</li>' +
+      '</ul><br><p>Geo:</p><ul>' +
+      '<li>siteName</li>' +
+      '<li>location</li>' +
+      '</ul><br><p>Column Level:</p><ul>' +
+      '<li>description</li>' +
+      '<li>dataFormat</li>' +
+      '<li>dataType</li>'
+    );
 
     var vc = this;
     vc.properties = {
@@ -102,12 +122,12 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
         { id: 5, name: " ", view: "Space"},
       ],
       "archiveType": create.archiveTypeList(),
+      "timeUnit": create.timeUnitList(),
+      "years": create.yearList(),
       "createdBy": create.createdByList(),
-      "countries" : map.getCountries(),
+      "countries" : map.getCountries()
     };
-    $scope.fields = [
-      "proxy", "material", "method", "dataType", "sensorSpecies", "sensorGenus", "variableType", "proxyObservationType", "inferredVariableType", "notes", "interpretation"
-    ];
+    $scope.fields = create.defaultColumnFields();
     $scope.oneAtATime = true;
     // Compilation of all LiPD file data
     $scope.files = {
@@ -223,9 +243,9 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
     };
 
     $scope.makeNoaaReady = function(){
-      create.addNoaaFields($scope.files.json, function(_d2){
+      create.addNoaaReady($scope.files.json, function(_d2){
         window.alert("NOAA fields have been added. Please fill out each field.");
-        $scope.file.json = _d2;
+        $scope.files.json = _d2;
       })
     };
 
@@ -557,8 +577,6 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
 
     $scope.validate = function(){
       // Go through all validations steps, and update scope data.
-      var _options = {"fileUploaded": $scope.pageMeta.fileUploaded};
-      // console.log($scope.files);
       // rearrange coordinates from dict to array when necessary, and set the map if coordinates exist
       $scope.files = map.fixCoordinates($scope.files);
       // convert dms coordinates where necessary
@@ -568,7 +586,7 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
           console.log("Updated Versions");
           console.log(_results1.files);
           $scope.pageMeta.oldVersion = _results1.version;
-          lipdValidator.validate(_results1.files, _options, function(_results){
+          lipdValidator.validate(_results1.files, $scope.pageMeta, function(_results){
             try{
               $scope.files = _results.files;
               $scope.feedback = _results.feedback;

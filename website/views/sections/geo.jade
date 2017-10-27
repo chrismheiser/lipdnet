@@ -65,6 +65,7 @@ div(layout='', layout-padding='', layout-sm='column')
 	md-input-container(flex='33', ng-class="md-input-has-value")
 		label Location
 		input(ng-model='files.json.geo.properties.location')
+		md-tooltip Use NASA GCMD locations. Example: "Continent>North America>United States of America>Baltimore"
 	md-input-container(flex="33")
 		label Country
 		md-select(ng-model="files.json.geo.properties.country")

@@ -15,17 +15,17 @@ var lipdValidator = (function(){
      * @param {array} files LiPD data sorted by type.
      *   files = { "modal": {}, "lipdFilename": "", "dataSetName": "", "fileCt": 0, "bagit": {}, "csv": {},
                   "jsonSimple": {}, "json": {} };
-     * @param {object} options Validation options {"fileUploaded": true/false}
+     * @param {object} pageMeta Validation pageMeta
      * @param {callback} cb Callback sorts the validation results
      */
-    validate: (function(files, options, cb){
+    validate: (function(files, pageMeta, cb){
       try{
         var _output = {};
         lipdValidator.populateTSids(files, function(files_1){
           _output.files = files_1.files;
-          options.tsids_generated = files_1.tsids_generated;
+          pageMeta.tsids_generated = files_1.tsids_generated;
 
-          lipdValidator.processData(files_1.files, options, function(_results){
+          lipdValidator.processData(files_1.files, pageMeta, function(_results){
             try{
               _output.feedback = _results.feedback;
               _output.status = _results.status;
@@ -47,13 +47,13 @@ var lipdValidator = (function(){
      * @param {array} files LiPD data sorted by type.
      *   files = { "modal": {}, "lipdFilename": "", "dataSetName": "", "fileCt": 0, "bagit": {}, "csv": {},
                   "jsonSimple": {}, "json": {} };
-     * @param {object} options Validation options {"fileUploaded": true/false}
+     * @param {object} pageMeta Validation pageMeta {"fileUploaded": true/false}
      * @param {callback} cb Callback sorts the validation results
      */
-    validate_w_restructure: (function(files, options, cb){
+    validate_w_restructure: (function(files, pageMeta, cb){
       try{
         lipdValidator.restructure(files, function(files_2){
-          lipdValidator.validate(files_2, options, function(_results){
+          lipdValidator.validate(files_2, pageMeta, function(_results){
             cb(_results);
           });
         });
@@ -259,11 +259,11 @@ var lipdValidator = (function(){
      * @param {array} files LiPD data sorted.
      *   files = { "modal": {}, "lipdFilename": "", "dataSetName": "", "fileCt": 0, "bagit": {}, "csv": {},
                   "jsonSimple": {}, "json": {} };
-     * @param {object} options Validation options {"fileUploaded": true/false}
+     * @param {object} pageMeta Validation pageMeta {"fileUploaded": true/false}
      * @param {callback} cb
      * @return {object} {"dat": files.json, "feedback": feedback, "filename": files.lipdFilename, "status": feedback.status}
      */
-    processData: (function(files, options, cb){
+    processData: (function(files, pageMeta, cb){
 
       // console.log("validate: Begin Validation");
       // console.log(files);
@@ -293,6 +293,7 @@ var lipdValidator = (function(){
         "wrnCt": 0,
         "errCt": 0,
         "errCtWiki": 0,
+        "errCtNoaa": 0,
         "tsidMsgs": [],
         "posMsgs": [],
         "errMsgs": [],
@@ -316,20 +317,6 @@ var lipdValidator = (function(){
         "reqGeoKeys": ["coordinates"]
       };
 
-      /** v1.1  && base keys */
-      var keys_1_1 = {
-        "miscKeys": ["lipdVersion"],
-        "reqRootKeys": ["lipdVersion"],
-        "reqTableNameKeys": []
-      };
-
-      /** v1.2  && base keys */
-      var keys_1_2 = {
-        "miscKeys": ["WDCPaleoUrl","hasMinValue", "hasMaxValue", "hasMedianValue", "hasMeanValue", "hasResolution", "lipdVersion"],
-        "reqRootKeys": ["lipdVersion"],
-        "reqTableNameKeys": []
-      };
-
       /** v1.3  && base keys */
       var keys_1_3 = {
         "miscKeys": ["WDCPaleoUrl","hasMinValue", "hasMaxValue", "hasMedianValue", "hasMeanValue", "hasResolution", "lipdVersion", "createdBy"],
@@ -337,9 +324,29 @@ var lipdValidator = (function(){
         "reqTableNameKeys": ["tableName", "name"]
       };
 
-      var _required_wiki = {
-        "root": ["dataSetName", "archiveType"],
-        "column": ["takenAtDepth", "variableName", "inferredVariableType", "proxyObservationType"]
+      var _wiki_validate = {
+        "required": {
+          "root": ["dataSetName", "archiveType"],
+          "columns": ["takenAtDepth", "variableName", "inferredVariableType", "proxyObservationType"]
+        },
+        "preferred": {
+          "root": [],
+          "columns": []
+        }
+      };
+
+      var _noaa_validate = {
+        "required": {
+          "root": ["investigators", "maxYear", "minYear", "timeUnit", "onlineResource", "onlineResourceDescription", "modifiedDate"],
+          "columns": ["description", "dataFormat", "dataType"],
+          "geo": ["location", "siteName"]
+        },
+        "preferred": {
+          "root": ["originalSourceUrl", "datasetDOI", "funding"],
+          "pub": ["author", "title", "year", "journal", "volume", "edition", "issue", "pages", "report", "doi",
+                  "onlineResource", "citation", "abstract"],
+          "funding": ["agency", "grant"]
+        }
       };
 
       /**
@@ -356,36 +363,7 @@ var lipdValidator = (function(){
           files.json["lipdVersion"]  = lipdVersion;
           feedback.lipdVersion = lipdVersion;
           console.log("Validating version: " + lipdVersion);
-
-          /* DEPRECATED: This code should never run */
-          /* Since all files are updated to v1.3, this code is unreachable, but kept for fallback reasons.*/
-          if(lipdVersion === "1.0"){
-            console.log("validate_1_0: LiPD Structure");
-            structureBase(files.json, keys_base.miscKeys.concat(keys_1_1.miscKeys));
-            structure_1_0(files.json);
-            console.log("validate_1_0: LiPD Required Fields");
-            requiredBase(files.json);
-            required_1_0(files.json);
-          }
-          else if(lipdVersion === "1.1"){
-            console.log("validate_1_1: LiPD Structure");
-            structureBase(files.json, keys_base.miscKeys);
-            structure_1_1(files.json);
-            console.log("validate_1_1: LiPD Required Fields");
-            requiredBase(files.json);
-            required_1_1(files.json);
-          }
-          else if (lipdVersion === "1.2"){
-            console.log("validate_1_2: LiPD Structure");
-            structureBase(files.json, keys_base.miscKeys.concat(keys_1_2.miscKeys));
-            structure_1_2(files.json);
-            console.log("validate_1_2: LiPD Required Fields");
-            requiredBase(files.json);
-            required_1_2(files.json);
-          }
-          /* END DEPRECATED*/
-
-          else if (lipdVersion === "1.3"){
+          if(lipdVersion === "1.3"){
             console.log("validate_1_3: LiPD Structure");
             structureBase(files.json, keys_base.miscKeys.concat(keys_1_3.miscKeys));
             structure_1_3(files.json);
@@ -397,19 +375,25 @@ var lipdValidator = (function(){
           logSpecialFeedback();
           verifyBagit(files.bagit);
           verifyWiki(files.json);
-          verifyValid();
+          verifyNoaa(files.json);
+          checkPassFail(feedback.errCt, function(passFail){
+            feedback.validLipd = passFail;
+            if(passFail==="PASS"){
+              valid = true;
+            }
+          });
           console.log("VALIDATE STATUS REPORT: ");
           console.log("LiPD filename: " + files.lipdFilename);
-          console.log("TSids created: " + options.tsids_generated);
-          console.log("Wiki Ready: " + feedback.validWiki);
-          console.log("Result: " + feedback.validLipd);
+          console.log("TSids created: " + pageMeta.tsids_generated);
+          console.log("Wiki: " + feedback.validWiki);
+          console.log("NOAA: " + feedback.validNoaa);
+          console.log("LiPD: " + feedback.validLipd);
           // var jsonCopy = JSON.parse(JSON.stringify(files.json));
         } catch (err){
           console.log(err);
         }
         return {"dat": files.json, "feedback": feedback, "filename": files.lipdFilename, "status": feedback.validLipd};
       };
-
 
       /**
        * Version-independent
@@ -452,47 +436,12 @@ var lipdValidator = (function(){
         }
       };
 
-      var structure_1_0 = function(D){
-        try {
-          if (D.hasOwnProperty("chronData")) {
-            structureSection_1_0("chron", D.chronData);
-          }
-          if (D.hasOwnProperty("paleoData")) {
-            structureSection_1_0("paleo", D.paleoData);
-          }
-        } catch (err) {
-          console.log("structure_1_0: Caught error parsing: " + err);
-        }
-      };
-
-      var structure_1_1 = function(D){
-        try {
-          if (D.hasOwnProperty("chronData")) {
-            structureSection_1_1("chron", D.chronData);
-          }
-          if (D.hasOwnProperty("paleoData")) {
-            structureSection_1_1("paleo", D.paleoData);
-          }
-        } catch (err) {
-          console.log("structure_1_1: Caught error parsing: " + err);
-        }
-      };
-
-
-      var structure_1_2 = function (D) {
-        try {
-            if (D.hasOwnProperty("chronData")) {
-              structureSection_1_2("chron", D.chronData);
-            }
-            if (D.hasOwnProperty("paleoData")) {
-              structureSection_1_2("paleo", D.paleoData);
-            }
-        } catch (err) {
-          console.log("structure_1_2: Caught error parsing: " + err);
-        }
-      };
-
-
+      /**
+       * Structure v1.3
+       * Top-level that calls down to individual sections
+       *
+       * @param D
+       */
       var structure_1_3 = function (D) {
         try {
           if (D.hasOwnProperty("chronData")) {
@@ -503,163 +452,6 @@ var lipdValidator = (function(){
           }
         } catch (err) {
           console.log("structure_1_3: Caught error parsing: " + err);
-        }
-      };
-
-
-      /**
-       * Structure v1.0
-       *
-       * paleo: array of objects
-       * chron: array of objects
-       *
-       * @param {string} pc paleo or chron
-       * @param {Array} d Metadata
-       */
-      var structureSection_1_0 = function(pc, d){
-
-        var _k = pc+"Data";
-
-        // paleoData || chronData NOT an array
-        if (!Array.isArray(d)) {
-          logFeedback("err", "Invalid data type: " + _k + ". Expected: Array, Given: " + (typeof d === 'undefined' ? 'undefined' : _typeof(d)));
-        }
-
-        // paleoData || chronData are an array
-        else if (Array.isArray(d) && d.length > 0) {
-
-          // paleoData || chronData are an array of objects
-          verifyArrObjs(_k, d, true);
-
-        }
-      };
-
-      /**
-       * Structure v1.1
-       *
-       * paleo: array of objects, no nested tables
-       * chron: array of objects, with nested tables
-       * measurement: single
-       * modelTable: single
-       * method: single
-       * ensemble: single
-       * calibratedAges: multiple
-       *
-       * @param {string} pc paleo or chron
-       * @param {Array} d Metadata
-       */
-      var structureSection_1_1 = function(pc, d){
-        try{
-          var _k = pc+"Data";
-
-          // paleoData || chronData NOT an array
-          if (!Array.isArray(d)) {
-            logFeedback("err", "Invalid data type: " + _k + ". Expected: Array, Given: " + (typeof d === 'undefined' ? 'undefined' : _typeof(d)));
-          }
-
-          // paleoData || chronData are an array
-          else if (Array.isArray(d) && d.length > 0) {
-
-            // paleoData || chronData are an array of objects
-            var valid_section = verifyArrObjs(_k, d, true);
-
-            // In v1.1, only chron has nested tables.
-            if (valid_section && pc === "chron") {
-              // create table names based on what "mode" we're in. chron or paleo
-              var meas = pc + "MeasurementTable";
-              var mod = pc + "Model";
-              // check if measurement table exists
-              if (d[0].hasOwnProperty(meas)) {
-                // check if measurement table is an object
-                verifyDataType("object", meas, d[0][meas], true);
-              } // end measurement table
-              // check if model table exists
-              if (d[0].hasOwnProperty(mod)) {
-                // check if model table is array with objects
-                var valid_model = verifyArrObjs(mod, d[0][mod]);
-                var _table_names = [ pc + "ModelTable", "calibratedAges", "method", "ensembleTable"];
-                if (valid_model) {
-                  // correct so far, so check if items in model table [0] are correct types
-                  for (var _i = 0; _i < _table_names.length; _i++) {
-                    var _table_name = _table_names[_i];
-                    if (d[0][mod][0].hasOwnProperty(_table_name)) {
-                      if (_table_name === "calibratedAges") {
-                        verifyArrObjs(_table_name, d[0][mod][0][_table_name], true);
-                      } else {
-                        verifyDataType("object", _table_name, d[0][mod][0][_table_name], true);
-                      }
-                    }
-                  }
-                }
-              } // end model
-            } // end valid_section
-          }
-        } catch(err){
-          console.log("structureSection_1_1: " + err);
-        }
-      };
-
-      /**
-       * Structure v1.2
-       *
-       * paleo: array of objects, with nested tables
-       * chron: array of objects, with nested tables
-       * measurement: multiple
-       * summary: single
-       * method: single
-       * ensemble: single
-       * distribution: multiple
-       *
-       * @param {string} pc paleo or chron
-       * @param {Array} d Metadata
-       */
-      var structureSection_1_2 = function (pc, d) {
-        try {
-          var _k = pc+"Data";
-
-          // paleoData || chronData NOT an array
-          if (!Array.isArray(d)) {
-            logFeedback("err", "Invalid data type: " + _k + ". Expected: Array, Given: " + (typeof d === 'undefined' ? 'undefined' : _typeof(d)));
-          }
-
-          // paleoData || chronData are an array
-          else if (Array.isArray(d) && d.length > 0) {
-
-            // paleoData || chronData are an array of objects
-            var valid_section = verifyArrObjs(_k, d, true);
-
-            if (valid_section) {
-              // create table names based on what "mode" we're in. chron or paleo
-              var meas = pc + "MeasurementTable";
-              var mod = pc + "Model";
-              // check if measurement table exists
-              if (d[0].hasOwnProperty(meas)) {
-                // check if measurement table is array with objects
-                verifyArrObjs(meas, d[0][meas], true);
-              } // end measurement table
-              // check if model table exists
-              if (d[0].hasOwnProperty(mod)) {
-                // check if model table is array with objects
-                var valid_model = verifyArrObjs(mod, d[0][mod]);
-                var _table_names = ["summaryTable", "distributionTable", "method", "ensembleTable"];
-                if (valid_model) {
-                  // correct so far, so check if items in model table [0] are correct types
-                  for (var _i = 0; _i < _table_names.length; _i++) {
-                    var table = _table_names[_i];
-                    if (d[0][mod][0].hasOwnProperty(table)) {
-                      if (table === "distributionTable") {
-                        verifyArrObjs(table, d[0][mod][0][table], true);
-                      } else {
-                        verifyDataType("object", table, d[0][mod][0][table], true);
-                      }
-                    }
-                  }
-                }
-              } // end model
-            } // end valid_section
-          }
-        } catch(err){
-          console.log("structureSection_1_2: " + err);
         }
       };
 
@@ -719,7 +511,6 @@ var lipdValidator = (function(){
         }
       };
 
-
         // REQUIRED DATA
 
       /**
@@ -729,39 +520,6 @@ var lipdValidator = (function(){
        */
       var requiredBase = function(D){
         requiredPubs(D);
-      };
-
-      /**
-       * Required data for v1.0
-       *
-       * @param {object} D Metadata
-       */
-      var required_1_0 = function(D){
-        requiredRoot(D, keys_base.reqRootKeys);
-        requiredSection_1_0("paleo", D);
-        requiredSection_1_0("chron", D);
-      };
-
-      /**
-       * Required data for v1.1
-       *
-       * @param {object} D Metadata
-       */
-      var required_1_1 = function(D){
-        requiredRoot(D, keys_base.reqRootKeys.concat(keys_1_1.reqRootKeys));
-        requiredSection_1_1("paleo", D);
-        requiredSection_1_1("chron", D);
-      };
-
-      /**
-       * Required data for v1.2
-       *
-       * @param {object} D Metadata
-       */
-      var required_1_2 = function (D) {
-        requiredRoot(D, keys_base.reqRootKeys.concat(keys_1_2.reqRootKeys));
-        requiredSection_1_2("paleo", D);
-        requiredSection_1_2("chron", D);
       };
 
       /**
@@ -775,188 +533,8 @@ var lipdValidator = (function(){
         requiredSection_1_3("chron", D);
       };
 
-
       /**
-       *  v1.0
-       *  Required data for the paleoData || chronData section
-       *
-       * @param {string} pc paleo or chron
-       * @param {object} D Metadata
-       */
-      var requiredSection_1_0 = function(pc, D){
-        var pcData = pc + "Data";
-
-        try{
-          // paleoData not found. Require _AT LEAST_ one paleo measurement table
-          if (!D.hasOwnProperty(pcData)) {
-            if (pc === "paleo") {
-              logFeedback("err", "Missing data: " + pcData + "0");
-            }
-          }
-          // paleoData
-          else {
-            // paleoData found, but empty. Require _AT LEAST_ one paleo measurement table
-            if (pc === "paleo" && !D[pcData]) {
-              logFeedback("err", "Missing data: " + pcData + "0");
-            } else {
-              // paleo || chron - no nested tables
-                requiredTables(D[pcData], pc, keys_base.reqTableNameKeys);
-            } // end else
-          } // end else
-        } catch(err){
-          console.log("validator: requiredSection_1_0: " + err);
-        }
-      }; // end required 1.0
-
-
-      /**
-       *  v1.1
-       *  Required data for the paleoData || chronData section
-       *
-       * @param {string} pc paleo or chron
-       * @param {object} D Metadata
-       */
-      var requiredSection_1_1 = function(pc, D){
-
-        var pcData = pc + "Data";
-        var meas = pc + "MeasurementTable";
-        var mod = pc + "Model";
-
-        try{
-          // paleoData not found. Require _AT LEAST_ one paleo measurement table
-          if (!D.hasOwnProperty(pcData)) {
-            if (pc === "paleo") {
-              logFeedback("err", "Missing data: " + pcData + "0measurement0");
-            }
-          }
-          // paleoData
-          else {
-            // paleoData found, but empty. Require _AT LEAST_ one paleo measurement table
-            if (pc === "paleo" && !D[pcData]) {
-              logFeedback("err", "Missing data: " + pcData + "0measurement0");
-            } else {
-
-              // paleo does not have nested tables
-              if (pc === "paleo"){
-                requiredTables(D[pcData], pc, keys_base.reqTableNameKeys);
-              }
-
-              // chron has nested tables
-              else if (pc === "chron"){
-                // paleoData entries
-                for (var i = 0; i < D[pcData].length; i++) {
-
-                  var _table = D[pcData][i];
-
-                  // measurement missing. Require _AT LEAST_ one paleo measurement table
-                  if (!_table.hasOwnProperty(meas)) {
-                    logFeedback("err", "Missing data: " + pc + "0measurement0");
-                  }
-
-                  // measurement
-                  else if (_table.hasOwnProperty(meas)) {
-                    requiredTable(_table[meas], pc + i + "measurement", keys_base.reqTableNameKeys)
-                  } // end meas
-
-                  // model
-                  if (_table.hasOwnProperty(mod)) {
-                    for (var k = 0; k < _table[mod].length; k++) {
-                      var modTables = _table[mod][k];
-                      // summary
-                      if (modTables.hasOwnProperty("chronModelTable")) {
-                        requiredTable(modTables.summaryTable, pc + i + "model" + k + "chronModelTable", keys_base.reqTableNameKeys);
-                      }
-                      // ensemble
-                      if (modTables.hasOwnProperty("ensembleTable")) {
-                        requiredTable(modTables.ensembleTable, pc + i + "model" + k + "ensemble", keys_base.reqTableNameKeys);
-                      }
-                      // distribution
-                      if (modTables.hasOwnProperty("calibratedAges")) {
-                        requiredTables(modTables.calibratedAges, pc + i + "model" + k + "calibratedAges", keys_base.reqTableNameKeys)
-                      }
-                    }
-                  } // end model
-                } // end paleoData loop
-              }
-            } // end else
-          } // end else
-        } catch(err){
-          console.log("validator: requiredSection_1_1: " + err);
-        }
-      }; // end required 1.1
-
-
-      /**
-       *  v1.2
-       *  Required data for the paleoData || chronData section
-       *
-       * @param {string} pc paleo or chron
-       * @param {object} D Metadata
-       */
-      var requiredSection_1_2 = function (pc, D) {
-
-        var pdData = pc + "Data";
-        var meas = pc + "MeasurementTable";
-        var mod = pc + "Model";
-
-        try{
-          // paleoData not found. Require _AT LEAST_ one paleo measurement table
-          if (!D.hasOwnProperty(pdData)) {
-            if (pc === "paleo") {
-              logFeedback("err", "Missing data: " + pdData + "0measurement0");
-            }
-          }
-          // paleoData
-          else {
-              // paleoData empty. Require _AT LEAST_ one paleo measurement table
-              if (pc === "paleo" && !D[pdData]) {
-                logFeedback("err", "Missing data: " + pdData + "0measurement0");
-              } else {
-
-                // paleoData entries
-                for (var i = 0; i < D[pdData].length; i++) {
-
-                  var table = D[pdData][i];
-
-                  // measurement missing. Require _AT LEAST_ one paleo measurement table
-                  if (!table.hasOwnProperty(meas) && pc === "paleo") {
-                    logFeedback("err", "Missing data: " + pc + "0measurement0");
-                  }
-
-                  // measurement
-                  else if (table.hasOwnProperty(meas)) {
-                    requiredTables(table[meas], pc + i + "measurement", keys_base.reqTableNameKeys)
-                  } // end meas
-
-                  // model
-                  if (table.hasOwnProperty(mod)) {
-                    for (var k = 0; k < table[mod].length; k++) {
-                      var modTables = table[mod][k];
-                      // summary
-                      if (modTables.hasOwnProperty("summaryTable")) {
-                        requiredTable(modTables.summaryTable, pc + i + "model" + k + "summary", keys_base.reqTableNameKeys);
-                      }
-                      // ensemble
-                      if (modTables.hasOwnProperty("ensembleTable")) {
-                        requiredTable(modTables.ensembleTable, pc + i + "model" + k + "ensemble", keys_base.reqTableNameKeys);
-                      }
-                      // distribution
-                      if (modTables.hasOwnProperty("distributionTable")) {
-                        requiredTables(modTables.distributionTable, pc + i + "model" + k + "distribution", keys_base.reqTableNameKeys)
-                      }
-                    }
-                  } // end model
-                } // end paleoData loop
-              } // end else
-            } // end else
-        } catch(err){
-          console.log("validator: requiredSection_1_2: " + err);
-        }
-
-      }; // end required 1.2
-
-      /**
-       *  v1.3
+       *  Required data for v1.3 - section
        *  Required data for the paleoData || chronData section
        *
        * @param {string} pc paleo or chron
@@ -969,7 +547,7 @@ var lipdValidator = (function(){
           // paleoData missing. Require _AT LEAST_ one paleo measurement table
           if (!D.hasOwnProperty(pdData)) {
             if (pc === "paleo") {
-              logFeedback("err", "Missing data: " + pdData + "0measurement0");
+              logFeedback("err", "Missing: " + pdData + "0measurement0");
             }
           }
           // paleoData
@@ -977,7 +555,7 @@ var lipdValidator = (function(){
 
             // paleoData empty. Require _AT LEAST_ one paleo measurement table
             if (pc === "paleo" && !D[pdData]) {
-              logFeedback("err", "Missing data: " + pdData + "0measurement0");
+              logFeedback("err", "Missing: " + pdData + "0measurement0");
             } else {
               // paleoData entries
               for (var i = 0; i < D[pdData].length; i++) {
@@ -986,7 +564,7 @@ var lipdValidator = (function(){
 
                 // measurement missing. Require _AT LEAST_ one paleo measurement table
                 if (!section.hasOwnProperty("measurementTable") && pc === "paleo") {
-                  logFeedback("err", "Missing data: " + pc + "0measurement0");
+                  logFeedback("err", "Missing: " + pc + "0measurement0");
                 }
 
                 // measurement
@@ -1022,7 +600,6 @@ var lipdValidator = (function(){
     }; // end required 1.3
 
 
-
       // VERSION INDEPENDENT FUNCTIONS
 
       /**
@@ -1039,17 +616,18 @@ var lipdValidator = (function(){
             var key = keys[i];
             // Geo
             if (key === "geo") {
-              // Geo
+              // Geo - make sure the whole section exists
               if (D.hasOwnProperty(key)) {
+                // section exists, check that the required geo keys are present
                 requiredGeo(D);
               }
-              // Geo missing. Required _AT LEAST_ coordinates
+              // Geo section missing. Required _AT LEAST_ coordinates
               else {
-                logFeedback("err", "Missing data: " + "geo.geometry.coordinates");
+                logFeedback("err", "Missing: " + "geo.geometry.coordinates");
               }
             } else if (!D.hasOwnProperty(key) || !D[key]) {
               // Required key is missing
-              logFeedback("err", "Missing data: " + key);
+              logFeedback("err", "Missing: " + key);
             }
           } // end for
         } catch(err){
@@ -1068,7 +646,7 @@ var lipdValidator = (function(){
       var requiredTables = function(tables, crumbs, tnks){
         try{
           if (tables.length === 0){
-            logFeedback("err", "Missing data: " + crumbs + "0");
+            logFeedback("err", "Missing: " + crumbs + "0");
           } else {
             for (var _w = 0; _w < tables.length; _w++) {
               requiredTable(tables[_w], crumbs + _w, tnks);
@@ -1079,7 +657,6 @@ var lipdValidator = (function(){
         }
 
       };
-
 
       /**
        * Check _one_ table for required keys
@@ -1105,7 +682,7 @@ var lipdValidator = (function(){
                 table["missingValue"] = "nan";
                 feedback.missingMvCt++;
               } else {
-                logFeedback("err", "Missing data: " + crumbs + "." + currKey);
+                logFeedback("err", "Missing: " + crumbs + "." + currKey);
               }
             }
           } // end columns loop
@@ -1119,17 +696,16 @@ var lipdValidator = (function(){
             }
           }
           if (!_tnk_bool){
-            logFeedback("err", "Missing data: " + crumbs + "." + "tableName");
+            logFeedback("err", "Missing: " + crumbs + "." + "tableName");
           }
-
 
           // column count match CSV count
           if(!table.hasOwnProperty("columns") || table.columns.length === 0){
-            logFeedback("err", "Missing data: " + crumbs + ".columns");
+            logFeedback("err", "Missing: " + crumbs + ".columns");
           } else if (table.hasOwnProperty("columns")) {
             // Required: CSV filename where column values are stored
             if (!filename) {
-              logFeedback("err", "Missing data: " + crumbs + ".filename")
+              logFeedback("err", "Missing: " + crumbs + ".filename")
             } else {
               requiredColumnsCtMatch(filename, table.columns);
             }
@@ -1147,7 +723,7 @@ var lipdValidator = (function(){
                       table.columns[i]["units"] = "unitless";
                       feedback.missingUnitCt++;
                     } else {
-                      logFeedback("err", "Missing data: " + crumbs + ".column" + i + "." + currKey, currKey);
+                      logFeedback("err", "Missing: " + crumbs + ".column" + i + "." + currKey, currKey);
                     }
                   }
                 }
@@ -1155,15 +731,11 @@ var lipdValidator = (function(){
             } // end columns loop
           } // end 'if columns exist'
 
-
-
-
         } catch(err){
           console.log("validator: requiredTable: " + err);
         }
 
       }; // end requiredTable fn
-
 
       /**
        * Notify the user: If there were any tsids that were auto-generated,
@@ -1184,7 +756,6 @@ var lipdValidator = (function(){
           console.log("logSpecialFeedback: " + err);
         }
       };
-
 
       /**
        * Check that publication data follows the BibJson standard
@@ -1243,7 +814,7 @@ var lipdValidator = (function(){
             // expecting specified data type, but didn't get it.
             if (v === undefined)  {
               if(addToLog){
-                logFeedback("warn", "Missing data: " + k);
+                logFeedback("warn", "Missing: " + k);
               }
             } // end if
             else if (_typeof(v) !== dt) {
@@ -1396,9 +967,9 @@ var lipdValidator = (function(){
             var key = pubKeys[k];
             if (!pub.hasOwnProperty(key)) {
               // this pub is missing a required key!
-              logFeedback("err", "Missing data: " + crumbs + "." + key);
+              logFeedback("err", "Missing: " + crumbs + "." + key);
             } else if (!pub[key]){
-              logFeedback("err", "Missing data: " + crumbs + "." + key);
+              logFeedback("err", "Missing: " + crumbs + "." + key);
             }
           }
         } catch(err) {
@@ -1409,6 +980,7 @@ var lipdValidator = (function(){
       // checks if there is coordinate information needed to plot a map of the location
       var requiredGeo = function (m) {
         try {
+          // COORDINATE CHECKS
           var coords = m.geo.geometry.coordinates.length;
           // start building map marker(s)
           if (coords === 2 || coords === 3) {
@@ -1421,7 +993,7 @@ var lipdValidator = (function(){
             var latValid = numberInRange(-90, 90, lat);
 
             if (!m.geo.geometry.coordinates[0]){
-              logFeedback("err", "Missing data: longitude", "coordinates");
+              logFeedback("err", "Missing: longitude", "coordinates");
             } else if (!lonValid) {
               // check if longitude is range
               logFeedback("err", "Longitude out of range: Enter value from -180 to 180", "longitude");
@@ -1429,7 +1001,7 @@ var lipdValidator = (function(){
 
 
             if (!m.geo.geometry.coordinates[1]){
-              logFeedback("err", "Missing data: latitude", "coordinates");
+              logFeedback("err", "Missing: latitude", "coordinates");
             } else if (!latValid) {
               // check if latitude is in range
               logFeedback("err", "Latitude out of range: Enter value from -90 to 90", "latitude");
@@ -1437,7 +1009,7 @@ var lipdValidator = (function(){
           } else {
             if (!m.geo.geometry.coordinates){
               // there aren't any coordinate values to make the map
-              logFeedback("err", "Missing data: " + "geo - coordinates", "coordinates");
+              logFeedback("err", "Missing: " + "geo - coordinates", "coordinates");
             }
           }
         } catch (err) {
@@ -1475,7 +1047,7 @@ var lipdValidator = (function(){
 
           // Only run Verify Bagit when this is an uploaded file. NOT when it's being created from scratch
           // If create from scratch, it's not possible to have bagit files yet.
-          if(options.fileUploaded){
+          if(pageMeta.fileUploaded){
             var count = 0;
             var errors = 0;
             validBagitFiles.forEach(function (filename) {
@@ -1498,150 +1070,210 @@ var lipdValidator = (function(){
       };
 
       /**
-       * Verify that the WIKI-required fields are present in the metadata
-       * Log missing fields as a warning with a WIKI notation.
+       *
+       * Verify that the Wiki required fields are present when the user wishes to meet Wiki standards.
+       * Data is split into "required" and "preferred" fields, and logged as errors and warnings respectively.
        *
        * @param D Metadata
        *
        */
       var verifyWiki = function (D){
-        var _pcs = ["paleoData", "chronData"];
-        var _required_wiki = {
-          "root": ["dataSetName", "archiveType"],
-          "columns": ["takenAtDepth", "variableName", "inferredVariableType", "proxyObservationType"]
-        };
-        try{
-          // Look for the ROOT keys required by the WIKI
-          for(var _w = 0; _w<_required_wiki["root"].length; _w++){
-              if(!D.hasOwnProperty(_required_wiki["root"][_w])){
-                logFeedback("warn", "Missing data (Wiki): " + _required_wiki["root"][_w]);
-              }
-          }
+        var _opts = {"mode": "Wiki", "ready": pageMeta.wikiReady, "keys": _wiki_validate, "count": feedback.errCtWiki};
+        verifyNoaaWiki(D, _opts, function(){
+          checkPassFail(feedback.errCtWiki, function(passFail){
+            feedback.validWiki = passFail;
+          });
+        });
+      };
 
-          // Look got the COLUMN keys required by the WIKI
-          for (var _y=0; _y<_pcs.length; _y++) {
-            var _pc = _pcs[_y];
-            if(D.hasOwnProperty(_pc)){
-              for (var i = 0; i < D[_pc].length; i++) {
-                var section = D[_pc][i];
+      /**
+       * Verify that the NOAA required fields are present when the user wishes to meet NOAA standards.
+       * Data is split into "required" and "preferred" fields, and logged as errors and warnings respectively.
+       *
+       * @param D Metadata
+       */
+      var verifyNoaa = function(D){
+        var _opts = {"mode": "NOAA", "ready": pageMeta.noaaReady, "keys": _noaa_validate, "count": feedback.errCtNoaa};
+        verifyNoaaWiki(D, _opts, function(){
+          checkPassFail(feedback.errCtNoaa, function(passFail){
+            feedback.validNoaa = passFail;
+          });
+        });
+      };
 
-                // measurement
-                if (section.hasOwnProperty("measurementTable")) {
-                  requiredTablesWiki(section["measurementTable"], _pc + i + "measurement", _required_wiki["columns"])
+      // NOAA
+      /**
+       * Verify that the NOAA required fields are present when the user wishes to meet NOAA standards.
+       * Data is split into "required" and "preferred" fields, and logged as errors and warnings respectively.
+       *
+       * @param D Metadata
+       * @param opts Parameters that are needed depending on the mode being run (noaa v. wiki)
+       * @param cb Callback
+       */
+      var verifyNoaaWiki = function(D, opts, cb){
+        if(opts.ready){
+          var _pcs = ["paleoData", "chronData"];
+
+          try{
+
+            // Required Root Keys
+            for(var _r = 0; _r < opts["keys"]["required"]["root"].length; _r++){
+              if(!D.hasOwnProperty(opts["keys"]["required"]["root"][_r])){
+                logFeedback("err", "(" + opts.mode + ") Missing: " + opts["keys"]["required"]["root"][_r]);
+                if(opts.mode === "NOAA"){
+                  feedback.errCtNoaa++;
+                } else if (opts.mode === "Wiki"){
+                  feedback.errCtWiki++;
                 }
-
-                // model
-                if (section.hasOwnProperty("model")) {
-                  for (var _k = 0; _k < section["model"].length; _k++) {
-                    var modTables = section["model"][_k];
-                    // summary
-                    if (modTables.hasOwnProperty("summaryTable")) {
-                      requiredTablesWiki(modTables.summaryTable, _pc + i + "model" + _k + "summary", _required_wiki["columns"])
-                    }
-                    // ensemble
-                    if (modTables.hasOwnProperty("ensembleTable")) {
-                      requiredTablesWiki(modTables.ensembleTable, _pc + i + "model" + _k + "ensemble", _required_wiki["columns"])
-                    }
-                    // distribution
-                    // if (modTables.hasOwnProperty("distributionTable")) {
-                    //   requiredTablesWiki(modTables.distributionTable, pc + _i + "model" + _k + "distribution", _required_wiki["columns"])
-                    // }
-                  }
-                } // end model
-              } // end pcData loop
+              }
             }
 
-            } // end else
-          checkWikiErr();
-        } catch(err){
-          console.log("verifyWiki: " + err);
-        }
+            // Preferred Root Keys
+            for(var _p = 0; _p < opts["keys"]["preferred"]["root"].length; _p++){
+              if(!D.hasOwnProperty(opts["keys"]["preferred"]["root"][_p])){
+                logFeedback("warn", "(" + opts.mode + ") Missing: " + opts["keys"]["preferred"]["root"][_p]);
+              }
+            }
 
+            // Special Case: NOAA GEO
+            if(opts.mode==="NOAA"){
+              console.log("NOAA GEO");
+              for(var _g=0; _g < opts["keys"]["required"]["geo"].length; _g++){
+                console.log("g = " + _g);
+                try{
+                  var _key1 = opts["keys"]["required"]["geo"][_g];
+                  console.log(_key1);
+                  if(!D.geo.properties[_key1]){
+                    logFeedback("err", "(NOAA) Missing: " + _key1);
+                  }
+                } catch(err){
+                  logFeedback("err", "(NOAA) Missing: " + _key1);
+
+                }
+              }
+            }
+
+            // Look got the COLUMN keys required by the WIKI
+            for (var _y=0; _y<_pcs.length; _y++) {
+              var _pc = _pcs[_y];
+              if(D.hasOwnProperty(_pc)){
+                for (var i = 0; i < D[_pc].length; i++) {
+                  var section = D[_pc][i];
+
+                  // measurement
+                  if (section.hasOwnProperty("measurementTable")) {
+                    requiredTablesNoaaWiki(section["measurementTable"], _pc + i + "measurement", opts.keys, opts.mode)
+                  }
+
+                  // model
+                  if (section.hasOwnProperty("model")) {
+                    for (var _k = 0; _k < section["model"].length; _k++) {
+                      var modTables = section["model"][_k];
+                      // summary
+                      if (modTables.hasOwnProperty("summaryTable")) {
+                        requiredTablesNoaaWiki(modTables.summaryTable, _pc + i + "model" + _k + "summary", opts.keys, opts.mode)
+                      }
+                      // ensemble
+                      if (modTables.hasOwnProperty("ensembleTable")) {
+                        requiredTablesNoaaWiki(modTables.ensembleTable, _pc + i + "model" + _k + "ensemble", opts.keys, opts.mode)
+                      }
+                      // distribution
+                      // if (modTables.hasOwnProperty("distributionTable")) {
+                      //   requiredTablesNoaa(modTables.distributionTable, pc + _i + "model" + _k + "distribution", _noaa_validate["required"]["columns"])
+                      // }
+                    }
+                  } // end model
+                } // end pcData loop
+              }
+
+            } // end else
+
+            cb();
+          } catch(err){
+            console.log("verifyNoaaWiki: " + opts.mode + ": "   + err);
+          }
+        }
       };
 
       /**
        * Check _multiple_ tables for required keys
        *
        * @param {object} tables Metadata
-       * @param {string} crumbs
-       * @param {object} tnks tableName keys for this version
+       * @param {string} crumbs Crumbs for path so far
+       * @param {object} keys Keys to look for
+       * @param {string} mode NOAA or Wiki mode
        */
-      var requiredTablesWiki = function(tables, crumbs, tnks){
+      var requiredTablesNoaaWiki = function(tables, crumbs, keys, mode){
         try{
           for (var _w = 0; _w < tables.length; _w++) {
-            requiredTableWiki(tables[_w], crumbs + _w, tnks);
+            requiredTableNoaaWiki(tables[_w], crumbs + _w, keys, mode);
           }
         } catch(err){
-          console.log("requiredTablesWiki: " + crumbs + ": " + err);
+          console.log("requiredTablesNoaaWiki: " + mode + ": " + crumbs + ": " + err);
         }
-
       };
-
 
       /**
        * Check _one_ table for required keys
        *
        * @param {object} table Metadata
-       * @param {string} crumbs
-       * @param {object} tnks Required keys for this LiPD Version
+       * @param {string} crumbs Crumbs for path so far
+       * @param {object} keys Keys to look for
+       * @param {string} mode NOAA or Wiki mode
        */
-      var requiredTableWiki = function (table, crumbs, tnks) {
+      var requiredTableNoaaWiki = function (table, crumbs, keys, mode) {
         try {
           if (table.hasOwnProperty("columns")) {
             // Required column keys
             for (var i = 0; i < table.columns.length; i++) {
-              // required column keys
-              for (var k in tnks) {
-                if(tnks.hasOwnProperty(k)){
-                  // current key
-                  var currKey = tnks[k];
-                  // current key exists in this column?
-                  if (!table.columns[i].hasOwnProperty(currKey) || !table.columns[i][currKey]) {
-                    logFeedback("warn", "Missing data (Wiki): " + crumbs + ".column" + i + "." + currKey, currKey);
-                    feedback.errCtWiki++;
-                  }
-                }
-              } // end table keys
+              requiredColumnNoaaWiki(table.columns[i], crumbs + ".column" + i + ".", mode, "err", keys["required"]);
+              requiredColumnNoaaWiki(table.columns[i], crumbs + ".column" + i + ".", mode, "warn", keys["preferred"]);
             } // end columns loop
           }
         } catch(err){
-          console.log("requiredTableWiki: " + err);
+          console.log("requiredTableNoaaWiki: " + mode + ": " + err);
         }
 
       }; // end requiredTable fn
 
-      var checkWikiErr = function(){
-        if(feedback.errCtWiki === 0){
-          feedback.validWiki = "PASS";
-        } else {
-          feedback.validWiki = "FAIL";
-        }
-      };
-
-      // Check for Valid LiPD data. If no errors, then it's valid.
-      var verifyValid = function () {
-        // if (feedback.missingTsidCt > 1) {
-        //   // Count all TSid errors as one cumulative error
-        //   // $scope.feedback.errCt++;
-        //   // Count all TSid errors as a single error
-        //   feedback.errCt++;
-        //   // feedback.errMsgs.push("Missing data: TSid from " + feedback.missingTsidCt + " columns");
-        //   feedback.status = "FAIL";
-        // }
+      /**
+       * Check _one_ table for required keys
+       *
+       * @param {object} column Metadata
+       * @param {string} crumbs Crumbs for path so far
+       * @param {string} mode NOAA or Wiki mode
+       * @param {string} lvl err or warn log level
+       * @param {object} keys Keys to look for
+       */
+      var requiredColumnNoaaWiki = function (column, crumbs, mode, lvl, keys){
         try{
-          if (!valid) {
-            if (feedback.errCt === 0) {
-              valid = true;
-              feedback.validLipd = "PASS";
-            } else {
-              feedback.validLipd = "FAIL";
+          for (var _p in keys["columns"]) {
+            if(keys["columns"].hasOwnProperty(_p)){
+              // current key
+              var _currKey = keys["columns"][_p];
+              // current key exists in this column?
+              if (!column.hasOwnProperty(_currKey) || !column[_currKey]) {
+                logFeedback(lvl, "(" + mode + ") Missing: " + crumbs + _currKey, _currKey);
+                if(lvl === "err" && mode === "NOAA"){
+                  feedback.errCtNoaa++;
+                } else if (lvl === "err" && mode === "Wiki"){
+                  feedback.errCtWiki++;
+                }
+              }
             }
-          }
+          } // end preferred key check
         } catch(err){
-          console.log("verifyValid: " + err);
+          console.log("requiredColumnNoaaWiki: " + mode + ": " + err);
         }
       };
 
+      var checkPassFail = function(count, cb){
+        if(count === 0){
+          cb("PASS");
+        } else {
+          cb("FAIL");
+        }
+      };
 
       // HELPERS
 

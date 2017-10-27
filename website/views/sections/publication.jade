@@ -17,17 +17,19 @@ div(ng-repeat="entry in files.json.pub track by $index" layout-wrap="")
     div(layout='', layout-padding='', layout-sm='column')
       md-input-container(flex='', ng-class="md-input-has-value")
         label Title *
-        textarea(ng-model='entry.title', columns='1')
-
+        textarea(ng-model='entry.title', columns='1', maxlength="500")
     div(layout='', layout-padding='', layout-sm='column')
       md-input-container(flex='', ng-class="md-input-has-value")
         label Journal
         textarea(ng-model='entry.journal', columns='1')
-
-    div(layout='', layout-padding='', layout-wrap='', layout-sm='column')
       md-input-container(flex='', ng-class="md-input-has-value")
-        label Year *
-        input(ng-model='entry.year')
+        label Report
+        textarea(ng-model='entry.report', columns='1')
+    div(layout='', layout-padding='', layout-wrap='', layout-sm='column')
+      md-input-container(flex="33")
+        label Year
+        md-select(ng-model="files.json.year")
+          md-option(ng-repeat="yr in dropdowns.years" ng-value="yr") {{yr}}
         md-tooltip Year is not required for dataCitations
       md-input-container(flex='', ng-class="md-input-has-value")
         label Pages
@@ -46,6 +48,14 @@ div(ng-repeat="entry in files.json.pub track by $index" layout-wrap="")
       md-input-container(flex='', ng-class="md-input-has-value")
         label Publication Type
         input(ng-model='entry.type')
+    div(layout='', layout-padding='', layout-sm='column' ng-if="pageMeta.noaaReady")
+      md-input-container(flex='', ng-class="md-input-has-value")
+        label Abstract *
+        textarea(ng-model='entry.abstract', columns='1', maxlength="500")
+    div(layout='', layout-padding='', layout-sm='column' ng-if="pageMeta.noaaReady")
+      md-input-container(flex='', ng-class="md-input-has-value")
+        label Citation *
+        textarea(ng-model='entry.citation', columns='1', maxlength="500")
     div(layout='', layout-padding='', layout-sm='column', ng-repeat='entry2 in entry.author track by $index')
       md-input-container(flex='', ng-class="md-input-has-value")
         label Author

@@ -435,6 +435,11 @@ var create = (function(){
       return ["excel", "lipd.net", "wiki", "noaa", "unknown"];
     }),
 
+    defaultColumnFields: (function(){
+      return [ "proxy", "measurementMaterial", "method", "variableType", "sensorSpecies", "sensorGenus", "variableType",
+        "proxyObservationType", "notes", "interpretation"];
+    }),
+
     inferredVariableTypeList: (function(){
       return ['Temperature', 'Sea Surface Temperature', 'Bottom Water Temperature', 'Ocean Mixed Layer Temperature',
       'Surface air temperature', 'Carbon dioxide concentration', 'Methane concentration', 'Nitrous oxide concentration',
@@ -483,9 +488,21 @@ var create = (function(){
       'Uk37', 'X-Ray diffraction', 'X-ray fluorescence', 'Zn/Ca'];
     }),
 
+    timeUnitList: (function(){
+      return ["AD", "BP", "CE"]
+    }),
+
     variableTypeList: (function(){
       return ["measured", "inferred"];
     }),
+
+    yearList: (function(){
+      var _years = [];
+      for(var _n=new Date().getFullYear(); _n>1950; _n--){
+        _years.push(_n);
+      }
+      return(_years);
+    })
 
   }; // end return
 
