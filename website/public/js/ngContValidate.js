@@ -243,22 +243,32 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
     };
 
     $scope.makeNoaaReady = function(){
-      create.addNoaaReady($scope.files.json, function(_d2){
-        window.alert("NOAA fields have been added. Please fill out each field.");
-        $scope.files.json = _d2;
-      })
+      if(!$scope.pageMeta.noaaReady){
+        // Make Ready
+        create.addNoaaReady($scope.files.json, function(_d2){
+          $scope.genericModalAlert({"title": "NOAA Validation", "message": "The fields that NOAA requires have been " +
+          "added where necessary. For a list of these requirements, hover your mouse pointer over the 'NOAA " +
+          "requirements' bar on the left side of the page."});
+          $scope.files.json = _d2;
+        });
+      } else {
+        // Don't remove fields. just alert
+        $scope.genericModalAlert({"title": "Fields may be ignored", "message": "Validation is no longer using NOAA rules."});
+      }
     };
 
     $scope.makeWikiReady = function(){
       if(!$scope.pageMeta.wikiReady){
         // Make Ready
         create.addWikiReady($scope.files.json, function(_d2){
-          $scope.genericModalAlert({"title": "Wiki Fields Added", "message": "Wiki required fields have been added. Please fill out each field"});
+          $scope.genericModalAlert({"title": "Wiki Validation", "message": "The fields that the Linked Earth Wiki requires have been " +
+          "added where necessary. For a list of these requirements, hover your mouse pointer over the 'Wiki " +
+          "requirements' bar on the left side of the page."});
           $scope.files.json = _d2;
         });
       } else {
         // Don't remove fields. just alert
-        $scope.genericModalAlert({"title": "Fields may be ignored", "message": "The Wiki fields have not been removed, but they may be ignored. Continue normally. "});
+        $scope.genericModalAlert({"title": "Fields may be ignored", "message": "Validation is no longer using Wiki rules."});
       }
     };
 

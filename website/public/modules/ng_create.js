@@ -436,7 +436,7 @@ var create = (function(){
     }),
 
     defaultColumnFields: (function(){
-      return [ "proxy", "measurementMaterial", "method", "variableType", "sensorSpecies", "sensorGenus", "variableType",
+      return ["proxy", "measurementMaterial", "method", "variableType", "sensorSpecies", "sensorGenus", "variableType",
         "proxyObservationType", "notes", "interpretation"];
     }),
 
@@ -489,7 +489,7 @@ var create = (function(){
     }),
 
     timeUnitList: (function(){
-      return ["AD", "BP", "CE"]
+      return ["AD", "BP", "CE"];
     }),
 
     variableTypeList: (function(){

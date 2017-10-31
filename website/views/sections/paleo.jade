@@ -12,6 +12,8 @@ div(layout='', layout-padding='', layout-sm='column' style="float: right;")
 		md-label Table Type
 		md-select(ng-model='dropdowns.current.table' ng-model-options="{trackBy: '$value.id'}" aria-label="filler")
 			md-option(ng-value="table" ng-repeat="table in dropdowns.tables") {{ table.name }}
+		md-tooltip DataTable containing PaleoData Variables
+
 	button.valid-btn(ng-click='addBlock(files.json.paleoData[0], dropdowns.current.table.name, "paleo")' style="margin: 1.5em;" type="button")  + Add Table
 	// END MEASUREMENT TABLE
 

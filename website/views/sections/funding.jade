@@ -2,6 +2,7 @@
 md-toolbar.md-hue-1
   h2.md-toolbar-tools
     span Funding
+    md-tooltip Source of monetary support underlying the collection/creation/analysis/curation of the Dataset
 div(ng-repeat='entry in files.json.funding track by $index' layout-wrap="")
   md-card
     //- div(layout='', layout-padding='', layout-sm='column')
@@ -10,16 +11,20 @@ div(ng-repeat='entry in files.json.funding track by $index' layout-wrap="")
       md-input-container(flex='', ng-class="md-input-has-value")
         label Agency
         input(ng-model='entry.agency')
+        md-tooltip Which entity was the Dataset funded by?
       md-input-container(flex='', ng-class="md-input-has-value")
         label Grant
         input(ng-model='entry.grant')
+        md-tooltip What was the Funding source for the Dataset?
     div(layout='', layout-padding='', layout-sm='column')
       md-input-container(flex='', ng-class="md-input-has-value")
         label Principal Investigator
         input(ng-model='entry.investigator')
+        md-tooltip Who was the lead on the source of Funding for the Dataset?
       md-input-container(flex='', ng-class="md-input-has-value")
         label Country
         input(ng-model='entry.country')
+        md-tooltip Which nation funded the Dataset?
         
     div(layout='', layout-padding='', layout-sm='column' style="float: right;")
       button.valid-btn(ng-click='removeBlock(files.json.funding, $index)' style="margin: 1.5em;" type="button")  - Remove						

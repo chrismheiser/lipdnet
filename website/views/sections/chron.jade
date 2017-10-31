@@ -2,6 +2,7 @@
 md-toolbar.md-hue-1
 	h2.md-toolbar-tools
 		span chronData
+		md-tooltip The data, metadata, and Model that describe the set of Variables used to relate depth/position to time (chronological information)
 
 include ./chron_meas.jade
 include ./chron_model.jade
@@ -12,6 +13,8 @@ div(layout='', layout-padding='', layout-sm='column' style="float: right;")
 		md-label Table Type
 		md-select(ng-model='dropdowns.current.table' ng-model-options="{trackBy: '$value.id'}" aria-label="Filler")
 			md-option(ng-value="table" ng-repeat="table in dropdowns.tables") {{ table.name }}
+		md-tooltip DataTable containing Variables pertaining to chronological information
+
 	button.valid-btn(ng-click='addBlock(files.json.chronData[0], dropdowns.current.table.name, "chron")' style="margin: 1.5em;" type="button")  + Add Table
 	// END MEASUREMENT TABLE
 

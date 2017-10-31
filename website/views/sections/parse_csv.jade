@@ -1,0 +1,14 @@
+div(ng-hide="entry2.toggle")
+    // Textarea to Copy/Paste CSV data
+    md-subheader.md-primary CSV data
+    div(layout='', layout-padding='', layout-sm='column')
+        md-input-container
+            md-label Delimiter
+            md-select(ng-model='dropdowns.current.delimiter' ng-model-options="{trackBy: '$value.id'}" aria-label="filler")
+                md-option(ng-value="delimiter" ng-repeat="delimiter in dropdowns.delimiters") {{ delimiter.view }}
+            md-tooltip Generally, copy/pasting data results in a 'Tab' delimiter. Please note if another delimiter is in use.
+
+        md-switch(ng-model='pageMeta.header') Header: {{ pageMeta.header? "On": "Off"}}
+    div(layout='', layout-padding='', layout-sm='column')
+        textarea(placeholder='Copy/Paste your CSV data here...' ng-model="entry2.values" style="border:0.1em solid #ccc;border-radius:0.5em;height:10em;width:80em")
+        button.valid-btn(ng-click="parseCsv(entry2, $index, {'pc': 'chron', 'tt': 'measurement'}); toggleCsvBox(entry2)" style="margin: 1.5em; float:right;" type="button") Parse CSV

@@ -668,9 +668,6 @@ var lipdValidator = (function(){
       var requiredTable = function (table, crumbs, tnks) {
         // look for table filename
         var filename = table.filename || null;
-        // var missingValue = table.missingValue;
-        var _tnk_bool = false;
-
         try {
           // required table root keys
           for (var _w = 0; _w < keys_base.reqTableKeys.length; _w++) {
@@ -691,12 +688,10 @@ var lipdValidator = (function(){
           for(var _tk = 0; _tk < tnks.length; _tk++){
             var _tnk = tnks[_tk];
             if(table.hasOwnProperty(_tnk)){
-              _tnk_bool = true;
-              break;
+              if(!table[_tnk]){
+                table["tableName"] = crumbs;
+              }
             }
-          }
-          if (!_tnk_bool){
-            logFeedback("err", "Missing: " + crumbs + "." + "tableName");
           }
 
           // column count match CSV count
