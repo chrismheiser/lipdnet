@@ -138,7 +138,7 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       "bagit": {},
       "csv": {},
       "jsonSimple": {"lipdVersion": 1.3},
-      "json": {"lipdVersion": 1.3, "pub": [], "funding": [], "dataSetName": "", "geo": {},
+      "json": {"lipdVersion": 1.3, "createdBy": "lipd.net", "pub": [], "funding": [], "dataSetName": "", "geo": {},
         "paleoData": [{"measurementTable": [{"tableName": "", "missingValue": "NaN",
           "filename": "", "columns": []}]}]}
     };
@@ -363,6 +363,18 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       console.log("getSet: filename = " + $scope.files.lipdFilename);
     };
 
+    $scope.resetCsv = function(entry){
+      // To reset a parsed CSV table, you need to undo all of the below
+      // entry.values, entry.filename, entry.columns,
+      // $scope.files.csv[_csvname] = _csv;
+      entry.values = null;
+      $scope.files.csv[entry.filename] = null;
+      entry.filename = null;
+      entry.columns = null;
+      entry.toggle = !entry.toggle;
+      return entry;
+    };
+
     $scope.parseCsv = function(entry, idx, options){
       // we can't guarantee a datasetname yet, so build this csv filename as best we can for now.
       var _csvname = options.pc + '0' + options.tt + idx + ".csv";
@@ -400,8 +412,6 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       }
       // CSV is all finished processing. Set data to scope.
       $scope.files.csv[_csvname] = _csv;
-      // console.log($scope.files.csv);
-      // console.log(entry);
       return entry;
     };
 

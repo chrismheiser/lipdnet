@@ -12,6 +12,7 @@ div(ng-repeat='entry in files.json.chronData track by $index' layout-wrap="")
             include ./table_root
             // Toggle the csv entry2 box and the parse csv button. Once we parse CSV, these elements are not longer needed.
             include ./parse_csv.jade
+                button.valid-btn(ng-click="parseCsv(entry2, $index, {'pc': 'chron', 'tt': 'summary'}); toggleCsvBox(entry2)" style="margin: 1.5em; float:right;" type="button") Parse CSV
             br
             // Column Data
             include ./table_column.jade
@@ -22,7 +23,7 @@ div(ng-repeat='entry in files.json.chronData track by $index' layout-wrap="")
             md-subheader.md-primary chron {{$parent.$index+1}} model 1 ensemble {{$index+1}}
             include ./table_root
             // Toggle the csv entry2 box and the parse csv button. Once we parse CSV, these elements are not longer needed.
-            include ./parse_csv.jade
+            //include ./parse_csv.jade
             br
             // Column Data
             include ./table_column.jade

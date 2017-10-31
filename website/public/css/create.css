@@ -220,8 +220,6 @@ input[type="number"] {
   	background-color:#f9f9f9;
   }
 
-  }
-
   #file-list li {
   	overflow: hidden;
   	text-overflow: ellipsis;

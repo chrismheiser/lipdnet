@@ -64,6 +64,46 @@ angular.module('ngColors', ['ngMaterial']).config(function ($mdThemingProvider) 
         .definePalette('warn',
                         warn);
 
+  // var wiki = {
+  //   '50': '#edeaf4',
+  //   '100': '#d1cae5',
+  //   '200': '#b3a7d3',
+  //   '300': '#9583c1',
+  //   '400': '#7e69b4',
+  //   '500': '#674ea7',
+  //   '600': '#5f479f',
+  //   '700': '#543d96',
+  //   '800': '#4a358c',
+  //   '900': '#39257c',
+  //   'A100': '#cbbdff',
+  //   'A200': '#a28aff',
+  //   'A400': '#7a57ff',
+  //   'A700': '#663dff'
+  // };
+  // $mdThemingProvider
+  //   .definePalette('wiki',
+  //     wiki);
+  //
+  // var noaa = {
+  //   '50': '#e8f0f8',
+  //   '100': '#c5daee',
+  //   '200': '#9ec2e3',
+  //   '300': '#77aad7',
+  //   '400': '#5a97cf',
+  //   '500': '#3d85c6',
+  //   '600': '#377dc0',
+  //   '700': '#2f72b9',
+  //   '800': '#2768b1',
+  //   '900': '#1a55a4',
+  //   'A100': '#dae9ff',
+  //   'A200': '#a7caff',
+  //   'A400': '#74abff',
+  //   'A700': '#5b9cff'
+  // };
+  // $mdThemingProvider
+  //   .definePalette('noaa',
+  //     noaa);
+
    $mdThemingProvider.theme('default')
        .primaryPalette('primary', {
           'default':'500',

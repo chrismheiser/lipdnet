@@ -21,11 +21,13 @@ block body
 			md-toolbar
 				.md-toolbar-tools
 					.md-title Create LiPD
-									
+
 			.col-sm-12
+
 				#form-container(ng-controller="ValidateCtrl as vc")
 
 					form#upload-form(ng-submit='')
+
 						//- GOOGLE MAP
 						div
 							ui-gmap-google-map(center='map.config.center', zoom='map.config.zoom', draggable='true', options='map.config.options', bounds='map.config.bounds')

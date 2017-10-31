@@ -2,6 +2,7 @@
 md-toolbar.md-hue-1
 	h2.md-toolbar-tools
 		span Geography
+		md-tooltip The geographic data and metadata for the dataset
 
 // COORDINATES
 
@@ -66,9 +67,15 @@ div(layout='', layout-padding='', layout-sm='column')
 		label(ng-if="pageMeta.noaaReady") Location *
 		label(ng-if="!pageMeta.noaaReady") Location
 		input(ng-model='files.json.geo.properties.location')
-		md-tooltip The NASA GCMD location. Example: Continent>North America>United States of America>Baltimore
+		md-tooltip
 	md-input-container(flex="")
 		label Country
 		md-select(ng-model="files.json.geo.properties.country")
 			md-option(ng-repeat="country in dropdowns.countries" ng-value="country.name") {{country.name}} ({{country.code}})
-		md-tooltip
+		md-tooltip ISO 3166 standard country list
+
+div(layout='', layout-padding='', layout-sm='column' ng-if="pageMeta.noaaReady")
+	md-input-container(flex='', ng-class="md-input-has-value")
+		label NASA GCMD Location *
+		input(ng-model='files.json.geo.properties.gcmdLocation')
+		md-tooltip Example: Continent>North America>United States of America>Baltimore
