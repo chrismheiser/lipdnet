@@ -153,8 +153,7 @@ var lipdValidator = (function(){
               }
             }
           }
-          // console.log("MODIFIED TABLE");
-          // console.log(table);
+
         } catch(err){
           console.log("populateTSids3: " + err);
         }
@@ -207,8 +206,6 @@ var lipdValidator = (function(){
               } // end model
             } // end paleoData loop
           } // end if hasOwnProperty
-          // console.log("TSIDS 2: MODIFIED" + pcData);
-          // console.log(d);
         } catch(err){
           console.log("populateTSids2: " + err);
         }
@@ -327,10 +324,16 @@ var lipdValidator = (function(){
       var _wiki_validate = {
         "required": {
           "root": ["dataSetName", "archiveType"],
+          "pub": [],
+          "funding": [],
+          "geo": [],
           "columns": ["takenAtDepth", "variableName", "inferredVariableType", "proxyObservationType"]
         },
         "preferred": {
           "root": [],
+          "pub": [],
+          "funding": [],
+          "geo": [],
           "columns": []
         }
       };
@@ -338,14 +341,18 @@ var lipdValidator = (function(){
       var _noaa_validate = {
         "required": {
           "root": ["investigators", "maxYear", "minYear", "timeUnit", "onlineResource", "onlineResourceDescription", "modifiedDate"],
-          "columns": ["description", "dataFormat", "dataType"],
-          "geo": ["location", "siteName"]
+          "pub": [],
+          "funding": [],
+          "geo": ["location", "siteName"],
+          "columns": ["description", "dataFormat", "dataType"]
         },
         "preferred": {
           "root": ["originalSourceUrl", "datasetDOI", "funding"],
           "pub": ["author", "title", "year", "journal", "volume", "edition", "issue", "pages", "report", "doi",
                   "onlineResource", "citation", "abstract"],
-          "funding": ["agency", "grant"]
+          "funding": ["agency", "grant"],
+          "geo": [],
+          "columns": []
         }
       };
 
@@ -739,13 +746,13 @@ var lipdValidator = (function(){
       var logSpecialFeedback = function(){
         try{
           if (feedback.missingTsidCt > 0){
-            logFeedback("warn", feedback.missingTsidCt + " columns without 'TSid'\nTSids has been generated and added automatically", "TSid");
+            logFeedback("warn", feedback.missingTsidCt + " columns missing 'TSid'\nTSids has been generated and added automatically", "TSid");
           }
           if(feedback.missingUnitCt > 0){
-            logFeedback("warn", feedback.missingUnitCt + " columns without 'units'\nThese columns have been assumed unitless and given a 'unitless' value")
+            logFeedback("warn", "Missing: units (" + feedback.missingUnitCt + " columns)\nThese columns have been assumed unitless and given a 'unitless' value")
           }
           if(feedback.missingMvCt > 0){
-            logFeedback("warn", feedback.missingMvCt + " columns without a 'missingValue'\nThese columns have been given the standard 'NaN' missing value")
+            logFeedback("warn",  "Missing: missingValue (" + feedback.missingMvCt + " columns)\nThese columns have been given the standard 'NaN' missing value")
           }
         } catch(err){
           console.log("logSpecialFeedback: " + err);
@@ -761,23 +768,26 @@ var lipdValidator = (function(){
         try {
           // these keys must be an array of objects
           var _arrs = ["author", "identifier", "editor", "license", "link"];
-          // this key must be an object
-          var _objs = ["journal"];
           var _crumbs = "";
-          var _idx = 0;
           // in case author is formatted wrong, convert it to BibJson format
           pub = fixAuthor(pub);
           for (var _p = 0; _p < pub.length; _p++){
             var _pub = pub[_p];
             for(var _key in _pub){
-              _idx = _p + 1;
-              _crumbs = "pub" + _idx + "." + _key;
+              var _up1 = _p + 1;
+              _crumbs = "pub" + _up1 + "." + _key;
               if(_pub.hasOwnProperty(_key)){
                 if (_arrs.includes(_key)){
-                  var _isArrObj = verifyArrObjs(_crumbs, _pub[_key], true);
+                  if (_key === "identifier"){
+                    _crumbs = "pub" + _up1 + ".DOI";
+                  }
+                  // these keys must be an array
+                  verifyArrObjs(_crumbs, _pub[_key], true);
                 } else if (_key === "journal"){
+                  // this key must be an object
                   verifyDataType("object", _crumbs, _pub[_key], false);
                 } else {
+                  // this key must be a string
                   verifyDataType("string", _crumbs, _pub[_key], false);
                 }
               }
@@ -926,19 +936,22 @@ var lipdValidator = (function(){
           else {
             // pub entry loop
             for (var i = 0; i < D.pub.length; i++) {
+              // switch to 1-index for reporting errors
+              var _up1 = i + 1;
               // special case: year and journal not required if this publication is a dataCitation
               if(D.pub[i].hasOwnProperty("type")){
                 // special case: dataCitation
+
                 if (D.pub[i].type === "dataCitation") {
-                  requiredPub(D.pub[i], "pub" + i, keys_base.reqPubDcKeys);
+                  requiredPub(D.pub[i], "pub" + _up1, keys_base.reqPubDcKeys);
                 } else {
                   // normal publication
-                  requiredPub(D.pub[i], "pub" + i, keys_base.reqPubKeys);
+                  requiredPub(D.pub[i], "pub" + _up1, keys_base.reqPubKeys);
                 }
               }
               // 'type' missing. Assume normal publication
               else{
-                requiredPub(D.pub[i], "pub" + i, keys_base.reqPubKeys);
+                requiredPub(D.pub[i], "pub" + _up1, keys_base.reqPubKeys);
               }
             }
           }
@@ -960,6 +973,9 @@ var lipdValidator = (function(){
           // TODO this doesn't work case-sensitively. EX: "Journal" causes an error for the 'journal' key requirement
           for (var k = 0; k < pubKeys.length; k++) {
             var key = pubKeys[k];
+            if (key === "identifier"){
+              key = "DOI";
+            }
             if (!pub.hasOwnProperty(key)) {
               // this pub is missing a required key!
               logFeedback("err", "Missing: " + crumbs + "." + key);
@@ -1004,7 +1020,7 @@ var lipdValidator = (function(){
           } else {
             if (!m.geo.geometry.coordinates){
               // there aren't any coordinate values to make the map
-              logFeedback("err", "Missing: " + "geo - coordinates", "coordinates");
+              logFeedback("err", "Missing: " + "coordinates", "coordinates");
             }
           }
         } catch (err) {
@@ -1130,14 +1146,13 @@ var lipdValidator = (function(){
               }
             }
 
+
+
             // Special Case: NOAA GEO
             if(opts.mode==="NOAA"){
-              console.log("NOAA GEO");
               for(var _g=0; _g < opts["keys"]["required"]["geo"].length; _g++){
-                console.log("g = " + _g);
                 try{
                   var _key1 = opts["keys"]["required"]["geo"][_g];
-                  console.log(_key1);
                   if(!D.geo.properties[_key1]){
                     logFeedback("err", "(NOAA) Missing: " + _key1);
                   }

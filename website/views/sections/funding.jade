@@ -6,7 +6,7 @@ md-toolbar.md-hue-1
 div(ng-repeat='entry in files.json.funding track by $index' layout-wrap="")
   md-card
     //- div(layout='', layout-padding='', layout-sm='column')
-    md-subheader.md-primary funding {{$index}}
+    md-subheader.md-primary funding {{$index+1}}
     div(layout='', layout-padding='', layout-sm='column')
       md-input-container(flex='', ng-class="md-input-has-value")
         label Agency

@@ -197,7 +197,6 @@ var versions = (function(){
       var _pcs = ["paleo", "chron"];
 
       console.log("Updating to v1.2");
-      console.log(d);
       var _tmp = [];
       try{
 
@@ -252,14 +251,10 @@ var versions = (function(){
           }
         }
         if(_tmp){
-          console.log("v12: paleodata");
-          console.log(_tmp);
           d.paleoData = _tmp;
         }
 
         d.lipdVersion = 1.2;
-        console.log("done with 1.2");
-        console.log(d);
       } catch(err){
         console.log("update_lipd_v1_2: " + err);
       }
@@ -286,11 +281,7 @@ var versions = (function(){
 
       try{
         versions.update_lipd_v1_3_names(d, function(d2){
-           console.log("done v1.3 names:");
-           console.log(d2);
           versions.update_lipd_v1_3_structure(d2, function(d3){
-            console.log("done v1.3 structure: ");
-            console.log(d3);
             d3.lipdVersion = 1.3;
             cb(d3);
           });
@@ -403,8 +394,6 @@ var versions = (function(){
                 for(var _w=0; _w < _section["model"].length; _w++){
                   // Model entry
                   var _model = _section["model"][_w];
-                  console.log("model entry");
-                  console.log(_model);
                   for(var _e=0; _e<_tbs.length; _e++){
                     if(_model.hasOwnProperty(_tbs[_e])){
                       // It's an object, but not an array object

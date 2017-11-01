@@ -6,7 +6,7 @@ md-toolbar.md-hue-1
 div(ng-repeat="entry in files.json.pub track by $index" layout-wrap="")
 
   md-card
-    md-subheader.md-primary publication {{$index}}
+    md-subheader.md-primary publication {{$index+1}}
     div(layout='', layout-padding='', layout-sm='column')
       md-input-container(flex='', ng-class="md-input-has-value")
         label DOI
@@ -30,8 +30,8 @@ div(ng-repeat="entry in files.json.pub track by $index" layout-wrap="")
     div(layout='', layout-padding='', layout-wrap='', layout-sm='column')
       md-input-container(flex="33")
         label Year
-        md-select(ng-model="files.json.year")
-          md-option(ng-repeat="yr in dropdowns.years" ng-value="yr") {{yr}}
+        md-select(ng-model="entry.year")
+          md-option(ng-repeat="yr in dropdowns.years" ng-value="yr" ng-model="entry.year") {{yr}}
         md-tooltip What year was the Publication issued? (not required for dataCitations)
       md-input-container(flex='', ng-class="md-input-has-value")
         label Pages

@@ -423,9 +423,13 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       // All metadata and data about the page is emptied when the Upload button is clicked. Ready for another file upload.
       $scope.allFiles = [];
       $scope.feedback = {
+        "lipdVersion": "NA",
         "missingTsidCt": 0,
         "wrnCt": 0,
         "errCt": 0,
+        "validLipd": "NA",
+        "validWiki": "NA",
+        "validNoaa": "NA",
         "tsidMsgs": [],
         "posMsgs": [],
         "errMsgs": [],
@@ -448,69 +452,21 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
         "markers": []
       };
       $scope.files = {
+        "modal": {},
         "lipdFilename": "",
         "dataSetName": "",
         "fileCt": 0,
         "bagit": {},
         "csv": {},
-        "jsonSimple": {
-          "lipdVersion": 1.3,
-          "archiveType": "",
-          "dataSetName": "",
-          "funding": [{ "agencyName": "", "grant": "" }],
-          "pub": [{ "identifier": [{ "type": "doi",
-            "id": "",
-            "url": "" }] }],
-          "geo": { "geometry": { "coordinates": [0, 0, 0] } },
-          "chronData": [{
-            "chronMeasurementTable": {},
-            "chronModel": [{
-              "method": {},
-              "ensembleTable": {},
-              "summaryTable": {},
-              "distributionTable": []
-            }]
-          }],
-          "paleoData": [{
-            "paleoMeasurementTable": {},
-            "paleoModel": [{
-              "method": {},
-              "ensembleTable": {},
-              "summaryTable": {},
-              "distributionTable": []
-            }]
-          }]
-        },
-        "json": {
-          "lipdVersion": 1.3,
-          "archiveType": "",
-          "dataSetName": "",
-          "funding": [{ "agencyName": "", "grant": "" }],
-          "pub": [{ "identifier": [{ "type": "doi",
-            "id": "",
-            "url": "" }] }],
-          "geo": { "geometry": { "coordinates": [0, 0, 0] } },
-          "chronData": [{
-            "chronMeasurementTable": {},
-            "chronModel": [{
-              "method": {},
-              "ensembleTable": {},
-              "summaryTable": {},
-              "distributionTable": []
-            }]
-          }],
-          "paleoData": [{
-            "paleoMeasurementTable": {},
-            "paleoModel": [{
-              "method": {},
-              "ensembleTable": {},
-              "summaryTable": {},
-              "distributionTable": []
-            }]
-          }]
-        }
+        "jsonSimple": {"lipdVersion": 1.3},
+        "json": {"lipdVersion": 1.3, "createdBy": "lipd.net", "pub": [], "funding": [], "dataSetName": "", "geo": {},
+          "paleoData": [{"measurementTable": [{"tableName": "", "missingValue": "NaN",
+            "filename": "", "columns": []}]}]}
       };
       $scope.pageMeta = {
+        "header": false,
+        "decimalDegrees": true,
+        "fileUploaded": false,
         "toggle": "",
         "simpleView": true,
         "valid": false,
@@ -518,7 +474,9 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
         "dlFallback": false,
         "dlFallbackMsg": "",
         "captcha": false,
-        "busyPromise": null,
+        "oldVersion": "NA",
+        "noaaReady": false,
+        "wikiReady": false
       };
       $scope.status = "N/A";
     };
@@ -600,10 +558,13 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       // rearrange coordinates from dict to array when necessary, and set the map if coordinates exist
       $scope.files = map.fixCoordinates($scope.files);
       // convert dms coordinates where necessary
+      console.log($scope.pageMeta.decimalDegrees);
       $scope.files.json = misc.checkCoordinatesDms($scope.files.json, $scope.dms, $scope.pageMeta.decimalDegrees);
       $scope.map = map.updateMap($scope.map, $scope.files);
+      console.log($scope.pageMeta.decimalDegrees);
       versions.update_lipd_version($scope.files, function(_results1){
           console.log("Updated Versions");
+          console.log($scope.pageMeta.decimalDegrees);
           console.log(_results1.files);
           $scope.pageMeta.oldVersion = _results1.version;
           lipdValidator.validate(_results1.files, $scope.pageMeta, function(_results){
@@ -768,7 +729,6 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
               $scope.pageMeta.fileUploaded = true;
               // Gather some metadata about the lipd file, and organize it so it's easier to manage.
               lipdValidator.restructure(res, function(_response_1){
-                // console.log(_response_1);
                 $scope.files = _response_1;
                 $scope.validate();
                 $scope.files.json = create.initColumnTmp($scope.files.json);

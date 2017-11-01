@@ -62,12 +62,10 @@ div(layout='', layout-padding='', layout-sm='column')
 		label(ng-if="pageMeta.noaaReady") Site Name *
 		label(ng-if="!pageMeta.noaaReady") Site Name
 		input(ng-model='files.json.geo.properties.siteName')
-		md-tooltip
 	md-input-container(flex='', ng-class="md-input-has-value")
 		label(ng-if="pageMeta.noaaReady") Location *
 		label(ng-if="!pageMeta.noaaReady") Location
 		input(ng-model='files.json.geo.properties.location')
-		md-tooltip
 	md-input-container(flex="")
 		label Country
 		md-select(ng-model="files.json.geo.properties.country")
