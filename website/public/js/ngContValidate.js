@@ -320,8 +320,8 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
           if (resp.status !== 200){
             window.alert("Error downloading file");
           } else {
-            window.location.href = "http://localhost:3000/files/" + resp.data;
-            // window.location.href = "http://www.lipd.net/files/" + resp.data;
+            // window.location.href = "http://localhost:3000/files/" + resp.data;
+            window.location.href = "http://www.lipd.net/files/" + resp.data;
           }
           // reset the captcha
           $scope.pageMeta.captcha = false;
@@ -620,8 +620,6 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       );
 
     };
-
-
 
     vc.propertiesQuerySearch = function(query) {
       return query ? vc.properties.list.filter(createFilterFor(query)) : vc.properties.list.filter(createFilterFor(''));

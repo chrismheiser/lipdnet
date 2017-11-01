@@ -196,13 +196,11 @@ input[type=number]::-webkit-outer-spin-button {
   	overflow: hidden;
   	white-space: nowrap;
   	margin-top: 14px;
-  	border: solid 1px #gray;
+  	border: 1px solid #808080;
   	border-radius: 5px;
   	min-height: 28px;
   	/*background-color: #eee;*/
   	background-color:#f9f9f9;
-  }
-
   }
 
   #file-list li {
