@@ -305,26 +305,18 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       $scope._myPromiseExport = ExportService.prepForDownload(_newJson);
       $scope.pageMeta.busyPromise = $scope._myPromiseExport;
       $scope._myPromiseExport.then(function (res) {
-        // console.log("ExportService.then()");
         //upload zip to node backend, then callback and download it afterward.
-        // console.log("Export response");
-        // console.log(res);
-        // console.log("downloadZip: Filename: " + $scope.files.lipdFilename);
-        console.log("AFTER");
-        console.log(res);
         $scope.uploadZip({"filename": $scope.files.lipdFilename, "dat": res}, function(resp){
+          // reset the captcha
+          $scope.pageMeta.captcha = false;
           // do get request to trigger download file immediately after download
-          // console.log("client side after upload");
-          // console.log(tmp.data);
-          // console.log(resp);
           if (resp.status !== 200){
             window.alert("Error downloading file");
           } else {
             // window.location.href = "http://localhost:3000/files/" + resp.data;
             window.location.href = "http://www.lipd.net/files/" + resp.data;
           }
-          // reset the captcha
-          $scope.pageMeta.captcha = false;
+
         });
       });
     };
@@ -524,9 +516,14 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       return true;
     };
 
-    $scope.startCaptcha = function(){
-      // Download button was clicked, show the captcha challenege
-      $scope.pageMeta.captcha = true;  };
+    $scope.checkCaptcha = function(){
+      if($scope.gRecaptchaResponse){
+        $scope.downloadZip();
+      } else {
+        // Download button was clicked, show the captcha challenge
+        $scope.pageMeta.captcha = true;
+      }
+    };
 
     $scope.toggleCsvBox = function(entry) {
       entry.toggle=!entry.toggle;
@@ -539,7 +536,6 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
         data: {file: _file.dat,
           filename: _file.filename}
       });
-
       $scope.pageMeta.busyPromise.then(function (resp) {
         console.log('Success');
         console.log(resp);
@@ -558,14 +554,10 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       // rearrange coordinates from dict to array when necessary, and set the map if coordinates exist
       $scope.files = map.fixCoordinates($scope.files);
       // convert dms coordinates where necessary
-      console.log($scope.pageMeta.decimalDegrees);
       $scope.files.json = misc.checkCoordinatesDms($scope.files.json, $scope.dms, $scope.pageMeta.decimalDegrees);
       $scope.map = map.updateMap($scope.map, $scope.files);
-      console.log($scope.pageMeta.decimalDegrees);
       versions.update_lipd_version($scope.files, function(_results1){
           console.log("Updated Versions");
-          console.log($scope.pageMeta.decimalDegrees);
-          console.log(_results1.files);
           $scope.pageMeta.oldVersion = _results1.version;
           lipdValidator.validate(_results1.files, $scope.pageMeta, function(_results){
             try{
@@ -718,7 +710,8 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
 
           // if the upload button is clicked && a file is chosen, THEN reset the page and data.
           $scope.resetPage();
-
+          $scope.files.lipdFilename = fileInput.files[0].name;
+          $scope.files.dataSetName = fileInput.files[0].name.slice(0, -4);
           // get a list of file entries inside this zip
           model.getEntries(fileInput.files[0], function (entries) {
             // use the service to parse data from the ZipJS entries
@@ -728,7 +721,7 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
               $scope.allFiles = res;
               $scope.pageMeta.fileUploaded = true;
               // Gather some metadata about the lipd file, and organize it so it's easier to manage.
-              lipdValidator.restructure(res, function(_response_1){
+              lipdValidator.restructure(res, $scope.files, function(_response_1){
                 $scope.files = _response_1;
                 $scope.validate();
                 $scope.files.json = create.initColumnTmp($scope.files.json);

@@ -85,39 +85,41 @@ var lipdValidator = (function(){
      *  @param {Array} objs File data. Shown at bottom of this file under "DATA AFTER IMPORT SERVICE"
      *  @param {callback} cb
      */
-    restructure: (function (objs, cb) {
+    restructure: (function (objs, scopeFiles, cb) {
         // console.log("sortBeforeValidate: Start sorting");
         // Files: User data holds all the user selected or imported data
-        var files = {
-            "lipdFilename": "",
-            "dataSetName": "",
-            "fileCt": 0,
-            "bagit": {},
-            "csv": {},
-            "json": {}
-          };
+        // var files = {
+        //     "lipdFilename": "",
+        //     "dataSetName": "",
+        //     "fileCt": 0,
+        //     "bagit": {},
+        //     "csv": {},
+        //     "json": {}
+        //   };
         try{
-          files.fileCt = objs.length;
+          scopeFiles.fileCt = objs.length;
           console.log("LiPD File Count: " + objs.length);
 
           // loop over each csv/jsonld object. sort them into the scope by file type
           objs.forEach(function (obj) {
             console.log("restructure: " + obj.filenameShort);
             if (obj.type === "json") {
-              console.log(obj.filenameFull);
-              console.log(obj.filenameFull.split("/")[0]);
-              files.dataSetName = obj.filenameFull.split("/")[0];
-              files.lipdFilename = obj.filenameFull.split("/")[0] + ".lpd";
-              files.json = obj.data;
+              console.log(scopeFiles.lipdFilename);
+              console.log(scopeFiles.lipdFilename);
+              // console.log(obj.filenameFull);
+              // console.log(obj.filenameFull.split("/")[0]);
+              // files.dataSetName = obj.filenameFull.split("/")[0];
+              // files.lipdFilename = obj.filenameFull.split("/")[0] + ".lpd";
+              scopeFiles.json = obj.data;
             } else if (obj.type === "csv") {
-              files.csv[obj.filenameShort] = obj.data;
+              scopeFiles.csv[obj.filenameShort] = obj.data;
             } else if (obj.type === "bagit") {
-              files.bagit[obj.filenameShort] = obj;
+              scopeFiles.bagit[obj.filenameShort] = obj;
             } else {
               console.log("restructure: Unknown File: " + obj.filenameFull);
             }
           });
-          cb(files);
+          cb(scopeFiles);
         }catch(err){
           console.log("restructure: " + err);
           // console.log(cb);
@@ -721,6 +723,9 @@ var lipdValidator = (function(){
                   var currKey = keys_base.reqColumnKeys[k];
                   // current key exists in this column?
                   if (!table.columns[i].hasOwnProperty(currKey) || !table.columns[i][currKey]) {
+                    // if(currKey === "TSid"){
+                    //   console.log(table.columns[i]);
+                    // }
                     if(currKey === "units"){
                       table.columns[i]["units"] = "unitless";
                       feedback.missingUnitCt++;
@@ -746,7 +751,7 @@ var lipdValidator = (function(){
       var logSpecialFeedback = function(){
         try{
           if (feedback.missingTsidCt > 0){
-            logFeedback("warn", feedback.missingTsidCt + " columns missing 'TSid'\nTSids has been generated and added automatically", "TSid");
+            logFeedback("warn", "Missing: TSid (" + feedback.missingTsidCt + " columns)\nTSids has been generated and added automatically", "TSid");
           }
           if(feedback.missingUnitCt > 0){
             logFeedback("warn", "Missing: units (" + feedback.missingUnitCt + " columns)\nThese columns have been assumed unitless and given a 'unitless' value")

@@ -249,7 +249,7 @@ var create = (function(){
      */
     closingWorkflow: (function(_scopeFiles, _dsn, _csv){
       // Remove temporary fields from the JSON data
-      var _newJson = JSON.parse(JSON.stringify(_scopeFiles.files));
+      var _newJson = JSON.parse(JSON.stringify(_scopeFiles));
       // TODO copy the archiveType from the root, to each data table column
 
       _newJson.json = create.rmTmpEmptyData(_newJson.json);
@@ -331,7 +331,7 @@ var create = (function(){
     rmTmpEmptyData: (function(x){
       // We add a few temporary variables (toggle, column values) when creating the page.
       // However, these cannot end up in the final lipd file. remove them.
-      var _removables = ["toggle", "values", "tmp"];
+      var _removables = ["toggle", "values", "tmp", "showColumn"];
       try{
         for (var _key in x){
           // safety check: don't want prototype attributes

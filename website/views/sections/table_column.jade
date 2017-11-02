@@ -1,56 +1,69 @@
 // Column Data
-div(ng-repeat='entry3 in entry2.columns track by $index' layout-wrap="")
-    md-card
-        md-subheader.md-primary column {{$index+1}}
-        div(layout='', layout-padding='', layout-sm='column')
-            md-input-container(flex='25', class="md-input-has-value")
-                label Variable Name *
-                input(ng-model="entry3.variableName")
-            md-input-container(flex='25', class="md-input-has-value")
-                label Units *
-                input(ng-model="entry3.units")
-                md-tooltip In what unit of measure is (are) the Variable(s) expressed?
-            md-input-container(flex='25', class="md-input-has-value" ng-if="pageMeta.noaaReady")
-                label Data Type *
-                input(ng-model="entry3.dataType")
-            md-input-container(flex='25', class="md-input-has-value" ng-if="pageMeta.noaaReady")
-                label Data Format *
-                input(ng-model="entry3.dataFormat")
-        div(layout='', layout-padding='', layout-sm='column')
-            md-input-container(flex='', class="md-input-has-value")
-                label(ng-if="pageMeta.noaaReady") Description *
-                label(ng-if="!pageMeta.noaaReady") Description
-                textarea(ng-model='entry3.description', columns='1', md-maxlength='500')
-        div(layout='', layout-padding='', layout-sm='column')
-            md-input-container(flex='', class="md-input-has-value")
-                label Values *
-                //- input(format-values ng-model="files.csv[entry2.filename].transposed[$index]")
-                input(space-values ng-model="files.csv[entry2.filename].transposed[$index]")
-        div(layout='', layout-padding='', layout-sm='column' style="float: right;")
-            button.valid-btn(ng-if="entry3.tmp.toggle" ng-click='entry3.tmp.toggle = !entry3.tmp.toggle' style="margin: 1.5em;" type="button")  - Other Fields
-            button.valid-btn(ng-if="!entry3.tmp.toggle" ng-click='entry3.tmp.toggle = !entry3.tmp.toggle' style="margin: 1.5em;" type="button")  + Other Fields
+div.row(style="overflow: scroll; height: auto; margin: 0px 0px; overflow-y: hidden;" layout="row")
+    div(ng-repeat='column in entry2.columns track by $index')
+        button.valid-btn(ng-click="column.tmp.showColumn = !column.tmp.showColumn" type="button" style="width: 150px; height:50px; margin: 1.5em; padding: 2px 5px 2px 5px;") Column {{$index+1}}:<br />{{column.variableName}}
 
-        div(ng-if="entry3.tmp.toggle")
-            md-subheader.md-primary Add Properties
-            div(layout='', layout-padding='', layout-sm='column')
-                div.form-group
-                    label(ng-repeat="field in fields track by $index" class="checkbox-inline")
-                        input(type="checkbox" value="field" ng-checked="entry3.tmp[field]"
-                        ng-click="addRmProperty(entry3, field); entry3.tmp[field] = !entry3.tmp[field]")
-                        | {{field}}
+div(layout="column" ng-repeat='entry3 in entry2.columns track by $index' layout-wrap="")
+    md-card(ng-if="entry3.tmp.showColumn")
+        md-subheader.md-primary column {{$index+1}}: {{entry3.variableName}}
+        div(layout='row', layout-padding='', layout-sm='column')
+            div(flex)
+                md-subheader.md-primary Standard fields
+                div(layout='', layout-padding='', layout-sm='column')
+                    md-input-container(flex='', class="md-input-has-value")
+                        label Variable Name *
+                        input(ng-model="entry3.variableName")
+                    md-input-container(flex='', class="md-input-has-value")
+                        label Units *
+                        input(ng-model="entry3.units")
+                        md-tooltip In what unit of measure is (are) the Variable(s) expressed?
+                    md-input-container(flex='', class="md-input-has-value" ng-if="pageMeta.noaaReady")
+                        label Data Type *
+                        input(ng-model="entry3.dataType")
+                    md-input-container(flex='', class="md-input-has-value" ng-if="pageMeta.noaaReady")
+                        label Data Format *
+                        input(ng-model="entry3.dataFormat")
+                div(layout='', layout-padding='', layout-sm='column')
+                    md-input-container(flex='', class="md-input-has-value")
+                        label(ng-if="pageMeta.noaaReady") Description *
+                        label(ng-if="!pageMeta.noaaReady") Description
+                        textarea(ng-model='entry3.description', columns='1', md-maxlength='500')
+                div(layout='', layout-padding='', layout-sm='column')
+                    md-input-container(flex='', class="md-input-has-value")
+                        label Values *
+                        //- input(format-values ng-model="files.csv[entry2.filename].transposed[$index]")
+                        input(space-values ng-model="files.csv[entry2.filename].transposed[$index]")
+                //md-subheader.md-primary Add Properties
+                div(layout='', layout-padd ing='', layout-sm='column')
+                    div.form-group
+                        label(ng-repeat="field in fields track by $index" class="checkbox-inline")
+                            input(type="checkbox" value="field" ng-checked="entry3.tmp[field]"
+                            ng-click="addRmProperty(entry3, field); entry3.tmp[field] = !entry3.tmp[field]")
+                            | {{field}}
 
-            div(layout='', layout-padding='', layout-sm='column')
-                button.invisible(ng-click="addRmProperty(entry3, entry3.tmp.custom); clearCustom(entry3)")
-                md-input-container(flex="25")
-                    label Other...
-                    input(ng-model="entry3.tmp.custom")
+                div(layout='', layout-padding='', layout-sm='column')
+                    button.invisible(ng-click="addRmProperty(entry3, entry3.tmp.custom); clearCustom(entry3)")
+                    md-input-container(flex="25")
+                        label Add custom field...
+                        input(ng-model="entry3.tmp.custom")
+                        md-tooltip Don't see the field you want? Add your custom field and press enter.
+                //div(layout='', layout-padding='', layout-sm='column' style="float: right;")
+                //    button.valid-btn(ng-if="entry3.tmp.toggle" ng-click='entry3.tmp.toggle = !entry3.tmp.toggle' style="margin: 1.5em;" type="button")  - Other Fields
+                //    button.valid-btn(ng-if="!entry3.tmp.toggle" ng-click='entry3.tmp.toggle = !entry3.tmp.toggle' style="margin: 1.5em;" type="button")  + Other Fields
+            div(flex)
+                md-subheader.md-primary Additional fields
+                //div(ng-if="entry3.tmp.toggle")
+                div
 
-        div(ng-repeat="(k,v) in entry3" ng-if="showProperty(k) && entry3.tmp.toggle" layout='', layout-padding='', layout-sm='column')
-            md-input-container(flex='', class="md-input-has-value")
-                label {{k}}
-                input(ng-model="entry3[k]" ng-disabled="k==='TSid'")
-        div(ng-repeat="interpretation in entry3.interpretation track by $index" ng-if="showProperty(k) && entry3.tmp.toggle" layout='', layout-padding='', layout-sm='column')
-            md-subheader.md-primary interpretation {{$index}}
-            md-input-container(flex='', class="md-input-has-value" ng-repeat="(k,v) in interpretation")
-                label {{k}}
-                input(ng-model="entry3.interpretation[k]")
+                div(style="overflow: scroll; height: 550px;")
+                    //div(ng-repeat="(k,v) in entry3" ng-if="showProperty(k) && entry3.tmp.toggle" layout='', layout-padding='', layout-sm='column')
+                    div(ng-repeat="(k,v) in entry3" ng-if="showProperty(k)" layout='', layout-padding='', layout-sm='column')
+                        md-input-container(flex='', class="md-input-has-value")
+                            label {{k}}
+                            input(ng-model="entry3[k]" ng-disabled="k==='TSid'")
+                    //div(ng-repeat="interpretation in entry3.interpretation track by $index" ng-if="showProperty(k) && entry3.tmp.toggle" layout='', layout-padding='', layout-sm='column')
+                    div(ng-repeat="interpretation in entry3.interpretation track by $index" ng-if="showProperty(k)" layout='', layout-padding='', layout-sm='column')
+                        md-subheader.md-primary interpretation {{$index}}
+                        md-input-container(flex='', class="md-input-has-value" ng-repeat="(k,v) in interpretation")
+                            label {{k}}
+                            input(ng-model="entry3.interpretation[k]")

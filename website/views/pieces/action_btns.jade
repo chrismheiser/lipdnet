@@ -16,9 +16,8 @@ li#buttons(style="list-style-type: none;")
 
   //- download button
   //- Temporary switch until other things get fixed. Allow the Download button at any time.
-  button.valid-btn#download-btn(title="Download the LiPD file when all errors are corrected" ng-show="!pageMeta.dlFallback" ng-click="startCaptcha()" type="button") Download
+  button.valid-btn#download-btn(title="Download the LiPD file when all errors are corrected" ng-show="!pageMeta.dlFallback" ng-click="checkCaptcha()" type="button") Download
   //- button.valid-btn#download-btn(ng-show="!pageMeta.dlFallback" ng-disabled="feedback.status!=='PASS'" ng-click="startCaptcha()" type="button") Download
   
   //- attempt at captcha
   div(vc-recaptcha key="'6LchMhIUAAAAAGjGCfNGxPkOJPl3ilJ2sQrapbbL'" ng-model="gRecaptchaResponse" on-success="downloadZip()" ng-show="pageMeta.captcha")
-  //- div(ng-show="pageMeta.captcha" class="g-recaptcha" data-sitekey="6LchMhIUAAAAAGjGCfNGxPkOJPl3ilJ2sQrapbbL" data-callback="downloadZip")
