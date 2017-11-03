@@ -17,17 +17,16 @@ body {
 	min-height: 100%;
 }
 
-#bg-img{
-	background: url(/img/peaks.jpg);
-	background-attachment: fixed;
-	background-repeat: no-repeat;
-	background-position: center bottom;
-	background-size: cover;
-	-webkit-background-size: cover;
-	-moz-background-size: cover;
-	-o-background-size: cover;
-
-}
+/*#bg-img{*/
+	/*background: url(/img/peaks.jpg);*/
+	/*background-attachment: fixed;*/
+	/*background-repeat: no-repeat;*/
+	/*background-position: center bottom;*/
+	/*background-size: cover;*/
+	/*-webkit-background-size: cover;*/
+	/*-moz-background-size: cover;*/
+	/*-o-background-size: cover;*/
+/*}*/
 
 
 /* Primary link colors  */
@@ -320,8 +319,9 @@ header ul.nav li ul li ul {
 /* Section :  Bottom */
 
 #bottom {
-	background:#fcfcfc;
-	padding:50px 0 0;
+	background: #fcfcfc;
+	padding: 50px 0 0;
+}
 
 /* Forms  */
 

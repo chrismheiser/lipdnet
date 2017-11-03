@@ -308,6 +308,19 @@ input[type=number]::-webkit-outer-spin-button {
     border: solid 1px #8FA864;
   }
 
+.warn-btn{
+    font-size: 10pt;
+    background-color: white;
+    font-family: RobotoDraft,Roboto,'Helvetica Neue',sans-serif;
+    margin-right: 5px;
+    padding: 4px;
+    width: 150px;
+    height: 31px;
+    border-radius: 5px;
+    color: #FDBABC;
+    border: solid 1px #FDBABC;
+}
+
   progress {
   	position: absolute;
   	right: 0px;

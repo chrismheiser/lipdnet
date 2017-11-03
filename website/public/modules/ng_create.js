@@ -273,6 +273,7 @@ var create = (function(){
           if (x.hasOwnProperty(_key) && x[_key] !== undefined){
             // if this key is in the array of items to be removed, then remove it.
             if(_key === "columns"){
+              x.toggle = true;
               // loop for each column
               for (var _v = 0; _v < x.columns.length; _v++){
                 var _col = x.columns[_v];
