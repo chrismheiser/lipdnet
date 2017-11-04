@@ -1,23 +1,13 @@
 //- File chooser: Select a lipd file 
 li#buttons(style="list-style-type: none;")
-  //- span#form-label Load LiPD
-  //- Bind this to a 'change' event so that we know when jsonld data is available to start processing.
   input#file-input(title="Upload your LiPD file for validation" name='file' type="file" accept=".lpd" style="max-width:200px; width:175px; padding:4px; display:inline;")
 
-  //- download button
-  //- md-button(ng-click="downloadZip()" ng-model='file' name='file' ngf-max-size="50MB") Download
-          
-  //- button.valid-btn#generate-tsid(ng-model="feedback.missingTsidCt" ng-disabled="feedback.missingTsidCt == 0" ng-click="populateTSids()") Populate TSid's
-  //- button.valid-btn#generate-tsid(ng-model="feedback.missingTsidCt" ng-if="feedback.missingTsidCt > 0" ng-click="populateTSids1()") Populate TSid's
-  //- br 
-  //- button to push validated lipd file to database
-  //- button.valid-btn(ng-model="file.push" ng-disabled="!pageMeta.valid") Upload to Wiki
-  button.valid-btn(title="LiPD data is validated during upload. If you make any corrections to the file, validate again to show updated results." ng-click="validate()" ng-disabled="pageMeta.filePicker" type="button") Validate
+li#buttons(style="list-style-type: none;")
 
-  //- download button
-  //- Temporary switch until other things get fixed. Allow the Download button at any time.
-  button.valid-btn#download-btn(title="Download the LiPD file when all errors are corrected" ng-show="!pageMeta.dlFallback" ng-click="checkCaptcha()" type="button") Download
-  //- button.valid-btn#download-btn(ng-show="!pageMeta.dlFallback" ng-disabled="feedback.status!=='PASS'" ng-click="startCaptcha()" type="button") Download
-  
-  //- attempt at captcha
+  button.valid-btn(ng-click="validate()" ng-disabled="pageMeta.filePicker" type="button") Validate
+    md-tooltip LiPD data is validated during upload. If you make any corrections to the file, validate again to show updated results.
+  button.valid-btn(ng-click="saveSession()") Save Session
+    md-tooltip Save your progress. The data will be stored in your browser for as long as you keep the window open.
+  button.valid-btn#download-btn( ng-show="!pageMeta.dlFallback" ng-click="checkCaptcha()" type="button") Download
+    md-tooltip Download the LiPD file when all errors are corrected
   div(vc-recaptcha key="'6LchMhIUAAAAAGjGCfNGxPkOJPl3ilJ2sQrapbbL'" ng-model="gRecaptchaResponse" on-success="downloadZip()" ng-show="pageMeta.captcha")

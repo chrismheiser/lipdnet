@@ -1,0 +1,9 @@
+.modal-content
+    .modal-header
+        h3.modal-title {{ data.title }}
+    .modal-body
+        p {{ data.message }}
+    .modal-footer
+        button(ng-if="data.button1" class="btn btn-success" data-dismiss="modal" ng-click="yes()") {{data.button1}}
+        button(ng-if="data.button2" class="btn btn-danger" data-dismiss="modal" ng-click="no()") {{data.button2}}
+        button(ng-if="data.button3" class="btn btn-primary" data-dismiss="modal" ng-click="close()") {{data.button3}}

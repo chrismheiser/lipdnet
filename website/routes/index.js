@@ -332,6 +332,10 @@ router.get("/modal-alert", function(req, res, next){
   res.render('modal/modal-alert', {title: ''});
 });
 
+router.get("/modal-ask", function(req, res, next){
+  res.render('modal/modal-ask', {title: ''});
+});
+
 router.get("/loading", function(req, res, next){
   res.render("loading", {title: ""});
 });

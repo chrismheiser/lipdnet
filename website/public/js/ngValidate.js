@@ -9,7 +9,7 @@
 // };
 
 // deprecated : cgBusy
-var f = angular.module('ngValidate', ['uiGmapgoogle-maps', 'json-tree', 'ngFileUpload', "ngMaterial", "vcRecaptcha", "ui.bootstrap", "cgBusy"]);
+var f = angular.module('ngValidate', ['uiGmapgoogle-maps', 'json-tree', 'ngFileUpload', "ngMaterial", "vcRecaptcha", "ui.bootstrap", "cgBusy", "toaster"]);
 
 
 f.value('cgBusyDefaults',{

@@ -1,6 +1,6 @@
 // Controller - Validate Form
-angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Upload', "ImportService", "ExportService", "$uibModal","$sce",
-  function ($scope, $log, $timeout, $q, $http, Upload, ImportService, ExportService, $uibModal, $sce) {
+angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Upload', "ImportService", "ExportService", "$uibModal","$sce", "toaster",
+  function ($scope, $log, $timeout, $q, $http, Upload, ImportService, ExportService, $uibModal, $sce, toaster) {
 
     // var url = "http://wiki.linked.earth/store/ds/query?query=";
     // var params = "PREFIX%20core%3A%20%3Chttp%3A%2F%2Flinked.earth%2Fontology%23%3E%0APREFIX%20wiki%3A%20%3Chttp%3A%2F%2Fwiki.linked.earth%2FSpecial%3AURIResolver%2F%3E%0ASELECT%20DISTINCT%20%3Flabel%0AWHERE%20%7B%0A%20%20%3Fs%20a%20core%3AInferredVariable%20.%0A%20%20%3Fs%20%3Fproperty%20%3Fc%20.%0A%20%20%3Fproperty%20%3Chttp%3A%2F%2Fwww.w3.org%2F2000%2F01%2Frdf-schema%23label%3E%20%3Flabel.%0A%7D";
@@ -128,7 +128,6 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       "countries" : map.getCountries()
     };
     $scope.fields = create.defaultColumnFields();
-    $scope.oneAtATime = true;
     // Compilation of all LiPD file data
     $scope.files = {
       "modal": {},
@@ -144,6 +143,7 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
     };
     // Metadata about the page view, and manipulations
     $scope.pageMeta = {
+      "busyPromise": null,
       "header": false,
       "decimalDegrees": true,
       "fileUploaded": false,
@@ -286,6 +286,51 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       });
     };
 
+    $scope.genericModalAsk = function(msg, cb){
+      $scope.modal = msg;
+      var modalInstance = $uibModal.open({
+        templateUrl: 'modal-ask',
+        controller: 'ModalCtrlAsk',
+        size: "md",
+        resolve: {
+          data: function () {
+            return $scope.modal;
+          }
+        }
+      });
+      modalInstance.result.then(function (selected) {
+        cb(selected);
+      });
+    };
+
+    // Show options for creating interpretation block
+    $scope.showModalInterpretation= function(cb){
+      var modalInstance = $uibModal.open({
+        templateUrl: 'modal-interp',
+        controller: 'ModalCtrlInterp',
+        size: "lg"
+      });
+      modalInstance.result.then(function (selected) {
+        cb(selected);
+      });
+
+    };
+
+    // Showing contents of individual file links
+    $scope.showModalFileContent = function(data){
+      $scope.modal = data;
+      var modalInstance = $uibModal.open({
+        templateUrl: 'modal-file',
+        controller: 'ModalCtrlFile',
+        size: "lg",
+        resolve: {
+          data: function () {
+            return $scope.modal;
+          }
+        }
+      });
+    };
+
     $scope.clearCustom = function(entry){
       if(entry.tmp.custom){
         $scope.fields.push(entry.tmp.custom);
@@ -293,6 +338,90 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       entry.tmp[entry.tmp.custom] = true;
       entry.tmp.custom = "";
       return entry;
+    };
+
+    $scope.roughSizeOfObject = function(object) {
+
+      var objectList = [];
+      var stack = [ object ];
+      var bytes = 0;
+
+      while ( stack.length ) {
+        var value = stack.pop();
+
+        if ( typeof value === 'boolean' ) {
+          bytes += 4;
+        }
+        else if ( typeof value === 'string' ) {
+          bytes += value.length * 2;
+        }
+        else if ( typeof value === 'number' ) {
+          bytes += 8;
+        }
+        else if
+        (
+          typeof value === 'object'
+          && objectList.indexOf( value ) === -1
+        )
+        {
+          objectList.push( value );
+
+          for( var i in value ) {
+            stack.push( value[ i ] );
+          }
+        }
+      }
+      return bytes;
+    };
+
+    $scope.saveSession = function(){
+      try{
+        delete $scope.pageMeta.busyPromise;
+        var _dat = JSON.stringify({
+          "allFiles": $scope.allFiles,
+          "status": $scope.status,
+          "map": $scope.map,
+          "dms": $scope.dms,
+          "feedback": $scope.feedback,
+          "pageMeta": $scope.pageMeta,
+          "files": $scope.files
+        });
+        console.log("Saving progress: ");
+        console.log($scope.roughSizeOfObject(_dat));
+        sessionStorage.setItem("lipd", _dat);
+        toaster.pop('note', "Saving progress...", "Saving your data to the browser session in case something goes wrong", 4000);
+      } catch(err){
+        toaster.pop('error', "Error saving progress", "Unable to save progress. Data may be too large for browser storage", 4000);
+      }
+    };
+
+    $scope.checkSession = function(){
+      var _prevSession = sessionStorage.getItem("lipd");
+      if(_prevSession){
+        $scope.genericModalAsk({"title": "Found previous session",
+          "message": "We detected LiPD data from a previous session. Would you like to restore the data?",
+          "button1": "Restore Data",
+          "button2": "Clear Data",
+          "button3": "Close"
+      },
+          function(_truth){
+            console.log(_truth);
+            if(_truth){
+              // start loading in the old session
+              _prevSession = JSON.parse(_prevSession);
+              $scope.allFiles = _prevSession.allFiles;
+              $scope.status = _prevSession.status;
+              $scope.map = _prevSession.map;
+              $scope.dms = _prevSession.dms;
+              $scope.feedback = _prevSession.feedback;
+              $scope.pageMeta = _prevSession.pageMeta;
+              $scope.files = _prevSession.files;
+            } else {
+              sessionStorage.removeItem("lipd");
+            }
+        });
+      }
+      // setInterval($scope.saveSession(),3000);
     };
 
     $scope.downloadZip = function(){
@@ -480,35 +609,6 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       $scope.files.json.geo.properties.country = name;
     };
 
-    // Show options for creating interpretation block
-    $scope.showModalInterpretation= function(cb){
-      var modalInstance = $uibModal.open({
-        templateUrl: 'modal-interp',
-        controller: 'ModalCtrlInterp',
-        size: "lg"
-      });
-
-      modalInstance.result.then(function (selected) {
-        cb(selected);
-      });
-
-    };
-
-    // Showing contents of individual file links
-    $scope.showModalFileContent = function(data){
-      $scope.modal = data;
-      var modalInstance = $uibModal.open({
-        templateUrl: 'modal-file',
-        controller: 'ModalCtrlFile',
-        size: "lg",
-        resolve: {
-          data: function () {
-            return $scope.modal;
-          }
-        }
-      });
-    };
-
     $scope.showProperty = function(name){
       if(["number", "variableName", "units", "toggle", "values", "checked", "tmp", "interpretation"].includes(name)){
         return false;
@@ -586,6 +686,8 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
           (angular.lowercase(item.name).indexOf(lowercaseQuery) === 0);
       };
     }
+
+    window.onload = $scope.checkSession();
 
     // Anyonymous
     (function (obj) {
