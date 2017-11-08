@@ -1,4 +1,8 @@
 // Column Data
+
+md-subheader.md-primary Columns
+
+
 div.row(style="overflow: scroll; height: auto; margin: 0px 0px; overflow-y: hidden;" layout="row")
     div(ng-repeat='column in entry2.columns track by $index')
         button.valid-btn(ng-click="column.tmp.showColumn = !column.tmp.showColumn" type="button" style="width: 150px; height:50px; margin: 1.5em; padding: 2px 5px 2px 5px;") Column {{$index+1}}:<br />{{column.variableName}}
@@ -32,7 +36,8 @@ div(layout="column" ng-repeat='entry3 in entry2.columns track by $index' layout-
                     md-input-container(flex='', class="md-input-has-value")
                         label Values *
                         //- input(format-values ng-model="files.csv[entry2.filename].transposed[$index]")
-                        input(space-values ng-model="files.csv[entry2.filename].transposed[$index]")
+                        input(space-values ng-model="files.csv[entry2.filename].transposed[$index]" disabled)
+                        md-tooltip This is a preview of the value data. You cannot edit this directly. Use the "Parse CSV" box where necessary.
                 //md-subheader.md-primary Add Properties
                 div(layout='', layout-padd ing='', layout-sm='column')
                     div.form-group

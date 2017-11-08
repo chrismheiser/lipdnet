@@ -143,6 +143,7 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
     };
     // Metadata about the page view, and manipulations
     $scope.pageMeta = {
+      "resetColumnMeta": true,
       "busyPromise": null,
       "header": false,
       "decimalDegrees": true,
@@ -499,6 +500,7 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
     $scope.parseCsv = function(entry, idx, options){
       // we can't guarantee a datasetname yet, so build this csv filename as best we can for now.
       var _csvname = options.pc + '0' + options.tt + idx + ".csv";
+      entry.tableName = options.pc + '0' + options.tt + idx;
       // Semi-colon delimiter is checked. Pass this as an argument to PapaParse
       // console.log($scope.dropdowns.current.delimiter.name);
       var _csv = Papa.parse(entry.values, {
@@ -508,31 +510,48 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       // add row, column, and transposed metadata to the parsed CSV object.
       _csv = misc.putCsvMeta(_csv);
 
-      // set the transposed data to entry.values. Transposed data is needed so we can display column data properly
-      entry.values = _csv.transposed;
-
       // transpose values so we can store each value array with its column
       entry.filename = _csvname;
-      // initialize X amount of columns
-      entry.columns = new Array(entry.values.length);
-      // start adding each column to the array
-      for(var _i=0; _i < entry.values.length; _i++){
-        if($scope.pageMeta.header){
-          // Header exists, we can set the variableName field as well! VariableName will be the first index
-          entry.columns[_i] = {"number": _i + 1, "variableName": entry.values[_i][0], "units": "", "values": entry.values[_i].splice(1, entry.values.length)};
+
+      // KEEP column metadata and parse values
+      if($scope.pageMeta.keepColumnMeta){
+        // Do the amount of parsed values columns === the existing amount of metadata columns?
+        if (entry.columns.length === _csv.transposed.length){
+          // set the transposed data to entry.values. Transposed data is needed so we can display column data properly
+          entry.values = _csv.transposed;
+          for (var _c = 0; _c < entry.columns.length; _c++){
+            entry.columns[_c]["values"] = entry.values[_c];
+          }
         } else {
-          // Headers do not exist. Set values directly
-          entry.columns[_i] = {"number": _i + 1, "variableName": "", "units": "", "values": entry.values[_i]};
+          $scope.genericModalAlert({"title": "Column Mismatch", "message": "When parsing values with the 'Parse & Keep Existing Metadata' option, the amount of values columns being parsed must match the amount of metadata columns that already exist."})
         }
       }
-      // If headers are present, we need to do some extra cleanup
-      if ($scope.pageMeta.header){
-        // Remove the header row from _csv.data (first array)  and _csv.transposed (first element of each array)
-        _csv = misc.removeCsvHeader(_csv);
-
+      // RESET column metadata and parse values
+      else {
+        // set the transposed data to entry.values. Transposed data is needed so we can display column data properly
+        entry.values = _csv.transposed;
+        // initialize X amount of columns
+        entry.columns = new Array(entry.values.length);
+        // start adding each column to the array
+        for(var _i=0; _i < entry.values.length; _i++){
+          if($scope.pageMeta.header){
+            // Header exists, we can set the variableName field as well! VariableName will be the first index
+            entry.columns[_i] = {"number": _i + 1, "variableName": entry.values[_i][0], "units": "", "values": entry.values[_i].splice(1, entry.values.length)};
+          } else {
+            // Headers do not exist. Set values directly
+            entry.columns[_i] = {"number": _i + 1, "variableName": "", "units": "", "values": entry.values[_i]};
+          }
+        }
+        // If headers are present, we need to do some extra cleanup
+        if ($scope.pageMeta.header){
+          // Remove the header row from _csv.data (first array)  and _csv.transposed (first element of each array)
+          _csv = misc.removeCsvHeader(_csv);
+        }
       }
+
       // CSV is all finished processing. Set data to scope.
       $scope.files.csv[_csvname] = _csv;
+      $scope.pageMeta.keepColumnMeta = true;
       return entry;
     };
 
@@ -585,6 +604,7 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
             "filename": "", "columns": []}]}]}
       };
       $scope.pageMeta = {
+        "keepColumnMeta": false,
         "header": false,
         "decimalDegrees": true,
         "fileUploaded": false,
