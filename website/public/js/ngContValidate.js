@@ -436,6 +436,8 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       $scope.pageMeta.busyPromise = $scope._myPromiseExport;
       $scope._myPromiseExport.then(function (res) {
         //upload zip to node backend, then callback and download it afterward.
+        console.log("Export response:");
+        console.log(res);
         $scope.uploadZip({"filename": $scope.files.lipdFilename, "dat": res}, function(resp){
           // reset the captcha
           $scope.pageMeta.captcha = false;
@@ -842,9 +844,13 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
               // Set response to allFiles so we can list all the filenames found in the LiPD archive.
               $scope.allFiles = res;
               $scope.pageMeta.fileUploaded = true;
+              $scope.pageMeta.keepColumnMeta = true;
               // Gather some metadata about the lipd file, and organize it so it's easier to manage.
               lipdValidator.restructure(res, $scope.files, function(_response_1){
                 $scope.files = _response_1;
+                if($scope.files.fileCt > 40){
+                  $scope.genericModalAlert({"title": "Wow! That's a lot of files!", "message": "We expanded the page to fit everything, so be sure to scroll down to see your data tables."})
+                }
                 $scope.validate();
                 $scope.files.json = create.initColumnTmp($scope.files.json);
                 $scope.files.json = create.initMissingArrs($scope.files.json);

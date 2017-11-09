@@ -3,9 +3,9 @@
 md-subheader.md-primary Columns
 
 
-div.row(style="overflow: scroll; height: auto; margin: 0px 0px; overflow-y: hidden;" layout="row")
+div.btn-row(layout="row")
     div(ng-repeat='column in entry2.columns track by $index')
-        button.valid-btn(ng-click="column.tmp.showColumn = !column.tmp.showColumn" type="button" style="width: 150px; height:50px; margin: 1.5em; padding: 2px 5px 2px 5px;") Column {{$index+1}}:<br />{{column.variableName}}
+        button.valid-btn.expandable(ng-click="column.tmp.showColumn = !column.tmp.showColumn" type="button") Column {{$index+1}}:<br />{{column.variableName}}
 
 div(layout="column" ng-repeat='entry3 in entry2.columns track by $index' layout-wrap="")
     md-card(ng-if="entry3.tmp.showColumn")

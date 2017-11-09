@@ -142,10 +142,36 @@ var mkdirSync = function (path) {
   }
 };
 
+
+var walk = function(directoryName) {
+  fs.readdir(directoryName, function(e, files) {
+    if (e) {
+      console.log('Error: ', e);
+      return;
+    }
+    files.forEach(function(file) {
+      var fullPath = path.join(directoryName,file);
+      fs.stat(fullPath, function(e, f) {
+        if (e) {
+          console.log('Error: ', e);
+          return;
+        }
+        if (f.isDirectory()) {
+          walk(fullPath);
+        } else {
+          console.log('- ' + fullPath);
+        }
+      });
+    });
+  });
+};
+
 // use the archiver model to create the LiPD file
-var createArchive = function(pathTmpZip, pathTmpBag, filename, cb){
+var createArchive = function(pathTmp, pathTmpZip, pathTmpBag, filename, cb){
   logger.info("Creating ZIP/LiPD archive...");
   var archive = archiver('zip');
+  var _origin = process.cwd();
+  process.chdir(pathTmp);
   // path where the LiPD will ultimately be located in "/zip" dir.
   var pathTmpZipLipd = path.join(pathTmpZip, filename);
   // open write stream to LiPD file location
@@ -154,11 +180,12 @@ var createArchive = function(pathTmpZip, pathTmpBag, filename, cb){
 
   // "close" event. processing is finished.
   output.on('close', function () {
-      logger.info(archive.pointer() + ' total bytes');
-      // logger.info('archiver has been finalized and the output file descriptor has closed.');
-      logger.info("LiPD Created at: " + pathTmpZipLipd);
-      // callback to finish POST request
-      cb();
+    logger.info(archive.pointer() + ' total bytes');
+    // logger.info('archiver has been finalized and the output file descriptor has closed.');
+    logger.info("LiPD Created at: " + pathTmpZipLipd);
+    // callback to finish POST request
+    process.chdir(_origin);
+    cb();
   });
 
   // error event
@@ -169,29 +196,30 @@ var createArchive = function(pathTmpZip, pathTmpBag, filename, cb){
 
   archive.pipe(output);
   // Add the data directory to the archive
-  logger.info("add dir to archive");
   try{
-    // read in all filenames from the "/bag" dir
-    var files = fs.readdirSync(pathTmpBag);
-    for(var i in files) {
-      // current file to process
-      var currPath = path.join(pathTmpBag, files[i]);
-
-      // if this is a bagit file (.txt), use "archive.file"
-      if(path.extname(files[i]) === ".txt") {
-        logger.info("archiving file from: " + currPath);
-        logger.info("archiving file to: " + files[i]);
-        archive.file(currPath, { name: files[i]});
-
-      }
-      // if this is the "/data" directory, use "archive.directory"
-      else {
-        logger.info("archiving dir from: " + currPath);
-        logger.info("archiving dir to: /" + files[i]);
-        archive.directory(currPath, "/" + files[i]);
-      }
-
-    }
+    logger.info("Archiving bag directory: " + pathTmpBag);
+    archive.directory("bag");
+    // // read in all filenames from the "/bag" dir
+    // var files = fs.readdirSync(pathTmpBag);
+    // for(var i in files) {
+    //   // current file to process
+    //   var currPath = path.join(pathTmpBag, files[i]);
+    //
+    //   // if this is a bagit file (.txt), use "archive.file"
+    //   if(path.extname(files[i]) === ".txt") {
+    //     logger.info("archiving file from: " + currPath);
+    //     logger.info("archiving file to: " + files[i]);
+    //     archive.file(currPath, { name: files[i]});
+    //
+    //   }
+    //   // if this is the "/data" directory, use "archive.directory"
+    //   else {
+    //     logger.info("archiving dir from: " + currPath);
+    //     logger.info("archiving dir to: /" + files[i]);
+    //     archive.directory(currPath, "/" + files[i]);
+    //   }
+    //
+    // }
 
   }catch(err){
     logger.info(err);
@@ -208,7 +236,7 @@ router.get('/', function(req, res, next) {
 
 // Receive a POST from the contact form on the home page
 router.post('/', function(req, res, next){
-  logger.info(req.body);
+  // logger.info(req.body);
 });
 
 // Get the schema page
@@ -235,7 +263,6 @@ router.post("/files", function(req, res, next){
 
     // console.log(master.files);
     master.files.forEach(function(file){
-      console.log(typeof(file));
       for(var _filename in file){
         try{
           logger.info("POST: writing: " + path.join(master.pathTmpFiles,  _filename));
@@ -270,8 +297,8 @@ router.post("/files", function(req, res, next){
       }).then(function(resp2){
         // When a successful Bagit Promise returns, start creating the ZIP/LiPD archive
         if(resp2){
-          createArchive(master.pathTmpZip, master.pathTmpBag, master.filename, function(){
-            logger.info("POST: response: " + path.basename(master.pathTmp));
+          createArchive(master.pathTmp, master.pathTmpZip, master.pathTmpBag, master.filename, function(){
+            logger.info("POST: " + path.basename(master.pathTmp));
             res.status(200).send(path.basename(master.pathTmp));
           });
         } else {
@@ -291,12 +318,12 @@ router.get("/files/:tmp", function(req, res, next){
     // Tmp string provided by client
     logger.info("GET: /files");
     var tmpStr = req.params.tmp;
-    logger.info("GET: tmpStr: " + tmpStr);
+    logger.info("GET: " + tmpStr);
+    // walk(path.join(process.cwd(), "tmp", tmpStr));
     // Path to the zip dir that holds the LiPD file
     var pathTmpZip = path.join(process.cwd(), "tmp", tmpStr, "zip");
-    logger.info("GET: " + pathTmpZip);
     // Read in all filenames from the dir
-    logger.info("GET: read zip dir");
+    logger.info("GET: LiPD File: " + pathTmpZip);
     var files = fs.readdirSync(pathTmpZip);
     // Loop over the files found
     for(var i in files) {
@@ -306,7 +333,7 @@ router.get("/files/:tmp", function(req, res, next){
          var pathLipd = path.join(pathTmpZip, files[i]);
          res.setHeader('Content-disposition', 'attachment; filename=' + files[i]);
          res.setHeader('Content-type', "application/zip");
-         logger.info("sending response to client.");
+         logger.info("GET: Sending LiPD to client");
          res.download(pathLipd);
        }
     }

@@ -14,7 +14,7 @@ div(ng-hide="entry2.toggle")
             md-tooltip Generally, copy/pasting data results in a 'Tab' delimiter. Please note if another delimiter is in use.
 
         md-switch(ng-model='pageMeta.header') Header: {{ pageMeta.header? "Yes": "No"}}
-        md-switch(ng-model='pageMeta.keepColumnMeta') Keep Existing Columns{{ pageMeta.keepColumnMeta? "Yes" : "No"}}
+        md-switch(ng-model='pageMeta.keepColumnMeta') Keep Existing Columns: {{ pageMeta.keepColumnMeta? "Yes" : "No"}}
             md-tooltip If you have a table full of metadata, and ONLY want to update the values, you can choose 'Keep Existing Columns' to preserve the metadata
 
     div(layout='', layout-padding='', layout-sm='column')

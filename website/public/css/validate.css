@@ -295,6 +295,16 @@ input[type=number]::-webkit-outer-spin-button {
   	border: solid 1px #eee;
   }
 
+  .expandable {
+      width: 150px;
+      height:50px;
+      margin: 1.5em;
+      padding: 2px 5px 2px 5px;
+      color: #2C6FAE;
+      border: solid 1px #2C6FAE;
+
+  }
+
   .valid-btn-sm{
     font-size: 10pt;
     background-color: white;
@@ -327,4 +337,12 @@ input[type=number]::-webkit-outer-spin-button {
   	top: 1px;
   	opacity: .7;
   	width: 80px;
+  }
+
+  .btn-row {
+      overflow: scroll;
+      height: auto;
+      margin: 0px 0px;
+      overflow-y: hidden;
+      overflow-x: auto;
   }

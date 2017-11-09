@@ -3,8 +3,14 @@ md-toolbar.md-hue-1
   h2.md-toolbar-tools
     span Funding
     md-tooltip Source of monetary support underlying the collection/creation/analysis/curation of the Dataset
+
+div.btn-row( layout="row")
+  div(ng-repeat="entry in files.json.funding track by $index")
+    button.valid-btn.expandable(ng-click="entry.toggle = !entry.toggle") Funding {{$index+1}}
+
+
 div(ng-repeat='entry in files.json.funding track by $index' layout-wrap="")
-  md-card
+  md-card(ng-show="entry.toggle")
     //- div(layout='', layout-padding='', layout-sm='column')
     md-subheader.md-primary funding {{$index+1}}
     div(layout='', layout-padding='', layout-sm='column')

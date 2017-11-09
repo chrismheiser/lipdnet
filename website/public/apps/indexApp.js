@@ -1,4 +1,4 @@
-var i = angular.module('indexApp', ['ngMap', 'ngContact', 'ngAnimate']);
+var i = angular.module('indexApp', ['ngMap', 'ngAnimate']);
 
 i.controller('toggle', function($scope){
   $scope.sch = false;

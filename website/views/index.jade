@@ -111,44 +111,6 @@ block body
 					div(ng-controller='MapCtrl' ng-cloak)
 						ui-gmap-google-map(center="map.center" zoom="map.zoom" options="options")
 
-	
-	//.container.cf#contact(ng-controller='ContactCtrl')
-	//	.animation-element.bounce-up.cf(ng-init="sent=false")
-	//		h1.subject.md-display-3(layout layout-align="center center") Contact
-	//		.subject.third
-	//			.category-color
-	//			.icon
-	//				i.fa.fa-envelope
-	//			.header.cf
-	//			h3.title Questions, comments, concerns...
-	//
-	//			// show this when form has not been submitted yet
-	//			.content(layout='row' layout-align='space-around center' ng-cloak ng-switch='fmsnt')
-	//				.f(ng-switch-when="false" flex='30')
-	//					h4 Tell us what you think
-	//					p We're working hard to make our LiPD utilities better every day. Let us know what you like, what you don't like, and what can be improved!
-	//				form.f(ng-switch-when="false" flex='60' method='post' ng-model='fm')
-	//					md-input-container
-	//						label Name
-	//						input(type="text" name='fn' ng-model='fm.fn' required max-length='30' ng-blur="checkForm();")
-	//					md-input-container
-	//						label Organization
-	//						input(type="text" name='fo' ng-model='fm.fo' required max-length='30' ng-blur="checkForm();")
-	//					md-input-container
-	//						label E-Mail
-	//						input(type="email" name='fe' ng-model='fm.fe' required max-length='30' ng-blur="checkForm()")
-	//					md-input-container
-	//						label Subject
-	//						input(type="text" name='fs' ng-model='fm.fs' required max-length='30' ng-blur="checkForm()")
-	//					md-input-container
-	//						label Message
-	//						textarea(type="text" name='fmm' ng-model='fm.fmm' required max-length='150' ng-blur="checkForm()")
-	//					md-button.send(type='submit' ng-click='sendMail()' ng-model="fmsnt" ng-disabled="!complete") Send
-	//				.f(ng-switch-when="true")
-	//					h1(style='font-weight:500;') Message Sent!
-	//					p We'll get back to you as soon as possible.
-
-
 	footer
 		p#nsf.
 			The development of LiPD is funded by the National Science Foundation   
@@ -160,6 +122,5 @@ block js
 	script(src='https://maps.googleapis.com/maps/api/js?sensor=false')
 	script(src='apps/indexApp.js')
 	script(src='js/ngMap.js')
-	script(src='js/ngContact.js')
 	script(src='lib/animate.js')
 	script(src='lib/smooth.js')
