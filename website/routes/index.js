@@ -10,7 +10,35 @@ var lipdValidator = require("../node_modules_custom/node_validator.js");
 var misc = require("../node_modules_custom/node_misc.js");
 var router = express.Router();
 
-var parseRequest = function(master, req){
+var downloadResponse = function(options, res){
+  // set headers and initiate download.
+  var pathFinal = path.join(options.path, options.file);
+  res.setHeader('Content-disposition', 'attachment; filename=' + options.file);
+  res.setHeader('Content-type', options.content);
+  logger.info(options.message);
+  res.download(pathFinal);
+};
+
+var writeFiles = function(dat, dst, res, cb){
+  try{
+    // console.log("writeFiles");
+    dat.forEach(function(file){
+      for(var _filename in file){
+        try{
+          logger.info("writing file: " + path.join(dst,  _filename));
+          fs.writeFileSync(path.join(dst, _filename), file[_filename]);
+        } catch(err){
+          res.status(500).send("Unable to process file: " + _filename);
+        }
+      }
+    });
+  } catch(err){
+    console.log("writeFiles: ", err);
+  }
+  cb();
+};
+
+var parseRequest = function(master, req, res){
   try {
     // set data about the file
     master.files = req.body.file;
@@ -26,25 +54,40 @@ var parseRequest = function(master, req){
   }
 };
 
+var parseRequestNoaa = function(master, req, res){
+  try {
+    // set data about the file
+    master.dat = req.body.dat;
+    master.name = req.body.name;
+
+    // path that stores noaas
+    master.pathTop = path.join(process.cwd(), "tmp");
+    master.pathTmpPrefix = path.join(master.pathTop, "noaa-");
+    return master;
+  } catch (err){
+    logger.info("index.js: parseRequestNoaa: " + err);
+    res.status(500).send("POST: parseRequestNoaa: Error creating Noaa: " + err);
+  }
+};
+
 var createTmpDir = function(master){
-  logger.info("createTmpDir");
   try {
     // create tmp folder at "/tmp/<lipd-xxxxx>"
     // logger.info("POST: creating tmp dir...");
     master.pathTmp = misc.makeid(master.pathTmpPrefix, function(_pathTmp){
       // logger.info("POST: created tmp dir str: " + _pathTmp);
       try{
-        logger.info("make dir: " + _pathTmp);
+        logger.info("mkdir: " + _pathTmp);
         mkdirSync(_pathTmp);
       } catch(err){
-        logger.info("index.js: POST /files: " + err);
+        logger.info("createTmpDir: Couldn't mkdirs" + err);
       }
       return _pathTmp;
     });
     return master;
   }catch(err){
-    logger.info("index.js: createTmpDir: " + err);
-    res.status(500).send("POST: createTmpDir: Error creating LiPD: " + err);
+    logger.info("createTmpDir: error making tmp IDs: " + err);
+    res.status(500).send("createTmpDir: error making tmp IDs: " + err);
   }
 };
 
@@ -166,6 +209,57 @@ var walk = function(directoryName) {
   });
 };
 
+var createArchiveNoaa = function(pathTmpNoaa, cb){
+  logger.info("Creating NOAA archive...");
+  var archive = archiver('zip');
+  var _origin = process.cwd();
+  process.chdir(pathTmpNoaa);
+  // path where the NOAA archive write to
+  var pathTmpNoaaZip = path.join(pathTmpNoaa, "noaa_archive.zip");
+  // open write stream to LiPD file location
+  var output = fs.createWriteStream(pathTmpNoaaZip);
+  logger.info("Write Stream Open: " + pathTmpNoaaZip);
+
+  // "close" event. processing is finished.
+  output.on('close', function () {
+    logger.info(archive.pointer() + ' total bytes');
+    // logger.info('archiver has been finalized and the output file descriptor has closed.');
+    logger.info("ZIP Created at: " + pathTmpNoaaZip);
+    // callback to finish POST request
+    process.chdir(_origin);
+    cb();
+  });
+
+  // error event
+  archive.on('error', function(err){
+    logger.info("archive error");
+    throw err;
+  });
+
+  archive.pipe(output);
+  // Add the data directory to the archive
+  try {
+    logger.info("Archiving NOAA text files: " + pathTmpNoaa);
+    try {
+      // read in all filenames from the "/bag" dir
+      var files = fs.readdirSync(pathTmpNoaa);
+      for (var i in files) {
+        // if this is a text file (.txt) archive it
+        if (path.extname(files[i]) === ".txt") {
+          logger.info("archiving: " + files[i]);
+          archive.file(files[i], {name: files[i]});
+        }
+      }
+    } catch (err) {
+      logger.info(err);
+    }
+  }catch(err){
+    logger.info(err);
+  }
+  // all files are done, finalize the archive
+  archive.finalize();
+};
+
 // use the archiver model to create the LiPD file
 var createArchive = function(pathTmp, pathTmpZip, pathTmpBag, filename, cb){
   logger.info("Creating ZIP/LiPD archive...");
@@ -199,27 +293,6 @@ var createArchive = function(pathTmp, pathTmpZip, pathTmpBag, filename, cb){
   try{
     logger.info("Archiving bag directory: " + pathTmpBag);
     archive.directory("bag");
-    // // read in all filenames from the "/bag" dir
-    // var files = fs.readdirSync(pathTmpBag);
-    // for(var i in files) {
-    //   // current file to process
-    //   var currPath = path.join(pathTmpBag, files[i]);
-    //
-    //   // if this is a bagit file (.txt), use "archive.file"
-    //   if(path.extname(files[i]) === ".txt") {
-    //     logger.info("archiving file from: " + currPath);
-    //     logger.info("archiving file to: " + files[i]);
-    //     archive.file(currPath, { name: files[i]});
-    //
-    //   }
-    //   // if this is the "/data" directory, use "archive.directory"
-    //   else {
-    //     logger.info("archiving dir from: " + currPath);
-    //     logger.info("archiving dir to: /" + files[i]);
-    //     archive.directory(currPath, "/" + files[i]);
-    //   }
-    //
-    // }
 
   }catch(err){
     logger.info(err);
@@ -254,25 +327,12 @@ router.post("/files", function(req, res, next){
   // REQ
   //
   var master = {};
-  master = parseRequest(master, req);
+  master = parseRequest(master, req, res);
   master = createTmpDir(master);
   master = createSubdirs(master);
   try{
     // use req data to write csv and jsonld files into "/files/<lipd-xxxxx>/files/"
-    // logger.info("POST: begin writing files");
-
-    // console.log(master.files);
-    master.files.forEach(function(file){
-      for(var _filename in file){
-        try{
-          logger.info("POST: writing: " + path.join(master.pathTmpFiles,  _filename));
-          fs.writeFileSync(path.join(master.pathTmpFiles, _filename), file[_filename]);
-        } catch(err){
-          res.status(500).send("Unable to process file: " + _filename);
-        }
-      }
-
-    });
+    writeFiles(master.files, master.pathTmpFiles, res, function(){});
 
     logger.info("Start Bagit...");
     // Call bagit process on folder of files
@@ -316,30 +376,119 @@ router.post("/files", function(req, res, next){
 router.get("/files/:tmp", function(req, res, next){
   try {
     // Tmp string provided by client
-    logger.info("GET: /files");
+    logger.info("/files get");
     var tmpStr = req.params.tmp;
-    logger.info("GET: " + tmpStr);
+    logger.info("/files get: " + tmpStr);
     // walk(path.join(process.cwd(), "tmp", tmpStr));
     // Path to the zip dir that holds the LiPD file
     var pathTmpZip = path.join(process.cwd(), "tmp", tmpStr, "zip");
     // Read in all filenames from the dir
-    logger.info("GET: LiPD File: " + pathTmpZip);
+    logger.info("/files get: LiPD File: " + pathTmpZip);
     var files = fs.readdirSync(pathTmpZip);
     // Loop over the files found
     for(var i in files) {
       // Get the first lipd file you find (there should only be one)
        if(path.extname(files[i]) === ".lpd") {
-         // set headers and initiate download.
-         var pathLipd = path.join(pathTmpZip, files[i]);
-         res.setHeader('Content-disposition', 'attachment; filename=' + files[i]);
-         res.setHeader('Content-type', "application/zip");
-         logger.info("GET: Sending LiPD to client");
-         res.download(pathLipd);
+         var options = {"path": pathTmpZip, "file": files[i], "content": "application/zip", "message": "/files get: Sending LiPD to client"};
+         downloadResponse(options, res);
        }
     }
   } catch(err) {
     logger.info(err);
     res.status(500).send("GET: Error downloading LiPD file: " + err);
+  }
+});
+
+router.post("/noaa", function(req, res, next){
+  try{
+    // Parse the angular request data into a form that we can use
+    var master = {};
+    master = parseRequestNoaa(master, req, res);
+    master = createTmpDir(master);
+    try {
+      // Bring in the request module to work some magic
+      var request = require('request');
+      // Pack up the options that we want to give the request module
+      var options = {
+        uri: 'http://cheiser.pythonanywhere.com/api/noaa',
+        method: 'POST',
+        json: master.dat
+      };
+      // Send the request to the NOAA API
+      console.log("Sending LiPD data to NOAA Conversion API: ", master.name);
+      request(options, function (error, response, body) {
+        console.log("Response Status: ", response.statusCode);
+        // Did the call work?
+        if (!error && response.statusCode == 200) {
+          // Huzzah! We have a good response
+          // console.log("# NOAA files received: ", body.length);
+          logger.info("NOAA tmp folder ID: " + path.basename(master.pathTmp));
+          // Write the NOAA data to the tmp folder as text files
+          try {
+            console.log("Received Data from NOAA API");
+            writeFiles(body, master.pathTmp, res, function(){
+              if(fs.readdirSync(master.pathTmp).length !== 0){
+                res.status(200).send(path.basename(master.pathTmp));
+              } else {
+                res.status(500).send("/noaa post: Error occurred during conversion/write process");
+              }
+            });
+          } catch(err){
+            console.log("/noaa post: Error while writing txt files to tmp: ", err);
+            res.status(500).send("/noaa post: Error while writing txt files to tmp: " + error);
+          }
+        } else{
+          // Yikes, something went wrong on in the flask app. Initiate damage control.
+          console.log("/noaa post: Bad response from NOAA API: ", error);
+          res.status(500).send("/noaa post: Bad response from NOAA API: " + error);
+        }
+      });
+    } catch(err){
+      // Yikes, communication problems.
+      console.log("/noaa post: Error preparing & sending NOAA API request: ", err);
+      res.status(500).send("/noaa post: Error preparing & sending NOAA API request: " + error);
+
+    }
+  } catch(err){
+    // Yikes, I messed this up somewhere.
+    console.log("/noaa post: Error parsing data request sent from angular: " + err);
+    res.status(500).send("/noaa post: Error parsing data request sent from angular: " + error);
+
+  }
+});
+
+router.get("/noaa/:tmp", function(req, res, next){
+  try {
+    logger.info("/noaa get: Ya! Take it away, Ern!");
+    // NOAA ID provided by client
+    var tmpStr = req.params.tmp;
+    logger.info("/noaa get: NOAA ID: " + tmpStr);
+    // walk(path.join(process.cwd(), "tmp", tmpStr));
+    // Full path to the zip dir that holds the NOAA file(s)
+    // var pathTmp = path.join(process.cwd(), "tmp");
+    var pathTmpNoaa = path.join(process.cwd(), "tmp", tmpStr);
+    // Read in all filenames from the dir
+    logger.info("/noaa get: Reading from: " + pathTmpNoaa);
+    var files = fs.readdirSync(pathTmpNoaa);
+    console.log("Found files, I hope: ");
+    console.log("File Count: ", files.length);
+    console.log(files);
+    if (files.length === 1){
+      var options = {"path": pathTmpNoaa, "file": files[0], "content": "text/plain", "message": "/noaa get: Sending NOAA txt to client"};
+      downloadResponse(options, res);
+    } else if (files.length > 1){
+      // zip up the files into a single download
+      createArchiveNoaa(pathTmpNoaa, function(){
+        var options = {"path": pathTmpNoaa, "file": "noaa_archive.zip", "content": "application/zip", "message": "/noaa get: Sending NOAA zip to client"};
+        downloadResponse(options, res);
+      });
+    } else {
+      res.status(500).send("/noaa get: Error, no NOAA files were created for the given ID");
+    }
+
+  } catch(err) {
+    logger.info("/noaa get: Error downloading NOAA file(s): ", err);
+    res.status(500).send("/noaa get: Error downloading NOAA file(s): ", err);
   }
 });
 

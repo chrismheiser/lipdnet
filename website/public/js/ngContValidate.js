@@ -2,81 +2,6 @@
 angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Upload', "ImportService", "ExportService", "$uibModal","$sce", "toaster",
   function ($scope, $log, $timeout, $q, $http, Upload, ImportService, ExportService, $uibModal, $sce, toaster) {
 
-    // var url = "http://wiki.linked.earth/store/ds/query?query=";
-    // var params = "PREFIX%20core%3A%20%3Chttp%3A%2F%2Flinked.earth%2Fontology%23%3E%0APREFIX%20wiki%3A%20%3Chttp%3A%2F%2Fwiki.linked.earth%2FSpecial%3AURIResolver%2F%3E%0ASELECT%20DISTINCT%20%3Flabel%0AWHERE%20%7B%0A%20%20%3Fs%20a%20core%3AInferredVariable%20.%0A%20%20%3Fs%20%3Fproperty%20%3Fc%20.%0A%20%20%3Fproperty%20%3Chttp%3A%2F%2Fwww.w3.org%2F2000%2F01%2Frdf-schema%23label%3E%20%3Flabel.%0A%7D";
-    // var xhr = new XMLHttpRequest();
-    // xhr.open("POST", url+params, true);
-    // //Send the proper header information along with the request
-    // xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-    // xhr.send(params);
-    // xhr.onreadystatechange = function() {
-    //   if (xhr.readyState === 4) {
-    //     console.log("fields");
-    //     console.log(xhr.response); //Outputs a DOMString by default
-    //   }
-    // };
-    //
-    // var url2 = "http://wiki.linked.earth/store/ds/query?query=";
-    // var params2 = "PREFIX%20core%3A%20%3Chttp%3A%2F%2Flinked.earth%2Fontology%23%3E%0APREFIX%20wiki%3A%20%3Chttp%3A%2F%2Fwiki.linked.earth%2FSpecial%3AURIResolver%2F%3E%0ASELECT%20%3Fds%20%3Fname%0AWHERE%20%7B%0A%20%20%3Fds%20a%20core%3ADataset%20.%0A%20%20%3Fds%20core%3Aname%20%3Fname%0A%7D";
-    // var xhr2 = new XMLHttpRequest();
-    // xhr2.open("GET", url2+params2, true);
-    // xhr2.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-    // xhr2.send(params2);
-    // xhr2.onreadystatechange = function() {
-    //   if (xhr2.readyState === 4) {
-    //     console.log("datasets");
-    //     console.log(xhr2.response); //Outputs a DOMString by default
-    //   }
-    // };
-
-    $scope.lipdPopover = $sce.trustAsHtml('' +
-      '<h5>LiPD Requirements</h5><br>' +
-      '<p>Root Level:</p><ul>' +
-      '<li>dataSetName</li>' +
-      '<li>archiveType</li>' +
-      '<li>createdBy</li>' +
-      '</ul><br><p>Geo:</p><ul>' +
-      '<li>coordinates</li>' +
-      '</ul><br><p>paleoData:</p><ul>' +
-      '<li>measurementTable</li>' +
-      '</ul><br><p>Column Level:</p><ul>' +
-      '<li>variableName</li>' +
-      '<li>units ("unitless" if units not applicable)</li>' +
-      '<li>values</li>' +
-      '</ul>');
-
-    $scope.wikiPopover = $sce.trustAsHtml('' +
-      '<h5>Linked Earth Wiki Requirements</h5><br>' +
-      '<p>In addition to the normal LiPD Requirements: </p>' +
-
-      '</ul><br><p>Column Level:</p><ul>' +
-      '<li>proxyObservationType</li>' +
-      '<li>variableType</li>' +
-      '<li>takenAtDepth</li>' +
-      '<li>inferredVariableType</li>' +
-      '</ul>');
-    $scope.noaaPopover = $sce.trustAsHtml('' +
-      '<h5>NOAA Requirements</h5><br>' +
-      '<p>In addition to the normal LiPD Requirements: </p>' +
-
-      '</ul><br><p>NOAA specific:</p><ul>' +
-      '<li>maxYear</li>' +
-      '<li>minYear</li>' +
-      '<li>timeUnit</li>' +
-      '<li>onlineResource</li>' +
-      '<li>onlineResourceDescription</li>' +
-      '<li>modifiedDate</li><br>' +
-      '</ul><p>Root Level:</p><ul>' +
-      '<li>investigators</li>' +
-      '</ul><br><p>Geo:</p><ul>' +
-      '<li>siteName</li>' +
-      '<li>location</li>' +
-      '</ul><br><p>Column Level:</p><ul>' +
-      '<li>description</li>' +
-      '<li>dataFormat</li>' +
-      '<li>dataType</li>'
-    );
-
     var vc = this;
     vc.properties = {
       item : null,
@@ -103,6 +28,9 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
         {"view": "Notes", "name": "notes", "checked": false},
       ]
     };
+    $scope.lipdPopover = $sce.trustAsHtml(create.getPopover("lipd"));
+    $scope.wikiPopover = $sce.trustAsHtml(create.getPopover("wiki"));
+    $scope.noaaPopover = $sce.trustAsHtml(create.getPopover("noaa"));
     $scope.dropdowns = {
       "current": {
         "table": { id: 1, name: 'measurement' },
@@ -143,6 +71,7 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
     };
     // Metadata about the page view, and manipulations
     $scope.pageMeta = {
+      "downloadMode": null,
       "resetColumnMeta": true,
       "busyPromise": null,
       "header": false,
@@ -243,156 +172,20 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       return entry;
     };
 
-    $scope.makeNoaaReady = function(){
-      if(!$scope.pageMeta.noaaReady){
-        // Make Ready
-        create.addNoaaReady($scope.files.json, function(_d2){
-          $scope.genericModalAlert({"title": "NOAA Validation", "message": "The fields that NOAA requires have been " +
-          "added where necessary. For a list of these requirements, hover your mouse pointer over the 'NOAA " +
-          "requirements' bar on the left side of the page."});
-          $scope.files.json = _d2;
-        });
+    $scope.checkCaptcha = function(mode, firstTry){
+      // If we get this call directly from the captcha "on-success" cb, then trigger download
+      // OR if the captcha was previously solved and still active, trigger download
+      $scope.pageMeta.downloadMode = mode;
+      if (firstTry || $scope.gRecaptchaResponse){
+        if(mode === "noaa"){
+          $scope.downloadNoaa();
+        } else if (mode === "lipd"){
+          $scope.downloadZip();
+        }
       } else {
-        // Don't remove fields. just alert
-        $scope.genericModalAlert({"title": "Fields may be ignored", "message": "Validation is no longer using NOAA rules."});
-      }
-    };
-
-    $scope.makeWikiReady = function(){
-      if(!$scope.pageMeta.wikiReady){
-        // Make Ready
-        create.addWikiReady($scope.files.json, function(_d2){
-          $scope.genericModalAlert({"title": "Wiki Validation", "message": "The fields that the Linked Earth Wiki requires have been " +
-          "added where necessary. For a list of these requirements, hover your mouse pointer over the 'Wiki " +
-          "requirements' bar on the left side of the page."});
-          $scope.files.json = _d2;
-        });
-      } else {
-        // Don't remove fields. just alert
-        $scope.genericModalAlert({"title": "Fields may be ignored", "message": "Validation is no longer using Wiki rules."});
-      }
-    };
-
-    $scope.genericModalAlert = function(msg){
-      $scope.modal = msg;
-      var modalInstance = $uibModal.open({
-        templateUrl: 'modal-alert',
-        controller: 'ModalCtrlAlert',
-        size: "md",
-        resolve: {
-          data: function () {
-            return $scope.modal;
-          }
-        }
-      });
-    };
-
-    $scope.genericModalAsk = function(msg, cb){
-      $scope.modal = msg;
-      var modalInstance = $uibModal.open({
-        templateUrl: 'modal-ask',
-        controller: 'ModalCtrlAsk',
-        size: "md",
-        resolve: {
-          data: function () {
-            return $scope.modal;
-          }
-        }
-      });
-      modalInstance.result.then(function (selected) {
-        cb(selected);
-      });
-    };
-
-    // Show options for creating interpretation block
-    $scope.showModalInterpretation= function(cb){
-      var modalInstance = $uibModal.open({
-        templateUrl: 'modal-interp',
-        controller: 'ModalCtrlInterp',
-        size: "lg"
-      });
-      modalInstance.result.then(function (selected) {
-        cb(selected);
-      });
-
-    };
-
-    // Showing contents of individual file links
-    $scope.showModalFileContent = function(data){
-      $scope.modal = data;
-      var modalInstance = $uibModal.open({
-        templateUrl: 'modal-file',
-        controller: 'ModalCtrlFile',
-        size: "lg",
-        resolve: {
-          data: function () {
-            return $scope.modal;
-          }
-        }
-      });
-    };
-
-    $scope.clearCustom = function(entry){
-      if(entry.tmp.custom){
-        $scope.fields.push(entry.tmp.custom);
-      }
-      entry.tmp[entry.tmp.custom] = true;
-      entry.tmp.custom = "";
-      return entry;
-    };
-
-    $scope.roughSizeOfObject = function(object) {
-
-      var objectList = [];
-      var stack = [ object ];
-      var bytes = 0;
-
-      while ( stack.length ) {
-        var value = stack.pop();
-
-        if ( typeof value === 'boolean' ) {
-          bytes += 4;
-        }
-        else if ( typeof value === 'string' ) {
-          bytes += value.length * 2;
-        }
-        else if ( typeof value === 'number' ) {
-          bytes += 8;
-        }
-        else if
-        (
-          typeof value === 'object'
-          && objectList.indexOf( value ) === -1
-        )
-        {
-          objectList.push( value );
-
-          for( var i in value ) {
-            stack.push( value[ i ] );
-          }
-        }
-      }
-      return bytes;
-    };
-
-    $scope.saveSession = function(){
-      try{
-        delete $scope.pageMeta.busyPromise;
-        var _dat = JSON.stringify({
-          "allFiles": $scope.allFiles,
-          "status": $scope.status,
-          "map": $scope.map,
-          "dms": $scope.dms,
-          "feedback": $scope.feedback,
-          "pageMeta": $scope.pageMeta,
-          "files": $scope.files
-        });
-        console.log("Saving progress: ");
-        console.log($scope.roughSizeOfObject(_dat));
-        sessionStorage.setItem("lipd", _dat);
-        toaster.pop('note', "Saving progress...", "Saving your data to the browser session in case something goes wrong", 4000);
-      } catch(err){
-        toaster.pop('error', "Error saving progress", "Unable to save progress. Data may be too large for browser storage", 4000);
+        // Download button was clicked, show the captcha challenge
+        console.log("Start captcha challenge");
+        $scope.pageMeta.captcha = true;
       }
     };
 
@@ -400,11 +193,11 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       var _prevSession = sessionStorage.getItem("lipd");
       if(_prevSession){
         $scope.genericModalAsk({"title": "Found previous session",
-          "message": "We detected LiPD data from a previous session. Would you like to restore the data?",
-          "button1": "Restore Data",
-          "button2": "Clear Data",
-          "button3": "Close"
-      },
+            "message": "We detected LiPD data from a previous session. Would you like to restore the data?",
+            "button1": "Restore Data",
+            "button2": "Clear Data",
+            "button3": "Close"
+          },
           function(_truth){
             console.log(_truth);
             if(_truth){
@@ -420,9 +213,39 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
             } else {
               sessionStorage.removeItem("lipd");
             }
-        });
+          });
       }
       // setInterval($scope.saveSession(),3000);
+    };
+
+    $scope.clearCustom = function(entry){
+      if(entry.tmp.custom){
+        $scope.fields.push(entry.tmp.custom);
+      }
+      entry.tmp[entry.tmp.custom] = true;
+      entry.tmp.custom = "";
+      return entry;
+    };
+
+    $scope.downloadNoaa = function(){
+      // Fix up the json a bit so it's ready to be sorted and downloaded
+      create.closingWorkflowNoaa($scope.files, $scope.files.dataSetName, $scope.files.csv, function(dat){
+        console.log("Let me bring this to the backroom.");
+        console.log(dat);
+        $scope.uploadNoaa({"name": $scope.files.lipdFilename, "dat": dat}, function(resp){
+          if (resp.status !== 200){
+            window.alert("There was a problem converting or downloading the file(s). The NOAA conversion is still being perfected and there may be nothing wrong with your data. We appreciate your patience!");
+          } else {
+            console.log("It looks like it worked. Here ya go!");
+            $scope.pageMeta.captcha = false;
+            $scope.pageMeta.downloadMode = null;
+            // window.location.href = "http://localhost:3000/noaa/" + resp.data;
+            window.location.href = "http://www.lipd.net/noaa/" + resp.data;
+          }
+        });
+      });
+
+
     };
 
     $scope.downloadZip = function(){
@@ -436,15 +259,17 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       $scope.pageMeta.busyPromise = $scope._myPromiseExport;
       $scope._myPromiseExport.then(function (res) {
         //upload zip to node backend, then callback and download it afterward.
-        console.log("Export response:");
+        console.log("Let me bring this to the backroom.");
         console.log(res);
         $scope.uploadZip({"filename": $scope.files.lipdFilename, "dat": res}, function(resp){
           // reset the captcha
           $scope.pageMeta.captcha = false;
+          $scope.pageMeta.downloadMode = null;
           // do get request to trigger download file immediately after download
           if (resp.status !== 200){
-            window.alert("Error downloading file");
+            window.alert("Error downloading file!");
           } else {
+            console.log("It looks like it worked. Here ya go!");
             // window.location.href = "http://localhost:3000/files/" + resp.data;
             window.location.href = "http://www.lipd.net/files/" + resp.data;
           }
@@ -481,22 +306,65 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       return entry;
     };
 
-    $scope.getSet = function(value){
-      $scope.files.dataSetName = value;
-      $scope.files.lipdFilename = value + ".lpd";
-      console.log("getSet: filename = " + $scope.files.lipdFilename);
+    $scope.genericModalAlert = function(msg){
+      $scope.modal = msg;
+      var modalInstance = $uibModal.open({
+        templateUrl: 'modal-alert',
+        controller: 'ModalCtrlAlert',
+        size: "md",
+        resolve: {
+          data: function () {
+            return $scope.modal;
+          }
+        }
+      });
     };
 
-    $scope.resetCsv = function(entry){
-      // To reset a parsed CSV table, you need to undo all of the below
-      // entry.values, entry.filename, entry.columns,
-      // $scope.files.csv[_csvname] = _csv;
-      entry.values = null;
-      $scope.files.csv[entry.filename] = null;
-      entry.filename = null;
-      entry.columns = null;
-      entry.toggle = !entry.toggle;
-      return entry;
+    $scope.genericModalAsk = function(msg, cb){
+      $scope.modal = msg;
+      var modalInstance = $uibModal.open({
+        templateUrl: 'modal-ask',
+        controller: 'ModalCtrlAsk',
+        size: "md",
+        resolve: {
+          data: function () {
+            return $scope.modal;
+          }
+        }
+      });
+      modalInstance.result.then(function (selected) {
+        cb(selected);
+      });
+    };
+
+    $scope.makeNoaaReady = function(){
+      if(!$scope.pageMeta.noaaReady){
+        // Make Ready
+        create.addNoaaReady($scope.files.json, function(_d2){
+          $scope.genericModalAlert({"title": "NOAA Validation", "message": "The fields that NOAA requires have been " +
+          "added where necessary. For a list of these requirements, hover your mouse pointer over the 'NOAA " +
+          "requirements' bar on the left side of the page."});
+          $scope.files.json = _d2;
+        });
+      } else {
+        // Don't remove fields. just alert
+        $scope.genericModalAlert({"title": "Fields may be ignored", "message": "Validation is no longer using NOAA rules."});
+      }
+    };
+
+    $scope.makeWikiReady = function(){
+      if(!$scope.pageMeta.wikiReady){
+        // Make Ready
+        create.addWikiReady($scope.files.json, function(_d2){
+          $scope.genericModalAlert({"title": "Wiki Validation", "message": "The fields that the Linked Earth Wiki requires have been " +
+          "added where necessary. For a list of these requirements, hover your mouse pointer over the 'Wiki " +
+          "requirements' bar on the left side of the page."});
+          $scope.files.json = _d2;
+        });
+      } else {
+        // Don't remove fields. just alert
+        $scope.genericModalAlert({"title": "Fields may be ignored", "message": "Validation is no longer using Wiki rules."});
+      }
     };
 
     $scope.parseCsv = function(entry, idx, options){
@@ -561,6 +429,18 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       create.rmBlock(entry, idx);
     };
 
+    $scope.resetCsv = function(entry){
+      // To reset a parsed CSV table, you need to undo all of the below
+      // entry.values, entry.filename, entry.columns,
+      // $scope.files.csv[_csvname] = _csv;
+      entry.values = null;
+      $scope.files.csv[entry.filename] = null;
+      entry.filename = null;
+      entry.columns = null;
+      entry.toggle = !entry.toggle;
+      return entry;
+    };
+
     $scope.resetPage = function(){
       // All metadata and data about the page is emptied when the Upload button is clicked. Ready for another file upload.
       $scope.allFiles = [];
@@ -606,6 +486,7 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
             "filename": "", "columns": []}]}]}
       };
       $scope.pageMeta = {
+        "downloadMode": null,
         "keepColumnMeta": false,
         "header": false,
         "decimalDegrees": true,
@@ -624,6 +505,27 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       $scope.status = "N/A";
     };
 
+    $scope.saveSession = function(){
+      try{
+        delete $scope.pageMeta.busyPromise;
+        var _dat = JSON.stringify({
+          "allFiles": $scope.allFiles,
+          "status": $scope.status,
+          "map": $scope.map,
+          "dms": $scope.dms,
+          "feedback": $scope.feedback,
+          "pageMeta": $scope.pageMeta,
+          "files": $scope.files
+        });
+        console.log("Saving progress: ");
+        console.log($scope.roughSizeOfObject(_dat));
+        sessionStorage.setItem("lipd", _dat);
+        toaster.pop('note', "Saving progress...", "Saving your data to the browser session in case something goes wrong", 4000);
+      } catch(err){
+        toaster.pop('error', "Error saving progress", "Unable to save progress. Data may be too large for browser storage", 4000);
+      }
+    };
+
     $scope.setCountry = function(name){
       if (!$scope.files.json.geo.properties.country){
         $scope.files.json.geo = create.addBlock($scope.files.json.geo, "geo", null);
@@ -638,17 +540,56 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       return true;
     };
 
-    $scope.checkCaptcha = function(){
-      if($scope.gRecaptchaResponse){
-        $scope.downloadZip();
-      } else {
-        // Download button was clicked, show the captcha challenge
-        $scope.pageMeta.captcha = true;
-      }
+    // Show options for creating interpretation block
+    $scope.showModalInterpretation= function(cb){
+      var modalInstance = $uibModal.open({
+        templateUrl: 'modal-interp',
+        controller: 'ModalCtrlInterp',
+        size: "lg"
+      });
+      modalInstance.result.then(function (selected) {
+        cb(selected);
+      });
+
+    };
+
+    // Showing contents of individual file links
+    $scope.showModalFileContent = function(data){
+      $scope.modal = data;
+      var modalInstance = $uibModal.open({
+        templateUrl: 'modal-file',
+        controller: 'ModalCtrlFile',
+        size: "lg",
+        resolve: {
+          data: function () {
+            return $scope.modal;
+          }
+        }
+      });
     };
 
     $scope.toggleCsvBox = function(entry) {
       entry.toggle=!entry.toggle;
+    };
+
+    $scope.uploadNoaa = function (_file, cb) {
+      // Upload *validated* lipd data to backend
+      $scope.pageMeta.busyPromise = Upload.upload({
+        url: '/noaa',
+        data: {dat: _file.dat,
+          name: _file.name}
+      });
+      $scope.pageMeta.busyPromise.then(function (resp) {
+        console.log('Success');
+        console.log(resp);
+        cb(resp);
+      }, function (resp) {
+        console.log(resp);
+        console.log('Error status: ' + resp.status);
+        cb(resp);
+      }, function (evt) {
+        var progressPercentage = parseInt(100.0 * evt.loaded / evt.total);
+      });
     };
 
     $scope.uploadZip = function (_file, cb) {
@@ -672,6 +613,7 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
     };
 
     $scope.validate = function(){
+      console.log($scope.files.json);
       // Go through all validations steps, and update scope data.
       // rearrange coordinates from dict to array when necessary, and set the map if coordinates exist
       $scope.files = map.fixCoordinates($scope.files);

@@ -251,7 +251,6 @@ var create = (function(){
       // Remove temporary fields from the JSON data
       var _newJson = JSON.parse(JSON.stringify(_scopeFiles));
       // TODO copy the archiveType from the root, to each data table column
-
       _newJson.json = create.rmTmpEmptyData(_newJson.json);
       // Append the DataSetName to the front of all the CSV files.
       var _addDataSetName = create.addDataSetName(_dsn, _csv);
@@ -260,6 +259,22 @@ var create = (function(){
         _newJson = create.alterFilenames(_newJson);
       }
       return _newJson;
+    }),
+
+    closingWorkflowNoaa: (function(_scopeFiles, _dsn, _csv, cb){
+      var _newJson = create.closingWorkflow(_scopeFiles, _dsn, _csv);
+      var _newCsv = create.structureCsvForPy(_csv);
+      cb({"metadata": _newJson.json, "csvs": _newCsv});
+    }),
+
+    structureCsvForPy: (function(_csv){
+      var _newCsv = {};
+      for(var _filename in _csv){
+        if(_csv.hasOwnProperty(_filename)){
+          _newCsv[_filename] = _csv[_filename]["transposed"];
+        }
+      }
+      return _newCsv;
     }),
 
     initColumnTmp: (function(x){
@@ -503,7 +518,58 @@ var create = (function(){
         _years.push(_n);
       }
       return(_years);
-    })
+    }),
+
+    getPopover: (function(name){
+      var _popovers = {
+        "lipd": '' +
+        '<h5>LiPD Requirements</h5><br>' +
+        '<p>Root Level:</p><ul>' +
+        '<li>dataSetName</li>' +
+        '<li>archiveType</li>' +
+        '<li>createdBy</li>' +
+        '</ul><br><p>Geo:</p><ul>' +
+        '<li>coordinates</li>' +
+        '</ul><br><p>paleoData:</p><ul>' +
+        '<li>measurementTable</li>' +
+        '</ul><br><p>Column Level:</p><ul>' +
+        '<li>variableName</li>' +
+        '<li>units ("unitless" if units not applicable)</li>' +
+        '<li>values</li>' +
+        '</ul>',
+        "wiki": '' +
+        '<h5>Linked Earth Wiki Requirements</h5><br>' +
+        '<p>In addition to the normal LiPD Requirements: </p>' +
+        '</ul><br><p>Column Level:</p><ul>' +
+        '<li>proxyObservationType</li>' +
+        '<li>variableType</li>' +
+        '<li>takenAtDepth</li>' +
+        '<li>inferredVariableType</li>' +
+        '</ul>',
+        "noaa": '' +
+        '<h5>NOAA Requirements</h5><br>' +
+        '<p>In addition to the normal LiPD Requirements: </p>' +
+        '</ul><br><p>NOAA specific:</p><ul>' +
+        '<li>maxYear</li>' +
+        '<li>minYear</li>' +
+        '<li>timeUnit</li>' +
+        '<li>onlineResource</li>' +
+        '<li>onlineResourceDescription</li>' +
+        '<li>modifiedDate</li><br>' +
+        '</ul><p>Root Level:</p><ul>' +
+        '<li>investigators</li>' +
+        '</ul><br><p>Geo:</p><ul>' +
+        '<li>siteName</li>' +
+        '<li>location</li>' +
+        '</ul><br><p>Column Level:</p><ul>' +
+        '<li>description</li>' +
+        '<li>dataFormat</li>' +
+        '<li>dataType</li>'
+      };
+
+      return _popovers[name];
+
+    }),
 
   }; // end return
 
