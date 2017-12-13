@@ -3,6 +3,7 @@ md-toolbar.md-hue-1
 	h2.md-toolbar-tools
 		span PaleoData *
 
+include ./paleo_buttons.jade
 include ./paleo_meas.jade
 include ./paleo_model.jade
 
@@ -14,7 +15,9 @@ div(layout='', layout-padding='', layout-sm='column' style="float: right;")
 			md-option(ng-value="table" ng-repeat="table in dropdowns.tables") {{ table.name }}
 		md-tooltip DataTable containing PaleoData Variables
 
-	button.valid-btn(ng-click='addBlock(files.json.paleoData[0], dropdowns.current.table.name, "paleo")' style="margin: 1.5em;" type="button")  + Add
+	button.valid-btn(ng-click='addBlock(files.json.paleoData[0], dropdowns.current.table.name, "paleo")' style="margin: 1.5em;" type="button") + Add Table
+	button.warn-btn(ng-if="files.json.paleoData[0]" ng-click="removePaleoChron('paleo')" style="margin: 1.5em; padding: 2px 2px 2px 2px;") Delete PaleoData
+
 	// END MEASUREMENT TABLE
 
 

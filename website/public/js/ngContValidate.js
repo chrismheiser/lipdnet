@@ -505,6 +505,16 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       $scope.status = "N/A";
     };
 
+    $scope.removePaleoChron = function(pc){
+
+      if(pc === "chron"){
+        $scope.files.json.chronData = [];
+      } else if (pc === "paleo"){
+        $scope.files.json.paleoData = [{"measurementTable": [{"tableName": "", "missingValue": "NaN",
+          "filename": "", "columns": []}]}];
+      }
+    };
+
     $scope.saveSession = function(){
       try{
         delete $scope.pageMeta.busyPromise;

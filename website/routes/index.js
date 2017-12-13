@@ -10,6 +10,16 @@ var lipdValidator = require("../node_modules_custom/node_validator.js");
 var misc = require("../node_modules_custom/node_misc.js");
 var router = express.Router();
 
+// var http = require("http");
+// http.get("http://cheiser.pythonanywhere.com/test", function(res) {
+//   console.log("Got response: " + res.statusCode);
+// }).on('error', function(e) {
+//   console.log("Got error: " + e.message);
+// });
+//
+//
+//
+
 var downloadResponse = function(options, res){
   // set headers and initiate download.
   var pathFinal = path.join(options.path, options.file);
@@ -412,10 +422,13 @@ router.post("/noaa", function(req, res, next){
       var options = {
         uri: 'http://cheiser.pythonanywhere.com/api/noaa',
         method: 'POST',
-        json: master.dat
+        json: master.dat,
+        timeout: 5000,
+        proxy: "http://rishi.cefns.nau.edu:3128"
       };
       // Send the request to the NOAA API
       console.log("Sending LiPD data to NOAA Conversion API: ", master.name);
+      // console.log("PORT : ", app.get("port"));
       request(options, function (error, response, body) {
         console.log("Response Status: ", response.statusCode);
         // Did the call work?
@@ -430,29 +443,29 @@ router.post("/noaa", function(req, res, next){
               if(fs.readdirSync(master.pathTmp).length !== 0){
                 res.status(200).send(path.basename(master.pathTmp));
               } else {
-                res.status(500).send("/noaa post: Error occurred during conversion/write process");
+                res.status(response.statusCode).send("/noaa post: Error occurred during conversion/write process");
               }
             });
           } catch(err){
             console.log("/noaa post: Error while writing txt files to tmp: ", err);
-            res.status(500).send("/noaa post: Error while writing txt files to tmp: " + error);
+            res.status(response.statusCode).send("/noaa post: Error while writing txt files to tmp: " + error);
           }
         } else{
           // Yikes, something went wrong on in the flask app. Initiate damage control.
           console.log("/noaa post: Bad response from NOAA API: ", error);
-          res.status(500).send("/noaa post: Bad response from NOAA API: " + error);
+          res.status(response.statusCode).send("/noaa post: Bad response from NOAA API: " + error);
         }
       });
     } catch(err){
       // Yikes, communication problems.
       console.log("/noaa post: Error preparing & sending NOAA API request: ", err);
-      res.status(500).send("/noaa post: Error preparing & sending NOAA API request: " + error);
+      res.status(500).send("/noaa post: Error preparing & sending NOAA API request: " + err);
 
     }
   } catch(err){
     // Yikes, I messed this up somewhere.
     console.log("/noaa post: Error parsing data request sent from angular: " + err);
-    res.status(500).send("/noaa post: Error parsing data request sent from angular: " + error);
+    res.status(500).send("/noaa post: Error parsing data request sent from angular: " + err);
 
   }
 });

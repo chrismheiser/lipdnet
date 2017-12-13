@@ -295,15 +295,25 @@ input[type=number]::-webkit-outer-spin-button {
   	border: solid 1px #eee;
   }
 
-  .expandable {
+  .expandable-on{
       width: 150px;
       height:50px;
       margin: 1.5em;
       padding: 2px 5px 2px 5px;
       color: #2C6FAE;
+      background-color: white;
       border: solid 1px #2C6FAE;
-
   }
+
+    .expandable-off{
+        width: 150px;
+        height:50px;
+        margin: 1.5em;
+        padding: 2px 5px 2px 5px;
+        color: white;
+        border: solid 1px #2C6FAE;
+        background-color: #2C6FAE;
+    }
 
   .valid-btn-sm{
     font-size: 10pt;
@@ -327,8 +337,21 @@ input[type=number]::-webkit-outer-spin-button {
     width: 150px;
     height: 31px;
     border-radius: 5px;
-    color: #FDBABC;
-    border: solid 1px #FDBABC;
+    color: #C63B3B;
+    border: solid 1px #C63B3B;
+}
+
+.warn-btn-sm{
+    font-size: 10pt;
+    background-color: white;
+    font-family: RobotoDraft,Roboto,'Helvetica Neue',sans-serif;
+    margin-right: 5px;
+    padding: 4px;
+    width: 30px;
+    height: 30px;
+    border-radius: 5px;
+    color: #C63B3B;
+    border: solid 1px #C63B3B;
 }
 
   progress {

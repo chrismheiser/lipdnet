@@ -6,7 +6,9 @@ md-toolbar.md-hue-1
 
 div.btn-row( layout="row")
   div(ng-repeat="entry in files.json.funding track by $index")
-    button.valid-btn.expandable(ng-click="entry.toggle = !entry.toggle") Funding {{$index+1}}
+    button.valid-btn.expandable-on(ng-if="entry.toggle" ng-click="entry.toggle = !entry.toggle") Funding {{$index+1}}
+    button.valid-btn.expandable-off(ng-if="!entry.toggle" ng-click="entry.toggle = !entry.toggle") Funding {{$index+1}}
+
 
 
 div(ng-repeat='entry in files.json.funding track by $index' layout-wrap="")
@@ -33,7 +35,7 @@ div(ng-repeat='entry in files.json.funding track by $index' layout-wrap="")
         md-tooltip Which nation funded the Dataset?
         
     div(layout='', layout-padding='', layout-sm='column' style="float: right;")
-      button.valid-btn(ng-click='removeBlock(files.json.funding, $index)' style="margin: 1.5em;" type="button")  - Remove						
+      button.warn-btn(ng-click='removeBlock(files.json.funding, $index)' style="margin: 1.5em;" type="button")  - Remove
       
 div(layout='', layout-padding='', layout-sm='column' style="float: right;")
   button.valid-btn(ng-click='addBlock(files.json.funding, "funding", null)' style="margin: 1.5em;" type="button")  + Add

@@ -17,7 +17,6 @@ div(ng-repeat='entry in files.json.paleoData track by $index' layout-wrap="")
             // Column Data
             include ./table_column.jade
 
-
     div(ng-repeat="entry2 in entry.model[0].ensembleTable track by $index" )
         md-card
             md-subheader.md-primary paleo {{$parent.$index+1}} > model 1 > ensemble {{$index+1}}

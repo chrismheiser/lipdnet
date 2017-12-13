@@ -353,7 +353,8 @@ var versions = (function(){
                 delete d[_key];
               }
               else if(VER_1_3.tables.indexOf(_key) !== -1){
-                d[_key] = "";
+                // delete any "___tableName" keys that are old
+                delete d[_key];
               }
             }
             // merge interpretations where necessary

@@ -3,7 +3,6 @@ li#buttons(style="list-style-type: none;")
   input#file-input(title="Upload your LiPD file for validation" name='file' type="file" accept=".lpd" style="max-width:200px; width:175px; padding:4px; display:inline;")
 
 li#buttons(style="list-style-type: none;")
-
   button.valid-btn(ng-click="validate()" ng-disabled="pageMeta.filePicker" type="button") Validate
     md-tooltip LiPD data is validated during upload. If you make any corrections to the file, validate again to show updated results.
   button.valid-btn(ng-click="saveSession()") Save Session

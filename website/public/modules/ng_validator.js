@@ -696,10 +696,8 @@ var lipdValidator = (function(){
           // tableName
           for(var _tk = 0; _tk < tnks.length; _tk++){
             var _tnk = tnks[_tk];
-            if(table.hasOwnProperty(_tnk)){
-              if(!table[_tnk]){
-                table["tableName"] = crumbs;
-              }
+            if(!table[_tnk]){
+              table["tableName"] = crumbs;
             }
           }
 
@@ -869,7 +867,7 @@ var lipdValidator = (function(){
           // Get the column count for this csv file.
           csvCt = files.csv[filename].cols;
         } catch(err){
-          logFeedback("err", "CSV filename(s) do not match filenames CSV filenames listed in JSONLD metadata", "filename");
+          logFeedback("err", "CSV filename(s) do not match filenames CSV filenames listed in the metadata", "filename");
           return;
         }
         try {
@@ -883,7 +881,7 @@ var lipdValidator = (function(){
                 metaCt = columns[0].number.length - 1 + metaCt;
                 if (csvCt !== metaCt) {
                   // Okay, there is actually an error now. Log it.
-                  logFeedback("err", "Mismatched columns: " + filename + " has " + csvCt + ", Jsonld has " + metaCt, filename);
+                  logFeedback("err", "Mismatched columns: " + filename + " has " + csvCt + ", jsonld has " + metaCt, filename);
                 }
               }
             }
@@ -896,7 +894,7 @@ var lipdValidator = (function(){
                 // Do the column counts match now?
                 if (csvCt !== metaCt) {
                   // Okay, there is actually an error now. Log it.
-                  logFeedback("err", "Mismatched columns: " + filename + " has " + csvCt + ", Jsonld has " + metaCt, filename);
+                  logFeedback("err", "Mismatched columns: " + filename + " has " + csvCt + ", jsonld has " + metaCt, filename);
                 }
               }
               // is column 1 an array of column numbers? (less likely)
@@ -906,17 +904,17 @@ var lipdValidator = (function(){
                 // Do the column counts match now?
                 if (csvCt !== metaCt) {
                   // Okay, there is actually an error now. Log it.
-                  logFeedback("err", "Mismatched columns: " + filename + " has " + csvCt + ", Jsonld has " + metaCt, filename);
+                  logFeedback("err", "Mismatched columns: " + filename + " has " + csvCt + ", jsonld has " + metaCt, filename);
                 }
               }
               // We have 2 columns, but neither one represents an array of columns. It's just a coincidence. Normal error.
               else {
-                logFeedback("err", "Mismatched columns: " + filename + " has " + csvCt + ", Jsonld has " + metaCt, filename);
+                logFeedback("err", "Mismatched columns: " + filename + " has " + csvCt + ", jsonld has " + metaCt, filename);
               }
             }
             // column counts don't match, and this is not an ensemble table. Error
             else {
-              logFeedback("err", "Mismatched columns: " + filename + " has " + csvCt + ", Jsonld has " + metaCt, filename);
+              logFeedback("err", "Mismatched columns: " + filename + " has " + csvCt + ", jsonld has " + metaCt, filename);
             }
           } // end if colCt dont match
         } catch(err){

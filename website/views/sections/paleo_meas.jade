@@ -1,12 +1,13 @@
 div(ng-repeat='entry in files.json.paleoData track by $index' layout-wrap="")
-    // PaleoData[1] : Should only be one entry2. Don't need to loop
+    // PaleoData[1] : Should only be one table. Don't need to loop
+
     div(ng-repeat="entry2 in entry.measurementTable track by $index" layout-wrap="")
-        md-card
+        md-card(ng-show="entry2.tmp.show")
             md-subheader.md-primary paleo {{$parent.$index+1}} > measurement {{$index+1}}
             include ./table_root
-            // Toggle the csv entry2 box and the parse csv button. Once we parse CSV, these elements are not longer needed.
+            // Toggle the csv table box and the parse csv button. Once we parse CSV, these elements are not longer needed.
             include ./parse_csv.jade
-                button.valid-btn(ng-click="parseCsv(entry2, $index, {'pc': 'paleo', 'tt': 'measurement'}); toggleCsvBox(entry2)" style="margin: 1.5em; float:right;" type="button") Parse Values
+                button.valid-btn(ng-click="parseCsv(table, $index, {'pc': 'paleo', 'tt': 'measurement'}); toggleCsvBox(table)" style="margin: 1.5em; float:right;" type="button") Parse Values
             br
             // Column Data
             include ./table_column
