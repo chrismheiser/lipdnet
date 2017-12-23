@@ -9,6 +9,6 @@ li#buttons(style="list-style-type: none;")
     md-tooltip Save your progress. The data will be stored in your browser for as long as you keep the window open.
   button.valid-btn#download-btn(ng-click="checkCaptcha('lipd', false)" type="button") Download LiPD
     md-tooltip Download LiPD file when all requirements are met and errors are fixed
-  button.valid-btn#download-btn(ng-click="checkCaptcha('noaa', false)" type="button") Download NOAA
+  button.valid-btn#download-btn(ng-click="checkCaptcha('noaa', false)" type="button") Download NOAA (Beta)
     md-tooltip Download NOAA file when all requirements are met and errors are fixed
   div(vc-recaptcha key="'6LchMhIUAAAAAGjGCfNGxPkOJPl3ilJ2sQrapbbL'" ng-model="gRecaptchaResponse" on-success="checkCaptcha(pageMeta.downloadMode, true)" ng-show="pageMeta.captcha")

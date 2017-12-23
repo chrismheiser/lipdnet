@@ -228,6 +228,8 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
     };
 
     $scope.downloadNoaa = function(){
+
+      $scope.genericModalAlert({"title": "NOAA Beta", "message": "Please note the 'NOAA Ready' and 'NOAA Download' features of this web site are BETA features, and as such are not fully implemented and are being improved. If you would like to contribute LiPD data to NOAA, please contact NOAA WDS-Paleo at: paleo@noaa.gov"});
       // Fix up the json a bit so it's ready to be sorted and downloaded
       create.closingWorkflowNoaa($scope.files, $scope.files.dataSetName, $scope.files.csv, function(dat){
         console.log("Let me bring this to the backroom.");
