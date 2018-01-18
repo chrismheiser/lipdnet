@@ -5,8 +5,8 @@ md-subheader.md-primary Columns
 
 div.btn-row(layout="row")
     div(ng-repeat='column in entry2.columns track by $index')
-        button.valid-btn.expandable-on(ng-if="column.tmp.show" ng-click="column.tmp.show = !column.tmp.show" type="button") Column {{$index+1}}:<br />{{column.variableName}}
-        button.valid-btn.expandable-off(ng-if="!column.tmp.show" ng-click="column.tmp.show = !column.tmp.show" type="button") Column {{$index+1}}:<br />{{column.variableName}}
+        button.valid-btn.expandable-off(ng-if="column.tmp.show" ng-click="column.tmp.show = !column.tmp.show" type="button") Column {{$index+1}}:<br />{{column.variableName}}
+        button.valid-btn.expandable-on(ng-if="!column.tmp.show" ng-click="column.tmp.show = !column.tmp.show" type="button") Column {{$index+1}}:<br />{{column.variableName}}
 
 div(layout="column" ng-repeat='entry3 in entry2.columns track by $index' layout-wrap="")
     md-card(ng-if="entry3.tmp.show")
@@ -53,23 +53,25 @@ div(layout="column" ng-repeat='entry3 in entry2.columns track by $index' layout-
                         label Add custom field...
                         input(ng-model="entry3.tmp.custom")
                         md-tooltip Don't see the field you want? Add your custom field and press enter.
+                div(layout='', layout-padding='', layout-sm='column')
+                    button.valid-btn(ng-click="showModalInterpretation(entry3, true, null)") + Add Interpretation
                 //div(layout='', layout-padding='', layout-sm='column' style="float: right;")
                 //    button.valid-btn(ng-if="entry3.tmp.toggle" ng-click='entry3.tmp.toggle = !entry3.tmp.toggle' style="margin: 1.5em;" type="button")  - Other Fields
                 //    button.valid-btn(ng-if="!entry3.tmp.toggle" ng-click='entry3.tmp.toggle = !entry3.tmp.toggle' style="margin: 1.5em;" type="button")  + Other Fields
             div(flex)
                 md-subheader.md-primary Additional fields
                 //div(ng-if="entry3.tmp.toggle")
-                div
 
-                div(style="overflow: scroll; height: 550px;")
+                div.btn-row(layout="row" style="overflow: scroll;")
+                    div(ng-repeat="interp in entry3.interpretation track by $index" layout='', layout-padding='', layout-sm='column')
+                        button.valid-btn.expandable-on(ng-click="showModalInterpretation(entry3, false, $index)") interpretation {{$index+1}}
+                        //md-subheader.md-primary interpretation {{$index}}
+                        //md-input-container(flex='', class="md-input-has-value" ng-repeat="(k,v) in interp")
+                        //    label {{k}}
+                        //    input(ng-model="entry3.interpretation[k]")
                     //div(ng-repeat="(k,v) in entry3" ng-if="showProperty(k) && entry3.tmp.toggle" layout='', layout-padding='', layout-sm='column')
+                div(style="overflow: scroll; height: 550px;")
                     div(ng-repeat="(k,v) in entry3" ng-if="showProperty(k)" layout='', layout-padding='', layout-sm='column')
                         md-input-container(flex='', class="md-input-has-value")
                             label {{k}}
                             input(ng-model="entry3[k]" ng-disabled="k==='TSid'")
-                    //div(ng-repeat="interpretation in entry3.interpretation track by $index" ng-if="showProperty(k) && entry3.tmp.toggle" layout='', layout-padding='', layout-sm='column')
-                    div(ng-repeat="interpretation in entry3.interpretation track by $index" ng-if="showProperty(k)" layout='', layout-padding='', layout-sm='column')
-                        md-subheader.md-primary interpretation {{$index}}
-                        md-input-container(flex='', class="md-input-has-value" ng-repeat="(k,v) in interpretation")
-                            label {{k}}
-                            input(ng-model="entry3.interpretation[k]")

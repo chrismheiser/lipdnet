@@ -2,10 +2,13 @@ div(layout='', layout-padding='', layout-sm='column')
     md-input-container(flex='', ng-class="md-input-has-value")
         label Table Name *
         input(ng-model='entry2.tableName' disabled)
+        md-tooltip Automated field. This field is disabled to preserve standardized naming.
     md-input-container(flex='', ng-class="md-input-has-value")
         label Missing Value *
         input(ng-model='entry2.missingValue')
+        md-tooltip LiPD uses 'NaN' as the standard missing value. Please note if your data uses a different missing value.
 div(layout='', layout-padding='', layout-sm='column')
     md-input-container(flex='', ng-class="md-input-has-value")
-        label Filename *
+        label(style="color:green;") Filename *
         input(ng-model='entry2.filename' disabled)
+        md-tooltip Automated field. This field is disabled to preserve standardized naming.

@@ -25,7 +25,7 @@ f.factory("ExportService", ["$q", function ($q) {
     var promises = [];
 
     // add in the jsonld
-    var _jsonFilename = _d1.dataSetName + ".jsonld";
+    var _jsonFilename = "metadata.jsonld";
     // convert formatted json into stringified json
     var _jsonPrepped = JSON.stringify(_d1.json, null, 4);
     promises.push(getText(_jsonFilename, _jsonPrepped));

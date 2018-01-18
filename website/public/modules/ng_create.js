@@ -453,7 +453,7 @@ var create = (function(){
 
     defaultColumnFields: (function(){
       return ["proxy", "measurementMaterial", "method", "variableType", "sensorSpecies", "sensorGenus", "variableType",
-        "proxyObservationType", "notes", "interpretation"];
+        "proxyObservationType", "notes"];
     }),
 
     inferredVariableTypeList: (function(){

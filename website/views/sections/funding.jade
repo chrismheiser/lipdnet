@@ -6,8 +6,8 @@ md-toolbar.md-hue-1
 
 div.btn-row( layout="row")
   div(ng-repeat="entry in files.json.funding track by $index")
-    button.valid-btn.expandable-on(ng-if="entry.toggle" ng-click="entry.toggle = !entry.toggle") Funding {{$index+1}}
-    button.valid-btn.expandable-off(ng-if="!entry.toggle" ng-click="entry.toggle = !entry.toggle") Funding {{$index+1}}
+    button.valid-btn.expandable-off(ng-if="entry.toggle" ng-click="entry.toggle = !entry.toggle") Funding {{$index+1}}
+    button.valid-btn.expandable-on(ng-if="!entry.toggle" ng-click="entry.toggle = !entry.toggle") Funding {{$index+1}}
 
 
 

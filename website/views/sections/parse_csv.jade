@@ -5,7 +5,7 @@ div(ng-show="entry2.toggle" layout="" layout-padding="" layout-sm="column")
     button.warn-btn(ng-click="resetCsv(entry2)" style="margin: 1.5em; padding: 2px 2px 2px 2px;") Delete Table
 
 //div(ng-hide="entry2.toggle")
-div
+div(ng-hide="entry2.toggle")
     // Textarea to Copy/Paste CSV data
     div(layout='', layout-padding='', layout-sm='column')
         md-input-container
@@ -15,8 +15,9 @@ div
             md-tooltip Generally, copy/pasting data results in a 'Tab' delimiter. Please note if another delimiter is in use.
 
         md-switch(ng-model='pageMeta.header') Header: {{ pageMeta.header? "Yes": "No"}}
+            md-tooltip If your values include a variable name header, feel free to include it. They must use the same formatting as the values, and not include any units
         md-switch(ng-model='pageMeta.keepColumnMeta') Keep Existing Columns: {{ pageMeta.keepColumnMeta? "Yes" : "No"}}
-            md-tooltip If you have a table full of metadata, and ONLY want to update the values, you can choose 'Keep Existing Columns' to preserve the metadata
+            md-tooltip If you have a table full of metadata, and ONLY want to update the values, you can choose 'Keep Existing Columns' to preserve the metadata. Choosing 'No' will replace all current data with the newly parsed data.
 
     div(layout='', layout-padding='', layout-sm='column')
         textarea(placeholder='Copy/Paste your CSV data here...' ng-model="entry2.values" style="border:0.1em solid #ccc;border-radius:0.5em;height:10em;width:80em")

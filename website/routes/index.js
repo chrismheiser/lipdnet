@@ -272,44 +272,49 @@ var createArchiveNoaa = function(pathTmpNoaa, cb){
 
 // use the archiver model to create the LiPD file
 var createArchive = function(pathTmp, pathTmpZip, pathTmpBag, filename, cb){
-  logger.info("Creating ZIP/LiPD archive...");
-  var archive = archiver('zip');
-  var _origin = process.cwd();
-  process.chdir(pathTmp);
-  // path where the LiPD will ultimately be located in "/zip" dir.
-  var pathTmpZipLipd = path.join(pathTmpZip, filename);
-  // open write stream to LiPD file location
-  var output = fs.createWriteStream(pathTmpZipLipd);
-  logger.info("Write Stream Open: " + pathTmpZipLipd);
+  try{
+    logger.info("Creating ZIP/LiPD archive...");
+    var archive = archiver('zip');
+    var _origin = process.cwd();
+    process.chdir(pathTmp);
+    // path where the LiPD will ultimately be located in "/zip" dir.
+    var pathTmpZipLipd = path.join(pathTmpZip, filename);
+    // open write stream to LiPD file location
+    var output = fs.createWriteStream(pathTmpZipLipd);
+    logger.info("Write Stream Open: " + pathTmpZipLipd);
 
-  // "close" event. processing is finished.
-  output.on('close', function () {
-    logger.info(archive.pointer() + ' total bytes');
-    // logger.info('archiver has been finalized and the output file descriptor has closed.');
-    logger.info("LiPD Created at: " + pathTmpZipLipd);
-    // callback to finish POST request
-    process.chdir(_origin);
-    cb();
-  });
+    // "close" event. processing is finished.
+    output.on('close', function () {
+      logger.info(archive.pointer() + ' total bytes');
+      // logger.info('archiver has been finalized and the output file descriptor has closed.');
+      logger.info("LiPD Created at: " + pathTmpZipLipd);
+      // callback to finish POST request
+      process.chdir(_origin);
+      cb();
+    });
 
-  // error event
-  archive.on('error', function(err){
+    // error event
+    archive.on('error', function(err){
       logger.info("archive error");
       throw err;
-  });
+    });
 
-  archive.pipe(output);
-  // Add the data directory to the archive
-  try{
-    logger.info("Archiving bag directory: " + pathTmpBag);
-    archive.directory("bag");
+    archive.pipe(output);
+    // Add the data directory to the archive
+    try{
+      logger.info("Archiving bag directory: " + pathTmpBag);
+      archive.directory("bag");
+      logger.info("Archive bag success");
+    }catch(err){
+      logger.info("Error archive bag directory: " + err);
+    }
 
-  }catch(err){
-    logger.info(err);
+    // all files are done, finalize the archive
+    archive.finalize();
+  } catch(err){
+    console.log("Error: createArchive: " + err);
   }
 
-  // all files are done, finalize the archive
-  archive.finalize();
 }; // end createArchive
 
 // Get the home page
@@ -368,6 +373,7 @@ router.post("/files", function(req, res, next){
         // When a successful Bagit Promise returns, start creating the ZIP/LiPD archive
         if(resp2){
           createArchive(master.pathTmp, master.pathTmpZip, master.pathTmpBag, master.filename, function(){
+            logger.info("Callback createArchive");
             logger.info("POST: " + path.basename(master.pathTmp));
             res.status(200).send(path.basename(master.pathTmp));
           });
@@ -513,8 +519,12 @@ router.get("/modal-file", function(req, res, next){
   res.render('modal/modal-file', {title: ''});
 });
 
-router.get("/modal-interp", function(req, res, next){
-  res.render('modal/modal-interp', {title: ''});
+router.get("/modal-interp-create", function(req, res, next){
+  res.render('modal/modal-interp-create', {title: ''});
+});
+
+router.get("/modal-interp-data", function(req, res, next){
+  res.render('modal/modal-interp-data', {title: ''});
 });
 
 router.get("/modal-alert", function(req, res, next){

@@ -1006,7 +1006,7 @@ var lipdValidator = (function(){
             var lonValid = numberInRange(-180, 180, lon);
             var latValid = numberInRange(-90, 90, lat);
 
-            if (!m.geo.geometry.coordinates[0]){
+            if (!lon && lon !== 0){
               logFeedback("err", "Missing: longitude", "coordinates");
             } else if (!lonValid) {
               // check if longitude is range
@@ -1014,7 +1014,7 @@ var lipdValidator = (function(){
             }
 
 
-            if (!m.geo.geometry.coordinates[1]){
+            if (!lat && lat !== 0){
               logFeedback("err", "Missing: latitude", "coordinates");
             } else if (!latValid) {
               // check if latitude is in range

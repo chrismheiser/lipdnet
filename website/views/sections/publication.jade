@@ -5,8 +5,8 @@ md-toolbar.md-hue-1
 
 div.btn-row( layout="row")
   div(ng-repeat="entry in files.json.pub track by $index")
-    button.valid-btn.expandable-on(ng-if="entry.toggle" ng-click="entry.toggle = !entry.toggle") Publication {{$index+1}}
-    button.valid-btn.expandable-off(ng-if="!entry.toggle" ng-click="entry.toggle = !entry.toggle") Publication {{$index+1}}
+    button.valid-btn.expandable-off(ng-if="entry.toggle" ng-click="entry.toggle = !entry.toggle") Publication {{$index+1}}
+    button.valid-btn.expandable-on(ng-if="!entry.toggle" ng-click="entry.toggle = !entry.toggle") Publication {{$index+1}}
 
 
 
@@ -15,7 +15,7 @@ div(ng-repeat="entry in files.json.pub track by $index" layout-wrap="")
 
   md-card(ng-show="entry.toggle")
     md-subheader.md-primary publication {{$index+1}}
-    div(layout='', layout-padding='', layout-sm='column')
+    div.step14(layout='', layout-padding='', layout-sm='column')
       md-input-container(flex='', ng-class="md-input-has-value")
         label DOI
         input(ng-model='entry.identifier[0].id')

@@ -2,12 +2,12 @@ div(ng-repeat='entry in files.json.paleoData track by $index' layout-wrap="")
     // PaleoData[1] : Should only be one entry2. Don't need to loop
 
     div(ng-if="entry.model[0].method" layout-wrap="")
-        md-card
+        md-card(ng-show="entry.model[0].method.show")
             md-subheader.md-primary paleo {{$parent.$index+1}} > model 1 > method
             include ./table_method
 
     div(ng-repeat="entry2 in entry.model[0].summaryTable track by $index" )
-        md-card
+        md-card(ng-if="entry2.tmp.show")
             md-subheader.md-primary paleo {{$parent.$index+1}} > model 1 > summary {{$index+1}}
             include ./table_root.jade
             // Toggle the csv entry2 box and the parse csv button. Once we parse CSV, these elements are not longer needed.
@@ -18,7 +18,7 @@ div(ng-repeat='entry in files.json.paleoData track by $index' layout-wrap="")
             include ./table_column.jade
 
     div(ng-repeat="entry2 in entry.model[0].ensembleTable track by $index" )
-        md-card
+        md-card(ng-if="entry2.tmp.show")
             md-subheader.md-primary paleo {{$parent.$index+1}} > model 1 > ensemble {{$index+1}}
             include ./table_root.jade
             // Toggle the csv entry2 box and the parse csv button. Once we parse CSV, these elements are not longer needed.

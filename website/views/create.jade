@@ -8,15 +8,11 @@ block css
 	link(rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/angularjs-toaster/2.1.0/toaster.css")
 	link(rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons")
 	link(rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/angular-busy/4.1.4/angular-busy.min.css")
+	link(rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intro.js/2.7.0/introjs.min.css")
 
 block body
-	body(ng-app='validateApp' ng-cloak)
+	body.step0(ng-app='validateApp' ng-cloak)
 		#wrapper
-			.alert.alert-info(role='warning')
-				button.close(type='button', data-dismiss='alert') ×
-				strong Wait!
-				p Ensemble and distribution table creation and editing is under development. Even if this data exists in an uploaded file, it may not show on the page.
-
 
 			include ./include/navbar.jade
 			md-toolbar
@@ -31,14 +27,29 @@ block body
 					form#upload-form(ng-submit='')
 
 						//- GOOGLE MAP
-						div
+						div.step1
 							ui-gmap-google-map(center='map.config.center', zoom='map.config.zoom', draggable='true', options='map.config.options', bounds='map.config.bounds')
 								ui-gmap-markers(models='map.markers', coords="'self'", events='events', options='map.config.options')
 						br
 
 						div(cg-busy="pageMeta.busyPromise")
 
+							.alert.alert-info(role='warning')
+								button.close(type='button', data-dismiss='alert') ×
+								strong Coming soon!
+								p - Ensemble and distribution table creating and editing is under development. Ensemble data is visible but has limited functionality.
+								p - "Take the tour!" option will allow you to become familiar with all aspects of this page.
+							br
+
 							include ./pieces/version.jade
+							//div
+							//	pre(style="background-color:#DFF1C1; border: none;")
+							//		p Are you new here? Take the tour to learn more about how to use this page.
+							//		br
+							//		button.valid-btn(ng-click="startTour()") Start the Tour!
+							//		button.valid-btn(ng-click="startHints()") Turn on Hints
+
+
 							div(class="span span50" style="padding-right:3em;")
 								md-toolbar.md-hue-1
 									h2.md-toolbar-tools
@@ -50,10 +61,15 @@ block body
 										include ./pieces/feedback.jade									
 											
 							div(class="span span50")
+								div.step11
 									include ./sections/root.jade
+								div.step12
 									include ./sections/noaa.jade
+								div.step13
 									include ./sections/funding.jade
+								div.step14
 									include ./sections/publication.jade
+								div.step15
 									include ./sections/geo.jade
 
 							include ./sections/paleo.jade
@@ -79,10 +95,12 @@ block js
 	script(src="modules/ng_misc.js")
 	script(src="modules/ng_versions.js")
 	script(src="modules/ng_validator.js")
+	script(src="https://cdnjs.cloudflare.com/ajax/libs/intro.js/2.7.0/intro.min.js")
 	script(src="https://cdnjs.cloudflare.com/ajax/libs/angularjs-toaster/2.1.0/toaster.js")
 	script(src="https://cdnjs.cloudflare.com/ajax/libs/angular-busy/4.1.4/angular-busy.min.js")
-	script(src="https://cdnjs.cloudflare.com/ajax/libs/angular-recaptcha/3.2.1/angular-recaptcha.min.js")
-	script(src="https://www.google.com/recaptcha/api.js?onload=vcRecaptchaApiLoaded&render=explicit" async defer)
+	//script(src='https://www.google.com/recaptcha/api.js')
+	//script(src="https://cdnjs.cloudflare.com/ajax/libs/angular-recaptcha/3.2.1/angular-recaptcha.min.js")
+	//script(src="https://www.google.com/recaptcha/api.js?onload=vcRecaptchaApiLoaded&render=explicit" async defer)
 	script(src='https://cdnjs.cloudflare.com/ajax/libs/angular-ui-router/0.2.15/angular-ui-router.min.js')
 	script(src='https://cdnjs.cloudflare.com/ajax/libs/angular-google-maps/2.2.0/angular-google-maps.min.js')
 	script(src='https://cdnjs.cloudflare.com/ajax/libs/danialfarid-angular-file-upload/8.0.1/ng-file-upload-shim.min.js')
@@ -92,4 +110,5 @@ block js
 	script(src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/2.5.0/ui-bootstrap-tpls.min.js")
 	script(src="https://cdnjs.cloudflare.com/ajax/libs/angular-sanitize/1.5.8/angular-sanitize.min.js")
 	script(src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js")
+
 	//- script(src="https://unpkg.com/ng-table@2.0.2/bundles/ng-table.min.js")

@@ -1,6 +1,6 @@
 // When a LPD file is chosen, all the files inside are listed here.
 
-li(style="list-style-type: none;")
+li.step8(style="list-style-type: none;")
   pre(ng-class="feedback.errCt>0 ? 'on' : 'off'" style="background-color:#FEBABB; border: none;" uib-popover="Errors are caused by missing required data or malformed data structures" popover-trigger="'mouseenter'") {{ feedback.errCt}} errors
     ul
       li(ng-repeat="err in feedback.errMsgs track by $index") {{err}}
@@ -13,6 +13,7 @@ li(style="list-style-type: none;")
   //- 	ul
   //- 		li(ng-repeat="pos in feedback.posMsgs track by $index") {{pos}}
 
+div.step9
   pre(ng-hide="feedback.validLipd == 'PASS'" style="background-color:#FEBABB; border: none;" uib-popover-html="lipdPopover" popover-trigger="'mouseenter'") Invalid LiPD file
   pre(ng-show="feedback.validLipd == 'PASS'" style="background-color:#DFF1C1; border: none;" uib-popover-html="lipdPopover" popover-trigger="'mouseenter'") Valid LiPD file
   pre(ng-hide="feedback.validWiki == 'PASS'" style="background-color:#FEBABB; border: none;" uib-popover-html="wikiPopover" popover-trigger="'mouseenter'") Wiki requirements not met
@@ -24,7 +25,7 @@ li(style="list-style-type: none;")
   //- pre#metaPretty(ng-model="files.json")
   //- pre#csvPretty
   
-li(style="list-style-type: none;")
+li.step10(style="list-style-type: none;")
   pre(ng-class="files.fileCt > 0? 'on' : 'off'" style="background-color:#eee; border: none;" uib-popover="Click any filename to view the data within that specific file" popover-trigger="'mouseenter'") {{files.fileCt}} files in LiPD
     ul
       li(ng-repeat="file in allFiles track by $index" ng-click="showModalFileContent(file)") {{ file.filenameShort }}

@@ -66,12 +66,11 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       "csv": {},
       "jsonSimple": {"lipdVersion": 1.3},
       "json": {"lipdVersion": 1.3, "createdBy": "lipd.net", "pub": [], "funding": [], "dataSetName": "", "geo": {},
-        "paleoData": [{"measurementTable": [{"tableName": "", "missingValue": "NaN",
-          "filename": "", "columns": []}]}]}
+        "paleoData": [{"measurementTable": [{"tableName": "paleo0measurement0", "missingValue": "NaN",
+          "filename": "paleo0measurement0.csv", "columns": []}]}]}
     };
     // Metadata about the page view, and manipulations
     $scope.pageMeta = {
-      "downloadMode": null,
       "resetColumnMeta": true,
       "busyPromise": null,
       "header": false,
@@ -83,7 +82,6 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       "filePicker": false,
       "dlFallback": false,
       "dlFallbackMsg": "",
-      "captcha": false,
       "oldVersion": "NA",
       "noaaReady": false,
       "wikiReady": false
@@ -143,6 +141,7 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
     }, true);
 
     $scope.addBlock = function(entry, blockType, pc){
+      toaster.pop('success', "Added a new " + blockType + " entry", "", 4000);
       // Need to initialize the first entry of chronData measurement table, when it doesn't yet exist.
       if (pc === "chron" && typeof(entry) === "undefined"){
         $scope.files.json = create.addChronData($scope.files.json);
@@ -153,40 +152,8 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
     };
 
     $scope.addRmProperty = function(entry, name) {
-      if (name === "interpretation"){
-        $scope.showModalInterpretation(function(selected){
-          if(selected === "cancel"){
-            entry.tmp[name] = !entry.tmp[name];
-          } else{
-            if (entry.interpretation === undefined){
-              entry.interpretation = [selected];
-            } else {
-              entry["interpretation"].push(selected);
-            }
-          }
-        });
-      }
-      else{
-        entry = create.addRmProperty(entry, name);
-      }
+      entry = create.addRmProperty(entry, name);
       return entry;
-    };
-
-    $scope.checkCaptcha = function(mode, firstTry){
-      // If we get this call directly from the captcha "on-success" cb, then trigger download
-      // OR if the captcha was previously solved and still active, trigger download
-      $scope.pageMeta.downloadMode = mode;
-      if (firstTry || $scope.gRecaptchaResponse){
-        if(mode === "noaa"){
-          $scope.downloadNoaa();
-        } else if (mode === "lipd"){
-          $scope.downloadZip();
-        }
-      } else {
-        // Download button was clicked, show the captcha challenge
-        console.log("Start captcha challenge");
-        $scope.pageMeta.captcha = true;
-      }
     };
 
     $scope.checkSession = function(){
@@ -228,19 +195,22 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
     };
 
     $scope.downloadNoaa = function(){
+      // console.log($scope.files);
+      $scope.files.lipdFilename = $scope.files.dataSetName + ".lpd";
+
 
       $scope.genericModalAlert({"title": "NOAA Beta", "message": "Please note the 'NOAA Ready' and 'NOAA Download' features of this web site are BETA features, and as such are not fully implemented and are being improved. If you would like to contribute LiPD data to NOAA, please contact NOAA WDS-Paleo at: paleo@noaa.gov"});
       // Fix up the json a bit so it's ready to be sorted and downloaded
       create.closingWorkflowNoaa($scope.files, $scope.files.dataSetName, $scope.files.csv, function(dat){
         console.log("Let me bring this to the backroom.");
         console.log(dat);
+        console.log($scope.files);
         $scope.uploadNoaa({"name": $scope.files.lipdFilename, "dat": dat}, function(resp){
           if (resp.status !== 200){
             window.alert("There was a problem converting or downloading the file(s). The NOAA conversion is still being perfected and there may be nothing wrong with your data. We appreciate your patience!");
           } else {
-            console.log("It looks like it worked. Here ya go!");
-            $scope.pageMeta.captcha = false;
-            $scope.pageMeta.downloadMode = null;
+            console.log("We have liftoff. Here ya go!");
+            // TODO change before pushing to production
             // window.location.href = "http://localhost:3000/noaa/" + resp.data;
             window.location.href = "http://www.lipd.net/noaa/" + resp.data;
           }
@@ -251,27 +221,33 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
     };
 
     $scope.downloadZip = function(){
+      $scope.files.dataSetName = $scope.files.json.dataSetName;
+      $scope.files.lipdFilename = $scope.files.dataSetName + ".lpd";
 
       // Fix up the json a bit so it's ready to be sorted and downloaded
       var _newJson = create.closingWorkflow($scope.files, $scope.files.dataSetName, $scope.files.csv);
 
       // Download the *validated* LiPD file to client's computer
       // use the service to parse data from the ZipJS entries
+      // console.log("newJson");
+      // console.log(_newJson);
       $scope._myPromiseExport = ExportService.prepForDownload(_newJson);
       $scope.pageMeta.busyPromise = $scope._myPromiseExport;
       $scope._myPromiseExport.then(function (res) {
         //upload zip to node backend, then callback and download it afterward.
         console.log("Let me bring this to the backroom.");
         console.log(res);
+        console.log($scope.files);
         $scope.uploadZip({"filename": $scope.files.lipdFilename, "dat": res}, function(resp){
-          // reset the captcha
-          $scope.pageMeta.captcha = false;
-          $scope.pageMeta.downloadMode = null;
+          console.log("got nodejs response");
+          console.log(resp);
+          // console.log($scope.pageMeta);
           // do get request to trigger download file immediately after download
           if (resp.status !== 200){
             window.alert("Error downloading file!");
           } else {
-            console.log("It looks like it worked. Here ya go!");
+            console.log("We have liftoff. Here ya go!");
+            // TODO change before pushing to production
             // window.location.href = "http://localhost:3000/files/" + resp.data;
             window.location.href = "http://www.lipd.net/files/" + resp.data;
           }
@@ -424,6 +400,9 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       // CSV is all finished processing. Set data to scope.
       $scope.files.csv[_csvname] = _csv;
       $scope.pageMeta.keepColumnMeta = true;
+      // Remove the values from the text field. After being processed, the values formatting gets jumbled and un-parseable.
+      // If they want to update or parse new values, they'll have to copy/paste them in again.
+      entry.values = "";
       return entry;
     };
 
@@ -488,7 +467,6 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
             "filename": "", "columns": []}]}]}
       };
       $scope.pageMeta = {
-        "downloadMode": null,
         "keepColumnMeta": false,
         "header": false,
         "decimalDegrees": true,
@@ -499,7 +477,6 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
         "filePicker": false,
         "dlFallback": false,
         "dlFallbackMsg": "",
-        "captcha": false,
         "oldVersion": "NA",
         "noaaReady": false,
         "wikiReady": false
@@ -508,13 +485,19 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
     };
 
     $scope.removePaleoChron = function(pc){
-
-      if(pc === "chron"){
-        $scope.files.json.chronData = [];
-      } else if (pc === "paleo"){
-        $scope.files.json.paleoData = [{"measurementTable": [{"tableName": "", "missingValue": "NaN",
-          "filename": "", "columns": []}]}];
-      }
+      $scope.genericModalAsk({"title": "Delete ALL data in this section?",
+          "message": "Are you sure you want to delete all data from the " + pc + "Data section? I won't be able to bring it back.",
+        "button1": "Yes",
+        "button2": "No"}, function(truth){
+        if(truth === true){
+          if(pc === "chron"){
+            $scope.files.json.chronData = [];
+          } else if (pc === "paleo"){
+            $scope.files.json.paleoData = [{"measurementTable": [{"tableName": "", "missingValue": "NaN",
+              "filename": "", "columns": []}]}];
+          }
+        }
+      });
     };
 
     $scope.saveSession = function(){
@@ -530,7 +513,7 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
           "files": $scope.files
         });
         console.log("Saving progress: ");
-        console.log($scope.roughSizeOfObject(_dat));
+        // console.log($scope.roughSizeOfObject(_dat));
         sessionStorage.setItem("lipd", _dat);
         toaster.pop('note', "Saving progress...", "Saving your data to the browser session in case something goes wrong", 4000);
       } catch(err){
@@ -546,23 +529,48 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
     };
 
     $scope.showProperty = function(name){
+      // Do not show any temporary fields, data, or nested blocks.
       if(["number", "variableName", "units", "toggle", "values", "checked", "tmp", "interpretation"].includes(name)){
         return false;
       }
       return true;
     };
 
-    // Show options for creating interpretation block
-    $scope.showModalInterpretation= function(cb){
+    $scope.showModalInterpretation = function(entry, create, idx){
+      // interp - array of interp objs
+      // create - bool for creating new interp or not
+      // idx - null if creating new interp, of integer if using existing data
+      var interpArr = entry.interpretation;
+      if(typeof interpArr === 'undefined' || !interpArr){
+        interpArr = [];
+      }
+      if(create){
+        idx = interpArr.length;
+        interpArr.push({});
+      }
+      $scope.modal = {"data": interpArr, "new": create, "idxNum": idx};
       var modalInstance = $uibModal.open({
-        templateUrl: 'modal-interp',
+        templateUrl: 'modal-interp-data',
         controller: 'ModalCtrlInterp',
-        size: "lg"
+        size: "lg",
+        resolve: {
+          data: function () {
+            return $scope.modal;
+          }
+        }
       });
-      modalInstance.result.then(function (selected) {
-        cb(selected);
+      modalInstance.result.then(function (new_data) {
+        if (new_data === "delete"){
+          interpArr.splice(idx, 1);
+          entry.interpretation = interpArr;
+        } else if(new_data !== "cancel"){
+          console.log("finishing interp");
+          console.log(new_data);
+          entry.interpretation = new_data;
+        }
+        return entry;
       });
-
+      return entry;
     };
 
     // Showing contents of individual file links
@@ -578,6 +586,193 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
           }
         }
       });
+    };
+
+    $scope.startTour = function(){
+      var intro = introJs();
+      intro.setOptions({
+        steps: [
+          {
+            element:document.querySelector(".step0"),
+            intro: "Welcome to the Create LiPD page! This tour is designed to teach you the ins and outs of creating or " +
+            "editing a LiPD file. We tried to make working with LiPD data as simple as possible, but some parts of the process " +
+            "inevitably need more explanation. Don't forget to hover your mouse pointer on items throughout the page to see more hints. "
+          },
+          {
+            // Map
+            element: document.querySelector(".step1"),
+            intro: "The map uses your coordinate data to drop a pin on your dataset's location."
+          },
+          {
+            // Choose file button
+            element: document.querySelector(".step2"),
+            intro: "If you have a LiPD file and would like to upload it, use the 'Choose File' button to browse your computer and select the file.",
+            position: 'right'
+          },
+          {
+            // Validate button
+            element: document.querySelector(".step3"),
+            intro: 'LiPD files must abide by our designed structure, follow standards, and meet minimum data requirements to be considered a valid file. Use this button to determine if your file is valid.',
+            position: 'right'
+          },
+          {
+            // Save Session button
+            element: document.querySelector(".step4"),
+            intro: "Need a break from your dataset? Did your internet connection disconnect? Save the session and come back later. Just don't close your internet browser!",
+            position: 'right'
+          },
+          {
+            // Download lipd button
+            element: document.querySelector(".step5"),
+            intro: 'Download your validated data as a LiPD file to your local computer.',
+            position: "right"
+          },
+          {
+            // Download NOAA button
+            element: document.querySelector(".step6"),
+            intro: "Download your validated data as a NOAA template text file. Please note, one text file is created for every paleo measurement table in your dataset.",
+            position: "right"
+          },
+          {
+            // NOAA ready, wiki ready switches
+            element: document.querySelector(".step7"),
+            intro: "The LinkedEarth Wiki and NOAA have additional data requirements on top of the normal LiPD requirements. Turning on these switches will add custom data input fields to the page and add rules to the validation process.",
+            position: "right"
+          },
+          {
+            // Feedback boxes
+            element: document.querySelector(".step8"),
+            intro: "Validation results. Every time you press the 'Validate' button, these boxes will show the results. A valid file may have warnings, but must not have any errors.",
+            position: "right"
+          },
+          {
+            // Requirements boxes
+            element: document.querySelector(".step9"),
+            intro: "The requirements boxes give you feedback on how complete your dataset is and if you meet different levels of requirements. Hover your mouse pointer over each box to view specific requirements for each.",
+            position: "right"
+          },
+          {
+            // Files list
+            element: document.querySelector(".step10"),
+            intro: "All files ( .jsonld, .csv, .txt ) archived withing the LiPD file are listed here after upload. The filenames listed may be clicked to view the contents inside.",
+            position: "right"
+          },
+          {
+            // Root data - disabled fields and asterisks
+            element: document.querySelector(".step11"),
+            intro: "Fields with a dashed underline are disabled. If you see one, it is done intentionally to preserve standardization and the field will be automatically populated for you. Fields with an asterisk (*) are required fields.",
+            position: "left"
+          },
+          {
+            // Funding - Multiple entry sections
+            element: document.querySelector(".step12"),
+            intro: "The section for NOAA specific data is hidden until you flip the switch for 'NOAA Ready (Beta)'",
+            position: "left"
+          },
+          {
+            // Funding - Multiple entry sections
+            element: document.querySelector(".step13"),
+            intro: "Sections with an 'Add+' button allow for multiple entries. Try it out! Press the add button to add a new entry, then press 'Funding 1' to show or hide the data fields.",
+            position: "left"
+          },
+          {
+            // Publication
+            element: document.querySelector(".step14"),
+            intro: "'Autocomplete using DOI' is the only part of Publication that you haven't seen yet. When you enter a DOI (Digital Object Identifier) and click the button, we'll use doi.org to retrieve and fill the publication data for you as much as possible.",
+            position: "left"
+          },
+          {
+            // Geo
+            element: document.querySelector(".step15"),
+            intro: "LiPD stores coordinates as Decimal Degrees, but you may enter your coordinates in Degrees-Minutes-Seconds or Decimal Degrees. Use the switch to change modes. The other fields are standard.",
+            position: "left"
+          }
+        ]
+      });
+      intro.start();
+    };
+
+    $scope.startHints = function(){
+      var intro = introJs();
+      intro.setOptions({
+        hints: [
+          {
+            intro: "Welcome to the Create LiPD page! This tour is designed to teach you the ins and outs of creating or " +
+            "editing a LiPD file. We tried to make working with LiPD data as simple as possible, but some parts of the process " +
+            "inevitably need more explanation."
+          },
+          {
+            // Map
+            element: document.querySelector(".step1"),
+            hint: "The map uses your coordinate data to drop a pin on your dataset's location.",
+            hintPosition: "bottom-left"
+          },
+          {
+            // Choose file button
+            element: document.querySelector(".step2"),
+            hint: "If you have a LiPD file and would like to upload it, use the 'Choose File' button to browse your computer and select the file.",
+            hintPosition: 'top'
+          },
+          {
+            // Validate button
+            element: document.querySelector(".step3"),
+            hint: 'LiPD files must abide by our designed structure, follow standards, and meet minimum data requirements to be considered a valid file. Use this button to determine if your file is valid.',
+            hintPosition: 'right'
+          },
+          {
+            // Save Session button
+            element: document.querySelector(".step4"),
+            hint: "Need a break from your dataset? Did your internet connection disconnect? Save the session and come back later. Just don't close your internet browser!",
+            hintPosition: 'right'
+          },
+          {
+            // Download lipd button
+            element: document.querySelector(".step5"),
+            hint: 'Download your validated data as a LiPD file to your local computer.',
+            hintPosition: "top-middle"
+          },
+          {
+            // Download NOAA button
+            element: document.querySelector(".step6"),
+            hint: "Download your validated data as a NOAA template text file. Please note, one text file is created for every paleo measurement table in your dataset.",
+            hintPosition: "top-middle"
+          },
+          {
+            // NOAA ready, wiki ready switches
+            element: document.querySelector(".step7"),
+            hint: "The LinkedEarth Wiki and NOAA have additional data requirements on top of the normal LiPD requirements. Turning on these switches will add custom data input fields to the page and add rules to the validation process.",
+            hintPosition: "middle-left"
+          },
+          {
+            // Feedback boxes
+            element: document.querySelector(".step8"),
+            hint: "Validation results. Every time you press the 'Validate' button, these boxes will show the results. A valid file may have warnings, but must not have any errors.",
+            hintPosition: "right"
+          },
+          {
+            // Requirements boxes
+            element: document.querySelector(".step9"),
+            hint: "The requirements boxes give you feedback on how complete your dataset is and if you meet different levels of requirements. Hover your mouse pointer over each box to view specific requirements for each.",
+            hintPosition: "right"
+          },
+          {
+            // Files list
+            element: document.querySelector(".step10"),
+            hint: "All files ( .jsonld, .csv, .txt ) archived withing the LiPD file are listed here after upload. The filenames listed may be clicked to view the contents inside.",
+            hintPosition: "right"
+          }
+        ]
+      });
+      intro.onhintsadded(function() {
+        console.log('all hints added');
+      });
+      intro.onhintclick(function(hintElement, item, stepId) {
+        console.log('hint clicked', hintElement, item, stepId);
+      });
+      intro.onhintclose(function (stepId) {
+        console.log('hint closed', stepId);
+      });
+      intro.addHints();
     };
 
     $scope.toggleCsvBox = function(entry) {
@@ -609,7 +804,13 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       $scope.pageMeta.busyPromise = Upload.upload({
         url: '/files',
         data: {file: _file.dat,
-          filename: _file.filename}
+          filename: _file.filename
+          // headers: {"Content-type": "application/json",
+          //           'Access-Control-Allow-Origin': '*',
+          //           'Access-Control-Allow-Methods': 'GET, POST',
+          //           'Access-Control-Allow-Headers': 'x-prototype-version,x-requested-with'
+          // }
+        }
       });
       $scope.pageMeta.busyPromise.then(function (resp) {
         console.log('Success');

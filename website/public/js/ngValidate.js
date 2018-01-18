@@ -8,8 +8,8 @@
 //   return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj === "undefined" ? "undefined" : _typeof2(obj);
 // };
 
-// deprecated : cgBusy
-var f = angular.module('ngValidate', ['uiGmapgoogle-maps', 'json-tree', 'ngFileUpload', "ngMaterial", "vcRecaptcha", "ui.bootstrap", "cgBusy", "toaster"]);
+// deprecated : cgBusy, "vcRecaptcha"
+var f = angular.module('ngValidate', ['uiGmapgoogle-maps', 'json-tree', 'ngFileUpload', "ngMaterial", "ui.bootstrap", "cgBusy", "toaster"]);
 
 
 f.value('cgBusyDefaults',{
