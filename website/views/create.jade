@@ -38,16 +38,15 @@ block body
 								button.close(type='button', data-dismiss='alert') ×
 								strong Coming soon!
 								p - Ensemble and distribution table creating and editing is under development. Ensemble data is visible but has limited functionality.
-								p - "Take the tour!" option will allow you to become familiar with all aspects of this page.
 							br
 
 							include ./pieces/version.jade
-							//div
-							//	pre(style="background-color:#DFF1C1; border: none;")
-							//		p Are you new here? Take the tour to learn more about how to use this page.
-							//		br
-							//		button.valid-btn(ng-click="startTour()") Start the Tour!
-							//		button.valid-btn(ng-click="startHints()") Turn on Hints
+							div
+								pre(style="background-color:#DFF1C1; border: none;")
+									p Are you new here? Take the tour to learn more about how to use this page.
+									br
+									button.valid-btn(type="button" ng-click="startTour()") Take the tour!
+									//button.valid-btn(type="button" ng-click="startHints()") Turn on Hints
 
 
 							div(class="span span50" style="padding-right:3em;")
@@ -73,7 +72,8 @@ block body
 									include ./sections/geo.jade
 
 							include ./sections/paleo.jade
-							include ./sections/chron.jade
+							.step23
+								include ./sections/chron.jade
 
 //- block js will insert js scripts listed in footer.jade that are needed on every page.
 block js

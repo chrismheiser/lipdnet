@@ -305,7 +305,7 @@ var lipdValidator = (function(){
         "miscKeys": ["studyName", "proxy", "metadataMD5", "googleSpreadSheetKey", "googleMetadataWorksheet",
           "@context", "tagMD5", "dataSetName", "description", "maxYear",
           "minYear", "originalDataUrl", "dataContributor", "collectionName", "googleDataUrl",
-          "paleoData", "chronData"],
+          "paleoData", "chronData", "notes"],
         "reqRootKeys": ["archiveType", "dataSetName", "paleoData", "geo"],
         "reqPubKeys": ["author", "title", "year", "journal"],
         "reqPubDcKeys": ["author", "title"],
@@ -434,7 +434,7 @@ var lipdValidator = (function(){
               } else {
                 // No rules for these keys. Log warning, but allow data.
                 if (keys.indexOf(k) === -1) {
-                  logFeedback("warn", "No rules found for key: " + k);
+                  logFeedback("warn", "Oops, we don't recognize this key: '" + k + "'");
                   console.log("verifyBase: No rules for key: " + k);
                 }
               }

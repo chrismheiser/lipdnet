@@ -2,7 +2,7 @@ div(ng-repeat='entry in files.json.chronData track by $index' layout-wrap="")
 
     // chronData[1] : Should only be one entry2. Don't need to loop
     div(ng-repeat="entry2 in entry.measurementTable track by $index" layout-wrap="")
-        md-card(ng-show="entry2.tmp.show")
+        md-card(ng-show="entry2.tmp.toggle")
             md-subheader.md-primary chron {{$parent.$index+1}} > measurement {{$index+1}}
             include ./table_root.jade
             // Toggle the csv entry2 box and the parse csv button. Once we parse CSV, these elements are not longer needed.

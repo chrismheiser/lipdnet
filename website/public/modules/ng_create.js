@@ -11,16 +11,12 @@ var create = (function(){
     addBlock: (function(entry, blockType, pc){
       try{
         if(pc !== null){
-          console.log("Entry inbound");
-          console.log(entry);
           // measurement tables
           if (blockType === "measurement"){
             entry["measurementTable"] = create.addTable(entry["measurementTable"]);
           }
           // model tables
           else if (["summary", "ensemble", "distribution"].indexOf(blockType) !== -1){
-            console.log("sendto prepModelTable");
-            console.log(entry);
             create.prepModelTable(entry, blockType, function(entry2){
               if (blockType === "summary"){
                 entry2["model"][0]["summaryTable"] = create.addTable(entry2.model[0].summaryTable);
@@ -29,6 +25,7 @@ var create = (function(){
               } else if (blockType === "ensemble"){
                 entry2["model"][0]["ensembleTable"] = create.addTable(entry2.model[0].ensembleTable);
               }
+              return entry2;
             });
           }
         } else {
@@ -47,7 +44,7 @@ var create = (function(){
         }
         return entry;
       } catch (err){
-       console.log("create:addBlock: " + err);
+       console.log("Error: create:addBlock: " + err);
       }
     }),
 
@@ -267,14 +264,156 @@ var create = (function(){
       cb({"metadata": _newJson.json, "csvs": _newCsv});
     }),
 
-    structureCsvForPy: (function(_csv){
-      var _newCsv = {};
-      for(var _filename in _csv){
-        if(_csv.hasOwnProperty(_filename)){
-          _newCsv[_filename] = _csv[_filename]["transposed"];
+    getTourSteps: (function(){
+      return [
+        {
+          element:document.querySelector(".step0"),
+          intro: "Welcome to the Create LiPD page! This tour is designed to teach you the ins and outs of creating or " +
+          "editing a LiPD file. We tried to make working with LiPD data as simple as possible, but some parts of the process " +
+          "inevitably need more explanation. Don't forget to hover your mouse pointer on items throughout the page to see more hints. "
+        },
+        {
+          // Map
+          element: document.querySelector(".step1"),
+          intro: "The map uses your coordinate data to drop a pin on your dataset's location."
+        },
+        {
+          // Choose file button
+          element: document.querySelector(".step2"),
+          intro: "If you have a LiPD file you want to upload, you can do that here. If not, that's okay too! Use the fields to start building a LiPD file",
+          position: 'right'
+        },
+        {
+          // Validate button
+          element: document.querySelector(".step3"),
+          intro: 'LiPD files must abide by a set of standards for key names, data structure, minimum data thresholds, etc. to be considered a valid file. The validation process gives you feedback on how to make your data a valid LiPD file.',
+          position: 'right'
+        },
+        {
+          // Save Session button
+          element: document.querySelector(".step4"),
+          intro: "Need a break from your dataset? Did your internet connection disconnect? Save the session and come back later. Just don't close your internet browser! We'll offer to load an older session if we find one saved in the browser.",
+          position: 'right'
+        },
+        {
+          // Download lipd button
+          element: document.querySelector(".step5"),
+          intro: 'Download your validated data as a LiPD file to your local computer.',
+          position: "right"
+        },
+        {
+          // Download NOAA button
+          element: document.querySelector(".step6"),
+          intro: "Download your validated data as a NOAA template text file. Please note, one text file is created for every paleo measurement table in your dataset. A multi-file output is downloaded as a ZIP file.",
+          position: "right"
+        },
+        {
+          // NOAA ready, wiki ready switches
+          element: document.querySelector(".step7"),
+          intro: "The LinkedEarth Wiki and NOAA have additional data requirements to the LiPD requirements. Turning on these switches will add custom data input fields to the page and add rules to the validation process.",
+          position: "right"
+        },
+        {
+          // Feedback boxes
+          element: document.querySelector(".step8"),
+          intro: "Validation results. Every time you press the 'Validate' button, these boxes will show the results. Warnings are recommended fixes, but not required. Errors MUST be fixed.",
+          position: "right"
+        },
+        {
+          // Requirements boxes
+          element: document.querySelector(".step9"),
+          intro: "The requirements boxes give you feedback on how complete your dataset is and if you meet different levels of requirements. Hover your mouse pointer over each box to view specific requirements for each.",
+          position: "right"
+        },
+        {
+          // Files list
+          element: document.querySelector(".step10"),
+          intro: "All files ( .jsonld, .csv, .txt ) archived withing the LiPD file are listed here after upload. The filenames listed may be clicked to view the contents inside.",
+          position: "right"
+        },
+        {
+          // Root data - disabled fields and asterisks
+          element: document.querySelector(".step11"),
+          intro: "Fields with a dashed underline are disabled. If you see one, it is done intentionally to preserve standardization and the field will be automatically populated for you. Fields with an asterisk (*) are required fields.",
+          position: "left"
+        },
+        {
+          // NOAA Specific
+          element: document.querySelector(".step12"),
+          intro: "The section for NOAA specific data is hidden until you flip the switch for 'NOAA Ready (Beta)'",
+          position: "left"
+        },
+        {
+          // Funding - Multiple entry sections
+          element: document.querySelector(".step13"),
+          intro: "Sections with an 'Add+' button allow for multiple entries that expand and collapse. (You can try this during the tour!) Click '- Delete' to delete a specific entry. ",
+          position: "left"
+        },
+        {
+          // Publication
+          element: document.querySelector(".step14"),
+          intro: "'Autocomplete using DOI' is the important part of the publication section. When you enter a DOI (Digital Object Identifier) and click the button, we'll use doi.org to retrieve and fill the publication data for you as much as possible. Another note, we use BibJSON standards for publication data, which is why authors are stored as individual entries.",
+          position: "left"
+        },
+        {
+          // Geo
+          element: document.querySelector(".step15"),
+          intro: "LiPD stores coordinates as Decimal Degrees, but you may enter your coordinates in Degrees-Minutes-Seconds or Decimal Degrees. Use the switch to change modes. The other fields are standard. ",
+          position: "left"
+        },
+        {
+          // Paleo
+          element: document.querySelector(".step16"),
+          intro: "Use this section to build the columns of your data table. Enter the header row (where applicable) and column values ONLY. We recommend copying your data from a text file or spreadsheet, but entering data by hand works as well. (with one small exception noted in the next step)",
+          position: "top"
+        },
+        {
+          // Delimiter
+          element: document.querySelector(".step17"),
+          intro: "Choose the delimiter that matches what you see in the input box below. One exception: When copying data from a spreadsheet, the delimiter is 'Tab (\\t)'.",
+          position: "right"
+        },
+        {
+          // Header
+          element: document.querySelector(".step18"),
+          intro: "Header row data will parse into the 'variableName' field for each column. Please note, units will not be parsed from the header row.",
+          position: "right"
+        },
+        {
+          // Keep existing columns
+          element: document.querySelector(".step19"),
+          intro: "Use this switch to make corrections to your values, or to completely redo your columns. For example, setting this switch to 'Yes' will preserve all column metadata that you have worked on so far and update the values ONLY. Setting the switch to 'No' will parse values and wipe all other column metadata for a fresh start.",
+          position: "right"
+        },
+        {
+          // Parse Values Box
+          element: document.querySelector(".step20"),
+          intro: "Here's an example of some data with a header line. This is what the data would look like if you copied it from a spreadsheet and it had a 'Tab' delimiter. Click 'Parse Values' to see how it creates columns in this table.",
+          position: "top"
+        },
+        {
+          // Add table dropdown and button
+          element: document.querySelector(".step21"),
+          intro: "Add a new data table to paleoData or chronData by choosing the table type from the dropdown menu and clicking '+ Add Table'. We're working to add support for more tables!",
+          position: "top"
+        },
+        {
+          // Delete Section buttons
+          element: document.querySelector(".step22"),
+          intro: "If you want to remove and ENTIRE paleoData section or chronData section, their respective 'Delete' buttons will do that. There's a confirmation box that asks you if you're sure before deleting the data.",
+          position: "top"
+        },
+        {
+          // chronData
+          element: document.querySelector(".step23"),
+          intro: "The chronData section is identical to everything you've seen in the paleoData section, so I'll skip this section of the page.",
+          position: "top"
+        },
+        {
+          element: document.querySelector(".step24"),
+          intro: "That's it! There many different pieces to this page, but hopefully this tour has explained some of the initial questions and the process makes more sense.",
         }
-      }
-      return _newCsv;
+      ]
     }),
 
     initColumnTmp: (function(x){
@@ -440,6 +579,17 @@ var create = (function(){
       return entry;
     }),
 
+    structureCsvForPy: (function(_csv){
+      var _newCsv = {};
+      for(var _filename in _csv){
+        if(_csv.hasOwnProperty(_filename)){
+          _newCsv[_filename] = _csv[_filename]["transposed"];
+        }
+      }
+      return _newCsv;
+    }),
+
+
     // STORED DATA LISTS -----
 
     archiveTypeList: (function(){
@@ -479,8 +629,12 @@ var create = (function(){
 
     prepModelTable: (function(entry, blockType, cb){
       try{
+
+        if(typeof entry === "undefined"){
+          entry = {};
+        }
         if(entry.hasOwnProperty("model")){
-          if(!entry["model"][0].hasOwnProperty(blockType + "Table")){
+          if(typeof entry["model"][0][blockType + "Table"] === "undefined"){
             entry["model"][0][blockType] = [];
           }
         }
@@ -490,7 +644,7 @@ var create = (function(){
         }
         cb(entry);
       } catch(err){
-        console.log("create: prepModelTable: " + err);
+        console.log("Error: create: prepModelTable: " + err);
         console.log(entry);
       }
     }),

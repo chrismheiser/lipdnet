@@ -39,7 +39,7 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       "tables": [
         { id: 1, name: 'measurement' },
         { id: 2, name: 'summary' },
-        { id: 3, name: 'ensemble' },
+        // { id: 3, name: 'ensemble' },
         // { id: 4, name: "distribution"}
       ],
       "delimiters": [
@@ -84,7 +84,8 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       "dlFallbackMsg": "",
       "oldVersion": "NA",
       "noaaReady": false,
-      "wikiReady": false
+      "wikiReady": false,
+      "tourMeta": {},
     };
     // All feedback warnings, errors, and messages received from the validator
     $scope.feedback = {
@@ -145,9 +146,12 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       // Need to initialize the first entry of chronData measurement table, when it doesn't yet exist.
       if (pc === "chron" && typeof(entry) === "undefined"){
         $scope.files.json = create.addChronData($scope.files.json);
+        $scope.files.json.chronData[0] = create.addBlock($scope.files.json.chronData[0], blockType, pc);
+        return;
+      } else {
+        // Add a block of data to the JSON. (i.e. funding, paleoData table, publication, etc.)
+        entry = create.addBlock(entry, blockType, pc);
       }
-      // Add a block of data to the JSON. (i.e. funding, paleoData table, publication, etc.)
-      entry = create.addBlock(entry, blockType, pc);
       return entry;
     };
 
@@ -315,18 +319,22 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       });
     };
 
-    $scope.makeNoaaReady = function(){
+    $scope.makeNoaaReady = function(alert){
       if(!$scope.pageMeta.noaaReady){
         // Make Ready
         create.addNoaaReady($scope.files.json, function(_d2){
-          $scope.genericModalAlert({"title": "NOAA Validation", "message": "The fields that NOAA requires have been " +
-          "added where necessary. For a list of these requirements, hover your mouse pointer over the 'NOAA " +
-          "requirements' bar on the left side of the page."});
+          if(alert){
+            $scope.genericModalAlert({"title": "NOAA Validation", "message": "The fields that NOAA requires have been " +
+            "added where necessary. For a list of these requirements, hover your mouse pointer over the 'NOAA " +
+            "requirements' bar on the left side of the page."});
+          }
           $scope.files.json = _d2;
         });
       } else {
-        // Don't remove fields. just alert
-        $scope.genericModalAlert({"title": "Fields may be ignored", "message": "Validation is no longer using NOAA rules."});
+        if(alert){
+          // Don't remove fields. just alert
+          $scope.genericModalAlert({"title": "Fields may be ignored", "message": "Validation is no longer using NOAA rules."});
+        }
       }
     };
 
@@ -351,10 +359,9 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       entry.tableName = options.pc + '0' + options.tt + idx;
       // Semi-colon delimiter is checked. Pass this as an argument to PapaParse
       // console.log($scope.dropdowns.current.delimiter.name);
-      var _csv = Papa.parse(entry.values, {
+      var _csv = Papa.parse(entry.tmp.values, {
         "delimiter": $scope.dropdowns.current.delimiter.name
       });
-
       // add row, column, and transposed metadata to the parsed CSV object.
       _csv = misc.putCsvMeta(_csv);
 
@@ -363,12 +370,14 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
 
       // KEEP column metadata and parse values
       if($scope.pageMeta.keepColumnMeta){
+        console.log($scope.pageMeta.header);
+        // TODO this section needs to use the header switch! in case they enter new headers or something
         // Do the amount of parsed values columns === the existing amount of metadata columns?
         if (entry.columns.length === _csv.transposed.length){
-          // set the transposed data to entry.values. Transposed data is needed so we can display column data properly
-          entry.values = _csv.transposed;
+          // set the transposed data to entry.tmp.values. Transposed data is needed so we can display column data properly
+          entry.tmp.values = _csv.transposed;
           for (var _c = 0; _c < entry.columns.length; _c++){
-            entry.columns[_c]["values"] = entry.values[_c];
+            entry.columns[_c]["values"] = entry.tmp.values[_c];
           }
         } else {
           $scope.genericModalAlert({"title": "Column Mismatch", "message": "When parsing values with the 'Parse & Keep Existing Metadata' option, the amount of values columns being parsed must match the amount of metadata columns that already exist."})
@@ -377,17 +386,17 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       // RESET column metadata and parse values
       else {
         // set the transposed data to entry.values. Transposed data is needed so we can display column data properly
-        entry.values = _csv.transposed;
+        entry.tmp.values = _csv.transposed;
         // initialize X amount of columns
-        entry.columns = new Array(entry.values.length);
+        entry.columns = new Array(entry.tmp.values.length);
         // start adding each column to the array
-        for(var _i=0; _i < entry.values.length; _i++){
+        for(var _i=0; _i < entry.tmp.values.length; _i++){
           if($scope.pageMeta.header){
             // Header exists, we can set the variableName field as well! VariableName will be the first index
-            entry.columns[_i] = {"number": _i + 1, "variableName": entry.values[_i][0], "units": "", "values": entry.values[_i].splice(1, entry.values.length)};
+            entry.columns[_i] = {"number": _i + 1, "variableName": entry.tmp.values[_i][0], "units": "", "values": entry.tmp.values[_i].slice(1, entry.tmp.values.length-1)};
           } else {
             // Headers do not exist. Set values directly
-            entry.columns[_i] = {"number": _i + 1, "variableName": "", "units": "", "values": entry.values[_i]};
+            entry.columns[_i] = {"number": _i + 1, "variableName": "", "units": "", "values": entry.tmp.values[_i]};
           }
         }
         // If headers are present, we need to do some extra cleanup
@@ -402,7 +411,7 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       $scope.pageMeta.keepColumnMeta = true;
       // Remove the values from the text field. After being processed, the values formatting gets jumbled and un-parseable.
       // If they want to update or parse new values, they'll have to copy/paste them in again.
-      entry.values = "";
+      entry.tmp.values = "";
       return entry;
     };
 
@@ -414,11 +423,11 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       // To reset a parsed CSV table, you need to undo all of the below
       // entry.values, entry.filename, entry.columns,
       // $scope.files.csv[_csvname] = _csv;
-      entry.values = null;
+      entry.tmp.values = null;
       $scope.files.csv[entry.filename] = null;
       entry.filename = null;
       entry.columns = null;
-      entry.toggle = !entry.toggle;
+      entry.tmp.toggle = !entry.tmp.toggle;
       return entry;
     };
 
@@ -530,7 +539,7 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
 
     $scope.showProperty = function(name){
       // Do not show any temporary fields, data, or nested blocks.
-      if(["number", "variableName", "units", "toggle", "values", "checked", "tmp", "interpretation"].includes(name)){
+      if(["number", "variableName", "units", "toggle", "dataFormat", "dataType", "description", "values", "checked", "tmp", "interpretation"].includes(name)){
         return false;
       }
       return true;
@@ -591,105 +600,99 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
     $scope.startTour = function(){
       var intro = introJs();
       intro.setOptions({
-        steps: [
-          {
-            element:document.querySelector(".step0"),
-            intro: "Welcome to the Create LiPD page! This tour is designed to teach you the ins and outs of creating or " +
-            "editing a LiPD file. We tried to make working with LiPD data as simple as possible, but some parts of the process " +
-            "inevitably need more explanation. Don't forget to hover your mouse pointer on items throughout the page to see more hints. "
-          },
-          {
-            // Map
-            element: document.querySelector(".step1"),
-            intro: "The map uses your coordinate data to drop a pin on your dataset's location."
-          },
-          {
-            // Choose file button
-            element: document.querySelector(".step2"),
-            intro: "If you have a LiPD file and would like to upload it, use the 'Choose File' button to browse your computer and select the file.",
-            position: 'right'
-          },
-          {
-            // Validate button
-            element: document.querySelector(".step3"),
-            intro: 'LiPD files must abide by our designed structure, follow standards, and meet minimum data requirements to be considered a valid file. Use this button to determine if your file is valid.',
-            position: 'right'
-          },
-          {
-            // Save Session button
-            element: document.querySelector(".step4"),
-            intro: "Need a break from your dataset? Did your internet connection disconnect? Save the session and come back later. Just don't close your internet browser!",
-            position: 'right'
-          },
-          {
-            // Download lipd button
-            element: document.querySelector(".step5"),
-            intro: 'Download your validated data as a LiPD file to your local computer.',
-            position: "right"
-          },
-          {
-            // Download NOAA button
-            element: document.querySelector(".step6"),
-            intro: "Download your validated data as a NOAA template text file. Please note, one text file is created for every paleo measurement table in your dataset.",
-            position: "right"
-          },
-          {
-            // NOAA ready, wiki ready switches
-            element: document.querySelector(".step7"),
-            intro: "The LinkedEarth Wiki and NOAA have additional data requirements on top of the normal LiPD requirements. Turning on these switches will add custom data input fields to the page and add rules to the validation process.",
-            position: "right"
-          },
-          {
-            // Feedback boxes
-            element: document.querySelector(".step8"),
-            intro: "Validation results. Every time you press the 'Validate' button, these boxes will show the results. A valid file may have warnings, but must not have any errors.",
-            position: "right"
-          },
-          {
-            // Requirements boxes
-            element: document.querySelector(".step9"),
-            intro: "The requirements boxes give you feedback on how complete your dataset is and if you meet different levels of requirements. Hover your mouse pointer over each box to view specific requirements for each.",
-            position: "right"
-          },
-          {
-            // Files list
-            element: document.querySelector(".step10"),
-            intro: "All files ( .jsonld, .csv, .txt ) archived withing the LiPD file are listed here after upload. The filenames listed may be clicked to view the contents inside.",
-            position: "right"
-          },
-          {
-            // Root data - disabled fields and asterisks
-            element: document.querySelector(".step11"),
-            intro: "Fields with a dashed underline are disabled. If you see one, it is done intentionally to preserve standardization and the field will be automatically populated for you. Fields with an asterisk (*) are required fields.",
-            position: "left"
-          },
-          {
-            // Funding - Multiple entry sections
-            element: document.querySelector(".step12"),
-            intro: "The section for NOAA specific data is hidden until you flip the switch for 'NOAA Ready (Beta)'",
-            position: "left"
-          },
-          {
-            // Funding - Multiple entry sections
-            element: document.querySelector(".step13"),
-            intro: "Sections with an 'Add+' button allow for multiple entries. Try it out! Press the add button to add a new entry, then press 'Funding 1' to show or hide the data fields.",
-            position: "left"
-          },
-          {
-            // Publication
-            element: document.querySelector(".step14"),
-            intro: "'Autocomplete using DOI' is the only part of Publication that you haven't seen yet. When you enter a DOI (Digital Object Identifier) and click the button, we'll use doi.org to retrieve and fill the publication data for you as much as possible.",
-            position: "left"
-          },
-          {
-            // Geo
-            element: document.querySelector(".step15"),
-            intro: "LiPD stores coordinates as Decimal Degrees, but you may enter your coordinates in Degrees-Minutes-Seconds or Decimal Degrees. Use the switch to change modes. The other fields are standard.",
-            position: "left"
-          }
-        ]
+        steps: create.getTourSteps()});
+      $scope.beforeAfterTour("before", function(tourMeta){
+        $scope.pageMeta.tourMeta = tourMeta;
+        intro.start();
       });
-      intro.start();
+      intro.onexit(function() {
+        $scope.beforeAfterTour("after", function(tourMeta){
+          $scope.pageMeta.tourMeta = tourMeta;
+        });
+      });
+    };
+
+    $scope.beforeAfterTour = function(mode, cb){
+      if(mode === "before"){
+        var beforeSettings = {"noaaReady": false,
+          "pub": {"added": false, "expanded": false},
+          "funding": {"added": false, "expanded": false},
+          "paleo": {"expanded": false, "values": false, "header": false}};
+        // Turn on NOAA switch
+        if (!$scope.pageMeta.noaaReady){
+          $scope.makeNoaaReady(false);
+          $scope.pageMeta.noaaReady = true;
+          beforeSettings.noaaReady = false;
+        }
+
+        // create and/or open pub 1
+        // does pub 1 exist?
+        if(typeof $scope.files.json.pub[0] === "undefined"){
+          // no, add block and expand
+          $scope.files.json.pub = $scope.addBlock($scope.files.json.pub, "pub", null);
+          $scope.files.json.pub[0].tmp = {"toggle": false};
+          beforeSettings.pub.added = true;
+        }
+        // is it expanded?
+        if(!$scope.files.json.pub[0].tmp.toggle){
+          // no, expand it.
+          $scope.files.json.pub[0].tmp.toggle = true;
+          beforeSettings.pub.expanded = true;
+        }
+
+        // create and/or open funding 1
+        // does funding 1 exist?
+        if(typeof $scope.files.json.funding[0] === "undefined"){
+          // no, add block and expand
+          $scope.files.json.funding = $scope.addBlock($scope.files.json.funding, "funding", null);
+          $scope.files.json.funding[0].tmp = {"toggle": false};
+          beforeSettings.funding.added = true;
+        }
+        // is it expanded?
+        if(!$scope.files.json.funding[0].tmp.toggle){
+          // no, expand it.
+          $scope.files.json.funding[0].tmp.toggle = true;
+          beforeSettings.funding.expanded = true;
+        }
+
+        // open paleo 1 meas 1
+        var pdt = $scope.files.json.paleoData[0].measurementTable[0];
+        if (typeof pdt.tmp === "undefined"){
+          pdt.tmp = {"toggle": false, "values": ""};
+        }
+        if (typeof pdt.tmp.toggle === "undefined"){
+          pdt.tmp.toggle = true;
+          beforeSettings.paleo.expanded = false;
+        }
+        if (!pdt.tmp.toggle){
+          pdt.tmp.toggle = true;
+          beforeSettings.paleo.expanded = false;
+        }
+        if (typeof pdt.tmp.values === "undefined" || !pdt.tmp.values) {
+          $scope.pageMeta.header = true;
+          pdt.tmp.values = "Depth\t Age\n3\t1900";
+          beforeSettings.paleo.values = true;
+          beforeSettings.paleo.header = true;
+        }
+        cb(beforeSettings);
+      } else if(mode === "after"){
+        $scope.pageMeta.noaaReady = $scope.pageMeta.tourMeta.noaaReady;
+        $scope.files.json.pub[0].tmp.toggle = $scope.pageMeta.tourMeta.pub.expanded;
+        $scope.files.json.funding[0].tmp.toggle = $scope.pageMeta.tourMeta.funding.expanded;
+        $scope.files.json.paleoData[0].measurementTable[0].tmp.toggle = $scope.pageMeta.tourMeta.paleo.expanded;
+        $scope.pageMeta.header = $scope.pageMeta.tourMeta.paleo.header;
+
+        if($scope.pageMeta.tourMeta.pub.added){
+          $scope.files.json.pub.splice(0,1);
+        }
+        if($scope.pageMeta.tourMeta.funding.added){
+          $scope.files.json.funding.splice(0,1);
+        }
+        if($scope.pageMeta.tourMeta.paleo.values){
+          $scope.files.json.paleoData[0].measurementTable[0].tmp.values = "";
+        }
+        cb({});
+      }
     };
 
     $scope.startHints = function(){
@@ -776,7 +779,7 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
     };
 
     $scope.toggleCsvBox = function(entry) {
-      entry.toggle=!entry.toggle;
+      entry.tmp.parse=!entry.tmp.parse;
     };
 
     $scope.uploadNoaa = function (_file, cb) {

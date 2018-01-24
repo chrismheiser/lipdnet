@@ -5,15 +5,15 @@ md-toolbar.md-hue-1
 
 div.btn-row( layout="row")
   div(ng-repeat="entry in files.json.pub track by $index")
-    button.valid-btn.expandable-off(ng-if="entry.toggle" ng-click="entry.toggle = !entry.toggle") Publication {{$index+1}}
-    button.valid-btn.expandable-on(ng-if="!entry.toggle" ng-click="entry.toggle = !entry.toggle") Publication {{$index+1}}
+    button.valid-btn.expandable-off(type="button" ng-if="entry.tmp.toggle" ng-click="entry.tmp.toggle = !entry.tmp.toggle") Publication {{$index+1}}
+    button.valid-btn.expandable-on(type="button" ng-if="!entry.tmp.toggle" ng-click="entry.tmp.toggle = !entry.tmp.toggle") Publication {{$index+1}}
 
 
 
 // PUBLICATION DATA
 div(ng-repeat="entry in files.json.pub track by $index" layout-wrap="")
 
-  md-card(ng-show="entry.toggle")
+  md-card(ng-show="entry.tmp.toggle")
     md-subheader.md-primary publication {{$index+1}}
     div.step14(layout='', layout-padding='', layout-sm='column')
       md-input-container(flex='', ng-class="md-input-has-value")
@@ -79,7 +79,7 @@ div(ng-repeat="entry in files.json.pub track by $index" layout-wrap="")
         button.warn-btn-sm(ng-click='removeBlock(entry.author, $index)' style="margin: 1.5em;" type="button")  -
     
     div(layout='', layout-padding='', layout-sm='column' style="float: right;")
-      button.warn-btn(ng-click='removeBlock(files.json.pub, $index)' style="margin: 1.5em;" type="button")  - Remove
+      button.warn-btn(ng-click='removeBlock(files.json.pub, $index)' style="margin: 1.5em;" type="button")  - Delete
       
 
   // DIVIDER LINE
