@@ -2,22 +2,21 @@ md-subheader.md-primary Parse Values
 
 div(ng-show="entry2.tmp.parse" layout="" layout-padding="" layout-sm="column")
     button.valid-btn(type="button" ng-click="entry2.tmp.parse = !entry2.tmp.parse" style="margin: 1.5em; padding: 2px 2px 2px 2px;") Update Values
-    button.warn-btn(type="button" ng-click="resetCsv(entry2)" style="margin: 1.5em; padding: 2px 2px 2px 2px;") Delete Table
 
 //div(ng-hide="entry2.tmp.parse")
 div(ng-hide="entry2.tmp.parse")
     // Textarea to Copy/Paste CSV data
     div(layout='', layoust-padding='', layout-sm='column')
-        .step17
+        .step17(style="padding:2px; margin:18px;")
             md-input-container
                 md-label Delimiter
                 md-select(ng-model='dropdowns.current.delimiter' ng-model-options="{trackBy: '$value.id'}" aria-label="filler")
                     md-option(ng-value="delimiter" ng-repeat="delimiter in dropdowns.delimiters") {{ delimiter.view }}
                 md-tooltip Generally, copy/pasting data results in a 'Tab' delimiter. Please note if another delimiter is in use.
-        .step18
+        .step18(style="padding:2px; margin:18px;")
             md-switch(ng-model='pageMeta.header') Header: {{ pageMeta.header? "Yes": "No"}}
                 md-tooltip If your values include a variable name header, feel free to include it. They must use the same formatting as the values, and not include any units
-        .step19
+        .step19(style="padding:2px; margin:18px;")
             md-switch(ng-model='pageMeta.keepColumnMeta') Keep Existing Columns: {{ pageMeta.keepColumnMeta? "Yes" : "No"}}
                 md-tooltip If you have a table full of metadata, and ONLY want to update the values, you can choose 'Keep Existing Columns' to preserve the metadata. Choosing 'No' will replace all current data with the newly parsed data.
 

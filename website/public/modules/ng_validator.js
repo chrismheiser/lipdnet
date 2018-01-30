@@ -318,7 +318,9 @@ var lipdValidator = (function(){
 
       /** v1.3  && base keys */
       var keys_1_3 = {
-        "miscKeys": ["WDCPaleoUrl","hasMinValue", "hasMaxValue", "hasMedianValue", "hasMeanValue", "hasResolution", "lipdVersion", "createdBy"],
+        "miscKeys": ["WDCPaleoUrl","hasMinValue", "hasMaxValue", "hasMedianValue", "hasMeanValue", "hasResolution",
+          "lipdVersion", "createdBy", "investigators", "maxYear", "minYear", "timeUnit", "onlineResource",
+          "onlineResourceDescription", "modifiedDate", "originalSourceUrl", "datasetDOI"],
         "reqRootKeys": ["lipdVersion", "createdBy"],
         "reqTableNameKeys": ["tableName", "name"]
       };
@@ -676,7 +678,9 @@ var lipdValidator = (function(){
        */
       var requiredTable = function (table, crumbs, tnks) {
         // look for table filename
-        var filename = table.filename || null;
+        var filename = table.filename || crumbs + ".csv";
+        console.log(filename);
+        table.filename = filename;
         try {
           // required table root keys
           for (var _w = 0; _w < keys_base.reqTableKeys.length; _w++) {
@@ -1006,6 +1010,10 @@ var lipdValidator = (function(){
             var lonValid = numberInRange(-180, 180, lon);
             var latValid = numberInRange(-90, 90, lat);
 
+
+            if(lon===0){
+              logFeedback("warn", "Longitude set to 0. Is this intended?", "coordinates");
+            }
             if (!lon && lon !== 0){
               logFeedback("err", "Missing: longitude", "coordinates");
             } else if (!lonValid) {
@@ -1013,8 +1021,10 @@ var lipdValidator = (function(){
               logFeedback("err", "Longitude out of range: Enter value from -180 to 180", "longitude");
             }
 
-
-            if (!lat && lat !== 0){
+            if (lat === 0){
+              logFeedback("warn", "Latitude set to 0. Is this intended?", "coordinates");
+            }
+            else if (!lat && lat !== 0){
               logFeedback("err", "Missing: latitude", "coordinates");
             } else if (!latValid) {
               // check if latitude is in range

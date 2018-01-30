@@ -66,8 +66,8 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       "csv": {},
       "jsonSimple": {"lipdVersion": 1.3},
       "json": {"lipdVersion": 1.3, "createdBy": "lipd.net", "pub": [], "funding": [], "dataSetName": "", "geo": {},
-        "paleoData": [{"measurementTable": [{"tableName": "paleo0measurement0", "missingValue": "NaN",
-          "filename": "paleo0measurement0.csv", "columns": []}]}]}
+        "paleoData": [{"measurementTable": [{"tableName": "paleo0measurement0", "filename": "paleo0measurement0.csv",
+          "columns": []}]}]}
     };
     // Metadata about the page view, and manipulations
     $scope.pageMeta = {
@@ -145,8 +145,7 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       toaster.pop('success', "Added a new " + blockType + " entry", "", 4000);
       // Need to initialize the first entry of chronData measurement table, when it doesn't yet exist.
       if (pc === "chron" && typeof(entry) === "undefined"){
-        $scope.files.json = create.addChronData($scope.files.json);
-        $scope.files.json.chronData[0] = create.addBlock($scope.files.json.chronData[0], blockType, pc);
+        $scope.files.json = create.addChronData($scope.files.json, blockType);
         return;
       } else {
         // Add a block of data to the JSON. (i.e. funding, paleoData table, publication, etc.)
@@ -170,7 +169,6 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
             "button3": "Close"
           },
           function(_truth){
-            console.log(_truth);
             if(_truth){
               // start loading in the old session
               _prevSession = JSON.parse(_prevSession);
@@ -199,19 +197,23 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
     };
 
     $scope.downloadNoaa = function(){
-      // console.log($scope.files);
+      $scope.files.dataSetName = $scope.files.json.dataSetName;
       $scope.files.lipdFilename = $scope.files.dataSetName + ".lpd";
-
 
       $scope.genericModalAlert({"title": "NOAA Beta", "message": "Please note the 'NOAA Ready' and 'NOAA Download' features of this web site are BETA features, and as such are not fully implemented and are being improved. If you would like to contribute LiPD data to NOAA, please contact NOAA WDS-Paleo at: paleo@noaa.gov"});
       // Fix up the json a bit so it's ready to be sorted and downloaded
-      create.closingWorkflowNoaa($scope.files, $scope.files.dataSetName, $scope.files.csv, function(dat){
+      create.closingWorkflowNoaa($scope.files, $scope.files.dataSetName, $scope.files.csv, function(_newScopeFiles){
+        // Receive a new, corrected version of $scope.files
         console.log("Let me bring this to the backroom.");
-        console.log(dat);
-        console.log($scope.files);
-        $scope.uploadNoaa({"name": $scope.files.lipdFilename, "dat": dat}, function(resp){
+        // The original $scope.files
+        // console.log($scope.files);
+        // The corrected version of $scope.files
+        console.log(_newScopeFiles);
+        $scope.uploadNoaa({"name": $scope.files.lipdFilename, "dat": _newScopeFiles}, function(resp){
+          console.log("Received backend response");
+          console.log(resp);
           if (resp.status !== 200){
-            window.alert("There was a problem converting or downloading the file(s). The NOAA conversion is still being perfected and there may be nothing wrong with your data. We appreciate your patience!");
+            window.alert("HTTP " + resp.status + ": Error downloading file\n" + resp.statusText);
           } else {
             console.log("We have liftoff. Here ya go!");
             // TODO change before pushing to production
@@ -228,27 +230,23 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       $scope.files.dataSetName = $scope.files.json.dataSetName;
       $scope.files.lipdFilename = $scope.files.dataSetName + ".lpd";
 
-      // Fix up the json a bit so it's ready to be sorted and downloaded
-      var _newJson = create.closingWorkflow($scope.files, $scope.files.dataSetName, $scope.files.csv);
+      // Correct the filenames, clean out the empty entries, and make $scope.files data ready for the ExportService
+      var _newScopeFiles = create.closingWorkflow($scope.files, $scope.files.dataSetName, $scope.files.csv);
 
-      // Download the *validated* LiPD file to client's computer
-      // use the service to parse data from the ZipJS entries
-      // console.log("newJson");
-      // console.log(_newJson);
-      $scope._myPromiseExport = ExportService.prepForDownload(_newJson);
+      // Go to the export service. Create an array where each object represents one output file. {Filename: Text} data pairs
+      $scope._myPromiseExport = ExportService.prepForDownload(_newScopeFiles);
       $scope.pageMeta.busyPromise = $scope._myPromiseExport;
-      $scope._myPromiseExport.then(function (res) {
+      $scope._myPromiseExport.then(function (filesArray) {
         //upload zip to node backend, then callback and download it afterward.
         console.log("Let me bring this to the backroom.");
-        console.log(res);
-        console.log($scope.files);
-        $scope.uploadZip({"filename": $scope.files.lipdFilename, "dat": res}, function(resp){
-          console.log("got nodejs response");
+        console.log(filesArray);
+        // console.log($scope.files);
+        $scope.uploadZip({"filename": $scope.files.lipdFilename, "dat": filesArray}, function(resp){
+          console.log("Received backend response");
           console.log(resp);
-          // console.log($scope.pageMeta);
           // do get request to trigger download file immediately after download
           if (resp.status !== 200){
-            window.alert("Error downloading file!");
+            window.alert("HTTP " + resp.status + ": Error downloading file!");
           } else {
             console.log("We have liftoff. Here ya go!");
             // TODO change before pushing to production
@@ -259,6 +257,36 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
         });
       });
     };
+
+    $scope.expandEntry = function(x, entry){
+      // Turn off ALL toggles in the given chunk of metadata
+      x = create.turnOffToggles(x);
+      // Now turn on the toggle for this specific entry
+      if (typeof entry.tmp === "undefined"){
+        entry["tmp"] = {"toggle": true};
+      } else{
+        entry.tmp.toggle = true;
+      }
+    };
+
+    // $scope.expandEntry = function(arr, idx){
+    //   // Expand the target idx, and make sure that all other idx's are collapsed. Only allow one expansion at once.
+    //   if(typeof arr[idx].tmp === "undefined"){
+    //     arr[idx]["tmp"] = {"toggle": true};
+    //   } else {
+    //     arr[idx].tmp.toggle = true;
+    //   }
+    //   for(var _p = 0; _p<arr.length; _p++){
+    //     if(_p !== idx){
+    //       if(typeof arr[_p].tmp === "undefined") {
+    //         arr[_p]["tmp"] = {"toggle": false};
+    //       } else {
+    //         arr[_p].tmp.toggle = false;
+    //       }
+    //     }
+    //   }
+    //   return arr;
+    // };
 
     $scope.fetchPublication = function(entry){
       console.log(entry);
@@ -424,8 +452,9 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       // entry.values, entry.filename, entry.columns,
       // $scope.files.csv[_csvname] = _csv;
       entry.tmp.values = null;
+      entry.tmp.parse = false;
       $scope.files.csv[entry.filename] = null;
-      entry.filename = null;
+      // entry.filename = null;
       entry.columns = null;
       entry.tmp.toggle = !entry.tmp.toggle;
       return entry;

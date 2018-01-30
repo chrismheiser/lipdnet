@@ -5,11 +5,11 @@ md-subheader.md-primary Columns
 
 div.btn-row(layout="row")
     div(ng-repeat='column in entry2.columns track by $index')
-        button.valid-btn.expandable-off(type="button" ng-if="column.tmp.show" ng-click="column.tmp.show = !column.tmp.show") Column {{$index+1}}:<br />{{column.variableName}}
-        button.valid-btn.expandable-on(type="button" ng-if="!column.tmp.show" ng-click="column.tmp.show = !column.tmp.show") Column {{$index+1}}:<br />{{column.variableName}}
+        button.valid-btn.expandable-off(type="button" ng-if="column.tmp.toggle" ng-click="column.tmp.toggle = false") Column {{$index+1}}:<br />{{column.variableName}}
+        button.valid-btn.expandable-on(type="button" ng-if="!column.tmp.toggle" ng-click="expandEntry(entry2.columns, column)") Column {{$index+1}}:<br />{{column.variableName}}
 
 div(layout="column" ng-repeat='entry3 in entry2.columns track by $index' layout-wrap="")
-    md-card(ng-if="entry3.tmp.show")
+    md-card(ng-if="entry3.tmp.toggle")
         md-subheader.md-primary column {{$index+1}}: {{entry3.variableName}}
         div(layout='row', layout-padding='', layout-sm='column')
             div(flex)

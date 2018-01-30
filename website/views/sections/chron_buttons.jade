@@ -4,20 +4,20 @@ div(ng-repeat='entry in files.json.chronData track by $index' layout-wrap="")
     div.btn-row(layout="row")
 
         div(ng-repeat='entry2 in entry.measurementTable track by $index')
-            button.valid-btn.expandable-off(ng-if="entry2.tmp.toggle" ng-click="entry2.tmp.toggle = !entry2.tmp.toggle" type="button") chron {{$parent.$index+1}} measurement {{$index+1}}
-            button.valid-btn.expandable-on(ng-if="!entry2.tmp.toggle" ng-click="entry2.tmp.toggle = !entry2.tmp.toggle" type="button") chron {{$parent.$index+1}} measurement {{$index+1}}
+            button.valid-btn.expandable-off(ng-if="entry2.tmp.toggle" ng-click="entry2.tmp.toggle = false" type="button") chron {{$parent.$index+1}} measurement {{$index+1}}
+            button.valid-btn.expandable-on(ng-if="!entry2.tmp.toggle" ng-click="expandEntry(entry, entry2)" type="button") chron {{$parent.$index+1}} measurement {{$index+1}}
 
     div.btn-row(layout="row")
 
         div(ng-if='entry.model[0].method')
-            button.valid-btn.expandable-off(ng-if="entry.model[0].method.toggle" ng-click="entry.model[0].method.toggle = !entry.model[0].method.toggle" type="button") chron {{$parent.$index+1}} model 1 method
-            button.valid-btn.expandable-on(ng-if="!entry.model[0].method.toggle" ng-click="entry.model[0].method.toggle = !entry.model[0].method.toggle" type="button") chron {{$parent.$index+1}} model 1 method
+            button.valid-btn.expandable-off(ng-if="entry.model[0].method.tmp.toggle" ng-click="entry.model[0].method.tmp.toggle = false" type="button") chron {{$parent.$index+1}} model 1 method
+            button.valid-btn.expandable-on(ng-if="!entry.model[0].method.tmp.toggle" ng-click="expandEntry(entry, entry.model[0].method)" type="button") chron {{$parent.$index+1}} model 1 method
 
         div(ng-repeat='entry2 in entry.model[0].summaryTable track by $index')
-            button.valid-btn.expandable-off(ng-if="entry2.tmp.toggle" ng-click="entry2.tmp.toggle = !entry2.tmp.toggle" type="button") chron {{$parent.$index+1}} model 1 summary {{$index+1}}
-            button.valid-btn.expandable-on(ng-if="!entry2.tmp.toggle" ng-click="entry2.tmp.toggle = !entry2.tmp.toggle" type="button") chron {{$parent.$index+1}} model 1 summary {{$index+1}}
+            button.valid-btn.expandable-off(ng-if="entry2.tmp.toggle" ng-click="entry2.tmp.toggle = false" type="button") chron {{$parent.$index+1}} model 1 summary {{$index+1}}
+            button.valid-btn.expandable-on(ng-if="!entry2.tmp.toggle" ng-click="expandEntry(entry, entry2)" type="button") chron {{$parent.$index+1}} model 1 summary {{$index+1}}
 
         div(ng-repeat='entry2 in entry.model[0].ensembleTable track by $index')
-            button.valid-btn.expandable-off(ng-if="entry2.tmp.toggle" ng-click="entry2.tmp.toggle = !entry2.tmp.toggle" type="button") chron {{$parent.$index+1}} model 1 ensemble {{$index+1}}
-            button.valid-btn.expandable-on(ng-if="!entry2.tmp.toggle" ng-click="entry2.tmp.toggle = !entry2.tmp.toggle" type="button") chron {{$parent.$index+1}} model 1 ensemble {{$index+1}}
+            button.valid-btn.expandable-off(ng-if="entry2.tmp.toggle" ng-click="entry2.tmp.toggle = false" type="button") chron {{$parent.$index+1}} model 1 ensemble {{$index+1}}
+            button.valid-btn.expandable-on(ng-if="!entry2.tmp.toggle" ng-click="expandEntry(entry, entry2)" type="button") chron {{$parent.$index+1}} model 1 ensemble {{$index+1}}
 

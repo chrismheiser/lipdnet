@@ -5,8 +5,8 @@ md-toolbar.md-hue-1
 
 div.btn-row( layout="row")
   div(ng-repeat="entry in files.json.pub track by $index")
-    button.valid-btn.expandable-off(type="button" ng-if="entry.tmp.toggle" ng-click="entry.tmp.toggle = !entry.tmp.toggle") Publication {{$index+1}}
-    button.valid-btn.expandable-on(type="button" ng-if="!entry.tmp.toggle" ng-click="entry.tmp.toggle = !entry.tmp.toggle") Publication {{$index+1}}
+    button.valid-btn.expandable-off(type="button" ng-if="entry.tmp.toggle" ng-click="entry.tmp.toggle = false;") Publication {{$index+1}}
+    button.valid-btn.expandable-on(type="button" ng-if="!entry.tmp.toggle" ng-click="expandEntry(files.json.pub, entry)") Publication {{$index+1}}
 
 
 
@@ -78,8 +78,9 @@ div(ng-repeat="entry in files.json.pub track by $index" layout-wrap="")
         button.valid-btn-sm(ng-click='addBlock(entry.author, "author", null)' style="margin: 1.5em;" type="button")  +
         button.warn-btn-sm(ng-click='removeBlock(entry.author, $index)' style="margin: 1.5em;" type="button")  -
     
-    div(layout='', layout-padding='', layout-sm='column' style="float: right;")
-      button.warn-btn(ng-click='removeBlock(files.json.pub, $index)' style="margin: 1.5em;" type="button")  - Delete
+    .md-toolbar-tools(style="background-color:white;")
+      span(flex)
+      button.warn-btn(ng-click='removeBlock(files.json.pub, $index)' style="margin: 1.5em;" type="button") Delete
       
 
   // DIVIDER LINE
@@ -87,5 +88,5 @@ div(ng-repeat="entry in files.json.pub track by $index" layout-wrap="")
   //-   md-divider(style="background-color:#efefef; width:100%;align:center;vertical-align:middle; display: inline-block;")
 
 div(layout='', layout-padding='', layout-sm='column' style="float: right;")
-  button.valid-btn(ng-click='addBlock(files.json.pub, "pub", null)' style="margin: 1.5em;" type="button")  + Add
+  button.valid-btn(ng-click='addBlock(files.json.pub, "pub", null)' style="margin: 1.5em;" type="button") Add
   

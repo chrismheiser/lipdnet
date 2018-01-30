@@ -9,16 +9,14 @@ include ./paleo_model.jade
 
 
 div(layout='', layout-padding='', layout-sm='column' style="float: right;")
-	.step21
-		md-input-container
-			md-label Table Type
-			md-select(ng-model='dropdowns.current.table' ng-model-options="{trackBy: '$value.id'}" aria-label="filler")
-				md-option(ng-value="table" ng-repeat="table in dropdowns.tables") {{ table.name }}
-			md-tooltip DataTable containing PaleoData Variables
+	md-input-container
+		md-label Table Type
+		md-select(ng-model='dropdowns.current.table' ng-model-options="{trackBy: '$value.id'}" aria-label="filler")
+			md-option(ng-value="table" ng-repeat="table in dropdowns.tables") {{ table.name }}
+		md-tooltip DataTable containing PaleoData Variables
 
-		button.valid-btn(ng-click='addBlock(files.json.paleoData[0], dropdowns.current.table.name, "paleo")' style="margin: 1.5em;" type="button") + Add Table
-	.step22
-		button.warn-btn(ng-if="files.json.paleoData[0]" ng-click="removePaleoChron('paleo')" style="margin: 1.5em; padding: 2px 2px 2px 2px;" type="button") Delete PaleoData
+	button.valid-btn(ng-click='addBlock(files.json.paleoData[0], dropdowns.current.table.name, "paleo")' style="margin: 1.5em;" type="button") + Add Table
+	button.warn-btn.step22(ng-if="files.json.paleoData[0]" ng-click="removePaleoChron('paleo')" style="margin: 1.5em; padding: 2px 2px 2px 2px;" type="button") Delete PaleoData
 
 	// END MEASUREMENT TABLE
 

@@ -370,4 +370,20 @@ input[type=number]::-webkit-outer-spin-button {
       overflow-x: auto;
   }
 
+.btn-danger {
+    background-color: #FDBABC;
+    color: white;
+    border: solid 1px #FDBABC;
+}
 
+.btn-success {
+    background-color: #DBEFB9;
+    color: white;
+    border: solid 1px #DBEFB9;
+}
+
+.btn-primary {
+    background-color: #99C5FF;
+    color: white;
+    border: solid 1px #99C5FF;
+}
