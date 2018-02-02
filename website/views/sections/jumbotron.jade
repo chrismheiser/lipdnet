@@ -1,0 +1,12 @@
+div
+    md-content
+        md-tabs.md-border-bottom.md-dynamic-height
+            md-tab(label="Map")
+                md-content.md-padding.step1
+                    ui-gmap-google-map(center='map.config.center', zoom='map.config.zoom', draggable='true', options='map.config.options', bounds='map.config.bounds')
+                        ui-gmap-markers(models='map.markers', coords="'self'", events='events', options='map.config.options')
+            md-tab(label="Charts")
+                md-content(ng-controller="GraphCtrl as gc")
+                    canvas(style="padding:20px;" id="line" class="chart chart-line" chart-data="data"
+                    chart-labels="labels" chart-series="series" chart-options="options"
+                    chart-dataset-override="datasetOverride" chart-click="onClick")

@@ -819,8 +819,8 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
           name: _file.name}
       });
       $scope.pageMeta.busyPromise.then(function (resp) {
-        console.log('Success');
-        console.log(resp);
+        // console.log('Success');
+        // console.log(resp);
         cb(resp);
       }, function (resp) {
         console.log(resp);
@@ -845,8 +845,8 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
         }
       });
       $scope.pageMeta.busyPromise.then(function (resp) {
-        console.log('Success');
-        console.log(resp);
+        // console.log('Success');
+        // console.log(resp);
         cb(resp);
       }, function (resp) {
         console.log(resp);

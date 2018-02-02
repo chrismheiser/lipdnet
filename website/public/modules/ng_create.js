@@ -220,6 +220,8 @@ var create = (function(){
         if (_csv.hasOwnProperty(_key)){
           if(_key.indexOf(_dsn) === -1){
             _csvCopy[_dsn + "." + _key]  = _csv[_key];
+          } else {
+            _csvCopy[_key] = _csv[_key];
           }
         }
       }
@@ -264,7 +266,7 @@ var create = (function(){
       // TODO copy the archiveType from the root, to each data table column
       _scopeFilesCopy.json = create.rmTmpEmptyData(_scopeFilesCopy.json);
       // Prepend DSN to CSV filenames wherever necessary. Do this for _csv metadata data and _json metadata.
-      _scopeFilesCopy = create.alterFilenames(_scopeFilesCopy, _csv);
+      _scopeFilesCopy = create.alterFilenames(_scopeFilesCopy);
       return _scopeFilesCopy;
     }),
 
@@ -641,7 +643,7 @@ var create = (function(){
     }),
 
     defaultColumnFields: (function(){
-      return ["proxy", "measurementMaterial", "method", "variableType", "sensorSpecies", "sensorGenus", "variableType",
+      return ["proxy", "measurementMaterial", "method", "sensorSpecies", "sensorGenus", "variableType",
         "proxyObservationType", "notes"];
     }),
 

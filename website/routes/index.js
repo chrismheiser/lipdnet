@@ -419,11 +419,12 @@ router.post("/noaa", function(req, res, next){
   try{
     // Parse the angular request data into a form that we can use
     var master = {};
-    console.log(JSON.stringify(req.body.dat));
+    // console.log(JSON.stringify(req.body.dat));
     master = parseRequestNoaa(master, req, res);
-    console.log(JSON.stringify(master.dat));
+    // console.log(JSON.stringify(master.dat));
     master = createTmpDir(master);
-    console.log(JSON.stringify(master.dat));
+    console.log(master.name);
+    // console.log(JSON.stringify(master.dat));
     try {
       // Bring in the request module to work some magic
       var request = require('request');
@@ -432,67 +433,85 @@ router.post("/noaa", function(req, res, next){
         uri: 'http://cheiser.pythonanywhere.com/api/noaa',
         method: 'POST',
         json: master.dat,
-        timeout: 5000,
-        // proxy: "http://rishi.cefns.nau.edu:3128"
+        timeout: 3000,
+        proxy: "http://rishi.cefns.nau.edu:3128"
       };
       // Send the request to the NOAA API
+
       console.log("Sending LiPD data to NOAA Conversion API: ", master.name);
       // console.log("PORT : ", app.get("port"));
-      console.log(JSON.stringify(master.dat));
+      // console.log(JSON.stringify(master.dat));
       request(options, function (error, response, body) {
         console.log("Response Status: ", response.statusCode);
         console.log("Response error: ");
         console.log(error);
         console.log("Response Body: ");
         console.log(body);
+        // console.log(typeof(body));
 
-        // Did the call work?
-        if (!error && response.statusCode === 200) {
-          // Huzzah! We have a good response
-          // console.log("# NOAA files received: ", body.length);
-          logger.info("NOAA tmp folder ID: " + path.basename(master.pathTmp));
-          // Write the NOAA data to the tmp folder as text files
-          try {
-            console.log("Received Data from NOAA API");
-            writeFiles(body, master.pathTmp, res, function(){
-              if(fs.readdirSync(master.pathTmp).length !== 0){
-                console.log("Exiting NOAA POST request");
-                res.status(200).send(path.basename(master.pathTmp));
-              } else {
-                // The request worked, but no files were created.... Something went wrong!
-                res.writeHead(204, "There was an error during the conversion process and no NOAA text files were created.", {'content-type' : 'text/plain'});
-                res.end();
-                console.log("Exiting NOAA POST request");
-
-                // res.status(204).send("Error occurred during conversion/write process. No text files created.");
-              }
-            });
-          } catch(err){
-            console.log("/noaa post: Error while writing txt files to tmp: ", err);
-            console.log("Exiting NOAA POST request");
-            res.writeHead(response.statusCode, "Error while writing text files to server", {'content-type' : 'text/plain'});
-            res.end()
+        // If the response is a string, then it is an error message coming from a Python API Exception
+        if (typeof body === 'string' || body instanceof String){
+          // If the response code is a 502, then something is wrong with the server and it needs to be looked at.
+          if(response.statusCode === 502){
+            res.writeHead(502, "It looks like our conversion server is down. We're very sorry! :(", {'content-type' : 'text/plain'});
           }
-        } else{
-          // Yikes, something went wrong on in the flask app. Initiate damage control.
-          console.log("/noaa post: Bad response from NOAA API: ", error);
+          // The process completed, but we didn't get any NOAA text data back. Which means an error occurred or there wasn't enough data.
+          else {
+            res.writeHead(204, "There was an error during the conversion process and no NOAA text files were created. Message from API: " + body, {'content-type': 'text/plain'});
+          }
           console.log("Exiting NOAA POST request");
-          res.writeHead(response.statusCode, "Bad response from NOAA API - " + error, {'content-type' : 'text/plain'});
           res.end();
+        }
+        else {
+          // Did the process complete and respond with data?
+          if (!error && response.statusCode === 200) {
+            // Huzzah! We have a good response
+            // console.log("# NOAA files received: ", body.length);
+            logger.info("NOAA tmp folder ID: " + path.basename(master.pathTmp));
+            try {
+              // Write the NOAA data to the tmp folder as text files
+              console.log("Received Data from API");
+              writeFiles(body, master.pathTmp, res, function(){
+                // Success! All the files are written and we can send the client back an ID for the download
+                if(fs.readdirSync(master.pathTmp).length !== 0){
+                  console.log("Exiting NOAA POST request");
+                  res.status(200).send(path.basename(master.pathTmp));
+                }
+                // Fallback code. We shouldn't reach this code because the API should send an error string which would be handled above.
+                else {
+                  res.writeHead(204, "There was an error during the conversion process and no NOAA text files were created. Message from API: " + body, {'content-type' : 'text/plain'});
+                  console.log("Exiting NOAA POST request");
+                  res.end();
+                }
+              });
+            } catch(err){
+              // Something went wrong while trying to process the API response.
+              console.log("/noaa post: Error while writing txt files to tmp: ", err);
+              console.log("Exiting NOAA POST request");
+              res.writeHead(500, "Error while writing text files to server", {'content-type' : 'text/plain'});
+              res.end();
+            }
+          } else{
+            // Something went wrong in the Python process and the API gave us a bad response.
+            console.log("/noaa post: Bad response from NOAA API: ", error);
+            console.log("Exiting NOAA POST request");
+            res.writeHead(403, "Bad response from API.", {'content-type' : 'text/plain'});
+            res.end();
+          }
         }
       });
     } catch(err){
-      // Yikes, communication problems.
+      // Communication problems while attempting to send a request to the API
       console.log("/noaa post: Error preparing & sending NOAA API request: ", err);
       console.log("Exiting NOAA POST request");
-      res.writeHead(500, "Unable to prepare data for NOAA API - " + err, {'content-type' : 'text/plain'});
+      res.writeHead(500, "Unable to prepare data for API: " + err, {'content-type' : 'text/plain'});
       res.end();
     }
   } catch(err){
-    // Yikes, I messed this up somewhere.
-    console.log("/noaa post: Error parsing data request sent from angular: " + err);
+    // There was a problem parsing the data from the client-side. We never even made it to the API request!
+    console.log("/noaa post: Error parsing data request sent from client-side: " + err);
     console.log("Exiting NOAA POST request");
-    res.writeHead(500, "Error parsing data request from client-side - " + err, {'content-type' : 'text/plain'});
+    res.writeHead(500, "Error parsing data request from client-side: " + err, {'content-type' : 'text/plain'});
     res.end();
   }
 });
