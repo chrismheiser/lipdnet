@@ -9,6 +9,22 @@ JSON-TREE styles
     width: 50%;
 }
 
+.span25 {
+    width: 25%;
+}
+
+.span75 {
+    width: 75%;
+}
+
+.span35 {
+    width: 35%;
+}
+
+.span65 {
+    width: 65%;
+}
+
 #tree-contain{
   padding-left: 30px;
 }

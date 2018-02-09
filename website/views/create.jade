@@ -5,6 +5,7 @@ block css
 	//- files below are page specific
 	link(rel='stylesheet' href='css/validate.css')
 	link(rel="stylesheet" href="css/json-tree.css")
+	link(rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/nvd3/1.8.1/nv.d3.min.css")
 	link(rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/angularjs-toaster/2.1.0/toaster.css")
 	link(rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons")
 	link(rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/angular-busy/4.1.4/angular-busy.min.css")
@@ -37,7 +38,6 @@ block body
 								button.close(type='button', data-dismiss='alert') ×
 								strong Coming soon!
 								p - Ensemble and distribution table creating and editing is under development. Ensemble data is visible but has limited functionality.
-								p - Charts for choosing column data and plotting it on a simple line graph.
 							br
 
 							include ./pieces/version.jade
@@ -52,7 +52,7 @@ block body
 							div(class="span span50" style="padding-right:3em;")
 								md-toolbar.md-hue-1
 									h2.md-toolbar-tools
-										span Load & Validate
+										span Load & Validates
 								div
 									ol
 										include ./pieces/action_btns.jade
@@ -91,17 +91,16 @@ block js
 	script(src="lib/zip/zip-ext.js")
 	script(src="lib/papaparse.min.js")
 	script(src="lib/FileSaver.min.js")
+	script(src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.min.js")
+	script(src="https://cdnjs.cloudflare.com/ajax/libs/nvd3/1.8.1/nv.d3.min.js")
+	//script(src="https://cdnjs.cloudflare.com/ajax/libs/angular-nvd3/1.0.9/angular-nvd3.min.js")
+	script(src="lib/angularjs-nvd3-directives.min.js")
 	script(src="modules/ng_map.js")
 	script(src="modules/ng_create.js")
 	script(src="modules/ng_misc.js")
 	script(src="modules/ng_versions.js")
 	script(src="modules/ng_validator.js")
-	script(src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/1.0.2/Chart.min.js")
-	//script(src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/1.1.1/Chart.min.js")
-	//script(src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.1/Chart.bundle.min.js")
-	//script(src="http://jtblin.github.io/angular-chart.js/dist/angular-chart.js")
-	script(src="https://cdnjs.cloudflare.com/ajax/libs/angular-chart.js/0.8.8/angular-chart.min.js")
-	//scripts(src="http://cdn.jsdelivr.net/angular.chartjs/latest/angular-chart.min.js")
+
 	script(src="https://cdnjs.cloudflare.com/ajax/libs/intro.js/2.7.0/intro.min.js")
 	script(src="https://cdnjs.cloudflare.com/ajax/libs/angularjs-toaster/2.1.0/toaster.js")
 	script(src="https://cdnjs.cloudflare.com/ajax/libs/angular-busy/4.1.4/angular-busy.min.js")

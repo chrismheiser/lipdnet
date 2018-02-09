@@ -276,14 +276,14 @@ var create = (function(){
       cb({"metadata": _newScopeFiles.json, "csvs": _newCsv});
     }),
 
-    turnOffToggles: (function(_x){
+    turnOffToggles: (function(_x, toggle_key){
       // Turn off all Toggles (recursive) beneath the given level.
       try{
         for (var _key in _x) {
           // safety check: don't want prototype attributes
           if (_x.hasOwnProperty(_key)) {
             // if this key is in the array of items to be removed, then remove it.
-            if (_key === "toggle") {
+            if (_key === toggle_key) {
               // remove this key
               _x[_key] = false;
             } // if key in removables
@@ -291,11 +291,11 @@ var create = (function(){
               // value is an array. iterate over array and recursive call
               for (var _g = 0; _g < _x[_key].length; _g++) {
                 // process, then return in place.
-                _x[_key][_g] = create.turnOffToggles(_x[_key][_g]);
+                _x[_key][_g] = create.turnOffToggles(_x[_key][_g], toggle_key);
               }
             } // if array
             else if (_x[_key].constructor === {}.constructor) {
-              _x[_key] = create.turnOffToggles(_x[_key]);
+              _x[_key] = create.turnOffToggles(_x[_key], toggle_key);
             } // if object
           } // hasownproperty
         }
@@ -304,6 +304,7 @@ var create = (function(){
       }
       return _x;
     }),
+
 
     getTourSteps: (function(){
       return [
@@ -458,21 +459,28 @@ var create = (function(){
     }),
 
     initColumnTmp: (function(x){
+      // Tmp Data throughout page:
+      // Table level: {"tmp": {"toggle": bool, "parse": bool, "graphActive": bool}
+      // Model Table Method: {"tmp": {"toggle": bool}}
+      // Column Level: {"tmp": {"toggle": bool}}
+
       // when uploading a file, we need to add in the column property booleans for the "Add Properties" section of each
       // column. That way, an uploaded file that already has properties from our list will trigger the checkbox to be on.
       var _ignore = ["values", "variableName", "units", "number"];
       // loop over this data structure
       try{
+        // Loop for n amount of unknown keys
         for (var _key in x){
-          // safety check: don't want prototype attributes
           if (x.hasOwnProperty(_key) && x[_key] !== undefined){
-            // if this key is in the array of items to be removed, then remove it.
+
+            // Are we at table level? We'll know based on if columns are present.
             if(_key === "columns"){
-              x.toggle = true;
+              // X is currently a data table. Set the toggle
+              x["tmp"] = {"toggle": false, "parse": true, "toggleGraph": false};
               // loop for each column
               for (var _v = 0; _v < x.columns.length; _v++){
                 var _col = x.columns[_v];
-                x.columns[_v].tmp = {};
+                x.columns[_v].tmp = {"toggle": false, "toggleGraph": false, "toggleGraphDisabled": false};
                 // loop for each property in one column
                 for (var _prop in _col){
                   if (_col.hasOwnProperty(_prop) && _col[_prop] !== undefined){
@@ -486,7 +494,15 @@ var create = (function(){
                 // console.log(_col);
               }
               // console.log(_x);
-            } else if (x[_key].constructor === [].constructor && x[_key].length > 0) {
+            }
+
+            // Is this a table? We need to add a temp object
+            if (_key === "filename"){
+
+            }
+
+            // Check if this is a nested structure and we need to process deeper.
+            if (x[_key].constructor === [].constructor && x[_key].length > 0) {
               // value is an array. iterate over array and recursive call
               for (var _g=0; _g < x[_key].length; _g++){
                 // process, then return in place.

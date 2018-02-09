@@ -87,6 +87,8 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       "wikiReady": false,
       "tourMeta": {},
     };
+
+
     // All feedback warnings, errors, and messages received from the validator
     $scope.feedback = {
       "lipdVersion": "NA",
@@ -260,7 +262,7 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
 
     $scope.expandEntry = function(x, entry){
       // Turn off ALL toggles in the given chunk of metadata
-      x = create.turnOffToggles(x);
+      x = create.turnOffToggles(x, "toggle");
       // Now turn on the toggle for this specific entry
       if (typeof entry.tmp === "undefined"){
         entry["tmp"] = {"toggle": true};
@@ -268,6 +270,7 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
         entry.tmp.toggle = true;
       }
     };
+
 
     // $scope.expandEntry = function(arr, idx){
     //   // Expand the target idx, and make sure that all other idx's are collapsed. Only allow one expansion at once.
@@ -611,8 +614,8 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       return entry;
     };
 
-    // Showing contents of individual file links
     $scope.showModalFileContent = function(data){
+      // Showing contents of individual file links
       $scope.modal = data;
       var modalInstance = $uibModal.open({
         templateUrl: 'modal-file',
@@ -858,6 +861,7 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
     };
 
     $scope.validate = function(){
+      console.log($scope.files);
       console.log($scope.files.json);
       // Go through all validations steps, and update scope data.
       // rearrange coordinates from dict to array when necessary, and set the map if coordinates exist
