@@ -328,14 +328,14 @@ router.post('/', function(req, res, next){
 });
 
 // Get the schema page
-router.get('/schema', function(req, res, next){
-    res.render('schema', {title: 'Schema'});
-});
+// router.get('/schema', function(req, res, next){
+//     res.render('schema', {title: 'Schema'});
+// });
 
 // Get the upload page
-router.get('/validator', function(req, res, next){
-  res.render('validator', {title: 'Validator'});
-});
+// router.get('/validator', function(req, res, next){
+//   res.render('validator', {title: 'Validator'});
+// });
 
 router.post("/files", function(req, res, next){
   logger.info("POST: /files");
@@ -551,8 +551,8 @@ router.get("/noaa/:tmp", function(req, res, next){
   }
 });
 
-router.get("/create", function(req, res, next){
-  res.render('create', {title: 'Create & Edit LiPD'});
+router.get("/playground", function(req, res, next){
+  res.render('playground', {title: 'Playground'});
 });
 
 router.get("/modal-file", function(req, res, next){

@@ -35,6 +35,7 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       "current": {
         "table": { id: 1, name: 'measurement' },
         "delimiter": { id: 1, name: "\t", view: "Tab ( \\t )"},
+        "parseMode": {id: 1, name: "new", view: "Start New"}
       },
       "tables": [
         { id: 1, name: 'measurement' },
@@ -48,6 +49,11 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
         { id: 3, name: ";", view: "Semi-colon ( ; )" },
         { id: 4, name: "|", view: "Pipe ( | )"},
         { id: 5, name: " ", view: "Space"},
+      ],
+      "parseMode": [
+        { id: 1, name: "new", view: "Start New"},
+        { id: 2, name: "update", view: "Update Values in All Existing Columns"},
+        { id: 3, name: "add", view: "Add New Column(s) to Existing Table" },
       ],
       "archiveType": create.archiveTypeList(),
       "timeUnit": create.timeUnitList(),
@@ -74,6 +80,7 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       "resetColumnMeta": true,
       "busyPromise": null,
       "header": false,
+      "addColumn": false,
       "decimalDegrees": true,
       "fileUploaded": false,
       "toggle": "",
@@ -157,7 +164,9 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
     };
 
     $scope.addRmProperty = function(entry, name) {
+      console.log("addRm: " + name);
       entry = create.addRmProperty(entry, name);
+      console.log(entry);
       return entry;
     };
 
@@ -189,11 +198,11 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       // setInterval($scope.saveSession(),3000);
     };
 
-    $scope.clearCustom = function(entry){
+    $scope.addCustom = function(entry){
       if(entry.tmp.custom){
         $scope.fields.push(entry.tmp.custom);
       }
-      entry.tmp[entry.tmp.custom] = true;
+      // entry.tmp[entry.tmp.custom] = true;
       entry.tmp.custom = "";
       return entry;
     };
@@ -384,66 +393,113 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       }
     };
 
-    $scope.parseCsv = function(entry, idx, options){
+    $scope.parseCsv = function(table, idx, options){
+      console.log(table);
+
+      var _parse_mode = $scope.dropdowns.current.parseMode.name;
+      var _delimiter = $scope.dropdowns.current.delimiter.name;
+
       // we can't guarantee a datasetname yet, so build this csv filename as best we can for now.
       var _csvname = options.pc + '0' + options.tt + idx + ".csv";
-      entry.tableName = options.pc + '0' + options.tt + idx;
-      // Semi-colon delimiter is checked. Pass this as an argument to PapaParse
-      // console.log($scope.dropdowns.current.delimiter.name);
-      var _csv = Papa.parse(entry.tmp.values, {
-        "delimiter": $scope.dropdowns.current.delimiter.name
+      table.tableName = options.pc + '0' + options.tt + idx;
+
+      // Delimiter: stored in scope, shared across all tables
+      // table.tmp.values refers to the TextArea box on the page
+      var _csv = Papa.parse(table.tmp.values, {
+        "delimiter": _delimiter
       });
-      // add row, column, and transposed metadata to the parsed CSV object.
+
+      // Add row, column, transposed data to csv object
       _csv = misc.putCsvMeta(_csv);
 
-      // transpose values so we can store each value array with its column
-      entry.filename = _csvname;
+      // Transpose values: one array = one column's values
+      table.filename = _csvname;
 
-      // KEEP column metadata and parse values
-      if($scope.pageMeta.keepColumnMeta){
-        console.log($scope.pageMeta.header);
-        // TODO this section needs to use the header switch! in case they enter new headers or something
+
+      // New Table: Remove existing data and place all new data.
+      if(_parse_mode === "new"){
+        // Set the transposed data to temporary table data
+        table.tmp.values = _csv.transposed;
+        // initialize X amount of columns
+        table.columns = new Array(table.tmp.values.length);
+        // start adding each column to the array
+        for(var _i=0; _i < table.tmp.values.length; _i++){
+          if($scope.pageMeta.header){
+            // Header exists. Set variableName and values
+            table.columns[_i] = {"number": _i + 1, "variableName": table.tmp.values[_i][0], "units": "", "values": table.tmp.values[_i].slice(1, table.tmp.values.length-1)};
+          } else {
+            // No header. Set values.
+            table.columns[_i] = {"number": _i + 1, "variableName": "", "units": "", "values": table.tmp.values[_i]};
+          }
+        }
+      }
+
+      // Update: Keep metadata, update values
+      else if(_parse_mode === "update"){
         // Do the amount of parsed values columns === the existing amount of metadata columns?
-        if (entry.columns.length === _csv.transposed.length){
-          // set the transposed data to entry.tmp.values. Transposed data is needed so we can display column data properly
-          entry.tmp.values = _csv.transposed;
-          for (var _c = 0; _c < entry.columns.length; _c++){
-            entry.columns[_c]["values"] = entry.tmp.values[_c];
+        if (table.columns.length === _csv.transposed.length){
+          // Set the transposed data to temporary table data
+          table.tmp.values = _csv.transposed;
+          for (var _c = 0; _c < table.columns.length; _c++){
+            if($scope.pageMeta.header){
+              // Header exists. Set variableName and values
+              table.columns[_c]["values"] = table.tmp.values[_c].slice(1, table.tmp.values.length-1);
+              table.columns[_c]["variableName"] = table.tmp.values[_c][0]
+            } else {
+              // No header. Set values.
+              table.columns[_c]["values"] = table.tmp.values[_c];
+            }
           }
         } else {
-          $scope.genericModalAlert({"title": "Column Mismatch", "message": "When parsing values with the 'Parse & Keep Existing Metadata' option, the amount of values columns being parsed must match the amount of metadata columns that already exist."})
-        }
-      }
-      // RESET column metadata and parse values
-      else {
-        // set the transposed data to entry.values. Transposed data is needed so we can display column data properly
-        entry.tmp.values = _csv.transposed;
-        // initialize X amount of columns
-        entry.columns = new Array(entry.tmp.values.length);
-        // start adding each column to the array
-        for(var _i=0; _i < entry.tmp.values.length; _i++){
-          if($scope.pageMeta.header){
-            // Header exists, we can set the variableName field as well! VariableName will be the first index
-            entry.columns[_i] = {"number": _i + 1, "variableName": entry.tmp.values[_i][0], "units": "", "values": entry.tmp.values[_i].slice(1, entry.tmp.values.length-1)};
-          } else {
-            // Headers do not exist. Set values directly
-            entry.columns[_i] = {"number": _i + 1, "variableName": "", "units": "", "values": entry.tmp.values[_i]};
-          }
-        }
-        // If headers are present, we need to do some extra cleanup
-        if ($scope.pageMeta.header){
-          // Remove the header row from _csv.data (first array)  and _csv.transposed (first element of each array)
-          _csv = misc.removeCsvHeader(_csv);
+          // If the table currently has N columns, you must provide N columns worth of values for 'Keep Existing Columns" to map new values to old column metadata properly
+          $scope.genericModalAlert({"title": "Column counts do not match", "message": "The number of columns provided does not match the existing number of columns to be updated."})
         }
       }
 
-      // CSV is all finished processing. Set data to scope.
+      // Add: Add these columns to existing columns.
+      else if (_parse_mode === "add") {
+        var _add_idx = table.columns.length;
+        var _scope_vals = {};
+
+        // Set the transposed data to temporary table data
+        table.tmp.values = _csv.transposed;
+
+        // Get the existing values data
+        if ($scope.files.csv.hasOwnProperty(_csvname)){
+          _scope_vals = $scope.files.csv[_csvname];
+        }
+
+        // Loop over the new values data
+        for(var _n=0; _n<table.tmp.values.length; _n++){
+          if($scope.pageMeta.header){
+            // Header exists. Set variableName and values
+            table.columns[_add_idx] = {"number": _add_idx + 1, "variableName": table.tmp.values[_n][0], "units": "", "values": table.tmp.values[_n].slice(1, table.tmp.values.length-1)};
+          } else {
+            // No header. Set values.
+            table.columns[_add_idx] = {"number": _add_idx + 1, "variableName": "", "units": "", "values": table.tmp.values[_n]};
+          }
+          // We are using an index that is one greater than the current column count.
+          _add_idx++;
+        }
+      }
+
+      // Headers: Remove the headers from the values data.
+      if ($scope.pageMeta.header){
+        // Remove the header row from _csv.data (first array)  and _csv.transposed (first element of each array)
+        _csv = misc.removeCsvHeader(_csv);
+      }
+      if (_parse_mode==="add"){
+        // Update the _csv data in the scope with the new data, col counts, etc.
+        _csv = create.updateCsvScope(_scope_vals, _csv);
+      }
+
+      // Values are finished processing. Set data to scope.
       $scope.files.csv[_csvname] = _csv;
-      $scope.pageMeta.keepColumnMeta = true;
-      // Remove the values from the text field. After being processed, the values formatting gets jumbled and un-parseable.
+      // $scope.pageMeta.keepColumnMeta = true;
+      // Remove the values from the text field. After being processed, the values formatting gets jumbled and cannot be parsed again.
       // If they want to update or parse new values, they'll have to copy/paste them in again.
-      entry.tmp.values = "";
-      return entry;
+      table.tmp.values = "";
+      return table;
     };
 
     $scope.removeBlock = function(entry, idx){
@@ -510,6 +566,7 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       $scope.pageMeta = {
         "keepColumnMeta": false,
         "header": false,
+        "appendColumn": false,
         "decimalDegrees": true,
         "fileUploaded": false,
         "toggle": "",
@@ -632,7 +689,7 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
     $scope.startTour = function(){
       var intro = introJs();
       intro.setOptions({
-        steps: create.getTourSteps()});
+        steps: create.tourSteps()});
       $scope.beforeAfterTour("before", function(tourMeta){
         $scope.pageMeta.tourMeta = tourMeta;
         intro.start();

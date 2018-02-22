@@ -1,32 +1,32 @@
 div
     md-content
-        md-tabs.md-border-bottom.md-dynamic-height
+        md-tabs.step1.md-border-bottom.md-dynamic-height
             md-tab(label="Map")
-                md-content.md-padding.step1
+                md-content.md-padding
                     ui-gmap-google-map(center='map.config.center', zoom='map.config.zoom', draggable='true', options='map.config.options', bounds='map.config.bounds')
                         ui-gmap-markers(models='map.markers', coords="'self'", events='events', options='map.config.options')
             md-tab(label="Graph")
-                md-content()
+                md-content
                     div(ng-controller="GraphCtrl as gc")
                         .span.span35
                             div(style="margin: 30px auto; text-align: center;")
-                                button.valid-btn(ng-click="swapAxis()") Swap Axis
-                                button.warn-btn(ng-click="resetGraph(files.json)") Reset
+                                button.valid-btn(type="button" ng-click="swapAxis()") Swap Axis
+                                button.warn-btn(type="button" ng-click="resetGraph(files.json)") Reset
                                 // TABLE BUTTONS
                                 md-subheader.md-primary(style="padding-top:30px;") Tables
                                 div(ng-repeat='entry in files.json.paleoData track by $index' layout-wrap="")
                                     // paleoData[1] : Should only be one entry2. Don't need to loop
                                     div.btn-row(layout="row")
                                         div(ng-repeat='entry2 in entry.measurementTable track by $index')
-                                            button.valid-btn.expandable-off(ng-if="entry2.tmp.toggleGraph" ng-click="entry2.tmp.toggleGraph = false;") paleo {{$parent.$index + 1}} measurement {{$index + 1}}
-                                            button.valid-btn.expandable-on(ng-if="!entry2.tmp.toggleGraph" ng-click="expandEntryGraph(files.json, entry2)") paleo {{$parent.$index + 1}} measurement {{$index + 1}}
+                                            button.valid-btn.expandable-off(type="button" ng-if="entry2.tmp.toggleGraph" ng-click="entry2.tmp.toggleGraph = false;") paleo {{$parent.$index + 1}} measurement {{$index + 1}}
+                                            button.valid-btn.expandable-on(type="button" ng-if="!entry2.tmp.toggleGraph" ng-click="expandEntryGraph(files.json, entry2)") paleo {{$parent.$index + 1}} measurement {{$index + 1}}
 
                                 div(ng-repeat='entry in files.json.chronData track by $index' layout-wrap="")
                                     // chronData[1] : Should only be one entry2. Don't need to loop
                                     div.btn-row(layout="row")
                                         div(ng-repeat='entry2 in entry.measurementTable track by $index')
-                                            button.valid-btn.expandable-off(ng-if="entry2.tmp.toggleGraph" ng-click="entry2.tmp.toggleGraph = false;") chron {{$parent.$index + 1}} measurement {{$index + 1}}
-                                            button.valid-btn.expandable-on(ng-if="!entry2.tmp.toggleGraph" ng-click="expandEntryGraph(files.json, entry2)") chron {{$parent.$index + 1}} measurement {{$index + 1}}
+                                            button.valid-btn.expandable-off(type="button" ng-if="entry2.tmp.toggleGraph" ng-click="entry2.tmp.toggleGraph = false;") chron {{$parent.$index + 1}} measurement {{$index + 1}}
+                                            button.valid-btn.expandable-on(type="button" ng-if="!entry2.tmp.toggleGraph" ng-click="expandEntryGraph(files.json, entry2)") chron {{$parent.$index + 1}} measurement {{$index + 1}}
 
 
 

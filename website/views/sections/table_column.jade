@@ -48,11 +48,11 @@ div(layout="column" ng-repeat='entry3 in entry2.columns track by $index' layout-
                             | {{field}}
 
                 div(layout='', layout-padding='', layout-sm='column')
-                    button.invisible(type="button" ng-click="addRmProperty(entry3, entry3.tmp.custom); clearCustom(entry3)")
+                    button.invisible(ng-click="addCustom(entry3)")
                     md-input-container(flex="25")
                         label Add custom field...
                         input(ng-model="entry3.tmp.custom")
-                        md-tooltip Don't see the field you want? Add your custom field and press enter.
+                        //md-tooltip Don't see the field you want? Add your custom field and press enter.
                 div(layout='', layout-padding='', layout-sm='column')
                     button.valid-btn(type="button" ng-click="showModalInterpretation(entry3, true, null)") + Add Interpretation
                 //div(layout='', layout-padding='', layout-sm='column' style="float: right;")
@@ -78,5 +78,5 @@ div(layout="column" ng-repeat='entry3 in entry2.columns track by $index' layout-
 
         .md-toolbar-tools(style="background-color:white;")
             span(flex)
-            button.warn-btn(type="button" ng-click="removeBlock(entry2.columns, $index)" style="margin: 1.5em; padding: 2px 2px 2px 2px;") Delete Column
+            button.warn-btn(type="button" ng-click="removeBlock(entry2.columns, $index)" style="margin: 1.5em; padding: 2px 2px 2px 2px;") Delete Table
 
