@@ -1,9 +1,9 @@
-div(ng-repeat='entry in files.json.paleoData track by $index' layout-wrap="")
+div(ng-repeat='entry in files.json.paleoData track by $index' layout-wrap="" ng-init="parentIdx = $index")
 
     // PaleoData[1] : Should only be one table. Don't need to loop
     div(ng-repeat="entry2 in entry.measurementTable track by $index" layout-wrap="")
         md-card(ng-show="entry2.tmp.toggle")
-            md-subheader.md-primary paleo {{$parent.$index+1}} > measurement {{$index+1}}
+            md-subheader.md-primary paleo {{parentIdx+1}} > measurement {{$index+1}}
             include ./table_root
             // Toggle the csv table box and the parse csv button. Once we parse CSV, these elements are not longer needed.
             .step16
