@@ -555,6 +555,10 @@ router.get("/playground", function(req, res, next){
   res.render('playground', {title: 'Playground'});
 });
 
+router.get("/create", function(req, res, next){
+  res.render('playground', {title: 'Playground'});
+});
+
 router.get("/modal-file", function(req, res, next){
   res.render('modal/modal-file', {title: ''});
 });
