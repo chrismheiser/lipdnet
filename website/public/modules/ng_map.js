@@ -265,7 +265,7 @@ var map = (function(){
       var _arr = _coords;
       if (_coords.constructor === {}.constructor && _coords){
         // initialize to zeros, as a fallback
-        _arr = [0,0,0];
+        _arr = [null, null, null];
         // loop through and add coordinates, if a number exists at that index.
         for (var _k = 0; _k < _arr.length; _k++){
           if (_coords[_k]){
@@ -284,7 +284,7 @@ var map = (function(){
         _coords = map.objToArr(_coords);
         files.json.geo.geometry.coordinates = _coords;
       } catch(err) {
-        files.json.geo = {"geometry": {"coordinates": [0, 0, 0]}};
+        files.json.geo = {"geometry": {"coordinates": [null, null, null]}};
       }
 
       return files;
