@@ -2,14 +2,15 @@ extends layout
 
 block css
 	link(rel='stylesheet' href='css/index.css')
+	link(rel="stylesheet" href="lib/angular-accordion/css/ang-accordion.css")
+	link(rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons")
 
 block body
 	include ./include/navbar.jade
 
 	// add #bg-img to body for photo background
-	body(ng-app='indexApp')
+	body(ng-app='indexApp' ng-controller="IndexCtrl")
 		#wrapper
-
 			section#content(ng-cloak)
 				.container#intro.text-center
 					div
@@ -25,19 +26,54 @@ block body
 							#[a(href='http://www.clim-past-discuss.net/11/4309/2015/cpd-11-4309-2015-discussion.html') here.]
 
 
-			#buttons(layout='row')
-				//- .md-button.schematic-btn.left(ng-mouseenter="sch=true" ng-mouseleave="sch=false") Schematic
-				a.right.smoothScroll(href="#schematic")
-					i.fa.fa-angle-double-down.fa-5x
+			//#buttons(layout='row')
+			//	//- .md-button.schematic-btn.left(ng-mouseenter="sch=true" ng-mouseleave="sch=false") Schematic
+			//	a.right.smoothScroll(href="#schematic")
+			//		i.fa.fa-angle-double-down.fa-5x
 			
-		.container.cf#schematic
-			.animation-element.bounce-up.cf
-				h1.subject.md-display-3(layout layout-align="center center") { Schematic }
-				.subject.third
-					.content(layout='row' layout-align='space-around center' ng-cloak)
-						img(ng-src="img/schematic.png" style='width:100%;')
+		//.container.cf#schematic
+		//	.animation-element.bounce-up.cf
+		//		h1.subject.md-display-3(layout layout-align="center center") { Schematic }
+		//		.subject.third
+		//			.content(layout='row' layout-align='space-around center' ng-cloak)
+		//				img(ng-src="img/schematic.png" style='width:100%;')
 
-		.container.cf#about
+
+		.container.cf#gettingstarted
+			.animation-element.bounce-up.cf
+				h1.subject.md-display-3(layout layout-align="center center") Getting Started
+
+				h3 I want to ...
+				md-card(ng-repeat="item in gettingStarted")
+					md-card-title
+						md-card-title-text
+							span.md-headline {{item.title}}
+					md-card-content
+						ul
+							li(ng-repeat="desc in item.descriptions") {{ desc }}
+
+
+		.container.cf#faq
+			.animation-element.bounce-up.cf
+				h1.subject.md-display-3(layout layout-align="center center") FAQ
+				ang-accordion
+					collapsible-item(ng-repeat="item in faqs" item-title="{{item.question}}")
+						div
+							p {{item.answer}}
+
+
+		.container.cf#quicklinks
+			.animation-element.bounce-up.cf
+				h1.subject.md-display-3(layout layout-align="center center") Quick Links
+
+				md-button(ng-repeat="item in quickLinks" style="background-color: #f6f6f6; min-width: 204px; min-height:118px;" ng-href="{{item.link}}")
+					br
+					i.material-icons.md-dark.md-36 {{item.icon}}
+					br
+					span {{item.title}}
+					md-tooltip {{item.tooltip}}
+
+	.container.cf#about
 			.animation-element.bounce-up.cf
 				h1.subject.md-display-3(layout layout-align="center center") About Us
 				.subject.first
@@ -115,10 +151,12 @@ block body
 
 
 block js
+	script(src="lib/angular-accordion/js/ang-accordion.js")
 	script(src='https://cdnjs.cloudflare.com/ajax/libs/angular-google-maps/2.2.0/angular-google-maps.min.js')
 	script(src='https://maps.googleapis.com/maps/api/js?sensor=false')
 	script(src='apps/indexApp.js')
 	script(src='js/ngMap.js')
+	script(src="js/ngIndex.js")
 	script(src="js/ngContact.js")
 	script(src='lib/animate.js')
 	script(src='lib/smooth.js')

@@ -328,8 +328,8 @@ router.post('/', function(req, res, next){
 });
 
 // Get the schema page
-// router.get('/schema', function(req, res, next){
-//     res.render('schema', {title: 'Schema'});
+// router.get('/faq', function(req, res, next){
+//     res.render('faq', {title: 'Frequently Asked Questions'});
 // });
 
 // Get the upload page
