@@ -212,6 +212,9 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       $scope.files.lipdFilename = $scope.files.dataSetName + ".lpd";
 
       $scope.genericModalAlert({"title": "NOAA Beta", "message": "Please note the 'NOAA Ready' and 'NOAA Download' features of this web site are BETA features, and as such are not fully implemented and are being improved. If you would like to contribute LiPD data to NOAA, please contact NOAA WDS-Paleo at: paleo@noaa.gov"});
+      if ($scope.feedback.errCt > 0){
+        $scope.genericModalAlert({"title": "File contains errors", "message": "You are downloading data that still has errors. Be aware that using a file that isn't fully valid may cause issues."});
+      }
       // Fix up the json a bit so it's ready to be sorted and downloaded
       create.closingWorkflowNoaa($scope.files, $scope.files.dataSetName, $scope.files.csv, function(_newScopeFiles){
         // Receive a new, corrected version of $scope.files
@@ -240,6 +243,10 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
     $scope.downloadZip = function(){
       $scope.files.dataSetName = $scope.files.json.dataSetName;
       $scope.files.lipdFilename = $scope.files.dataSetName + ".lpd";
+
+      if ($scope.feedback.errCt > 0){
+        $scope.genericModalAlert({"title": "File contains errors", "message": "You are downloading data that still has errors. Be aware that using a file that isn't fully valid may cause issues."});
+      }
 
       // Correct the filenames, clean out the empty entries, and make $scope.files data ready for the ExportService
       var _newScopeFiles = create.closingWorkflow($scope.files, $scope.files.dataSetName, $scope.files.csv);
