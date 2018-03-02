@@ -470,7 +470,7 @@ var create = (function(){
                   _auths.push({"name": _currAuth});
                 }
                 // set the authors array to the entry data
-                entry.authors = _auths;
+                entry.author = _auths;
               } else {
                 // normal case: create new key in entry, and set the value using the respoonse object data.
                 entry[_keys[_key]] = res.data[_key];

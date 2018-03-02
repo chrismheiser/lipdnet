@@ -41,37 +41,55 @@ block body
 
 		.container.cf#gettingstarted
 			.animation-element.bounce-up.cf
-				h1.subject.md-display-3(layout layout-align="center center") Getting Started
-
-				h3 I want to ...
-				md-card(ng-repeat="item in gettingStarted")
-					md-card-title
-						md-card-title-text
-							span.md-headline {{item.title}}
-					md-card-content
-						ul
-							li(ng-repeat="desc in item.descriptions") {{ desc }}
+				h1.subject.md-display-3 Getting Started
+				.subject.first
+					.category-color
+					.icon
+						i.fa.fa-star
+					.header.cf
+					.content
+						h3 I want to ...
+						md-card(ng-repeat="item in gettingStarted")
+							md-card-title
+								md-card-title-text
+									span.md-headline {{item.title}}
+							md-card-content
+								ul
+									li(ng-repeat="desc in item.descriptions") {{ desc }}
 
 
 		.container.cf#faq
 			.animation-element.bounce-up.cf
-				h1.subject.md-display-3(layout layout-align="center center") FAQ
-				ang-accordion
-					collapsible-item(ng-repeat="item in faqs" item-title="{{item.question}}")
-						div
-							p {{item.answer}}
+				h1.subject.md-display-3 FAQ
+				.subject.first
+					.category-color
+					.icon
+						i.fa.fa-question
+					.header.cf
+					.content
+						//h1.subject.md-display-3(layout layout-align="center center") FAQ
+						ang-accordion
+							collapsible-item(ng-repeat="item in faqs" item-title="{{item.question}}")
+								div
+									p {{item.answer}}
 
 
 		.container.cf#quicklinks
 			.animation-element.bounce-up.cf
-				h1.subject.md-display-3(layout layout-align="center center") Quick Links
-
-				md-button(ng-repeat="item in quickLinks" style="background-color: #f6f6f6; min-width: 204px; min-height:118px;" ng-href="{{item.link}}")
-					br
-					i.material-icons.md-dark.md-36 {{item.icon}}
-					br
-					span {{item.title}}
-					md-tooltip {{item.tooltip}}
+				h1.subject.md-display-3 Quick Links
+				.subject.first
+					.category-color
+					.icon
+						i.fa.fa-link
+					.header.cf
+					.content
+						md-button(ng-repeat="item in quickLinks" style="background-color: #f6f6f6; min-width: 204px; min-height:118px;" ng-href="{{item.link}}")
+							br
+							i.material-icons.md-dark.md-36 {{item.icon}}
+							//i(class = "{{item.icon}}")
+							br
+							span {{item.title}}
+							md-tooltip {{item.tooltip}}
 
 	.container.cf#about
 			.animation-element.bounce-up.cf
@@ -81,7 +99,7 @@ block body
 					.icon
 						i.fa.fa-users
 					.header.cf
-					h3.title Team
+					//h3.title Team
 					.content(layout-sm='column' layout='row' layout-align='space-around center')
 						.layout-margin(flex='25')
 							md-card
