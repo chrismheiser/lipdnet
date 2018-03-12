@@ -25,9 +25,11 @@ div(layout="column" ng-repeat='entry3 in entry2.columns track by $index' layout-
                     md-input-container(flex='', class="md-input-has-value" ng-if="pageMeta.noaaReady")
                         label Data Type *
                         input(ng-model="entry3.dataType")
+                        md-tooltip Please reference the "NOAA Variable Naming" link under "Quick Links" on the home page for description
                     md-input-container(flex='', class="md-input-has-value" ng-if="pageMeta.noaaReady")
                         label Data Format *
                         input(ng-model="entry3.dataFormat")
+                        md-tooltip Define whether data are numeric (“N”) or character-based (“C”)
                 div(layout='', layout-padding='', layout-sm='column')
                     md-input-container(flex='', class="md-input-has-value")
                         label(ng-if="pageMeta.noaaReady") Description *

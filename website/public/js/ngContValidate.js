@@ -373,7 +373,7 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
           if(alert){
             $scope.genericModalAlert({"title": "NOAA Validation", "message": "The fields that NOAA requires have been " +
             "added where necessary. For a list of these requirements, hover your mouse pointer over the 'NOAA " +
-            "requirements' bar on the left side of the page."});
+            "requirements' bar on the left side of the page. Use the 'NOAA Variable Naming' link under 'Quick Links' on the home page for variable information."});
           }
           $scope.files.json = _d2;
         });

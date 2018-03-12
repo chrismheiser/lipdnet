@@ -92,14 +92,20 @@ p.controller('IndexCtrl', function ($scope) {
         "icon": "chrome_reader_mode",
         "title": "LinkedEarth Ontology",
         "link": "http://linked.earth/ontology/",
-        "tooltip": "A controlled vocabulary of terms used in LinkedEarth"
+        "tooltip": "A controlled vocabulary of terms used by LinkedEarth"
       },
       {
         "icon": "cloud_download",
         "title": "LiPD Excel Template",
         "link": "https://github.com/nickmckay/LiPD-utilities/raw/master/Examples/LiPD_template.xlsx",
         "tooltip": "Create a LiPD file by entering your data into the Excel template and converting it using the LiPD Utilities (Python)"
-      }
+      },
+      {
+        "icon": "chrome_reader_mode",
+        "title": "NOAA Variable Naming",
+        "link": "https://www1.ncdc.noaa.gov/pub/data/paleo/templates/Variable_naming_guide.pdf",
+        "tooltip": "A short guide to naming variables using NOAA standards"
+      },
 
 
     ];
