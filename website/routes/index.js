@@ -8,17 +8,11 @@ var fastcsv = require("fast-csv");
 var logger = require("../node_modules_custom/node_log.js");
 var lipdValidator = require("../node_modules_custom/node_validator.js");
 var misc = require("../node_modules_custom/node_misc.js");
+var port = process.env.PORT || 3000;
+var dev = port === 3000;
 var router = express.Router();
 
-// var http = require("http");
-// http.get("http://cheiser.pythonanywhere.com/test", function(res) {
-//   console.log("Got response: " + res.statusCode);
-// }).on('error', function(e) {
-//   console.log("Got error: " + e.message);
-// });
-//
-//
-//
+
 
 var downloadResponse = function(options, res){
   // set headers and initiate download.
@@ -433,21 +427,27 @@ router.post("/noaa", function(req, res, next){
         uri: 'http://cheiser.pythonanywhere.com/api/noaa',
         method: 'POST',
         json: master.dat,
-        timeout: 3000,
-        proxy: "http://rishi.cefns.nau.edu:3128"
+        timeout: 3000
       };
-      // Send the request to the NOAA API
 
+      // If we're on the production server, then we need to add in the proxy option
+      if (!dev){
+        options.proxy = "http://rishi.cefns.nau.edu:3128";
+
+      }
+
+      // Send the request to the NOAA API
       console.log("Sending LiPD data to NOAA Conversion API: ", master.name);
-      // console.log("PORT : ", app.get("port"));
+      // console.log("PORT : ", port);
       // console.log(JSON.stringify(master.dat));
       request(options, function (error, response, body) {
         console.log("Response Status: ", response.statusCode);
         console.log("Response error: ");
         console.log(error);
-        console.log("Response Body: ");
-        console.log(body);
-        // console.log(typeof(body));
+        if(dev){
+          console.log("Response Body: ");
+          console.log(body);
+        }
 
         // If the response is a string, then it is an error message coming from a Python API Exception
         if (typeof body === 'string' || body instanceof String){

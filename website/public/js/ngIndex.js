@@ -32,7 +32,6 @@ p.controller('IndexCtrl', function ($scope) {
       }
     ];
 
-
     $scope.quickLinks = [
       {
         "icon": "toys",

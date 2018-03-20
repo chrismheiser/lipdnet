@@ -95,7 +95,6 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       "tourMeta": {},
     };
 
-
     // All feedback warnings, errors, and messages received from the validator
     $scope.feedback = {
       "lipdVersion": "NA",
@@ -208,6 +207,8 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
     };
 
     $scope.downloadNoaa = function(){
+
+      var dev = location.host === "localhost:3000";
       $scope.files.dataSetName = $scope.files.json.dataSetName;
       $scope.files.lipdFilename = $scope.files.dataSetName + ".lpd";
 
@@ -230,17 +231,19 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
             window.alert("HTTP " + resp.status + ": Error downloading file\n" + resp.statusText);
           } else {
             console.log("We have liftoff. Here ya go!");
-            // TODO change before pushing to production
-            // window.location.href = "http://localhost:3000/noaa/" + resp.data;
-            window.location.href = "http://www.lipd.net/noaa/" + resp.data;
+            // Are we on dev or production? Use href accordingly
+            if(dev){
+              window.location.href = "http://localhost:3000/noaa/" + resp.data;
+            } else {
+              window.location.href = "http://www.lipd.net/noaa/" + resp.data;
+            }
           }
         });
       });
-
-
     };
 
     $scope.downloadZip = function(){
+      var dev = location.host === "localhost:3000";
       $scope.files.dataSetName = $scope.files.json.dataSetName;
       $scope.files.lipdFilename = $scope.files.dataSetName + ".lpd";
 
@@ -267,9 +270,12 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
             window.alert("HTTP " + resp.status + ": Error downloading file!");
           } else {
             console.log("We have liftoff. Here ya go!");
-            // TODO change before pushing to production
-            // window.location.href = "http://localhost:3000/files/" + resp.data;
-            window.location.href = "http://www.lipd.net/files/" + resp.data;
+            // Are we on dev or production? Use href accordingly
+            if(dev){
+              window.location.href = "http://localhost:3000/files/" + resp.data;
+            } else {
+              window.location.href = "http://www.lipd.net/files/" + resp.data;
+            }
           }
 
         });
