@@ -536,6 +536,24 @@ var create = (function(){
         "proxyObservationType", "notes", "inferredVariableType", "takenAtDepth"];
     }),
 
+    fieldsList: (function(){
+      return [
+        { id: 1, name: "calibration"},
+        { id: 2, name: "inferredVariableType"},
+        { id: 3, name: "interpretation"},
+        { id: 4, name: "measurementMaterial"},
+        { id: 5, name: "method"},
+        { id: 6, name: "notes"},
+        { id: 7, name: "physicalSample"},
+        { id: 8, name: "proxy"},
+        { id: 9, name: "proxyObservationType"},
+        { id: 10, name: "sensorGenus"},
+        { id: 11, name: "sensorSpecies"},
+        { id: 12, name: "takenAtDepth"},
+        { id: 13, name: "variableType"},
+      ]
+    }),
+
     tourSteps: (function(){
       return [
         {

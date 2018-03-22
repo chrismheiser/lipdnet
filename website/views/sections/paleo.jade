@@ -15,8 +15,8 @@ div(layout='', layout-padding='', layout-sm='column' style="float: right;")
 			md-option(ng-value="table" ng-repeat="table in dropdowns.tables") {{ table.name }}
 		md-tooltip DataTable containing PaleoData Variables
 
-	button.valid-btn.step21(ng-click='addBlock(files.json.paleoData[0], dropdowns.current.table.name, "paleo")' style="margin: 1.5em;" type="button") + Add Table
-	button.warn-btn.step22(ng-if="files.json.paleoData[0]" ng-click="removePaleoChron('paleo')" style="margin: 1.5em; padding: 2px 2px 2px 2px;" type="button") Delete PaleoData
+	button.green-btn-off.step21(ng-click='addBlock(files.json.paleoData[0], dropdowns.current.table.name, "paleo")' style="margin: 1.5em;" type="button") + Add Table
+	button.red-btn-off.step22(ng-if="files.json.paleoData[0]" ng-click="removePaleoChron('paleo')" style="margin: 1.5em; padding: 2px 2px 2px 2px;" type="button") Delete PaleoData
 
 	// END MEASUREMENT TABLE
 

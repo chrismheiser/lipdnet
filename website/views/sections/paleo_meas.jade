@@ -8,10 +8,10 @@ div(ng-repeat='entry in files.json.paleoData track by $index' layout-wrap="" ng-
             // Toggle the csv table box and the parse csv button. Once we parse CSV, these elements are not longer needed.
             .step16
                 include ./parse_csv.jade
-                    button.valid-btn(ng-click="parseCsv(entry2, $index, {'pc': 'paleo', 'tt': 'measurement'}); toggleCsvBox(entry2)" style="margin: 1.5em; float:right;" type="button") Parse Values
+                    button.green-btn-off(ng-click="parseCsv(entry2, $index, {'pc': 'paleo', 'tt': 'measurement'}); toggleCsvBox(entry2)" style="margin: 1.5em; float:right;" type="button") Parse Values
             br
             // Column Data
             include ./table_column
             .md-toolbar-tools(style="background-color:white;")
                 span(flex)
-                button.warn-btn(type="button" ng-click="removeBlock(entry.measurementTable, $index)" style="margin: 1.5em; padding: 2px 2px 2px 2px;") Delete Table
+                button.red-btn-off(type="button" ng-click="removeBlock(entry.measurementTable, $index)" style="margin: 1.5em; padding: 2px 2px 2px 2px;") Delete Table

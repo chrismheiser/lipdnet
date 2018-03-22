@@ -5,8 +5,8 @@ md-subheader.md-primary Columns
 
 div.btn-row(layout="row")
     div(ng-repeat='column in entry2.columns track by $index')
-        button.valid-btn.expandable-off(type="button" ng-if="column.tmp.toggle" ng-click="column.tmp.toggle = false") Column {{$index+1}}:<br />{{column.variableName}}
-        button.valid-btn.expandable-on(type="button" ng-if="!column.tmp.toggle" ng-click="expandEntry(entry2.columns, column)") Column {{$index+1}}:<br />{{column.variableName}}
+        button.blue-btn-on(type="button" ng-if="column.tmp.toggle" ng-click="column.tmp.toggle = false") Column {{$index+1}}:<br />{{column.variableName}}
+        button.blue-btn-off(type="button" ng-if="!column.tmp.toggle" ng-click="expandEntry(entry2.columns, column)") Column {{$index+1}}:<br />{{column.variableName}}
 
 div(layout="column" ng-repeat='entry3 in entry2.columns track by $index' layout-wrap="")
     md-card(ng-if="entry3.tmp.toggle")
@@ -41,44 +41,56 @@ div(layout="column" ng-repeat='entry3 in entry2.columns track by $index' layout-
                         //- input(format-values ng-model="files.csv[entry2.filename].transposed[$index]")
                         input(space-values ng-model="files.csv[entry2.filename].transposed[$index]" disabled)
                         md-tooltip This is a preview of the value data. You cannot edit this directly. Use the "Parse Values" box where necessary.
-                //md-subheader.md-primary Add Properties
-                div(layout='', layout-padd ing='', layout-sm='column')
-                    div.form-group
-                        label(ng-repeat="field in fields track by $index" class="checkbox-inline")
-                            input(type="checkbox" value="field" ng-checked="entry3.tmp[field]"
-                            ng-click="addRmProperty(entry3, field); entry3.tmp[field] = !entry3.tmp[field]")
-                            | {{field}}
+
+                md-subheader.md-primary Add Fields
+
+                div(layout='', layout-padding='', layout-sm='column')
+                    md-input-container(flex="75")
+                        //md-label Table Type
+                        md-select(ng-model='dropdowns.current.columnField' ng-model-options="{trackBy: '$value.id'}" aria-label="Filler")
+                            md-option(ng-value="field" ng-repeat="field in dropdowns.columnFields") {{ field.name }}
+                        md-tooltip Choose the field you would like to add to this column
+                    button.green-btn-off(flex='' type="button" ng-click='addColumnField(entry3)' style="margin: 1.5em;") Add
+
+                    //div.form-group
+                    //    label(ng-repeat="field in fields track by $index" class="checkbox-inline")
+                    //        input(type="checkbox" value="field" ng-checked="entry3.tmp[field]"
+                    //        ng-click="addRmProperty(entry3, field); entry3.tmp[field] = !entry3.tmp[field]")
+                    //        | {{field}}
 
                 div(layout='', layout-padding='', layout-sm='column')
                     button.invisible(ng-click="addCustom(entry3)")
                     md-input-container(flex="25")
-                        label Add custom field...
+                        label Add custom
                         input(ng-model="entry3.tmp.custom")
-                        //md-tooltip Don't see the field you want? Add your custom field and press enter.
+                        md-tooltip Don't see the field you want? Type in the box and press enter.
+
                 div(layout='', layout-padding='', layout-sm='column')
-                    button.valid-btn(type="button" ng-click="showModalInterpretation(entry3, true, null)") + Add Interpretation
+                    button.yellow-btn-off(type="button" ng-if="!pageMeta.editColumn" ng-click="pageMeta.editColumn = !pageMeta.editColumn") Edit
+                    button.yellow-btn-on(type="button" ng-if="pageMeta.editColumn" ng-click="pageMeta.editColumn = !pageMeta.editColumn") Edit
+                    md-tooltip Turn editing on to delete any of the additional fields. Turn back off when done.
+                //div(layout='', layout-padding='', layout-sm='column')
+                //    button.valid-btn(type="button" ng-click="showModalInterpretation(entry3, true, null)") + Add Interpretation
                 //div(layout='', layout-padding='', layout-sm='column' style="float: right;")
-                //    button.valid-btn(ng-if="entry3.tmp.toggle" ng-click='entry3.tmp.toggle = !entry3.tmp.toggle' style="margin: 1.5em;" type="button")  - Other Fields
-                //    button.valid-btn(ng-if="!entry3.tmp.toggle" ng-click='entry3.tmp.toggle = !entry3.tmp.toggle' style="margin: 1.5em;" type="button")  + Other Fields
+
             div(flex)
                 md-subheader.md-primary Additional fields
-                //div(ng-if="entry3.tmp.toggle")
-
                 div.btn-row(layout="row" style="overflow: scroll;")
+                    div(ng-repeat="(k,v) in entry3" ng-if="isBlock(k)" layout='', layout-padding='', layout-sm='column')
+                        button.blue-btn-off(type="button" ng-click="showModalBlock(entry3, false, k)") {{k}}
+
                     div(ng-repeat="interp in entry3.interpretation track by $index" layout='', layout-padding='', layout-sm='column')
-                        button.valid-btn.expandable-on(type="button" ng-click="showModalInterpretation(entry3, false, $index)") interpretation {{$index+1}}
-                        //md-subheader.md-primary interpretation {{$index}}
-                        //md-input-container(flex='', class="md-input-has-value" ng-repeat="(k,v) in interp")
-                        //    label {{k}}
-                        //    input(ng-model="entry3.interpretation[k]")
-                    //div(ng-repeat="(k,v) in entry3" ng-if="showProperty(k) && entry3.tmp.toggle" layout='', layout-padding='', layout-sm='column')
+                        button.blue-btn-off(type="button" ng-click="showModalInterpretation(entry3, false, $index)") interpretation {{$index+1}}
+
                 div(style="overflow: scroll; height: 550px;")
-                    div(ng-repeat="(k,v) in entry3" ng-if="showProperty(k)" layout='', layout-padding='', layout-sm='column')
+                    div(ng-repeat="(k,v) in entry3" ng-if="isProperty(k)" layout='', layout-padding='', layout-sm='column')
                         md-input-container(flex='', class="md-input-has-value")
                             label {{k}}
                             input(ng-model="entry3[k]" ng-disabled="k==='TSid'")
+                        div(flex='10' layout='', layout-padding='', layout-sm='column')
+                            button.red-btn-sm(type="button" ng-show="pageMeta.editColumn" ng-click="rmColumnField(entry3, k)") X
 
         .md-toolbar-tools(style="background-color:white;")
             span(flex)
-            button.warn-btn(type="button" ng-click="removeBlock(entry2.columns, $index)" style="margin: 1.5em; padding: 2px 2px 2px 2px;") Delete Column
+            button.red-btn-off(type="button" ng-click="removeBlock(entry2.columns, $index)" style="margin: 1.5em; padding: 2px 2px 2px 2px;") Delete Column
 

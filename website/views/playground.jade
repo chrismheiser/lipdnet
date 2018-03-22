@@ -45,8 +45,8 @@ block body
 								pre(style="background-color:#DFF1C1; border: none;")
 									p Are you new here? Take the tour to learn more about how to use this page.
 									br
-									button.valid-btn(type="button" ng-click="startTour()") Take the tour!
-									a.btn.btn-default.valid-btn(href="https://github.com/chrismheiser/geoChronR/issues" type="button" style="width:250px") Questions, comments, concerns
+									button.green-btn-off(type="button" ng-click="startTour()") Take the tour!
+									a.btn.btn-default.green-btn-off(href="https://github.com/chrismheiser/geoChronR/issues" type="button" style="width:250px") Questions, comments, concerns
 										md-tooltip Use the Github repository to see upcoming changes, fixes, report bugs, and make suggestions
 
 							div(class="span span50" style="padding-right:3em;")
@@ -85,6 +85,7 @@ block js
 	script(src='js/ngContModInt.js')
 	script(src='js/ngContModAsk.js')
 	script(src='js/ngContModAlert.js')
+	script(src='js/ngContModBlock.js')
 	script(src='js/ngGraphs.js')
 	script(src="lib/zip/zip.js")
 	script(src='lib/json-tree.js')

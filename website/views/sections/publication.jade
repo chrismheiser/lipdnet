@@ -5,8 +5,8 @@ md-toolbar.md-hue-1
 
 div.btn-row( layout="row")
   div(ng-repeat="entry in files.json.pub track by $index")
-    button.valid-btn.expandable-off(type="button" ng-if="entry.tmp.toggle" ng-click="entry.tmp.toggle = false;") Publication {{$index+1}}
-    button.valid-btn.expandable-on(type="button" ng-if="!entry.tmp.toggle" ng-click="expandEntry(files.json.pub, entry)") Publication {{$index+1}}
+    button.blue-btn-on(type="button" ng-if="entry.tmp.toggle" ng-click="entry.tmp.toggle = false;") Publication {{$index+1}}
+    button.blue-btn-off(type="button" ng-if="!entry.tmp.toggle" ng-click="expandEntry(files.json.pub, entry)") Publication {{$index+1}}
 
 
 
@@ -20,7 +20,7 @@ div(ng-repeat="entry in files.json.pub track by $index" layout-wrap="")
         label DOI
         input(ng-model='entry.identifier[0].id')
         md-tooltip(data-html="true") What is the digital object identifier associated with the resource? Enter a valid DOI and we'll fetch the information. Example: 10.1000/sample123
-      button.valid-btn(type="button" ng-click="fetchPublication(entry)" style="margin:1.5em; float:right;height:auto;" ng-disabled="!entry.identifier[0].id") Autocomplete using DOI
+      button.green-btn-off(type="button" ng-click="fetchPublication(entry)" style="margin:1.5em; float:right;height:auto;" ng-disabled="!entry.identifier[0].id") Autocomplete using DOI
     br
     div(layout='', layout-padding='', layout-sm='column')
       md-input-container(flex='', ng-class="md-input-has-value")
@@ -75,12 +75,12 @@ div(ng-repeat="entry in files.json.pub track by $index" layout-wrap="")
         md-tooltip Who wrote (i.e., created) the resource, such as a Publication? Use format: LastName, FirstName
 
       div(layout='', layout-padding='', layout-sm='column' style="float: right;")
-        button.valid-btn-sm(ng-click='addBlock(entry.author, "author", null)' style="margin: 1.5em;" type="button")  +
-        button.warn-btn-sm(ng-click='removeBlock(entry.author, $index)' style="margin: 1.5em;" type="button")  -
+        button.green-btn-sm(ng-click='addBlock(entry.author, "author", null)' style="margin: 1.5em;" type="button")  +
+        button.red-btn-sm(ng-click='removeBlock(entry.author, $index)' style="margin: 1.5em;" type="button")  -
     
     .md-toolbar-tools(style="background-color:white;")
       span(flex)
-      button.warn-btn(ng-click='removeBlock(files.json.pub, $index)' style="margin: 1.5em;" type="button") Delete
+      button.red-btn-off(ng-click='removeBlock(files.json.pub, $index)' style="margin: 1.5em;" type="button") Delete
       
 
   // DIVIDER LINE
@@ -88,5 +88,5 @@ div(ng-repeat="entry in files.json.pub track by $index" layout-wrap="")
   //-   md-divider(style="background-color:#efefef; width:100%;align:center;vertical-align:middle; display: inline-block;")
 
 div(layout='', layout-padding='', layout-sm='column' style="float: right;")
-  button.valid-btn(ng-click='addBlock(files.json.pub, "pub", null)' style="margin: 1.5em;" type="button") Add
+  button.green-btn-off(ng-click='addBlock(files.json.pub, "pub", null)' style="margin: 1.5em;" type="button") Add
   

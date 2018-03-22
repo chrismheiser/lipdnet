@@ -1,0 +1,39 @@
+.modal-content
+    .modal-header
+        h3.modal-title {{field}}
+    .modal-body(style="height:600px!important; overflow-y: auto;")
+        div
+            .col-md-4
+                fieldset
+                    .md-padding
+                        div(layout='row', layout-wrap='')
+                            div(flex='25', flex-gt-sm='50', layout='column')
+                                h4 CUSTOM
+                                //button.invisible(ng-click="toggle(null)")
+                                md-input-container(flex="")
+                                    label Add custom
+                                    input(ng-model="customField" ng-keydown="$event.keyCode == 13 && toggle(null)")
+                                    md-tooltip Don't see the field you want? Type in the box and press enter
+                                div(layout='row', layout-wrap='' ng-repeat='key in custom')
+                                    md-checkbox(ng-checked='exists(key)', ng-click='toggle(key)') {{key}}
+                                h4 REQUIRED
+                                div(layout='row', layout-wrap='' ng-repeat='key in required')
+                                    md-checkbox(ng-checked='true', ng-click='toggle(key)' disabled) {{key}}
+                                h4 STANDARD
+                                div(layout='row', layout-wrap='' ng-repeat="key in standard")
+                                    md-checkbox(ng-checked='exists(key)', ng-click='toggle(key)') {{key}}
+
+                                h4 OPTIONAL
+                                div(layout='row', layout-wrap='' ng-repeat='key in optional')
+                                    md-checkbox(ng-checked='exists(key)', ng-click='toggle(key)') {{key}}
+
+            .col-md-8
+                div(ng-repeat="(k,v) in  block" layout='', layout-padding='', layout-sm='column')
+                    md-input-container(flex='', class="md-input-has-value")
+                        label {{k}}
+                        input(ng-model="block[k]")
+
+    .modal-footer
+        button.red-btn-on(type="button" ng-if="!new" style="float:left;" data-dismiss="modal" ng-click="delete()") DELETE
+        button.green-btn-off(type="button" data-dismiss="modal" ng-click="close()") Save
+        button.red-btn-off(type="button" data-dismiss="modal" ng-click="dismiss()") Cancel

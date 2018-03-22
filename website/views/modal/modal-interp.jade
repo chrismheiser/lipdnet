@@ -25,6 +25,6 @@
                         input(ng-model="currInterp[k]")
 
     .modal-footer
-        button(ng-if="!new" style="float:left;" class="btn btn-danger" data-dismiss="modal" ng-click="delete()") DELETE
-        button(class="btn btn-success" data-dismiss="modal" ng-click="close()") Save
-        button(class="btn btn-danger" data-dismiss="modal" ng-click="dismiss()") Cancel
+        button.red-btn-on(type="button" ng-if="!new" style="float:left;" data-dismiss="modal" ng-click="delete()") DELETE
+        button.green-btn-off(type="button" data-dismiss="modal" ng-click="close()") Save
+        button.red-btn-off(type="button" data-dismiss="modal" ng-click="dismiss()") Cancel

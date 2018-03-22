@@ -35,8 +35,10 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       "current": {
         "table": { id: 1, name: 'measurement' },
         "delimiter": { id: 1, name: "\t", view: "Tab ( \\t )"},
-        "parseMode": {id: 1, name: "new", view: "Start New"}
+        "parseMode": {id: 1, name: "new", view: "Start New"},
+        "columnField": {id: 4, name: "notes"}
       },
+      "columnFields": create.fieldsList(),
       "tables": [
         { id: 1, name: 'measurement' },
         { id: 2, name: 'summary' },
@@ -80,7 +82,7 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       "resetColumnMeta": true,
       "busyPromise": null,
       "header": false,
-      "addColumn": false,
+      "editColumn": false,
       "decimalDegrees": true,
       "fileUploaded": false,
       "toggle": "",
@@ -94,6 +96,9 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       "wikiReady": false,
       "tourMeta": {},
     };
+
+    // "addColumn": false,
+
 
     // All feedback warnings, errors, and messages received from the validator
     $scope.feedback = {
@@ -163,10 +168,21 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
     };
 
     $scope.addRmProperty = function(entry, name) {
-      console.log("addRm: " + name);
+      // console.log("addRm: " + name);
       entry = create.addRmProperty(entry, name);
-      console.log(entry);
+      // console.log(entry);
       return entry;
+    };
+
+    $scope.addColumnField = function(entry){
+      var _field = $scope.dropdowns.current.columnField.name;
+      if(_field === "interpretation"){
+        $scope.showModalInterpretation(entry, true, null);
+      } else if (["calibration", "hasResolution", "physicalSample"].indexOf(_field) !== -1){
+        $scope.showModalBlock(entry, true, _field);
+      } else if(!entry.hasOwnProperty(_field)){
+        entry[_field] = "";
+      }
     };
 
     $scope.checkSession = function(){
@@ -198,12 +214,10 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
     };
 
     $scope.addCustom = function(entry){
-      if(entry.tmp.custom){
-        $scope.fields.push(entry.tmp.custom);
+      if(entry.tmp.custom && !entry.hasOwnProperty(entry.tmp.custom)){
+        entry[entry.tmp.custom] = "";
       }
-      // entry.tmp[entry.tmp.custom] = true;
       entry.tmp.custom = "";
-      return entry;
     };
 
     $scope.downloadNoaa = function(){
@@ -373,25 +387,27 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
     };
 
     $scope.makeNoaaReady = function(alert){
+      // The noaaReady boolean is bound to the switch
       if(!$scope.pageMeta.noaaReady){
         // Make Ready
         create.addNoaaReady($scope.files.json, function(_d2){
           if(alert){
             $scope.genericModalAlert({"title": "NOAA Validation", "message": "The fields that NOAA requires have been " +
             "added where necessary. For a list of these requirements, hover your mouse pointer over the 'NOAA " +
-            "requirements' bar on the left side of the page. Use the 'NOAA Variable Naming' link under 'Quick Links' on the home page for variable information."});
+            "requirements' bar on the left side of the page. Reference the 'NOAA Variable Naming' link under 'Quick Links' on the home page for variable information."});
           }
           $scope.files.json = _d2;
         });
       } else {
         if(alert){
-          // Don't remove fields. just alert
+          // Don't remove fields, only remove
           $scope.genericModalAlert({"title": "Fields may be ignored", "message": "Validation is no longer using NOAA rules."});
         }
       }
     };
 
     $scope.makeWikiReady = function(){
+      // The wikiReady boolean is bound to the switch
       if(!$scope.pageMeta.wikiReady){
         // Make Ready
         create.addWikiReady($scope.files.json, function(_d2){
@@ -407,7 +423,7 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
     };
 
     $scope.parseCsv = function(table, idx, options){
-      console.log(table);
+      // console.log(table);
 
       var _parse_mode = $scope.dropdowns.current.parseMode.name;
       var _delimiter = $scope.dropdowns.current.delimiter.name;
@@ -611,6 +627,12 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       });
     };
 
+    $scope.rmColumnField = function(entry, field){
+      if(entry.hasOwnProperty(field)){
+        delete entry[field];
+      }
+    };
+
     $scope.saveSession = function(){
       try{
         delete $scope.pageMeta.busyPromise;
@@ -639,12 +661,50 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       $scope.files.json.geo.properties.country = name;
     };
 
-    $scope.showProperty = function(name){
+    $scope.isBlock = function(field){
+      // Data is a block if the field is in this list.
+      if(["physicalSample", "hasResolution", "calibration"].includes(field)){
+        return true;
+      }
+      return false;
+    };
+
+    $scope.isProperty = function(field){
       // Do not show any temporary fields, data, or nested blocks.
-      if(["number", "variableName", "units", "toggle", "dataFormat", "dataType", "description", "values", "checked", "tmp", "interpretation"].includes(name)){
+      if(["number", "variableName", "units", "toggle", "dataFormat", "dataType", "description", "values", "checked", "tmp", "interpretation", "physicalSample", "hasResolution", "calibration"].includes(field)){
         return false;
       }
       return true;
+    };
+
+    $scope.showModalBlock = function(entry, create, field){
+      var _block = entry[field];
+      if(typeof _block === 'undefined' || !_block){
+        _block = {};
+      }
+      if(create){
+        _block = {};
+      }
+      $scope.modal = {"data": _block, "new": create, "field": field};
+      var modalInstance = $uibModal.open({
+        templateUrl: 'modal-block',
+        controller: 'ModalCtrlBlock',
+        size: "lg",
+        resolve: {
+          data: function () {
+            return $scope.modal;
+          }
+        }
+      });
+      modalInstance.result.then(function (new_data) {
+        if (new_data === "delete"){
+          delete entry[field];
+        } else if(new_data !== "cancel"){
+          entry[field] = new_data;
+        }
+        return entry;
+      });
+      return entry;
     };
 
     $scope.showModalInterpretation = function(entry, create, idx){
@@ -661,7 +721,7 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       }
       $scope.modal = {"data": interpArr, "new": create, "idxNum": idx};
       var modalInstance = $uibModal.open({
-        templateUrl: 'modal-interp-data',
+        templateUrl: 'modal-interp',
         controller: 'ModalCtrlInterp',
         size: "lg",
         resolve: {
@@ -675,8 +735,6 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
           interpArr.splice(idx, 1);
           entry.interpretation = interpArr;
         } else if(new_data !== "cancel"){
-          console.log("finishing interp");
-          console.log(new_data);
           entry.interpretation = new_data;
         }
         return entry;

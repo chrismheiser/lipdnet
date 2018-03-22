@@ -269,7 +269,20 @@ input[type=number]::-webkit-outer-spin-button {
   	background-color: white;
   }
 
-  .valid-btn{
+    .green-btn-on{
+        font-size: 10pt;
+        background-color: #8FA864;
+        font-family: RobotoDraft,Roboto,'Helvetica Neue',sans-serif;
+        margin-right: 5px;
+        padding: 4px;
+        width: 150px;
+        height: 31px;
+        border-radius: 5px;
+        color: white;
+        border: solid 1px #8FA864;
+    }
+
+  .green-btn-off{
   	font-size: 10pt;
   	background-color: white;
   	font-family: RobotoDraft,Roboto,'Helvetica Neue',sans-serif;
@@ -282,7 +295,7 @@ input[type=number]::-webkit-outer-spin-button {
   	border: solid 1px #8FA864;
   }
 
-  .valid-btn[disabled]{
+  .green-btn[disabled]{
   	font-size: 10pt;
   	background-color: white;
   	font-family: RobotoDraft,Roboto,'Helvetica Neue',sans-serif;
@@ -295,17 +308,7 @@ input[type=number]::-webkit-outer-spin-button {
   	border: solid 1px #eee;
   }
 
-  .expandable-on{
-      width: 150px;
-      height:50px;
-      margin: 1.5em;
-      padding: 2px 5px 2px 5px;
-      color: #2C6FAE;
-      background-color: white;
-      border: solid 1px #2C6FAE;
-  }
-
-    .expandable-off{
+    .blue-btn-on{
         width: 150px;
         height:50px;
         margin: 1.5em;
@@ -313,9 +316,23 @@ input[type=number]::-webkit-outer-spin-button {
         color: white;
         border: solid 1px #2C6FAE;
         background-color: #2C6FAE;
+        border-radius: 5px;
     }
 
-  .valid-btn-sm{
+    .blue-btn-off{
+        width: 150px;
+        height:50px;
+        border-radius: 5px;
+        margin: 1.5em;
+        padding: 2px 5px 2px 5px;
+        color: #2C6FAE;
+        background-color: white;
+        border: solid 1px #2C6FAE;
+    }
+
+
+
+  .green-btn-sm{
     font-size: 10pt;
     background-color: white;
     font-family: RobotoDraft,Roboto,'Helvetica Neue',sans-serif;
@@ -328,7 +345,47 @@ input[type=number]::-webkit-outer-spin-button {
     border: solid 1px #8FA864;
   }
 
-.warn-btn{
+.yellow-btn-on{
+    font-size: 10pt;
+    background-color: #E8C34A;
+    font-family: RobotoDraft,Roboto,'Helvetica Neue',sans-serif;
+    margin-right: 5px;
+    padding: 4px;
+    width: 150px;
+    height: 31px;
+    border-radius: 5px;
+    color: white;
+    border: solid 1px #E8C34A;
+}
+.yellow-btn-off{
+    font-size: 10pt;
+    background-color: white;
+    font-family: RobotoDraft,Roboto,'Helvetica Neue',sans-serif;
+    margin-right: 5px;
+    padding: 4px;
+    width: 150px;
+    height: 31px;
+    border-radius: 5px;
+    color: #E8C34A;
+    border: solid 1px #E8C34A;
+}
+
+
+.red-btn-on{
+    font-size: 10pt;
+    font-family: RobotoDraft,Roboto,'Helvetica Neue',sans-serif;
+    margin-right: 5px;
+    padding: 4px;
+    width: 150px;
+    height: 31px;
+    border-radius: 5px;
+    color: white;
+    background-color:#C63B3B;
+    border: solid 1px #C63B3B;
+}
+
+
+.red-btn-off{
     font-size: 10pt;
     background-color: white;
     font-family: RobotoDraft,Roboto,'Helvetica Neue',sans-serif;
@@ -341,11 +398,11 @@ input[type=number]::-webkit-outer-spin-button {
     border: solid 1px #C63B3B;
 }
 
-.warn-btn-sm{
+.red-btn-sm{
     font-size: 10pt;
     background-color: white;
     font-family: RobotoDraft,Roboto,'Helvetica Neue',sans-serif;
-    margin-right: 5px;
+    margin: 5px;
     padding: 4px;
     width: 30px;
     height: 30px;

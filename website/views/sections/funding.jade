@@ -6,8 +6,8 @@ md-toolbar.md-hue-1
 
 div.btn-row( layout="row")
   div(ng-repeat="entry in files.json.funding track by $index")
-    button.valid-btn.expandable-off(type="button" ng-if="entry.tmp.toggle" ng-click="entry.tmp.toggle = false;") Funding {{$index+1}}
-    button.valid-btn.expandable-on(type="button" ng-if="!entry.tmp.toggle" ng-click="expandEntry(files.json.funding, entry)") Funding {{$index+1}}
+    button.blue-btn-on.expandable-off(type="button" ng-if="entry.tmp.toggle" ng-click="entry.tmp.toggle = false;") Funding {{$index+1}}
+    button.blue-btn-off(type="button" ng-if="!entry.tmp.toggle" ng-click="expandEntry(files.json.funding, entry)") Funding {{$index+1}}
 
 
 
@@ -36,8 +36,8 @@ div(ng-repeat='entry in files.json.funding track by $index' layout-wrap="")
         
     .md-toolbar-tools(style="background-color:white;")
       span(flex)
-      button.warn-btn(ng-click='removeBlock(files.json.funding, $index)' style="margin: 1.5em;" type="button") Delete
+      button.red-btn-off(ng-click='removeBlock(files.json.funding, $index)' style="margin: 1.5em;" type="button") Delete
       
 div(layout='', layout-padding='', layout-sm='column' style="float: right;")
-  button.valid-btn(ng-click='addBlock(files.json.funding, "funding", null)' style="margin: 1.5em;" type="button") Add
+  button.green-btn-off(ng-click='addBlock(files.json.funding, "funding", null)' style="margin: 1.5em;" type="button") Add
   //- button.valid-btn(ng-click='addBlock(entry, "funding")' style="margin: 1.5em;")  + Add Funding

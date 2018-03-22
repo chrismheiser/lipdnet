@@ -17,8 +17,8 @@ div(layout='', layout-padding='', layout-sm='column' style="float: right;")
 			md-option(ng-value="table" ng-repeat="table in dropdowns.tables") {{ table.name }}
 		md-tooltip DataTable containing Variables pertaining to chronological information
 
-	button.valid-btn(type="button" ng-click='addBlock(files.json.chronData[0], dropdowns.current.table.name, "chron")' style="margin: 1.5em;") + Add Table
-	button.warn-btn(type="button" ng-click="removePaleoChron('chron')" style="margin: 1.5em; padding: 2px 2px 2px 2px;") Delete ChronData
+	button.green-btn-off(type="button" ng-click='addBlock(files.json.chronData[0], dropdowns.current.table.name, "chron")' style="margin: 1.5em;") + Add Table
+	button.red-btn-off(type="button" ng-click="removePaleoChron('chron')" style="margin: 1.5em; padding: 2px 2px 2px 2px;") Delete ChronData
 	// END MEASUREMENT TABLE
 
 
