@@ -9,30 +9,46 @@ angular.module('ngValidate').controller('ModalCtrlInterp', function ($scope, $ui
   $scope.interpArr = data.data;
   $scope.new = data.new;
   $scope.idxNum = data.idxNum;
-  $scope.currInterp = $scope.interpArr[$scope.idxNum];
+  $scope.entry = $scope.interpArr[$scope.idxNum];
 
 
   // Make sure the required and standard fields are
   if($scope.new){
     for (var _a = 0; _a < $scope.initial.length; _a++){
       var _key = $scope.initial[_a];
-      if(!$scope.currInterp.hasOwnProperty(_key)){
-        $scope.currInterp[_key] = "";
+      if(!$scope.entry.hasOwnProperty(_key)){
+        $scope.entry[_key] = "";
       }
     }
   }
 
-  $scope.toggle = function (key) {
-    if ($scope.currInterp.hasOwnProperty(key)) {
-      delete $scope.currInterp[key];
+  $scope.edit = function(){
+    $scope.editMode = !$scope.editMode;
+  };
+
+  $scope.rmField = function(entry, field){
+    if(entry.hasOwnProperty(field)){
+      delete entry[field];
     }
-    else {
-      $scope.currInterp[key] = "";
+  };
+
+  $scope.toggle = function (key) {
+    if (key === null){
+      $scope.custom.push($scope.customField);
+      $scope.entry[$scope.customField] = "";
+      $scope.customField = "";
+    } else {
+      if ($scope.entry.hasOwnProperty(key)) {
+        delete $scope.entry[key];
+      }
+      else {
+        $scope.entry[key] = "";
+      }
     }
   };
 
   $scope.exists = function(key){
-    if ($scope.currInterp.hasOwnProperty(key)) {
+    if ($scope.entry.hasOwnProperty(key)) {
       return true;
     }
   };

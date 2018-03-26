@@ -42,7 +42,7 @@ body                            { padding-top:20px; }
   opacity: 0.2;
 }
 
-input[type=number]::-webkit-inner-spin-button, 
+input[type=number]::-webkit-inner-spin-button,
 input[type=number]::-webkit-outer-spin-button {
   -webkit-appearance: none;
   margin: 0;
@@ -400,14 +400,14 @@ input[type=number]::-webkit-outer-spin-button {
 
 .red-btn-sm{
     font-size: 10pt;
-    background-color: white;
+    background-color: #C63B3B;
     font-family: RobotoDraft,Roboto,'Helvetica Neue',sans-serif;
     margin: 5px;
     padding: 4px;
     width: 30px;
     height: 30px;
     border-radius: 5px;
-    color: #C63B3B;
+    color: white;
     border: solid 1px #C63B3B;
 }
 

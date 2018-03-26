@@ -52,12 +52,6 @@ div(layout="column" ng-repeat='entry3 in entry2.columns track by $index' layout-
                         md-tooltip Choose the field you would like to add to this column
                     button.green-btn-off(flex='' type="button" ng-click='addColumnField(entry3)' style="margin: 1.5em;") Add
 
-                    //div.form-group
-                    //    label(ng-repeat="field in fields track by $index" class="checkbox-inline")
-                    //        input(type="checkbox" value="field" ng-checked="entry3.tmp[field]"
-                    //        ng-click="addRmProperty(entry3, field); entry3.tmp[field] = !entry3.tmp[field]")
-                    //        | {{field}}
-
                 div(layout='', layout-padding='', layout-sm='column')
                     button.invisible(ng-click="addCustom(entry3)")
                     md-input-container(flex="25")
@@ -69,18 +63,15 @@ div(layout="column" ng-repeat='entry3 in entry2.columns track by $index' layout-
                     button.yellow-btn-off(type="button" ng-if="!pageMeta.editColumn" ng-click="pageMeta.editColumn = !pageMeta.editColumn") Edit
                     button.yellow-btn-on(type="button" ng-if="pageMeta.editColumn" ng-click="pageMeta.editColumn = !pageMeta.editColumn") Edit
                     md-tooltip Turn editing on to delete any of the additional fields. Turn back off when done.
-                //div(layout='', layout-padding='', layout-sm='column')
-                //    button.valid-btn(type="button" ng-click="showModalInterpretation(entry3, true, null)") + Add Interpretation
-                //div(layout='', layout-padding='', layout-sm='column' style="float: right;")
 
             div(flex)
                 md-subheader.md-primary Additional fields
                 div.btn-row(layout="row" style="overflow: scroll;")
                     div(ng-repeat="(k,v) in entry3" ng-if="isBlock(k)" layout='', layout-padding='', layout-sm='column')
-                        button.blue-btn-off(type="button" ng-click="showModalBlock(entry3, false, k)") {{k}}
+                        button.blue-btn-off(type="button" ng-click="showModalBlock(entry3, false, k, null)") {{k}}
 
-                    div(ng-repeat="interp in entry3.interpretation track by $index" layout='', layout-padding='', layout-sm='column')
-                        button.blue-btn-off(type="button" ng-click="showModalInterpretation(entry3, false, $index)") interpretation {{$index+1}}
+                    div(ng-repeat="(k, entry4) in entry3" ng-if="isArr(k)" layout='', layout-padding='', layout-sm='column')
+                        button.blue-btn-off(ng-repeat="i in entry4 track by $index" type="button" ng-click="showModalBlock(entry3, false, k, $index)") {{k}} {{$index+1}}
 
                 div(style="overflow: scroll; height: 550px;")
                     div(ng-repeat="(k,v) in entry3" ng-if="isProperty(k)" layout='', layout-padding='', layout-sm='column')

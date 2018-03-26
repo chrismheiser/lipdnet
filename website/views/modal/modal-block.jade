@@ -1,6 +1,7 @@
 .modal-content
     .modal-header
-        h3.modal-title {{field}}
+        h3.modal-title(ng-if="idx === null") {{key}}
+        h3.modal-title(ng-if="idx !== null") {{key}} {{idx + 1}}
     .modal-body(style="height:600px!important; overflow-y: auto;")
         div
             .col-md-4
@@ -9,11 +10,10 @@
                         div(layout='row', layout-wrap='')
                             div(flex='25', flex-gt-sm='50', layout='column')
                                 h4 CUSTOM
-                                //button.invisible(ng-click="toggle(null)")
                                 md-input-container(flex="")
                                     label Add custom
                                     input(ng-model="customField" ng-keydown="$event.keyCode == 13 && toggle(null)")
-                                    md-tooltip Don't see the field you want? Type in the box and press enter
+                                    md-tooltip Don't see the key you want? Type in the box and press enter
                                 div(layout='row', layout-wrap='' ng-repeat='key in custom')
                                     md-checkbox(ng-checked='exists(key)', ng-click='toggle(key)') {{key}}
                                 h4 REQUIRED
@@ -28,12 +28,16 @@
                                     md-checkbox(ng-checked='exists(key)', ng-click='toggle(key)') {{key}}
 
             .col-md-8
-                div(ng-repeat="(k,v) in  block" layout='', layout-padding='', layout-sm='column')
+                div(ng-repeat="(k,v) in entry" layout='', layout-padding='', layout-sm='column')
                     md-input-container(flex='', class="md-input-has-value")
                         label {{k}}
-                        input(ng-model="block[k]")
+                        input(ng-model="entry[k]")
+                    div(flex='10' layout='', layout-padding='', layout-sm='column')
+                        button.red-btn-sm(type="button" ng-show="editMode" ng-click="rmField(entry, k)") X
 
     .modal-footer
         button.red-btn-on(type="button" ng-if="!new" style="float:left;" data-dismiss="modal" ng-click="delete()") DELETE
         button.green-btn-off(type="button" data-dismiss="modal" ng-click="close()") Save
+        button.yellow-btn-on(type="button" data-dismiss="modal" ng-click="edit()" ng-if="editMode") Edit
+        button.yellow-btn-off(type="button" data-dismiss="modal" ng-click="edit()" ng-if="!editMode") Edit
         button.red-btn-off(type="button" data-dismiss="modal" ng-click="dismiss()") Cancel

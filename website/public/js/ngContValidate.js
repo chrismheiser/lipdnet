@@ -176,11 +176,16 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
 
     $scope.addColumnField = function(entry){
       var _field = $scope.dropdowns.current.columnField.name;
-      if(_field === "interpretation"){
-        $scope.showModalInterpretation(entry, true, null);
-      } else if (["calibration", "hasResolution", "physicalSample"].indexOf(_field) !== -1){
-        $scope.showModalBlock(entry, true, _field);
-      } else if(!entry.hasOwnProperty(_field)){
+      // Adding an entry that is a nested array item
+      if(["interpretation"].indexOf(_field) !== -1){
+        $scope.showModalBlock(entry, true, _field, 0);
+      }
+      // Adding an entry that is a nested object item
+      else if (["calibration", "hasResolution", "physicalSample"].indexOf(_field) !== -1){
+        $scope.showModalBlock(entry, true, _field, null);
+      }
+      // Adding any regular field
+      else if(!entry.hasOwnProperty(_field)){
         entry[_field] = "";
       }
     };
@@ -188,7 +193,7 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
     $scope.checkSession = function(){
       var _prevSession = sessionStorage.getItem("lipd");
       if(_prevSession){
-        $scope.genericModalAsk({"title": "Found previous session",
+        $scope.showModalAsk({"title": "Found previous session",
             "message": "We detected LiPD data from a previous session. Would you like to restore the data?",
             "button1": "Restore Data",
             "button2": "Clear Data",
@@ -214,7 +219,11 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
     };
 
     $scope.addCustom = function(entry){
-      if(entry.tmp.custom && !entry.hasOwnProperty(entry.tmp.custom)){
+      // Adding a field that is restricted / automated. Don't allow
+      if (["TSid"].indexOf(entry.tmp.custom) !== -1){
+        $scope.showModalAlert({"title": "Restricted field", "message": "You may not add, remove, or edit fields that are automatically generated"});
+      }
+      else if(entry.tmp.custom && !entry.hasOwnProperty(entry.tmp.custom)){
         entry[entry.tmp.custom] = "";
       }
       entry.tmp.custom = "";
@@ -226,9 +235,9 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       $scope.files.dataSetName = $scope.files.json.dataSetName;
       $scope.files.lipdFilename = $scope.files.dataSetName + ".lpd";
 
-      $scope.genericModalAlert({"title": "NOAA Beta", "message": "Please note the 'NOAA Ready' and 'NOAA Download' features of this web site are BETA features, and as such are not fully implemented and are being improved. If you would like to contribute LiPD data to NOAA, please contact NOAA WDS-Paleo at: paleo@noaa.gov"});
+      $scope.showModalAlert({"title": "NOAA Beta", "message": "Please note the 'NOAA Ready' and 'NOAA Download' features of this web site are BETA features, and as such are not fully implemented and are being improved. If you would like to contribute LiPD data to NOAA, please contact NOAA WDS-Paleo at: paleo@noaa.gov"});
       if ($scope.feedback.errCt > 0){
-        $scope.genericModalAlert({"title": "File contains errors", "message": "You are downloading data that still has errors. Be aware that using a file that isn't fully valid may cause issues."});
+        $scope.showModalAlert({"title": "File contains errors", "message": "You are downloading data that still has errors. Be aware that using a file that isn't fully valid may cause issues."});
       }
       // Fix up the json a bit so it's ready to be sorted and downloaded
       create.closingWorkflowNoaa($scope.files, $scope.files.dataSetName, $scope.files.csv, function(_newScopeFiles){
@@ -262,7 +271,7 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       $scope.files.lipdFilename = $scope.files.dataSetName + ".lpd";
 
       if ($scope.feedback.errCt > 0){
-        $scope.genericModalAlert({"title": "File contains errors", "message": "You are downloading data that still has errors. Be aware that using a file that isn't fully valid may cause issues."});
+        $scope.showModalAlert({"title": "File contains errors", "message": "You are downloading data that still has errors. Be aware that using a file that isn't fully valid may cause issues."});
       }
 
       // Correct the filenames, clean out the empty entries, and make $scope.files data ready for the ExportService
@@ -355,36 +364,6 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       return entry;
     };
 
-    $scope.genericModalAlert = function(msg){
-      $scope.modal = msg;
-      var modalInstance = $uibModal.open({
-        templateUrl: 'modal-alert',
-        controller: 'ModalCtrlAlert',
-        size: "md",
-        resolve: {
-          data: function () {
-            return $scope.modal;
-          }
-        }
-      });
-    };
-
-    $scope.genericModalAsk = function(msg, cb){
-      $scope.modal = msg;
-      var modalInstance = $uibModal.open({
-        templateUrl: 'modal-ask',
-        controller: 'ModalCtrlAsk',
-        size: "md",
-        resolve: {
-          data: function () {
-            return $scope.modal;
-          }
-        }
-      });
-      modalInstance.result.then(function (selected) {
-        cb(selected);
-      });
-    };
 
     $scope.makeNoaaReady = function(alert){
       // The noaaReady boolean is bound to the switch
@@ -392,7 +371,7 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
         // Make Ready
         create.addNoaaReady($scope.files.json, function(_d2){
           if(alert){
-            $scope.genericModalAlert({"title": "NOAA Validation", "message": "The fields that NOAA requires have been " +
+            $scope.showModalAlert({"title": "NOAA Validation", "message": "The fields that NOAA requires have been " +
             "added where necessary. For a list of these requirements, hover your mouse pointer over the 'NOAA " +
             "requirements' bar on the left side of the page. Reference the 'NOAA Variable Naming' link under 'Quick Links' on the home page for variable information."});
           }
@@ -401,7 +380,7 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       } else {
         if(alert){
           // Don't remove fields, only remove
-          $scope.genericModalAlert({"title": "Fields may be ignored", "message": "Validation is no longer using NOAA rules."});
+          $scope.showModalAlert({"title": "Fields may be ignored", "message": "Validation is no longer using NOAA rules."});
         }
       }
     };
@@ -411,14 +390,14 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       if(!$scope.pageMeta.wikiReady){
         // Make Ready
         create.addWikiReady($scope.files.json, function(_d2){
-          $scope.genericModalAlert({"title": "Wiki Validation", "message": "The fields that the Linked Earth Wiki requires have been " +
+          $scope.showModalAlert({"title": "Wiki Validation", "message": "The fields that the Linked Earth Wiki requires have been " +
           "added where necessary. For a list of these requirements, hover your mouse pointer over the 'Wiki " +
           "requirements' bar on the left side of the page."});
           $scope.files.json = _d2;
         });
       } else {
         // Don't remove fields. just alert
-        $scope.genericModalAlert({"title": "Fields may be ignored", "message": "Validation is no longer using Wiki rules."});
+        $scope.showModalAlert({"title": "Fields may be ignored", "message": "Validation is no longer using Wiki rules."});
       }
     };
 
@@ -481,7 +460,7 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
           }
         } else {
           // If the table currently has N columns, you must provide N columns worth of values for 'Keep Existing Columns" to map new values to old column metadata properly
-          $scope.genericModalAlert({"title": "Column counts do not match", "message": "The number of columns provided does not match the existing number of columns to be updated."})
+          $scope.showModalAlert({"title": "Column counts do not match", "message": "The number of columns provided does not match the existing number of columns to be updated."})
         }
       }
 
@@ -612,7 +591,7 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
     };
 
     $scope.removePaleoChron = function(pc){
-      $scope.genericModalAsk({"title": "Delete ALL data in this section?",
+      $scope.showModalAsk({"title": "Delete ALL data in this section?",
           "message": "Are you sure you want to delete all data from the " + pc + "Data section? I won't be able to bring it back.",
         "button1": "Yes",
         "button2": "No"}, function(truth){
@@ -627,9 +606,13 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       });
     };
 
-    $scope.rmColumnField = function(entry, field){
-      if(entry.hasOwnProperty(field)){
-        delete entry[field];
+    $scope.rmColumnField = function(entry, _field){
+      if(entry.hasOwnProperty(_field)){
+        if (["TSid"].indexOf(_field) !== -1){
+          $scope.showModalAlert({"title": "Restricted field", "message": "You may not add, remove, or edit fields that are automatically generated"});
+        } else {
+          delete entry[_field];
+        }
       }
     };
 
@@ -669,6 +652,14 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       return false;
     };
 
+    $scope.isArr = function(field){
+      // Data is a block if the field is in this list.
+      if(["interpretation"].includes(field)){
+        return true;
+      }
+      return false;
+    };
+
     $scope.isProperty = function(field){
       // Do not show any temporary fields, data, or nested blocks.
       if(["number", "variableName", "units", "toggle", "dataFormat", "dataType", "description", "values", "checked", "tmp", "interpretation", "physicalSample", "hasResolution", "calibration"].includes(field)){
@@ -677,15 +668,59 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       return true;
     };
 
-    $scope.showModalBlock = function(entry, create, field){
-      var _block = entry[field];
-      if(typeof _block === 'undefined' || !_block){
-        _block = {};
+    $scope.showModalAlert = function(msg){
+      // FORMAT: msg = {"title": "", "msg": ""}
+      $scope.modal = msg;
+      var modalInstance = $uibModal.open({
+        templateUrl: 'modal-alert',
+        controller: 'ModalCtrlAlert',
+        size: "md",
+        resolve: {
+          data: function () {
+            return $scope.modal;
+          }
+        }
+      });
+    };
+
+    $scope.showModalAsk = function(msg, cb){
+      // FORMAT: msg = {"title": "", "msg": "", "button1": "", "button2": "", "button3": ""}
+      $scope.modal = msg;
+      var modalInstance = $uibModal.open({
+        templateUrl: 'modal-ask',
+        controller: 'ModalCtrlAsk',
+        size: "md",
+        resolve: {
+          data: function () {
+            return $scope.modal;
+          }
+        }
+      });
+      modalInstance.result.then(function (selected) {
+        cb(selected);
+      });
+    };
+
+
+    $scope.showModalBlock = function(entry, _create, _key, idx){
+      // FORMAT: options = {"data": [] or {}, "create": bool, "key": "", "idx": null or int}
+      // Use idx === null or !== null to determine if this is an
+      var arrType = idx !== null;
+
+      // Get the data
+      var _data = entry[_key];
+      // If data not initialized or creating from scratch, then make the object
+      if((typeof _data === 'undefined' || !_data) && !arrType){
+        _data = {};
+      } else if ((typeof _data === 'undefined' || !_data) && arrType){
+        _data = [];
       }
-      if(create){
-        _block = {};
+      if(_create && arrType){
+        idx = _data.length;
+        _data.push({});
       }
-      $scope.modal = {"data": _block, "new": create, "field": field};
+      //Set options to pass to modal controller
+      $scope.modal = {"data": _data, "create": _create, "key": _key, "idx": idx};
       var modalInstance = $uibModal.open({
         templateUrl: 'modal-block',
         controller: 'ModalCtrlBlock',
@@ -698,44 +733,14 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       });
       modalInstance.result.then(function (new_data) {
         if (new_data === "delete"){
-          delete entry[field];
-        } else if(new_data !== "cancel"){
-          entry[field] = new_data;
-        }
-        return entry;
-      });
-      return entry;
-    };
-
-    $scope.showModalInterpretation = function(entry, create, idx){
-      // interp - array of interp objs
-      // create - bool for creating new interp or not
-      // idx - null if creating new interp, of integer if using existing data
-      var interpArr = entry.interpretation;
-      if(typeof interpArr === 'undefined' || !interpArr){
-        interpArr = [];
-      }
-      if(create){
-        idx = interpArr.length;
-        interpArr.push({});
-      }
-      $scope.modal = {"data": interpArr, "new": create, "idxNum": idx};
-      var modalInstance = $uibModal.open({
-        templateUrl: 'modal-interp',
-        controller: 'ModalCtrlInterp',
-        size: "lg",
-        resolve: {
-          data: function () {
-            return $scope.modal;
+          if(arrType){
+            _data.splice(idx, 1);
+            entry[_key] = _data;
+          } else {
+            delete entry[_key];
           }
-        }
-      });
-      modalInstance.result.then(function (new_data) {
-        if (new_data === "delete"){
-          interpArr.splice(idx, 1);
-          entry.interpretation = interpArr;
         } else if(new_data !== "cancel"){
-          entry.interpretation = new_data;
+          entry[_key] = new_data;
         }
         return entry;
       });
@@ -1168,7 +1173,7 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
               lipdValidator.restructure(res, $scope.files, function(_response_1){
                 $scope.files = _response_1;
                 if($scope.files.fileCt > 40){
-                  $scope.genericModalAlert({"title": "Wow! That's a lot of files!", "message": "We expanded the page to fit everything, so be sure to scroll down to see your data tables."})
+                  $scope.showModalAlert({"title": "Wow! That's a lot of files!", "message": "We expanded the page to fit everything, so be sure to scroll down to see your data tables."})
                 }
                 $scope.validate();
                 $scope.files.json = create.initColumnTmp($scope.files.json);
