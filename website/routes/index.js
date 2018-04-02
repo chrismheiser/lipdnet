@@ -563,14 +563,6 @@ router.get("/modal-file", function(req, res, next){
   res.render('modal/modal-file', {title: ''});
 });
 
-// router.get("/modal-interp-create", function(req, res, next){
-//   res.render('modal/modal-interp-create', {title: ''});
-// });
-
-router.get("/modal-interp", function(req, res, next){
-  res.render('modal/modal-interp', {title: ''});
-});
-
 router.get("/modal-block", function(req, res, next){
   res.render('modal/modal-block', {title: ''});
 });

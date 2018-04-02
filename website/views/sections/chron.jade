@@ -2,7 +2,7 @@
 md-toolbar.md-hue-1
 	h2.md-toolbar-tools
 		span chronData
-		md-tooltip The data, metadata, and Model that describe the set of Variables used to relate depth/position to time (chronological information)
+		md-tooltip {{getTooltip("chronData", "chronData")}}
 
 include ./chron_buttons.jade
 include ./chron_meas.jade
@@ -15,7 +15,7 @@ div(layout='', layout-padding='', layout-sm='column' style="float: right;")
 		md-label Table Type
 		md-select(ng-model='dropdowns.current.table' ng-model-options="{trackBy: '$value.id'}" aria-label="Filler")
 			md-option(ng-value="table" ng-repeat="table in dropdowns.tables") {{ table.name }}
-		md-tooltip DataTable containing Variables pertaining to chronological information
+		md-tooltip {{getTooltip("chronData", "table")}}
 
 	button.green-btn-off(type="button" ng-click='addBlock(files.json.chronData[0], dropdowns.current.table.name, "chron")' style="margin: 1.5em;") + Add Table
 	button.red-btn-off(type="button" ng-click="removePaleoChron('chron')" style="margin: 1.5em; padding: 2px 2px 2px 2px;") Delete ChronData

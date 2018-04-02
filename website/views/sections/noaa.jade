@@ -8,31 +8,45 @@ div(ng-if="pageMeta.noaaReady")
         md-input-container(flex="33")
             label Max Year *
             input(ng-model='files.json.maxYear')
+            md-tooltip {{getTooltip("noaa", "maxYear")}}
+
         md-input-container(flex="33")
             label Min Year *
             input(ng-model='files.json.minYear')
+            md-tooltip {{getTooltip("noaa", "minYear")}}
+
         md-input-container(flex="33")
             label Time Unit *
             md-select(ng-model="files.json.timeUnit")
                 md-option(ng-repeat="tu in dropdowns.timeUnit" ng-value="tu") {{tu}}
+            md-tooltip {{getTooltip("noaa", "timeUnit")}}
+
     div(layout='', layout-padding='', layout-sm='column')
         md-input-container(flex='')
             label Online Resource *
             input(ng-model='files.json.onlineResource')
+            md-tooltip {{getTooltip("noaa", "onlineResource")}}
+
     div(layout='', layout-padding='', layout-sm='column')
         md-input-container(flex='')
             label Online Resource Description *
             input(ng-model='files.json.onlineResourceDescription')
+            md-tooltip {{getTooltip("noaa", "onlineResourceDescription")}}
+
     div(layout='', layout-padding='', layout-sm='column')
         md-input-container(flex='')
             label Original Source URL *
             input(ng-model='files.json.originalSourceUrl')
+            md-tooltip {{getTooltip("noaa", "originalSourceUrl")}}
+
     div(layout='', layout-padding='', layout-sm='column')
         md-input-container(flex='50', ng-class="md-input-has-value")
             label Modified Date *
             input(ng-model='files.json.modifiedDate')
+            md-tooltip {{getTooltip("noaa", "modifiedDate")}}
+
         md-input-container(flex='50', ng-class="md-input-has-value")
             label Dataset DOI *
             input(ng-model='files.json.datasetDOI')
-            md-tooltip What is the digital object identifier associated with the dataset? Example: 10.1000/sample123
+            md-tooltip {{getTooltip("noaa", "datasetDOI")}}
 

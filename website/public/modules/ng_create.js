@@ -133,19 +133,15 @@ var create = (function(){
       return entry;
     }),
 
-    addNoaaReady: (function(D, cb){
-      cb(D);
-    }),
-
     /**
-     * Add the wiki required fields to the
+     * Add the required column keys to each column if they don't exist.
+     *
+     * @param {Array} D Metadata
+     * @param {Array} fields Field names (strings) to be added to columns
+     * @return {Array} D Metadata, with new fields added
      */
-    addWikiReady: (function(D, cb){
+    addFieldsToCols: (function(D, fields, cb){
       var _pcs = ["paleoData", "chronData"];
-      // var _required_wiki = {
-      //   "root": ["dataSetName", "archiveType"],
-      //   "column": ["takenAtDepth", "variableName", "inferredVariableType", "proxyObservationType"]
-      // };
 
       // We don't need to add the root fields, because those are already standard.
 
@@ -155,10 +151,10 @@ var create = (function(){
           var _section = D[_pc];
           for(var _s=0; _s < _section.length; _s++){
             if(_section[_s].hasOwnProperty("measurementTable")){
-              D[_pc][_s]["measurementTable"] = create.addWikiReadyTables(_section[_s]["measurementTable"]);
+              D[_pc][_s]["measurementTable"] = create.addFieldsToTables(_section[_s]["measurementTable"], fields);
             }
             if(_section[_s].hasOwnProperty("model")){
-              D[_pc][_s]["model"] = create.addWikiReadyModels(_section[_s]["model"]);
+              D[_pc][_s]["model"] = create.addFieldsToModels(_section[_s]["model"], fields);
             }
           }
         }
@@ -167,19 +163,23 @@ var create = (function(){
       cb(D);
     }),
 
-    addWikiReadyModels: (function(models){
+    /**
+     * Add the required column keys to each column if they don't exist.
+     *
+     * @param {Array} models Metadata
+     * @param {Array} fields Field names (strings) to be added to columns
+     * @return {Array} models Metadata
+     */
+    addFieldsToModels: (function(models, fields){
       for(var _p = 0; _p <models.length; _p++){
         var _model = models[_p];
         if (_model.hasOwnProperty("summaryTable")){
-          models[_p]["summaryTable"] = create.addWikiReadyModels(models[_p]["summaryTable"]);
+          models[_p]["summaryTable"] = create.addFieldsToTables(models[_p]["summaryTable"], fields);
 
         }
         if (_model.hasOwnProperty("ensembleTable")){
-          models[_p]["ensembleTable"] = create.addWikiReadyModels(models[_p]["ensembleTable"]);
+          models[_p]["ensembleTable"] = create.addFieldsToTables(models[_p]["ensembleTable"], fields);
         }
-        // if (_model.hasOwnProperty("distributionTable")){
-        //   models[_p]["distributionTable"] = create.addWikiReadyModels(models[_p]["distributionTable"]);
-        // }
       }
       return(models);
     }),
@@ -188,22 +188,34 @@ var create = (function(){
      * Add the required column keys to each column if they don't exist.
      *
      * @param {Array} tables Metadata
+     * @param {Array} fields Field names (strings) to be added to columns
      * @return {Array} tables Metadata
      */
-    addWikiReadyTables: (function(tables){
-      var _required = ["takenAtDepth", "variableName", "inferredVariableType", "proxyObservationType"];
+    addFieldsToTables: (function(tables, fields){
       for(var _t = 0; _t<tables.length; _t++){
-        var _columns = tables[_t]["columns"];
+        tables[_t] = create.addFieldsToTable(tables[_t], fields);
+      }
+      return(tables);
+    }),
+
+    /**
+     * Add the required column keys to each column if they don't exist.
+     *
+     * @param {Array} tables Metadata
+     * @param {Array} fields Field names (strings) to be added to columns
+     * @return {Array} tables Metadata
+     */
+    addFieldsToTable: (function(table, fields){
+        var _columns = table["columns"];
         for(var _c = 0; _c < _columns.length; _c++){
-          for (var _k = 0; _k < _required.length; _k++){
-            var _key = _required[_k];
+          for (var _k = 0; _k < fields.length; _k++){
+            var _key = fields[_k];
             if(!_columns[_c].hasOwnProperty(_key)){
-              tables[_t]["columns"][_c][_key] = "";
+              table["columns"][_c][_key] = "";
             }
           }
         }
-      }
-      return(tables);
+      return(table);
     }),
 
     alterFilenames: (function(_scopeFiles){
@@ -459,7 +471,7 @@ var create = (function(){
                 // get the year from the created attribute
                 entry.year = res.data.created["date-parts"][0][0];
               } else if (_key === "author"){
-                // loop over and sort through the author names
+                // loop over and sort tvhrough the author names
                 var _auths = [];
                 var _currAuth = "";
                 // Loop over the authors data in the response object
@@ -763,6 +775,118 @@ var create = (function(){
 
     timeUnitList: (function(){
       return ["AD", "BP", "CE"];
+    }),
+
+    fieldMetadataLibrary: (function(section, key){
+      var _tip = " ";
+      var _lib = {
+        "root": {
+          "createdBy": {"tooltip": "Where did this file originate from? How was the LiPD file created?", "label": "Created By", "model": "files.json.createdBy", "disabled": false, "fieldType": "text", "size": 50},
+          "lipdVersion": {"tooltip": "Ontology and data structure change by version. We'll handle this for you, but it's important to know the current version.", "label": "LiPD Version *", "model": "files.json.lipdVersion", "disabled": true, "fieldType": "number", "size": 50},
+          "dataSetName": {"tooltip": "Please use the format 'Name.Location.Year' for your dataset name", "label": "Dataset Name *", "model": "files.json.dataSetName", "disabled": false, "fieldType": "text", "size": 50},
+          "collectionName": {"tooltip": "NA", "label": "Collection Name", "model": "files.json.collectionName", "disabled": false, "fieldType": "text", "size": 33, },
+          "investigators": {"tooltip": "Use the format: LastName, FirstName; LastName, FirstName; ...", "label": "Investigators", "model": "files.json.investigators", "disabled": false, "fieldType": "text", "size": 66, },
+          "notes": {"tooltip": "Use to add information that does not fit elsewhere in the dataset", "label": "Notes", "model": "files.json.notes", "disabled": false, "fieldType": "text", "size": 100},
+          "archiveType": { "tooltip": "Which ProxyArchive underlies this ProxySystem?", "label": "Archive Type", "model": "files.json.archiveType", "disabled": false, "size": 50},
+
+        },
+        "funding": {
+          "agency": {"tooltip": "Which entity was the Dataset funded by?"},
+          "grant": {"tooltip": "What was the Funding source for the Dataset?"},
+          "principalInvestigator": {"tooltip": "Who was the lead on the source of Funding for the Dataset?"},
+          "country": {"tooltip": "Which nation funded the Dataset?"}
+
+        },
+        "noaa": {
+          "maxYear" : {"tooltip": "NA"},
+          "minYear" : {"tooltip": "NA"},
+          "timeUnit": {"tooltip": "NA"},
+          "onlineResource": {"tooltip": "NA"},
+          "onlineResourceDescription": {"tooltip": "NA"},
+          "originalSourceUrl": {"tooltip": "NA"},
+          "modifiedDate": {"tooltip": "NA"},
+          "datasetDOI": {"tooltip": "What is the digital object identifier associated with the dataset? Example: 10.1000/sample123"},
+        },
+        "pub": {
+          "publication": {"tooltip": "A document that serves as reference for a Dataset or its components"},
+          "doi": {"tooltip": "What is the digital object identifier associated with the resource?  Example: 10.1000/sample123"},
+          "title": {"tooltip": "What is the title of the Publication?"},
+          "journal": {"tooltip": "What is the name of the journal in which the resource can be found?"},
+          "report": {"tooltip": "NA"},
+          "year": {"tooltip": "What year was the Publication issued? (not required for dataCitations)"},
+          "pages": {"tooltip": "In what pages of the Publication can the reference to the resource be found? (not required for dataCitations)"},
+          "volume": {"tooltip": "In which volume of the Publication does the reference to the Datatset appear?"},
+          "edition": {"tooltip": "In which edition of the Publication does the reference to the Datatset appear?"},
+          "issue": {"tooltip": "In what issue of the journal can the resource be found?"},
+          "type": {"tooltip": "What publication type? (journal-article, data citation, etc.)"},
+          "abstract": {"tooltip": "NA"},
+          "citation": {"tooltip": "NA"},
+          "author": {"tooltip": "Who wrote (i.e., created) the resource, such as a Publication? Use format: LastName, FirstName"},
+        },
+        "geo": {
+          "latitude": {"tooltip": "The latitude value in decimal degrees from -90 to 90"},
+          "longitude": {"tooltip": "The longitude value in decimal degrees from -180 to 180"},
+          "elevation": {"tooltip": "Elevation value in meters"},
+          "units": {"tooltip": "Standard elevation units is meters"},
+          "siteName": {"tooltip": "NA"},
+          "location": {"tooltip": "NA"},
+          "country" : {"tooltip": "ISO 3166 standard country list"},
+          "gcmdLocation": {"tooltip": "Example: Continent>North America>United States of America>Baltimore"},
+
+        },
+        "paleoData": {
+          "paleoData": {"tooltip": "The Data pertaining to past environmental variability"},
+          "measurement": {"tooltip": "DataTable that contains the Variables (both measured and inferred)"},
+          "model": {"tooltip": "Model used to derive an environmental axis from the PaleoDataModel"},
+          "table": {"tooltip": "DataTable containing PaleoData Variables"},
+          "values": {"tooltip": "What are the numerical values of the Variable, Uncertainty, and Model outputs?"},
+          "variableName": {"tooltip": "NA"},
+          "units": {"tooltip": "In what unit of measure is (are) the Variable(s) expressed?"},
+          "description": {"tooltip": "What additional details would you give about the resource?"},
+          "calibration": {"tooltip": "NA"},
+          "hasResolution": {"tooltip": "What is the Resolution of the Variable?"},
+          "hasMinValue": {"tooltip": "What is the minimum value of the Variable?"},
+          "hasMaxValue": {"tooltip": "What is the maximum value of the Variable?"},
+          "hasMeanValue": {"tooltip": "What is the mean value of the Variable?"},
+          "hasMedianValue": {"tooltip": "What is the median value of the Variable?"},
+          "inferredVariableType": {"tooltip": "What type of InferredVariable does the InferredVariable belongs to?"},
+          "interpretation": {"tooltip": "A suite of metadata that describes which phenomena drove variability in this Variable (e.g. environmental drivers)."},
+          "direction": {"tooltip": "Is the InferredVariable value increasing or decreasing as the value of the MeasuredVariable is increasing?"},
+          "measurementMaterial": {"tooltip": "NA"},
+          "method": {"tooltip": "How is the information obtained from the resource?"},
+          "missingValue": {"tooltip": "How are the missing values of the Variable identified in the DataTable?"},
+          "notes": {"tooltip": "Use to add information that does not fit elsewhere in the dataset"},
+          "physicalSample": {"tooltip": "The actual sample on which the measurements are made. For instance, the lake core analyzed in the lab is the physical sample."},
+          "proxy": {"tooltip": "NA"},
+          "proxyObservationType": {"tooltip": "What type of ProxyObservation does the MeasuredVariable or Proxy System belong to? For example, the measured value of 5.63 mmol/mol is of type Mg/Ca, or the proxy observation of the current prpoxy system is Mg/Ca"},
+          "sensorGenus": {"tooltip": "What is the Genus of the Organic ProxySensor?"},
+          "sensorSpecies": {"tooltip": "What is the species of the Organic ProxySensor?"},
+          "takenAtDepth": {"tooltip": "At which depth in the ProxyArchive is the Variable measured or inferred?"},
+          "variableType": {"tooltip": "NA"},
+          "name": {"tooltip": "NA"},
+          "runCommand": {"tooltip": "NA"},
+          "runEnv": {"tooltip": "NA"},
+        },
+        "chronData": {
+          "chronData": {"tooltip": "The data, metadata, and Model that describe the set of Variables used to relate depth/position to time (chronological information)"},
+          "measurement": {"tooltip": "DataTable that contains the Variables (both measured and inferred)"},
+          "model": {"tooltip": "Model used to derive a time (or age) axis from the ChronDataModel"},
+          "table": {"tooltip": "DataTable containing Variables pertaining to chronological information"},
+        },
+        "misc": {
+          "editMode": {"tooltip": "Edit mode allows you to delete fields. Turn on to show delete buttons, and turn back off when done."},
+          "addCustom": {"tooltip": "Don't see the field you want? Type in the box and press enter."},
+          "addFields": {"tooltip": "Choose the field you would like to add to this column"},
+          "fetchDoi": {"tooltip": "Provide a valid DOI and we'll fetch the associated publication information."},
+          "map": {"tooltip": "We'll drop a pin on the dataset location using the coordinates given in the Geo section."},
+          "graph": {"tooltip": "Use table data to plot two columns on a simply X,Y graph."}
+        }
+      };
+      try{
+        _tip = _lib[section][key].tooltip;
+      } catch(err){
+      }
+      return _tip;
     }),
 
     variableTypeList: (function(){

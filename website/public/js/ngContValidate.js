@@ -64,6 +64,7 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       "countries" : map.getCountries()
     };
     $scope.fields = create.defaultColumnFields();
+    $scope.fieldMetadata = create.fieldMetadataLibrary();
     // Compilation of all LiPD file data
     $scope.files = {
       "modal": {},
@@ -96,9 +97,6 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       "wikiReady": false,
       "tourMeta": {},
     };
-
-    // "addColumn": false,
-
 
     // All feedback warnings, errors, and messages received from the validator
     $scope.feedback = {
@@ -364,18 +362,22 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       return entry;
     };
 
+    $scope.getTooltip = function(section, key){
+      return create.fieldMetadataLibrary(section, key);
+    };
 
     $scope.makeNoaaReady = function(alert){
       // The noaaReady boolean is bound to the switch
       if(!$scope.pageMeta.noaaReady){
         // Make Ready
-        create.addNoaaReady($scope.files.json, function(_d2){
+        create.addFieldsToCols($scope.files.json, ["dataType", "dataFormat"], function(_d2){
           if(alert){
             $scope.showModalAlert({"title": "NOAA Validation", "message": "The fields that NOAA requires have been " +
             "added where necessary. For a list of these requirements, hover your mouse pointer over the 'NOAA " +
             "requirements' bar on the left side of the page. Reference the 'NOAA Variable Naming' link under 'Quick Links' on the home page for variable information."});
           }
           $scope.files.json = _d2;
+          console.log($scope.files.json.paleoData);
         });
       } else {
         if(alert){
@@ -389,11 +391,12 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       // The wikiReady boolean is bound to the switch
       if(!$scope.pageMeta.wikiReady){
         // Make Ready
-        create.addWikiReady($scope.files.json, function(_d2){
+        create.addFieldsToCols($scope.files.json, ["takenAtDepth", "inferredVariableType", "proxyObservationType"], function(_d2){
           $scope.showModalAlert({"title": "Wiki Validation", "message": "The fields that the Linked Earth Wiki requires have been " +
           "added where necessary. For a list of these requirements, hover your mouse pointer over the 'Wiki " +
           "requirements' bar on the left side of the page."});
           $scope.files.json = _d2;
+          console.log($scope.files.json.paleoData);
         });
       } else {
         // Don't remove fields. just alert
@@ -499,6 +502,14 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       if (_parse_mode==="add"){
         // Update the _csv data in the scope with the new data, col counts, etc.
         _csv = create.updateCsvScope(_scope_vals, _csv);
+      }
+
+      if($scope.pageMeta.noaaReady){
+        table = create.addFieldsToTable(table, ["dataFormat", "dataType"]);
+
+      }
+      if($scope.pageMeta.wikiReady){
+        table = create.addFieldsToTable(table, ["takenAtDepth", "inferredVariableType", "proxyObservationType"]);
       }
 
       // Values are finished processing. Set data to scope.
@@ -662,7 +673,7 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
 
     $scope.isProperty = function(field){
       // Do not show any temporary fields, data, or nested blocks.
-      if(["number", "variableName", "units", "toggle", "dataFormat", "dataType", "description", "values", "checked", "tmp", "interpretation", "physicalSample", "hasResolution", "calibration"].includes(field)){
+      if(["number", "variableName", "units", "toggle", "description", "values", "checked", "tmp", "interpretation", "physicalSample", "hasResolution", "calibration"].includes(field)){
         return false;
       }
       return true;
@@ -700,7 +711,6 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
         cb(selected);
       });
     };
-
 
     $scope.showModalBlock = function(entry, _create, _key, idx){
       // FORMAT: options = {"data": [] or {}, "create": bool, "key": "", "idx": null or int}

@@ -13,26 +13,25 @@ div.btn-row( layout="row")
 
 div(ng-repeat='entry in files.json.funding track by $index' layout-wrap="")
   md-card(ng-show="entry.tmp.toggle")
-    //- div(layout='', layout-padding='', layout-sm='column')
     md-subheader.md-primary funding {{$index+1}}
     div(layout='', layout-padding='', layout-sm='column')
       md-input-container(flex='', ng-class="md-input-has-value")
         label Agency
         input(ng-model='entry.agency')
-        md-tooltip Which entity was the Dataset funded by?
+        md-tooltip {{getTooltip("funding", "agency")}}
       md-input-container(flex='', ng-class="md-input-has-value")
         label Grant
         input(ng-model='entry.grant')
-        md-tooltip What was the Funding source for the Dataset?
+        md-tooltip {{getTooltip("funding", "grant")}}
     div(layout='', layout-padding='', layout-sm='column')
       md-input-container(flex='', ng-class="md-input-has-value")
         label Principal Investigator
         input(ng-model='entry.investigator')
-        md-tooltip Who was the lead on the source of Funding for the Dataset?
+        md-tooltip {{getTooltip("funding", "principalInvestigator")}}
       md-input-container(flex='', ng-class="md-input-has-value")
         label Country
         input(ng-model='entry.country')
-        md-tooltip Which nation funded the Dataset?
+        md-tooltip {{getTooltip("funding", "country")}}
         
     .md-toolbar-tools(style="background-color:white;")
       span(flex)

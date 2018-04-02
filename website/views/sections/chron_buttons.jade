@@ -1,11 +1,17 @@
 div(ng-repeat='entry in files.json.chronData track by $index' layout-wrap="" ng-init="parentIdx = $index")
     // chronData[1] : Should only be one entry2. Don't need to loop
 
+    md-subheader.plain(ng-if='entry.measurementTable[0]') measurements
+        md-tooltip {{getTooltip("chronData", "measurement")}}
+
     div.btn-row(layout="row")
 
         div(ng-repeat='entry2 in entry.measurementTable track by $index')
             button.blue-btn-on(ng-if="entry2.tmp.toggle" ng-click="entry2.tmp.toggle = false" type="button") chron {{parentIdx+1}} measurement {{$index+1}}
             button.blue-btn-off(ng-if="!entry2.tmp.toggle" ng-click="expandEntry(entry, entry2)" type="button") chron {{parentIdx+1}} measurement {{$index+1}}
+
+    md-subheader.plain(ng-if='entry.model[0]') models
+        md-tooltip {{getTooltip("chronData", "model")}}
 
     div.btn-row(layout="row")
 

@@ -2,6 +2,7 @@
 md-toolbar.md-hue-1
   h2.md-toolbar-tools
     span Publication
+    md-tooltip {{getTooltip("pub", "publication")}}
 
 div.btn-row( layout="row")
   div(ng-repeat="entry in files.json.pub track by $index")
@@ -19,64 +20,83 @@ div(ng-repeat="entry in files.json.pub track by $index" layout-wrap="")
       md-input-container(flex='', ng-class="md-input-has-value")
         label DOI
         input(ng-model='entry.identifier[0].id')
-        md-tooltip(data-html="true") What is the digital object identifier associated with the resource? Enter a valid DOI and we'll fetch the information. Example: 10.1000/sample123
-      button.green-btn-off(type="button" ng-click="fetchPublication(entry)" style="margin:1.5em; float:right;height:auto;" ng-disabled="!entry.identifier[0].id") Autocomplete using DOI
+        md-tooltip(data-html="true") {{getTooltip("pub", "doi")}}
+      div
+        button.green-btn-off(type="button" ng-click="fetchPublication(entry)" style="margin:1.5em; float:right;height:auto;" ng-disabled="!entry.identifier[0].id") Autocomplete using DOI
+        md-tooltip {{getTooltip("misc", "fetchDoi")}}
     br
+
     div(layout='', layout-padding='', layout-sm='column')
       md-input-container(flex='', ng-class="md-input-has-value")
         label Title *
         textarea(ng-model='entry.title', columns='1', maxlength="500")
-        md-tooltip What is the title of the Publication?
+        md-tooltip {{getTooltip("pub", "title")}}
+
     div(layout='', layout-padding='', layout-sm='column')
       md-input-container(flex='', ng-class="md-input-has-value")
         label Journal
         textarea(ng-model='entry.journal', columns='1')
-        md-tooltip What is the name of the journal in which the resource can be found?
+        md-tooltip {{getTooltip("pub", "journal")}}
+
       md-input-container(flex='', ng-class="md-input-has-value")
         label Report
         textarea(ng-model='entry.report', columns='1')
+        md-tooltip {{getTooltip("pub", "report")}}
+
     div(layout='', layout-padding='', layout-wrap='', layout-sm='column')
       md-input-container(flex="33")
         label Year
         md-select(ng-model="entry.year")
           md-option(ng-repeat="yr in dropdowns.years" ng-value="yr" ng-model="entry.year") {{yr}}
-        md-tooltip What year was the Publication issued? (not required for dataCitations)
+        md-tooltip {{getTooltip("pub", "year")}}
+
       md-input-container(flex='', ng-class="md-input-has-value")
         label Pages
         input(ng-model="entry.pages")
-        md-tooltip In what pages of the Publication can the reference to the resource be found? (not required for dataCitations)
+        md-tooltip {{getTooltip("pub", "pages")}}
+
       md-input-container(flex='', ng-class="md-input-has-value")
         label Volume
         input(ng-model='entry.volume')
-        md-tooltip In which volume of the Publication does the reference to the Datatset appear?
+        md-tooltip {{getTooltip("pub", "volume")}}
+
     div(layout='', layout-padding='', layout-wrap='', layout-sm='column')
       md-input-container(flex='', ng-class="md-input-has-value")
         label Edition
         input(ng-model='entry.edition')
+        md-tooltip {{getTooltip("pub", "edition")}}
+
       md-input-container(flex='', ng-class="md-input-has-value")
         label Issue
         input(ng-model='entry.issue')
-        md-tooltip In what issue of the journal can the resource be found?
+        md-tooltip {{getTooltip("pub", "issue")}}
+
       md-input-container(flex='', ng-class="md-input-has-value")
         label Publication Type
         input(ng-model='entry.type')
+        md-tooltip {{getTooltip("pub", "type")}}
+
     div(layout='', layout-padding='', layout-sm='column' ng-if="pageMeta.noaaReady")
       md-input-container(flex='', ng-class="md-input-has-value")
         label Abstract *
         textarea(ng-model='entry.abstract', columns='1', maxlength="500")
+        md-tooltip {{getTooltip("pub", "abstract")}}
+
     div(layout='', layout-padding='', layout-sm='column' ng-if="pageMeta.noaaReady")
       md-input-container(flex='', ng-class="md-input-has-value")
         label Citation *
         textarea(ng-model='entry.citation', columns='1', maxlength="500")
+        md-tooltip {{getTooltip("pub", "citation")}}
+
     div(layout='', layout-padding='', layout-sm='column', ng-repeat='entry2 in entry.author track by $index')
       md-input-container(flex='', ng-class="md-input-has-value")
         label Author
         input(ng-model='entry2.name')
-        md-tooltip Who wrote (i.e., created) the resource, such as a Publication? Use format: LastName, FirstName
+        md-tooltip {{getTooltip("pub", "author")}}
 
       div(layout='', layout-padding='', layout-sm='column' style="float: right;")
         button.green-btn-sm(ng-click='addBlock(entry.author, "author", null)' style="margin: 1.5em;" type="button")  +
-        button.red-btn-sm(ng-click='removeBlock(entry.author, $index)' style="margin: 1.5em;" type="button")  -
+        button.red-btn-sm-off(ng-click='removeBlock(entry.author, $index)' style="margin: 1.5em;" type="button")  -
     
     .md-toolbar-tools(style="background-color:white;")
       span(flex)

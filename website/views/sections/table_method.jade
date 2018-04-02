@@ -2,9 +2,14 @@ div(layout='', layout-padding='', layout-sm='column')
     md-input-container(flex='', ng-class="md-input-has-value")
         label Name
         input(ng-model='entry.model[0].method.name')
+        md-tooltip {{getTooltip("paleoData", "name")}}
+
     md-input-container(flex='', ng-class="md-input-has-value")
         label Run command
         input(ng-model='entry.model[0].method.runCommand')
+        md-tooltip {{getTooltip("paleoData", "runCommand")}}
+
     md-input-container(flex='', ng-class="md-input-has-value")
         label Run environment
         input(ng-model='entry.model[0].method.runEnv')
+        md-tooltip {{getTooltip("paleoData", "runEnv")}}

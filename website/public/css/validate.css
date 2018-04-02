@@ -398,7 +398,7 @@ input[type=number]::-webkit-outer-spin-button {
     border: solid 1px #C63B3B;
 }
 
-.red-btn-sm{
+.red-btn-sm-on{
     font-size: 10pt;
     background-color: #C63B3B;
     font-family: RobotoDraft,Roboto,'Helvetica Neue',sans-serif;
@@ -408,6 +408,19 @@ input[type=number]::-webkit-outer-spin-button {
     height: 30px;
     border-radius: 5px;
     color: white;
+    border: solid 1px #C63B3B;
+}
+
+.red-btn-sm-off{
+    font-size: 10pt;
+    background-color: white;
+    font-family: RobotoDraft,Roboto,'Helvetica Neue',sans-serif;
+    margin: 5px;
+    padding: 4px;
+    width: 30px;
+    height: 30px;
+    border-radius: 5px;
+    color: #C63B3B;
     border: solid 1px #C63B3B;
 }
 
@@ -443,4 +456,9 @@ input[type=number]::-webkit-outer-spin-button {
     background-color: #99C5FF;
     color: white;
     border: solid 1px #99C5FF;
+}
+
+.plain {
+    background: white;
+    color: #8FA864;
 }

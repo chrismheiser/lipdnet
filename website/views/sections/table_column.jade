@@ -18,38 +18,34 @@ div(layout="column" ng-repeat='entry3 in entry2.columns track by $index' layout-
                     md-input-container(flex='', class="md-input-has-value")
                         label Variable Name *
                         input(ng-model="entry3.variableName")
+                        md-tooltip {{getTooltip("paleoData", "variableName")}}
+
                     md-input-container(flex='', class="md-input-has-value")
                         label Units *
                         input(ng-model="entry3.units")
-                        md-tooltip In what unit of measure is (are) the Variable(s) expressed?
-                    md-input-container(flex='', class="md-input-has-value" ng-if="pageMeta.noaaReady")
-                        label Data Type *
-                        input(ng-model="entry3.dataType")
-                        md-tooltip Please reference the "NOAA Variable Naming" link under "Quick Links" on the home page for description
-                    md-input-container(flex='', class="md-input-has-value" ng-if="pageMeta.noaaReady")
-                        label Data Format *
-                        input(ng-model="entry3.dataFormat")
-                        md-tooltip Define whether data are numeric (“N”) or character-based (“C”)
+                        md-tooltip {{getTooltip("paleoData", "units")}}
+
                 div(layout='', layout-padding='', layout-sm='column')
                     md-input-container(flex='', class="md-input-has-value")
                         label(ng-if="pageMeta.noaaReady") Description *
                         label(ng-if="!pageMeta.noaaReady") Description
                         textarea(ng-model='entry3.description', columns='1', md-maxlength='500')
+                        md-tooltip {{getTooltip("paleoData", "description")}}
+
                 div(layout='', layout-padding='', layout-sm='column')
                     md-input-container(flex='', class="md-input-has-value")
                         label Values *
                         //- input(format-values ng-model="files.csv[entry2.filename].transposed[$index]")
                         input(space-values ng-model="files.csv[entry2.filename].transposed[$index]" disabled)
-                        md-tooltip This is a preview of the value data. You cannot edit this directly. Use the "Parse Values" box where necessary.
+                        md-tooltip {{getTooltip("paleoData", "values")}}
 
                 md-subheader.md-primary Add Fields
 
                 div(layout='', layout-padding='', layout-sm='column')
                     md-input-container(flex="75")
-                        //md-label Table Type
                         md-select(ng-model='dropdowns.current.columnField' ng-model-options="{trackBy: '$value.id'}" aria-label="Filler")
                             md-option(ng-value="field" ng-repeat="field in dropdowns.columnFields") {{ field.name }}
-                        md-tooltip Choose the field you would like to add to this column
+                        md-tooltip {{getTooltip("misc", "addFields")}}
                     button.green-btn-off(flex='' type="button" ng-click='addColumnField(entry3)' style="margin: 1.5em;") Add
 
                 div(layout='', layout-padding='', layout-sm='column')
@@ -57,12 +53,12 @@ div(layout="column" ng-repeat='entry3 in entry2.columns track by $index' layout-
                     md-input-container(flex="25")
                         label Add custom
                         input(ng-model="entry3.tmp.custom")
-                        md-tooltip Don't see the field you want? Type in the box and press enter.
+                        md-tooltip {{getTooltip("misc", "addCustom")}}
 
                 div(layout='', layout-padding='', layout-sm='column')
                     button.yellow-btn-off(type="button" ng-if="!pageMeta.editColumn" ng-click="pageMeta.editColumn = !pageMeta.editColumn") Edit
                     button.yellow-btn-on(type="button" ng-if="pageMeta.editColumn" ng-click="pageMeta.editColumn = !pageMeta.editColumn") Edit
-                    md-tooltip Turn editing on to delete any of the additional fields. Turn back off when done.
+                    md-tooltip {{getTooltip("misc", "editMode")}}
 
             div(flex)
                 md-subheader.md-primary Additional fields
@@ -78,8 +74,10 @@ div(layout="column" ng-repeat='entry3 in entry2.columns track by $index' layout-
                         md-input-container(flex='', class="md-input-has-value")
                             label {{k}}
                             input(ng-model="entry3[k]" ng-disabled="k==='TSid'")
+                            md-tooltip {{getTooltip("paleoData", k)}}
+
                         div(flex='10' layout='', layout-padding='', layout-sm='column')
-                            button.red-btn-sm(type="button" ng-show="pageMeta.editColumn" ng-click="rmColumnField(entry3, k)") X
+                            button.red-btn-sm-on(type="button" ng-show="pageMeta.editColumn" ng-click="rmColumnField(entry3, k)") X
 
         .md-toolbar-tools(style="background-color:white;")
             span(flex)
