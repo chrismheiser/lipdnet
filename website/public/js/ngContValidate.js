@@ -404,15 +404,14 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       }
     };
 
-    $scope.parseCsv = function(table, idx, options){
-      // console.log(table);
-
+    $scope.parseCsv = function(table, parentIdx, idx, options){
       var _parse_mode = $scope.dropdowns.current.parseMode.name;
       var _delimiter = $scope.dropdowns.current.delimiter.name;
 
       // we can't guarantee a datasetname yet, so build this csv filename as best we can for now.
-      var _csvname = options.pc + '0' + options.tt + idx + ".csv";
-      table.tableName = options.pc + '0' + options.tt + idx;
+      var _csvname = options.pc + parentIdx + options.tt + idx + ".csv";
+
+      table.tableName = options.pc + parentIdx + options.tt + idx;
 
       // Delimiter: stored in scope, shared across all tables
       // table.tmp.values refers to the TextArea box on the page
@@ -451,12 +450,14 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
         if (table.columns.length === _csv.transposed.length){
           // Set the transposed data to temporary table data
           table.tmp.values = _csv.transposed;
+          console.log(table.tmp.values);
           for (var _c = 0; _c < table.columns.length; _c++){
             if($scope.pageMeta.header){
               // Header exists. Set variableName and values
               table.columns[_c]["values"] = table.tmp.values[_c].slice(1, table.tmp.values.length-1);
               table.columns[_c]["variableName"] = table.tmp.values[_c][0]
             } else {
+              console.log("updating values, keeping metadata");
               // No header. Set values.
               table.columns[_c]["values"] = table.tmp.values[_c];
             }
@@ -470,15 +471,9 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       // Add: Add these columns to existing columns.
       else if (_parse_mode === "add") {
         var _add_idx = table.columns.length;
-        var _scope_vals = {};
 
         // Set the transposed data to temporary table data
         table.tmp.values = _csv.transposed;
-
-        // Get the existing values data
-        if ($scope.files.csv.hasOwnProperty(_csvname)){
-          _scope_vals = $scope.files.csv[_csvname];
-        }
 
         // Loop over the new values data
         for(var _n=0; _n<table.tmp.values.length; _n++){
@@ -499,9 +494,13 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
         // Remove the header row from _csv.data (first array)  and _csv.transposed (first element of each array)
         _csv = misc.removeCsvHeader(_csv);
       }
-      if (_parse_mode==="add"){
+
+      if(_parse_mode === "add"){
         // Update the _csv data in the scope with the new data, col counts, etc.
-        _csv = create.updateCsvScope(_scope_vals, _csv);
+        // Get the existing values data
+        var _csv_obj = create.getParsedCsvObj(_csvname, $scope.files.csv);
+        _csv = create.updateCsvScope(_csv_obj.data, _csv);
+
       }
 
       if($scope.pageMeta.noaaReady){
@@ -514,9 +513,9 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
 
       // Values are finished processing. Set data to scope.
       $scope.files.csv[_csvname] = _csv;
-      // $scope.pageMeta.keepColumnMeta = true;
-      // Remove the values from the text field. After being processed, the values formatting gets jumbled and cannot be parsed again.
-      // If they want to update or parse new values, they'll have to copy/paste them in again.
+      // // $scope.pageMeta.keepColumnMeta = true;
+      // // Remove the values from the text field. After being processed, the values formatting gets jumbled and cannot be parsed again.
+      // // If they want to update or parse new values, they'll have to copy/paste them in again.
       table.tmp.values = "";
       return table;
     };

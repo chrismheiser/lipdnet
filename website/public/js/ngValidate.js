@@ -80,10 +80,11 @@ f.directive("spaceValues", function(){
     link: function (scope, element, attrs, ngModel) {
       //format text going to user (model to view)
       ngModel.$formatters.push(function(value) {
-        // console.log(value);
         var _str = "";
-        for(var _i=0; _i<value.length;_i++){
-          _str += value[_i] + ",  ";
+        if(typeof(value) !== "undefined"){
+          for(var _i=0; _i<value.length;_i++){
+            _str += value[_i] + ",  ";
+          }
         }
       return _str;
       });

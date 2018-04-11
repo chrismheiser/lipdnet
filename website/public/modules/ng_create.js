@@ -317,6 +317,35 @@ var create = (function(){
       return _x;
     }),
 
+    getParsedCsvObj: (function(csv_name, csv_objs){
+      var _csv_obj = {};
+      var _found = false;
+      
+      // Loop over all the csv filenames
+      for (var _filename in csv_objs){
+        if(csv_objs.hasOwnProperty(_filename)){
+          // Is this csv_name in the current filename?
+          // (ie. is "paleo0measurement0.csv" within "Heiser2018.paleo0measurement0.csv". Yes. )
+          if(_filename.indexOf(csv_name) !== -1){
+            // Swap and use the new filename match
+            csv_name = _filename;
+            // Also get the object for this filename
+            _csv_obj = csv_objs[_filename];
+            _found = true;
+          }
+        }
+      }
+
+      // If a sub match wasn't found, then check for an exact match. (We prefer a sub-match)
+      if(!_found){
+        if(csv_objs.hasOwnProperty(csv_name)){
+          _csv_obj = csv_objs[csv_name];
+        }
+      }
+
+      return {"name": csv_name, "data": _csv_obj};
+    }),
+
 
     initColumnTmp: (function(x){
       // Tmp Data throughout page:
