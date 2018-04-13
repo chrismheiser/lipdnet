@@ -344,7 +344,7 @@ var lipdValidator = (function(){
 
       var _noaa_validate = {
         "required": {
-          "root": ["investigators", "maxYear", "minYear", "timeUnit", "onlineResource", "onlineResourceDescription", "modifiedDate"],
+          "root": ["investigators", "mostRecentYear", "earliestYear", "timeUnit", "onlineResource", "onlineResourceDescription", "modifiedDate"],
           "pub": [],
           "funding": [],
           "geo": ["location", "siteName"],
@@ -393,12 +393,11 @@ var lipdValidator = (function(){
               valid = true;
             }
           });
-          console.log("VALIDATE STATUS REPORT: ");
+          console.log("Validator Report: ");
           console.log("LiPD filename: " + files.lipdFilename);
           console.log("TSids created: " + pageMeta.tsids_generated);
-          console.log("Wiki: " + feedback.validWiki);
-          console.log("NOAA: " + feedback.validNoaa);
-          console.log("LiPD: " + feedback.validLipd);
+          console.log("Wiki: ", feedback.validWiki, ", NOAA: ", feedback.validNoaa, " LiPD: ", feedback.validLipd);
+
           // var jsonCopy = JSON.parse(JSON.stringify(files.json));
         } catch (err){
           console.log(err);

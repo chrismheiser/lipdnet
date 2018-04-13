@@ -320,7 +320,7 @@ var create = (function(){
     getParsedCsvObj: (function(csv_name, csv_objs){
       var _csv_obj = {};
       var _found = false;
-      
+
       // Loop over all the csv filenames
       for (var _filename in csv_objs){
         if(csv_objs.hasOwnProperty(_filename)){
@@ -827,8 +827,8 @@ var create = (function(){
 
         },
         "noaa": {
-          "maxYear" : {"tooltip": "NA"},
-          "minYear" : {"tooltip": "NA"},
+          "earliestYear" : {"tooltip": "NA"},
+          "mostRecentYear" : {"tooltip": "NA"},
           "timeUnit": {"tooltip": "NA"},
           "onlineResource": {"tooltip": "NA"},
           "onlineResourceDescription": {"tooltip": "NA"},

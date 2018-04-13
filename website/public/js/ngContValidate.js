@@ -408,7 +408,7 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       var _parse_mode = $scope.dropdowns.current.parseMode.name;
       var _delimiter = $scope.dropdowns.current.delimiter.name;
 
-      // we can't guarantee a datasetname yet, so build this csv filename as best we can for now.
+      // we can't guarantee a dataSetName yet, so build this csv filename as best we can for now.
       var _csvname = options.pc + parentIdx + options.tt + idx + ".csv";
 
       table.tableName = options.pc + parentIdx + options.tt + idx;

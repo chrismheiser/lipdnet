@@ -6,14 +6,14 @@ div(ng-if="pageMeta.noaaReady")
 div(ng-if="pageMeta.noaaReady")
     div(layout='', layout-padding='', layout-sm='column')
         md-input-container(flex="33")
-            label Max Year *
-            input(ng-model='files.json.maxYear')
-            md-tooltip {{getTooltip("noaa", "maxYear")}}
+            label Earliest Year *
+            input(ng-model='files.json.earliestYear')
+            md-tooltip {{getTooltip("noaa", "earliestYear")}}
 
         md-input-container(flex="33")
-            label Min Year *
-            input(ng-model='files.json.minYear')
-            md-tooltip {{getTooltip("noaa", "minYear")}}
+            label Most Recent Year *
+            input(ng-model='files.json.mostRecentYear')
+            md-tooltip {{getTooltip("noaa", "mostRecentYear")}}
 
         md-input-container(flex="33")
             label Time Unit *
