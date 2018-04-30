@@ -51,7 +51,6 @@ var misc = (function(){
     }),
 
     convertToDms: (function(dd){
-      // TODO WHY IS LON GETTING A SOUTH VALUE IN CONVERSION?!
       var _dms = {
         "lon": {"d": 0, "m": 0, "s": 0, "dir": {id: 1, name: "E"}},
         "lat": {"d": 0, "m": 0, "s": 0, "dir": {id: 1, name: "W"}}

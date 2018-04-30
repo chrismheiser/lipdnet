@@ -17,6 +17,7 @@ div(ng-repeat="entry in files.json.pub track by $index" layout-wrap="")
   md-card(ng-show="entry.tmp.toggle")
     md-subheader.md-primary publication {{$index+1}}
     div.step14(layout='', layout-padding='', layout-sm='column')
+
       md-input-container(flex='', ng-class="md-input-has-value")
         label DOI
         input(ng-model='entry.identifier[0].id')

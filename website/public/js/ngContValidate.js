@@ -245,8 +245,6 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       $scope.dms = _vals.dms;
       $scope.dropdowns.current.dms.lat = _vals.dms.lat.dir;
       $scope.dropdowns.current.dms.lon = _vals.dms.lon.dir;
-      console.log(_vals);
-      console.log($scope.dropdowns.current.dms);
     };
 
     $scope.downloadNoaa = function(){

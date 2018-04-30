@@ -55,7 +55,7 @@ block body
 									span.md-headline {{item.title}}
 							md-card-content
 								ul
-									li(ng-repeat="desc in item.descriptions") {{ desc }}
+									li(ng-repeat="desc in item.descriptions" ng-bind-html="desc") {{desc}}
 
 
 		.container.cf#faq
@@ -170,6 +170,7 @@ block body
 
 block js
 	script(src="lib/angular-accordion/js/ang-accordion.js")
+	script(src="https://cdnjs.cloudflare.com/ajax/libs/angular-sanitize/1.6.10/angular-sanitize.min.js")
 	script(src='https://cdnjs.cloudflare.com/ajax/libs/angular-google-maps/2.2.0/angular-google-maps.min.js')
 	script(src='https://maps.googleapis.com/maps/api/js?sensor=false')
 	script(src='apps/indexApp.js')

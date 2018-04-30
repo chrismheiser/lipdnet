@@ -684,7 +684,7 @@ var create = (function(){
         {
           // Publication
           element: document.querySelector(".step14"),
-          intro: "'Autocomplete using DOI' is the important part of the publication section. When you enter a DOI (Digital Object Identifier) and click the button, we'll use doi.org to retrieve and fill the publication data for you as much as possible. Another note, we use BibJSON standards for publication data, which is why authors are stored as individual entries.",
+          intro: "'Autocomplete using DOI' is the important part of the publication section. When you enter a DOI (Digital Object Identifier) and click the button, we'll use doi.org to retrieve and fill the publication data for you as much as possible. Authors are stored as individual entries according to BibJson standard. .",
           position: "left"
         },
         {

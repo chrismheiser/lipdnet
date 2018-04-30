@@ -1,32 +1,32 @@
-var p = angular.module("ngIndex", []);
+var p = angular.module("ngIndex", ["ngSanitize"]);
 
 p.controller('IndexCtrl', function ($scope) {
     $scope.gettingStarted = [
       {
         "title": "create a LiPD file from scratch",
         "descriptions": [
-          "Use the online Playground: enter data and download your dataset as a LiPD file",
-          "Use the LiPD Utilities (Python): enter your data into our Excel template, and use the LiPD Utilities to convert the excel file to a LiPD file"
+          "Use the <a href='/playground'>LiPD Playground</a>: enter data and download your dataset as a LiPD file",
+          "Use the <a href='https://github.com/nickmckay/LiPD-utilities/tree/master/Python'>LiPD Utilities (Python)</a>: enter your data into our Excel template, and use the LiPD Utilities to convert the excel file to a LiPD file"
         ]
       },
       {
         "title": "create many LiPD files from scratch",
         "descriptions": [
-          "Use the LiPD Utilities (Python): enter your data into our Excel template, and use the LiPD Utilities " +
+          "Use the <a href='https://github.com/nickmckay/LiPD-utilities/tree/master/Python'>LiPD Utilities (Python)</a>: enter your data into our Excel template, and use the LiPD Utilities " +
           "to convert the excel file to a LiPD file. This is currently the easiest way as creating many files one-by-one in the Playground can be tedious."
         ]
       },
       {
         "title": "edit a LiPD file",
         "descriptions": [
-          "Use the online Playground: upload your LiPD file, edit, and download as a new LiPD file",
-          "Use the LiPD Utilities: read the LiPD file to the workspace, make manual edits, and write as a new file"
+          "Use the <a href='/playground'>LiPD Playground</a>: upload your LiPD file, edit, and download as a new LiPD file",
+          "Use the <a href='https://github.com/nickmckay/LiPD-utilities/'>LiPD Utilities</a>: read the LiPD file to the workspace, make manual edits, and write as a new file"
         ]
       },
       {
         "title": "analyze LiPD data",
         "descriptions": [
-          "Use the LiPD Utilities to read a LiPD file and use the desired functions. Consider adding the GeoChronR or PyleoClim packages for additional functions."
+          "Use the <a href='https://github.com/nickmckay/LiPD-utilities/'>LiPD Utilities</a>: read a LiPD file and use the desired functions. Consider adding the <a href='http://github.com/nickmckay/GeoChronR/'>GeoChronR</a> or <a href='https://github.com/LinkedEarth/Pyleoclim_util'>PyleoClim</a> packages for additional functions."
         ]
 
       }
@@ -65,9 +65,15 @@ p.controller('IndexCtrl', function ($scope) {
       },
       {
         "icon": "code",
-        "title": "PyleoClim",
-        "link": "http://linkedearth.github.io/Pyleoclim_util/",
+        "title": "PyleoClim Github",
+        "link": "https://github.com/LinkedEarth/Pyleoclim_util",
         "tooltip": "A Python package for analyzing and visualizing paleoclimate data in LiPD"
+      },
+      {
+        "icon": "chrome_reader_mode",
+        "title": "PyleoClim Docs",
+        "link": "http://linkedearth.github.io/Pyleoclim_util/",
+        "tooltip": "The PyleoClim package documentation"
       },
       {
         "icon": "public",
