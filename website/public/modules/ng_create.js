@@ -500,7 +500,7 @@ var create = (function(){
                 // get the year from the created attribute
                 entry.year = res.data.created["date-parts"][0][0];
               } else if (_key === "author"){
-                // loop over and sort tvhrough the author names
+                // loop over and sort through the author names
                 var _auths = [];
                 var _currAuth = "";
                 // Loop over the authors data in the response object
@@ -753,8 +753,8 @@ var create = (function(){
     inferredVariableTypeList: (function(){
       return ['Temperature', 'Sea Surface Temperature', 'Bottom Water Temperature', 'Ocean Mixed Layer Temperature',
       'Surface air temperature', 'Carbon dioxide concentration', 'Methane concentration', 'Nitrous oxide concentration',
-      'Free oxygen levels', 'pH', 'Carbonate saturation', 'Carbonate Ion Concentration', 'Salinity', 'dD', 'd18O',
-      'ExcessD', 'Precipitation Amount', 'd18O', 'dD', 'ExcessD', 'Moisture Content', 'PDSI', 'Year', 'JulianDay',
+      'Free oxygen levels', 'pH', 'Carbonate saturation', 'Carbonate Ion Concentration', 'Salinity',
+        'Precipitation Amount', 'd18O', 'dD', 'ExcessD', 'Moisture Content', 'PDSI', 'Year', 'JulianDay',
       'Age', 'Radiocarbon Age', 'SOI', 'Nino3.4', 'Nino3', 'Nino4', 'Nino1', 'Nino2', 'Nino1+2', 'AMO', 'NAO', 'AO',
       'SAM', 'AAO'];
     }),

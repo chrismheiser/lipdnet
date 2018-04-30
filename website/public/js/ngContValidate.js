@@ -36,7 +36,8 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
         "table": { id: 1, name: 'measurement' },
         "delimiter": { id: 1, name: "\t", view: "Tab ( \\t )"},
         "parseMode": {id: 1, name: "new", view: "Start New"},
-        "columnField": {id: 4, name: "notes"}
+        "columnField": {id: 4, name: "notes"},
+        "dms": {"lat": {id: 1, name: "N"}, "lon": {id: 1, name: "E"}}
       },
       "columnFields": create.fieldsList(),
       "tables": [
@@ -57,6 +58,10 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
         { id: 2, name: "update", view: "Update Values in All Existing Columns"},
         { id: 3, name: "add", view: "Add New Column(s) to Existing Table" },
       ],
+      "dms": {
+        "lat": [{id: 1, name: "N"}, {id: 2, name: "S"}],
+        "lon": [{id: 1, name: "E"}, {id: 2, name: "W"}]
+      },
       "archiveType": create.archiveTypeList(),
       "timeUnit": create.timeUnitList(),
       "years": create.yearList(),
@@ -74,7 +79,8 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       "bagit": {},
       "csv": {},
       "jsonSimple": {"lipdVersion": 1.3},
-      "json": {"lipdVersion": 1.3, "createdBy": "lipd.net", "pub": [], "funding": [], "dataSetName": "", "geo": {},
+      "json": {"lipdVersion": 1.3, "createdBy": "lipd.net", "pub": [], "funding": [], "dataSetName": "", "geo": {
+        "geometry": {"coordinates": []}},
         "paleoData": [{"measurementTable": [{"tableName": "paleo0measurement0", "filename": "paleo0measurement0.csv",
           "columns": []}]}]}
     };
@@ -118,12 +124,14 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       "lon": {
         "d": 0,
         "m": 0,
-        "s": 0
+        "s": 0,
+        "dir": $scope.dropdowns.current.dms.lon
       },
       "lat":{
         "d": 0,
         "m": 0,
-        "s": 0
+        "s": 0,
+        "dir": $scope.dropdowns.current.dms.lat
       }
     };
     // Set google map default view
@@ -227,6 +235,20 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       entry.tmp.custom = "";
     };
 
+    $scope.convertCoordinates = function(){
+      if(typeof($scope.files.json.geo.geometry.coordinates) === "undefined"){
+        $scope.files.json.geo.geometry.coordinates = [0,0];
+      }
+      console.log($scope.dms);
+      var _vals = misc.convertCoordinates($scope.pageMeta.decimalDegrees, $scope.files.json.geo.geometry.coordinates, $scope.dms);
+      $scope.files.json.geo.geometry.coordinates = _vals.dd;
+      $scope.dms = _vals.dms;
+      $scope.dropdowns.current.dms.lat = _vals.dms.lat.dir;
+      $scope.dropdowns.current.dms.lon = _vals.dms.lon.dir;
+      console.log(_vals);
+      console.log($scope.dropdowns.current.dms);
+    };
+
     $scope.downloadNoaa = function(){
 
       var dev = location.host === "localhost:3000";
@@ -313,7 +335,6 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
         entry.tmp.toggle = true;
       }
     };
-
 
     // $scope.expandEntry = function(arr, idx){
     //   // Expand the target idx, and make sure that all other idx's are collapsed. Only allow one expansion at once.
@@ -577,9 +598,10 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
         "bagit": {},
         "csv": {},
         "jsonSimple": {"lipdVersion": 1.3},
-        "json": {"lipdVersion": 1.3, "createdBy": "lipd.net", "pub": [], "funding": [], "dataSetName": "", "geo": {},
-          "paleoData": [{"measurementTable": [{"tableName": "", "missingValue": "NaN",
-            "filename": "", "columns": []}]}]}
+        "json": {"lipdVersion": 1.3, "createdBy": "lipd.net", "pub": [], "funding": [], "dataSetName": "", "geo": {
+          "geometry": {"coordinates": []}},
+          "paleoData": [{"measurementTable": [{"tableName": "paleo0measurement0", "filename": "paleo0measurement0.csv",
+            "columns": []}]}]}
       };
       $scope.pageMeta = {
         "keepColumnMeta": false,

@@ -7,7 +7,7 @@ md-toolbar.md-hue-1
 // COORDINATES
 
 
-md-switch(ng-model='pageMeta.decimalDegrees') {{pageMeta.decimalDegrees? "Decimal Degrees": "Degrees-Minutes-Seconds"}}
+md-switch(ng-model='pageMeta.decimalDegrees' ng-click="convertCoordinates()") {{pageMeta.decimalDegrees? "Decimal Degrees": "Degrees-Minutes-Seconds"}}
 	md-tooltip LiPD stores coordinates as Decimal Degrees. You may switch to Degrees-Minutes-Seconds format and we will convert the values for you.
 
 div(layout='', layout-padding='', layout-sm='column' ng-if="pageMeta.decimalDegrees")
@@ -33,6 +33,10 @@ div(ng-if="!pageMeta.decimalDegrees")
 		md-input-container(flex='', ng-class="md-input-has-value")
 			label Seconds
 			input(ng-model='dms.lat.s', type='number')
+		md-input-container(flex='', ng-class="md-input-has-value")
+			label Hemisphere
+			md-select(ng-model='dropdowns.current.dms.lat' ng-model-options="{trackBy: '$value.id'}" aria-label="filler")
+				md-option(ng-value="dir" ng-repeat="dir in dropdowns.dms.lat") {{ dir.name }}
 
 	md-subheader.md-primary Longitude
 	div(layout='', layout-padding='', layout-sm='column')
@@ -45,6 +49,10 @@ div(ng-if="!pageMeta.decimalDegrees")
 		md-input-container(flex='', ng-class="md-input-has-value")
 			label Seconds
 			input(ng-model='dms.lon.s', type='number')
+		md-input-container(flex='', ng-class="md-input-has-value")
+			label Hemisphere
+			md-select(ng-model='dropdowns.current.dms.lon' ng-model-options="{trackBy: '$value.id'}" aria-label="filler")
+				md-option(ng-value="dir" ng-repeat="dir in dropdowns.dms.lon") {{ dir.name }}
 
 
 div(layout='', layout-padding='', layout-sm='column')

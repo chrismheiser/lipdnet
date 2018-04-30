@@ -555,6 +555,10 @@ router.get("/playground", function(req, res, next){
   res.render('playground', {title: 'Playground'});
 });
 
+router.get("/query", function(req, res, next){
+  res.render('query', {title: 'Query Datasets'});
+});
+
 router.get("/create", function(req, res, next){
   res.render('playground', {title: 'Playground'});
 });

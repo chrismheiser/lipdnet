@@ -1,0 +1,140 @@
+extends layout
+
+//- block css will insert css scripts listed in head.jade that are needed on every page.
+block css
+    //- files below are page specific
+    link(rel='stylesheet' href='css/validate.css')
+    link(rel="stylesheet" href="css/json-tree.css")
+    link(rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/angularjs-toaster/2.1.0/toaster.css")
+    link(rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons")
+    link(rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/angular-busy/4.1.4/angular-busy.min.css")
+
+block body
+    body(ng-app='ngQuery' ng-cloak)
+        #wrapper
+
+            include ./include/navbar.jade
+            md-toolbar
+                .md-toolbar-tools
+                    .md-title Query Datasets
+
+            pre {{query}}
+            br
+            div#form-container(ng-controller="QueryCtrl as qc")
+
+                .col-sm-6
+
+                    md-subheader.md-primary Archive Type
+                        md-tooltip {{getTooltip("root", "archiveType")}}
+                    div(layout='row', layout-padding='', layout-wrap="" flex layout-sm='column')
+                        div(flex="50" ng-repeat="item in dropdowns.archiveType")
+                            md-checkbox(ng-checked="" ng-clicked="addToArr('archiveType', item)") {{item}}
+
+
+                    md-subheader.md-primary Inferred Variable Type
+                        md-tooltip {{getTooltip("paleoData", "inferredVariableType")}}
+                    div(layout='row', layout-padding='', layout-wrap="" flex layout-sm='column')
+                        div(flex="50" ng-repeat="item in dropdowns.inferredVariableType")
+                            md-checkbox(ng-checked="" ng-clicked="") {{item}}
+
+                    md-subheader.md-primary Proxy Observation Type
+                        md-tooltip {{getTooltip("paleoData", "proxyObservationType")}}
+                    div(layout='row', layout-padding='', layout-wrap="" flex layout-sm='column')
+                        div(flex="50" ng-repeat="item in dropdowns.proxyObservationType")
+                            md-checkbox(ng-checked="" ng-clicked="") {{item}}
+
+
+                .col-sm-6
+
+                    md-subheader.md-primary Age
+                    div(layout='row', layout-padding='', layout-sm='column')
+                        md-input-container(flex='', ng-class="md-input-has-value")
+                            label Min
+                            input(ng-model='query.ageBound[0]' type='number')
+                        md-input-container(flex='', ng-class="md-input-has-value")
+                            label Max
+                            input(ng-model='query.ageBound[1]' type='number')
+                        md-input-container(flex="")
+                            label Unit
+                            md-select(ng-model="query.timeUnit[0]" aria-label="Filler")
+                                md-option(ng-repeat="tu in dropdowns.timeUnit" ng-value="tu") {{tu}}
+                            md-tooltip {{getTooltip("noaa", "timeUnit")}}
+                        md-input-container(flex="")
+                            label Age Bound Type
+                            md-select(ng-model='query.ageBoundType[0]' aria-label="Filler")
+                                md-option(ng-repeat="abt in dropdowns.ageBoundType" ng-value="abt") {{abt}}
+
+                    md-subheader.md-primary Latitude
+                        md-tooltip {{getTooltip("geo", "latitude")}}
+                    div(layout='row', layout-padding='', layout-sm='column')
+                        md-input-container(flex='', ng-class="md-input-has-value")
+                            label Min
+                            input(ng-model='query.lat[0]', type='number' step="1")
+                        md-input-container(flex='', ng-class="md-input-has-value")
+                            label Max
+                            input(ng-model='query.lat[1]', type='number' step="1")
+
+                    md-subheader.md-primary Longitude
+                        md-tooltip {{getTooltip("geo", "latitude")}}
+                    div(layout='', layout-padding='', layout-sm='column')
+                        md-input-container(flex='', ng-class="md-input-has-value")
+                            label Min
+                            input(ng-model='query.lon[0]', type='number' step="1")
+                        md-input-container(flex='', ng-class="md-input-has-value")
+                            label Max
+                            input(ng-model='query.lon[1]', type='number' step="1")
+
+                    md-subheader.md-primary Elevation (m)
+                        md-tooltip {{getTooltip("geo", "elevation")}}
+                    div(layout='', layout-padding='', layout-sm='column')
+                        md-input-container(flex='', ng-class="md-input-has-value")
+                            label Min
+                            input(ng-model='query.alt[0]', type='number' step="1")
+                        md-input-container(flex='', ng-class="md-input-has-value")
+                            label Max
+                            input(ng-model='query.alt[1]', type='number' step="1")
+
+                    div(layout='row', layout-padding='', layout-sm='column')
+                        .col-sm-3
+                            md-subheader.md-primary Resolution
+                            md-input-container(flex='', ng-class="md-input-has-value")
+                                label Max
+                                input(ng-model='query.resolution[0]', type='number' step="0.0001")
+                        .col-sm-3
+                            md-subheader.md-primary Record Length
+                            md-input-container(flex='', ng-class="md-input-has-value")
+                                label Value
+                                input(ng-model='query.recordLength[0]', type='number' step="1")
+
+
+//- block js will insert js scripts listed in footer.jade that are needed on every page.
+block js
+    //- files below are page specific
+    script(src="js/ngQuery.js")
+    script(src="modules/ng_create.js")
+    script(src="https://cdnjs.cloudflare.com/ajax/libs/angularjs-toaster/2.1.0/toaster.js")
+    script(src="https://cdnjs.cloudflare.com/ajax/libs/angular-busy/4.1.4/angular-busy.min.js")
+    script(src='https://maps.googleapis.com/maps/api/js?libraries=places&key=AIzaSyA7HRzSi5HhyKTX9Xw7CZ-9XScwq04TZyc')
+    script(src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/2.5.0/ui-bootstrap-tpls.min.js")
+    script(src="https://cdnjs.cloudflare.com/ajax/libs/angular-sanitize/1.5.8/angular-sanitize.min.js")
+    script(src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js")
+
+// ALL ITEMS ARE LISTS
+
+// archiveType
+// proxyObsType
+// infVarType
+// sensorGenus
+// sensorSpecies
+// lat
+// lon
+// alt
+// ageUnits
+// ageBound
+// ageBoundType
+// recordLength
+// resolution
+// interpName
+// interpDetail
+
+

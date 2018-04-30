@@ -2,11 +2,11 @@ var misc = (function(){
   // 'use strict';
   return {
 
-    checkCoordinatesDms: (function(D, dms, ddOn){
+    checkCoordinatesDms: (function(D, dms, ddMode){
 
-      // Only attempt conversion process if the decimal degrees switch is OFF (i.e., DMS is on)
-      if(!ddOn){
-       var _dd = misc.convertDecimalDegrees(dms);
+      // Only attempt conversion process if the Decimal Degrees switch is OFF (i.e., DMS is on)
+      if(!ddMode){
+       var _dd = misc.convertToDecimalDegrees(dms);
        // longitude
        D.geo.geometry.coordinates[0] = _dd[0];
        // latitude
@@ -15,17 +15,69 @@ var misc = (function(){
       return(D);
     }),
 
-    convertDecimalDegrees: (function(dms){
+    convertCoordinates: (function(mode, dd, dms){
+
+      // Convert DD to DMS
+      if(mode){
+        dms = misc.convertToDms(dd);
+      }
+      // Convert DMS to DD
+      else {
+        dd = misc.convertToDecimalDegrees(dms);
+      }
+      var _vals = {"dd": dd, "dms": dms};
+      return(_vals);
+    }),
+
+    convertToDecimalDegrees: (function(dms){
       // FORMULA : DD = d + (min/60) + (sec/3600)
       // lat, lon
       var _dd = [0, 0];
       try{
         _dd[0] = dms.lon.d + (dms.lon.m/60) + (dms.lon.s/3600);
         _dd[1] = dms.lat.d + (dms.lat.m/60) + (dms.lat.s/3600);
+        _dd[0] = Number(_dd[0].toFixed(6));
+        _dd[1] = Number(_dd[1].toFixed(6));
+        if(dms.lon.dir.name === "W"){
+          _dd[0] = -(_dd[0]);
+        }
+        if(dms.lat.dir.name === "S"){
+          _dd[1] = -(_dd[1]);
+        }
       } catch(err){
         console.log("Error converting decimal degrees! " + err);
       }
       return _dd;
+    }),
+
+    convertToDms: (function(dd){
+      // TODO WHY IS LON GETTING A SOUTH VALUE IN CONVERSION?!
+      var _dms = {
+        "lon": {"d": 0, "m": 0, "s": 0, "dir": {id: 1, name: "E"}},
+        "lat": {"d": 0, "m": 0, "s": 0, "dir": {id: 1, name: "W"}}
+      };
+
+      // get the dd values
+      var _lon = dd[0];
+      var _lat = dd[1];
+
+      // lon conversion
+      _dms.lon.d = Math.floor(_lon);
+      _dms.lon.m = Math.floor(((_lon - _dms.lon.d) * 60));
+      _dms.lon.s = Number(((_lon - _dms.lon.d - _dms.lon.m/60) * 3600).toFixed(2));
+      if(_lon < 0){
+        _dms.lon.dir = {id: 2, name:"S"}
+      }
+
+      // lat conversion
+      _dms.lat.d = Math.floor(_lat);
+      _dms.lat.m = Math.floor(((_lat - _dms.lat.d) * 60));
+      _dms.lat.s = Number(((_lat - _dms.lat.d - _dms.lat.m/60) * 3600).toFixed(2));
+      if(_lat < 0){
+        _dms.lat.dir = {id: 2, name: "W"};
+      }
+
+      return _dms;
     }),
 
     removeCsvHeader: (function(_csv){
