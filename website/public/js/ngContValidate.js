@@ -375,6 +375,7 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
             // console.log(response);
             alert("HTTP 404: No data found for that DOI");
           });
+        entry.tmp.doiWarn = true;
       } else {
         alert("DOI entered does not match the DOI format");
       }

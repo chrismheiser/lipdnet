@@ -482,6 +482,7 @@ var create = (function(){
       var _keys = {
         "citation": "citation",
         "created": "year",
+        "container-title": "journal",
         "author": "authors",
         "publisher": "publisher",
         "title": "title",

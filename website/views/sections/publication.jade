@@ -16,8 +16,9 @@ div(ng-repeat="entry in files.json.pub track by $index" layout-wrap="")
 
   md-card(ng-show="entry.tmp.toggle")
     md-subheader.md-primary publication {{$index+1}}
+    pre(ng-show="entry.tmp.doiWarn" style="background-color:#FDEDB9; border: none;")
+      p(style="white-space: pre-line; word-break:break-word;") Data retrieved from the DOI API may be incomplete or compiled differently depending on the journal source. We encourage you to reference the DOI manually and verify the information if you encounter issues (ex. missing authors, incorrect dates, etc.).
     div.step14(layout='', layout-padding='', layout-sm='column')
-
       md-input-container(flex='', ng-class="md-input-has-value")
         label DOI
         input(ng-model='entry.identifier[0].id')
