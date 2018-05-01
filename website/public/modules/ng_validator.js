@@ -304,8 +304,8 @@ var lipdValidator = (function(){
         "advKeys": ["@context", "tsid", "number", "google", "md5", "lipdVersion", "investigators"],
         "miscKeys": ["studyName", "proxy", "metadataMD5", "googleSpreadSheetKey", "googleMetadataWorksheet",
           "@context", "tagMD5", "dataSetName", "description", "maxYear",
-          "minYear", "originalDataUrl", "dataContributor", "collectionName", "googleDataUrl",
-          "paleoData", "chronData", "notes"],
+          "minYear", "originalDataUrl", "originalDataURL", "dataContributor", "collectionName", "googleDataUrl",
+          "googleDataURL", "paleoData", "chronData", "notes"],
         "reqRootKeys": ["archiveType", "dataSetName", "paleoData", "geo"],
         "reqPubKeys": ["author", "title", "year", "journal"],
         "reqPubDcKeys": ["author", "title"],
@@ -331,7 +331,8 @@ var lipdValidator = (function(){
           "pub": [],
           "funding": [],
           "geo": [],
-          "columns": ["takenAtDepth", "variableName", "inferredVariableType", "proxyObservationType"]
+          "columns": ["takenAtDepth", "variableName"],
+          // "specialColumns": ["inferredVariableType", "proxyObservationType"]
         },
         "preferred": {
           "root": [],
@@ -396,7 +397,7 @@ var lipdValidator = (function(){
           console.log("Validator Report: ");
           console.log("LiPD filename: " + files.lipdFilename);
           console.log("TSids created: " + pageMeta.tsids_generated);
-          console.log("Wiki: ", feedback.validWiki, ", NOAA: ", feedback.validNoaa, " LiPD: ", feedback.validLipd);
+          console.log("Wiki", feedback.validWiki, "NOAA", feedback.validNoaa, "LiPD", feedback.validLipd);
 
           // var jsonCopy = JSON.parse(JSON.stringify(files.json));
         } catch (err){
@@ -717,16 +718,34 @@ var lipdValidator = (function(){
 
             // Required column keys
             for (var i = 0; i < table.columns.length; i++) {
-              // required column keys
+
+              // Special Fields: variableType and proxyObservationType / inferredVariableType
+              if(table.columns[i].hasOwnProperty("variableType")){
+                var _varType = table.columns[i].variableType;
+                if(_varType === "measured" || _varType === "measuredVariable"){
+                  if(!table.columns[i].hasOwnProperty("proxyObservationType")){
+                    logFeedback("err", "Missing: " + crumbs + ".column" + i + ".proxyObservationType", "proxyObservationType");
+                  }
+                } else if(_varType === "inferred"){
+                  if(!table.columns[i].hasOwnProperty("inferredVariableType")){
+                    logFeedback("err", "Missing: " + crumbs + ".column" + i + ".inferredVariableType", "inferredVariableType");
+                  }
+                } else {
+                  logFeedback("err", "Missing: " + crumbs + ".column" + i + ".variableType", "variableType");
+                }
+
+              } else {
+                logFeedback("err", "Missing: " + crumbs + ".column" + i + ".variableType", "variableType");
+                logFeedback("err", "Missing: " + crumbs + ".column" + i + ".proxyObservationType OR inferredVariableType", "proxyObservationType|inferredVariableType");
+              }
+
+              // Required column keys
               for (var k in keys_base.reqColumnKeys) {
                 if(keys_base.reqColumnKeys.hasOwnProperty(k)){
                   // current key
                   var currKey = keys_base.reqColumnKeys[k];
                   // current key exists in this column?
                   if (!table.columns[i].hasOwnProperty(currKey) || !table.columns[i][currKey]) {
-                    // if(currKey === "TSid"){
-                    //   console.log(table.columns[i]);
-                    // }
                     if(currKey === "units"){
                       table.columns[i]["units"] = "unitless";
                       feedback.missingUnitCt++;
@@ -864,8 +883,6 @@ var lipdValidator = (function(){
       // check that column count in a table match the column count in the CSV data
       var requiredColumnsCtMatch = function (filename, columns) {
         var csvCt = 0;
-        // console.log("columns");
-        // console.log(columns);
         try{
           // Get the column count for this csv file.
           csvCt = files.csv[filename].cols;
@@ -877,7 +894,6 @@ var lipdValidator = (function(){
           var metaCt = columns.length;
           // edge case: ensemble table that has "two" columns, but actual column 2 is a list of columns.
           if (csvCt !== metaCt) {
-            // console.log("one column");
             // column counts don't match. Do we have two columns? Might be an ensemble table
             if (columns.length === 1){
               if (Array.isArray(columns[0].number)){
@@ -888,8 +904,7 @@ var lipdValidator = (function(){
                 }
               }
             }
-            if (columns.length === 2) {
-              // console.log("two columns");
+            else if (columns.length === 2) {
               // Is column 2 an array of columns? (most likely)
               if (Array.isArray(columns[1].number)) {
                 // calculate how many columns this array REALLY represents.

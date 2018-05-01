@@ -239,7 +239,6 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       if(typeof($scope.files.json.geo.geometry.coordinates) === "undefined"){
         $scope.files.json.geo.geometry.coordinates = [0,0];
       }
-      console.log($scope.dms);
       var _vals = misc.convertCoordinates($scope.pageMeta.decimalDegrees, $scope.files.json.geo.geometry.coordinates, $scope.dms);
       $scope.files.json.geo.geometry.coordinates = _vals.dd;
       $scope.dms = _vals.dms;
@@ -1024,8 +1023,6 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
     };
 
     $scope.validate = function(){
-      console.log($scope.files);
-      console.log($scope.files.json);
       // Go through all validations steps, and update scope data.
       // rearrange coordinates from dict to array when necessary, and set the map if coordinates exist
       $scope.files = map.fixCoordinates($scope.files);
