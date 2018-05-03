@@ -18,93 +18,110 @@ block body
                 .md-toolbar-tools
                     .md-title Query Datasets
 
-            pre {{query}}
-            br
             div#form-container(ng-controller="QueryCtrl as qc")
+                //pre(ng-model="query") {{queryPretty}}
+                br
+                md-subheader.md-primary Query Results
+                div(ng-if="!formattedQuery")
+                    br
+                    p(style="align:auto; margin:auto; float:center; text-align:center;" ) No Results
+                md-card(ng-if="formattedQuery" ng-repeat="item in formattedQuery")
+                    md-subheader(style="color:#2C6FAE;") {{item.dsn}}
+                    .col-6(style="padding: 1em; margin: 1em;")
+                        h6 Wiki page
+                        a(href="{{item.url_dataset}}") {{item.url_dataset}}
+                        h6 Download
+                        a(href="{{item.url_download}}") {{item.url_download}}
 
-                .col-sm-6
+                button.green-btn-on(style="float: right;" ng-click="submitQuery()") Search
 
-                    md-subheader.md-primary Archive Type
-                        md-tooltip {{getTooltip("root", "archiveType")}}
-                    div(layout='row', layout-padding='', layout-wrap="" flex layout-sm='column')
-                        div(flex="50" ng-repeat="item in dropdowns.archiveType")
-                            md-checkbox(ng-checked="" ng-clicked="addToArr('archiveType', item)") {{item}}
-
-
-                    md-subheader.md-primary Inferred Variable Type
-                        md-tooltip {{getTooltip("paleoData", "inferredVariableType")}}
-                    div(layout='row', layout-padding='', layout-wrap="" flex layout-sm='column')
-                        div(flex="50" ng-repeat="item in dropdowns.inferredVariableType")
-                            md-checkbox(ng-checked="" ng-clicked="") {{item}}
-
-                    md-subheader.md-primary Proxy Observation Type
-                        md-tooltip {{getTooltip("paleoData", "proxyObservationType")}}
-                    div(layout='row', layout-padding='', layout-wrap="" flex layout-sm='column')
-                        div(flex="50" ng-repeat="item in dropdowns.proxyObservationType")
-                            md-checkbox(ng-checked="" ng-clicked="") {{item}}
+                br
+                br
+                div
+                    .col-sm-6
 
 
-                .col-sm-6
+                        md-subheader.md-primary Archive Type
+                            md-tooltip {{getTooltip("root", "archiveType")}}
+                        div(layout='row', layout-padding='', layout-wrap="" flex layout-sm='column')
+                            div(flex="50" ng-repeat="item in dropdowns.archiveType")
+                                md-checkbox(ng-checked="" ng-clicked="addToArr('archiveType', item)") {{item}}
 
-                    md-subheader.md-primary Age
-                    div(layout='row', layout-padding='', layout-sm='column')
-                        md-input-container(flex='', ng-class="md-input-has-value")
-                            label Min
-                            input(ng-model='query.ageBound[0]' type='number')
-                        md-input-container(flex='', ng-class="md-input-has-value")
-                            label Max
-                            input(ng-model='query.ageBound[1]' type='number')
-                        md-input-container(flex="")
-                            label Unit
-                            md-select(ng-model="query.timeUnit[0]" aria-label="Filler")
-                                md-option(ng-repeat="tu in dropdowns.timeUnit" ng-value="tu") {{tu}}
-                            md-tooltip {{getTooltip("noaa", "timeUnit")}}
-                        md-input-container(flex="")
-                            label Age Bound Type
-                            md-select(ng-model='query.ageBoundType[0]' aria-label="Filler")
-                                md-option(ng-repeat="abt in dropdowns.ageBoundType" ng-value="abt") {{abt}}
 
-                    md-subheader.md-primary Latitude
-                        md-tooltip {{getTooltip("geo", "latitude")}}
-                    div(layout='row', layout-padding='', layout-sm='column')
-                        md-input-container(flex='', ng-class="md-input-has-value")
-                            label Min
-                            input(ng-model='query.lat[0]', type='number' step="1")
-                        md-input-container(flex='', ng-class="md-input-has-value")
-                            label Max
-                            input(ng-model='query.lat[1]', type='number' step="1")
+                        md-subheader.md-primary Inferred Variable Type
+                            md-tooltip {{getTooltip("paleoData", "inferredVariableType")}}
+                        div(layout='row', layout-padding='', layout-wrap="" flex layout-sm='column')
+                            div(flex="50" ng-repeat="item in dropdowns.inferredVariableType")
+                                md-checkbox(ng-checked="" ng-clicked="") {{item}}
 
-                    md-subheader.md-primary Longitude
-                        md-tooltip {{getTooltip("geo", "latitude")}}
-                    div(layout='', layout-padding='', layout-sm='column')
-                        md-input-container(flex='', ng-class="md-input-has-value")
-                            label Min
-                            input(ng-model='query.lon[0]', type='number' step="1")
-                        md-input-container(flex='', ng-class="md-input-has-value")
-                            label Max
-                            input(ng-model='query.lon[1]', type='number' step="1")
+                        md-subheader.md-primary Proxy Observation Type
+                            md-tooltip {{getTooltip("paleoData", "proxyObservationType")}}
+                        div(layout='row', layout-padding='', layout-wrap="" flex layout-sm='column')
+                            div(flex="50" ng-repeat="item in dropdowns.proxyObservationType")
+                                md-checkbox(ng-checked="" ng-clicked="") {{item}}
 
-                    md-subheader.md-primary Elevation (m)
-                        md-tooltip {{getTooltip("geo", "elevation")}}
-                    div(layout='', layout-padding='', layout-sm='column')
-                        md-input-container(flex='', ng-class="md-input-has-value")
-                            label Min
-                            input(ng-model='query.alt[0]', type='number' step="1")
-                        md-input-container(flex='', ng-class="md-input-has-value")
-                            label Max
-                            input(ng-model='query.alt[1]', type='number' step="1")
 
-                    div(layout='row', layout-padding='', layout-sm='column')
-                        .col-sm-3
-                            md-subheader.md-primary Resolution
+                    .col-sm-6
+
+                        md-subheader.md-primary Age
+                        div(layout='row', layout-padding='', layout-sm='column')
+                            md-input-container(flex='', ng-class="md-input-has-value")
+                                label Min
+                                input(ng-model='query.ageBound[0]' type='number')
                             md-input-container(flex='', ng-class="md-input-has-value")
                                 label Max
-                                input(ng-model='query.resolution[0]', type='number' step="0.0001")
-                        .col-sm-3
-                            md-subheader.md-primary Record Length
+                                input(ng-model='query.ageBound[1]' type='number')
+                            md-input-container(flex="")
+                                label Unit
+                                md-select(ng-model="query.timeUnit[0]" aria-label="Filler")
+                                    md-option(ng-repeat="tu in dropdowns.timeUnit" ng-value="tu") {{tu}}
+                                md-tooltip {{getTooltip("noaa", "timeUnit")}}
+                            md-input-container(flex="")
+                                label Age Bound Type
+                                md-select(ng-model='query.ageBoundType[0]' aria-label="Filler")
+                                    md-option(ng-repeat="abt in dropdowns.ageBoundType" ng-value="abt") {{abt}}
+
+                        md-subheader.md-primary Latitude
+                            md-tooltip {{getTooltip("geo", "latitude")}}
+                        div(layout='row', layout-padding='', layout-sm='column')
                             md-input-container(flex='', ng-class="md-input-has-value")
-                                label Value
-                                input(ng-model='query.recordLength[0]', type='number' step="1")
+                                label Min
+                                input(ng-model='query.lat[0]', type='number' step="1")
+                            md-input-container(flex='', ng-class="md-input-has-value")
+                                label Max
+                                input(ng-model='query.lat[1]', type='number' step="1")
+
+                        md-subheader.md-primary Longitude
+                            md-tooltip {{getTooltip("geo", "latitude")}}
+                        div(layout='', layout-padding='', layout-sm='column')
+                            md-input-container(flex='', ng-class="md-input-has-value")
+                                label Min
+                                input(ng-model='query.lon[0]', type='number' step="1")
+                            md-input-container(flex='', ng-class="md-input-has-value")
+                                label Max
+                                input(ng-model='query.lon[1]', type='number' step="1")
+
+                        md-subheader.md-primary Elevation (m)
+                            md-tooltip {{getTooltip("geo", "elevation")}}
+                        div(layout='', layout-padding='', layout-sm='column')
+                            md-input-container(flex='', ng-class="md-input-has-value")
+                                label Min
+                                input(ng-model='query.alt[0]', type='number' step="1")
+                            md-input-container(flex='', ng-class="md-input-has-value")
+                                label Max
+                                input(ng-model='query.alt[1]', type='number' step="1")
+
+                        div(layout='row', layout-padding='', layout-sm='column')
+                            .col-sm-3
+                                md-subheader.md-primary Resolution
+                                md-input-container(flex='', ng-class="md-input-has-value")
+                                    label Max
+                                    input(ng-model='query.resolution[0]', type='number' step="0.0001")
+                            .col-sm-3
+                                md-subheader.md-primary Record Length
+                                md-input-container(flex='', ng-class="md-input-has-value")
+                                    label Value
+                                    input(ng-model='query.recordLength[0]', type='number' step="1")
 
 
 //- block js will insert js scripts listed in footer.jade that are needed on every page.
@@ -112,6 +129,8 @@ block js
     //- files below are page specific
     script(src="js/ngQuery.js")
     script(src="modules/ng_create.js")
+    script(src="https://cdnjs.cloudflare.com/ajax/libs/danialfarid-angular-file-upload/12.2.13/ng-file-upload.min.js")
+    script(src="https://cdnjs.cloudflare.com/ajax/libs/danialfarid-angular-file-upload/12.2.13/ng-file-upload-shim.min.js")
     script(src="https://cdnjs.cloudflare.com/ajax/libs/angularjs-toaster/2.1.0/toaster.js")
     script(src="https://cdnjs.cloudflare.com/ajax/libs/angular-busy/4.1.4/angular-busy.min.js")
     script(src='https://maps.googleapis.com/maps/api/js?libraries=places&key=AIzaSyA7HRzSi5HhyKTX9Xw7CZ-9XScwq04TZyc')

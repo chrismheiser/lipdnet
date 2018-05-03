@@ -74,6 +74,24 @@ var parseRequestNoaa = function(master, req, res){
   }
 };
 
+var parseWikiQueryResults = function(results, cb){
+  var _query_results = [];
+  for(var _m=0; _m<results.length; _m++) {
+    try {
+      var _item = {};
+      var _dsn_link = results[_m]["binding"][0]["uri"][0];
+      var _dsn = _dsn_link.match(/http:\/\/wiki.linked.earth\/Special:URIResolver\/(.*)/);
+      _item["dsn"] = _dsn[1];
+      _item["url_dataset"] = _dsn_link;
+      _item["url_download"] = 'http://wiki.linked.earth/wiki/index.php/Special:WTLiPD?op=export&lipdid=' + _dsn[1];
+      _query_results.push(_item);
+    } catch(err){
+      console.log("query: error parsing results: ", err);
+    }
+  }
+  cb(_query_results);
+};
+
 var createTmpDir = function(master){
   try {
     // create tmp folder at "/tmp/<lipd-xxxxx>"
@@ -557,6 +575,77 @@ router.get("/playground", function(req, res, next){
 
 router.get("/query", function(req, res, next){
   res.render('query', {title: 'Query Datasets'});
+});
+
+router.post("/query", function(req, res, next){
+  // console.log(req);
+  // Bring in the request module to work some magic
+  var request = require('request');
+  // Pack up the options that we want to give the request module
+  var options = {
+    uri: 'http://cheiser.pythonanywhere.com/api/wikiquery',
+    method: 'POST',
+    json: req.body,
+    timeout: 3000
+  };
+  // If we're on the production server, then we need to add in the proxy option
+  if (!dev){
+    options.proxy = "http://rishi.cefns.nau.edu:3128";
+  }
+  try{
+    request(options, function (error, response, body) {
+      console.log("query: Python Response Status: ", response.statusCode);
+      // console.log("Response error: ");
+      // console.log(error);
+      // console.log(response);
+      // console.log(body);
+      if (!error && response.statusCode === 200) {
+        console.log("query: Preparing to send new query");
+        // console.log(response.body);
+        options = {
+          uri: "http://wiki.linked.earth/store/ds/query",
+          qs: {"query": response.body}
+        };
+        if (!dev){
+          options.proxy = "http://rishi.cefns.nau.edu:3128";
+        }
+        // console.log(typeof(response.body));
+        console.log("query: Sending Wiki Query request");
+        request(options, function(error2, res2, body2){
+          console.log("query: Wiki Response Status: ", res2.statusCode);
+          // "<uri>http://wiki.linked.earth/Special:URIResolver/MD982181.Khider.2014</uri>".match(/<uri>http:\/\/wiki.linked.earth\/Special:URIResolver\/(.*)<\/uri>/)
+          // var _matches = res2.body.match(/<uri>http:\/\/wiki.linked.earth\/Special:URIResolver\/(.*)<\/uri>/);
+          // console.log("Response error: ");
+          if (!error2 && res2.statusCode === 200) {
+            var parseString = require('xml2js').parseString;
+            var _xml = res2.body;
+            parseString(_xml, function (err, result) {
+              try{
+                var _results = result.sparql.results[0].result;
+                parseWikiQueryResults(_results, function(_organized_results){
+                  // console.log(_organized_results);
+                  res.status(200).send(_organized_results);
+                });
+              } catch(err){
+                console.log("query: couldn't grab results from the wiki response object: ", err);
+                res.writeHead(100, "Received Wiki response, but results are malformed", {'content-type' : 'text/plain'});
+                res.end();
+              }
+            });
+          } else {
+            res.writeHead(res2.statusCode, "query: Error talking to the Wiki API", {'content-type' : 'text/plain'});
+            res.end();
+          }
+        });
+      } else {
+        res.writeHead(response.statusCode, "query: Error talking to the Python API", {'content-type' : 'text/plain'});
+        res.end();
+      }
+    });
+  } catch(err){
+    res.writeHead(response.statusCode, "query: error: ", err);
+    res.end();
+  }
 });
 
 router.get("/create", function(req, res, next){
