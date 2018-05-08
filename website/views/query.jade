@@ -18,52 +18,71 @@ block body
                 .md-toolbar-tools
                     .md-title Query Datasets
 
-            div#form-container(ng-controller="QueryCtrl as qc")
-                //pre(ng-model="query") {{queryPretty}}
+            div#form-container(ng-controller="QueryCtrl as qc" cg-busy="pageMeta.busyPromise")
+
                 br
                 md-subheader.md-primary Query Results
-                div(ng-if="!formattedQuery")
+                div(ng-if="feedback.errCt > 0")
+                    li(style="list-style-type: none;")
+                        pre(ng-class="on" style="background-color:#FEBABB; border: none;" uib-popover="Cannot send the query in the current state. Please fix errors listed." popover-trigger="'mouseenter'") {{ feedback.errCt}} errors
+                            ul
+                                li(ng-repeat="err in feedback.errMsgs track by $index") {{err}}
+
+                div(ng-if="feedback.errCt === 0")
+                    div(ng-if="resultCt === null")
+                        br
+                        p(style="align:auto; margin:auto; float:center; text-align:center;") Enter your search parameters, then click 'Search' to see results here
+                    div(ng-if="resultCt !== null")
+                        br
+                        h5(style="align:auto; margin:auto; float:center; text-align:center;color:#2C6FAE;") {{resultMsg}}
                     br
-                    p(style="align:auto; margin:auto; float:center; text-align:center;" ) No Results
-                md-card(ng-if="formattedQuery" ng-repeat="item in formattedQuery")
-                    md-subheader(style="color:#2C6FAE;") {{item.dsn}}
-                    .col-6(style="padding: 1em; margin: 1em;")
-                        h6 Wiki page
-                        a(href="{{item.url_dataset}}") {{item.url_dataset}}
-                        h6 Download
-                        a(href="{{item.url_download}}") {{item.url_download}}
-
+                    md-content(ng-if="resultCt !== null")
+                        .col-md-12
+                            md-list.col-md-6(ng-repeat="item in resultObjs track by $index" ng-if="$even" flex)
+                                md-list-item.noright
+                                    //img.md-avatar
+                                    h6(style="color:#2C6FAE;") {{item.dsn}}
+                                    md-button.md-secondary(ng-href="{{item.url_download}}")
+                                        i.material-icons.md-dark.md-36 cloud_download
+                                    md-button.md-secondary(ng-href="{{item.url_dataset}}")
+                                        i.material-icons.md-dark.md-36 link
+                            md-list.col-md-6(ng-repeat="item in resultObjs track by $index" ng-if="$odd" flex)
+                                md-list-item.noright
+                                    //img.md-avatar
+                                    h6(style="color:#2C6FAE;") {{item.dsn}}
+                                    md-button.md-secondary(ng-href="{{item.url_download}}")
+                                        i.material-icons.md-dark.md-36 cloud_download
+                                    md-button.md-secondary(ng-href="{{item.url_dataset}}")
+                                        i.material-icons.md-dark.md-36 link
+                br
                 button.green-btn-on(style="float: right;" ng-click="submitQuery()") Search
-
+                br
                 br
                 br
                 div
                     .col-sm-6
-
-
                         md-subheader.md-primary Archive Type
                             md-tooltip {{getTooltip("root", "archiveType")}}
                         div(layout='row', layout-padding='', layout-wrap="" flex layout-sm='column')
                             div(flex="50" ng-repeat="item in dropdowns.archiveType")
-                                md-checkbox(ng-checked="" ng-clicked="addToArr('archiveType', item)") {{item}}
+                                md-checkbox(ng-model="checked.archiveType[item]") {{item}}
 
 
                         md-subheader.md-primary Inferred Variable Type
                             md-tooltip {{getTooltip("paleoData", "inferredVariableType")}}
                         div(layout='row', layout-padding='', layout-wrap="" flex layout-sm='column')
-                            div(flex="50" ng-repeat="item in dropdowns.inferredVariableType")
-                                md-checkbox(ng-checked="" ng-clicked="") {{item}}
+                            div(flex="50" ng-repeat="item in dropdowns.infVarType")
+                                md-checkbox(ng-model="checked.infVarType[item]") {{item}}
 
                         md-subheader.md-primary Proxy Observation Type
                             md-tooltip {{getTooltip("paleoData", "proxyObservationType")}}
                         div(layout='row', layout-padding='', layout-wrap="" flex layout-sm='column')
                             div(flex="50" ng-repeat="item in dropdowns.proxyObservationType")
-                                md-checkbox(ng-checked="" ng-clicked="") {{item}}
+                                md-checkbox(ng-model="checked.proxyObsType[item]") {{item}}
 
 
                     .col-sm-6
-
-                        md-subheader.md-primary Age
+                        md-subheader.md-primary Age Bound
                         div(layout='row', layout-padding='', layout-sm='column')
                             md-input-container(flex='', ng-class="md-input-has-value")
                                 label Min
@@ -116,7 +135,7 @@ block body
                                 md-subheader.md-primary Resolution
                                 md-input-container(flex='', ng-class="md-input-has-value")
                                     label Max
-                                    input(ng-model='query.resolution[0]', type='number' step="0.0001")
+                                    input(ng-model='query.resolution[0]', type='number' step="1")
                             .col-sm-3
                                 md-subheader.md-primary Record Length
                                 md-input-container(flex='', ng-class="md-input-has-value")
