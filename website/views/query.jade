@@ -16,7 +16,7 @@ block body
             include ./include/navbar.jade
             md-toolbar
                 .md-toolbar-tools
-                    .md-title Query Datasets
+                    .md-title Query Datasets on LinkedEarth
 
             div#form-container(ng-controller="QueryCtrl as qc" cg-busy="pageMeta.busyPromise")
 
@@ -74,10 +74,10 @@ block body
                             div(flex="50" ng-repeat="item in dropdowns.infVarType")
                                 md-checkbox(ng-model="checked.infVarType[item]") {{item}}
 
-                        md-subheader.md-primary Proxy Observation Type
+                        md-subheader.md-primary Measured Variable
                             md-tooltip {{getTooltip("paleoData", "proxyObservationType")}}
                         div(layout='row', layout-padding='', layout-wrap="" flex layout-sm='column')
-                            div(flex="50" ng-repeat="item in dropdowns.proxyObservationType")
+                            div(flex="50" ng-repeat="item in dropdowns.proxyObsType")
                                 md-checkbox(ng-model="checked.proxyObsType[item]") {{item}}
 
 
