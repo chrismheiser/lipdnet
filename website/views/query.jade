@@ -55,7 +55,14 @@ block body
                                     md-button.md-secondary(ng-href="{{item.url_dataset}}")
                                         i.material-icons.md-dark.md-36 link
                 br
-                button.green-btn-on(style="float: right;" ng-click="submitQuery()") Search
+                div
+                    //div(style="text-align: center;")
+                    //    h6 Sources
+                    //    md-checkbox NOAA
+                    //    md-checkbox LinkedEarth
+                    //    md-checkbox PANGAEA
+                    div(style="float:right;")
+                        button.green-btn-on(ng-click="submitQuery()") Search
                 br
                 br
                 br
@@ -74,7 +81,7 @@ block body
                             div(flex="50" ng-repeat="item in dropdowns.infVarType")
                                 md-checkbox(ng-model="checked.infVarType[item]") {{item}}
 
-                        md-subheader.md-primary Measured Variable
+                        md-subheader.md-primary Proxy Observation Type
                             md-tooltip {{getTooltip("paleoData", "proxyObservationType")}}
                         div(layout='row', layout-padding='', layout-wrap="" flex layout-sm='column')
                             div(flex="50" ng-repeat="item in dropdowns.proxyObsType")
