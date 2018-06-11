@@ -11,6 +11,7 @@ block css
 	link(rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons")
 	link(rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/angular-busy/4.1.4/angular-busy.min.css")
 	link(rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intro.js/2.7.0/introjs.min.css")
+	link(rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/handsontable/3.0.0/handsontable.full.min.css")
 
 block body
 	body.step0(ng-app='validateApp' ng-cloak)
@@ -36,6 +37,7 @@ block body
 						div(cg-busy="pageMeta.busyPromise")
 
 							include ./pieces/version.jade
+
 							div
 								pre(style="background-color:#DFF1C1; border: none;")
 									p Are you new here? Take the tour to learn more about how to use this page.
@@ -81,12 +83,16 @@ block js
 	script(src='js/ngContModAsk.js')
 	script(src='js/ngContModAlert.js')
 	script(src='js/ngContModBlock.js')
+	script(src='js/ngSpreadsheet.js')
 	script(src='js/ngGraphs.js')
 	script(src="lib/zip/zip.js")
 	script(src='lib/json-tree.js')
 	script(src="lib/zip/zip-ext.js")
 	script(src="lib/papaparse.min.js")
 	script(src="lib/FileSaver.min.js")
+	//script(src="https://cdnjs.cloudflare.com/ajax/libs/handsontable/3.0.0/handsontable.full.min.js")
+	script(src="lib/ngHandsontable/dist/handsontable.full.js")
+	script(src="lib/ngHandsontable/dist/ngHandsontable.js")
 	script(src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.min.js")
 	script(src="https://cdnjs.cloudflare.com/ajax/libs/nvd3/1.8.1/nv.d3.min.js")
 	//script(src="https://cdnjs.cloudflare.com/ajax/libs/angular-nvd3/1.0.9/angular-nvd3.min.js")

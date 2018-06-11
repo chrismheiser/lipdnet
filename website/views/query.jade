@@ -62,6 +62,7 @@ block body
                     //    md-checkbox LinkedEarth
                     //    md-checkbox PANGAEA
                     div(style="float:right;")
+                        button.green-btn-on(ng-click="downloadAll()" ng-if="resultCt > 1") Download All
                         button.green-btn-on(ng-click="submitQuery()") Search
                 br
                 br

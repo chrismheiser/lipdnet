@@ -86,6 +86,7 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
     };
     // Metadata about the page view, and manipulations
     $scope.pageMeta = {
+      "spreadsheetBeta": true,
       "resetColumnMeta": true,
       "busyPromise": null,
       "header": false,
@@ -602,6 +603,7 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
             "columns": []}]}]}
       };
       $scope.pageMeta = {
+        "spreadsheetBeta": true,
         "keepColumnMeta": false,
         "header": false,
         "appendColumn": false,
@@ -887,89 +889,6 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
         }
         cb({});
       }
-    };
-
-    $scope.startHints = function(){
-      var intro = introJs();
-      intro.setOptions({
-        hints: [
-          {
-            intro: "Welcome to the Create LiPD page! This tour is designed to teach you the ins and outs of creating or " +
-            "editing a LiPD file. We tried to make working with LiPD data as simple as possible, but some parts of the process " +
-            "inevitably need more explanation."
-          },
-          {
-            // Map
-            element: document.querySelector(".step1"),
-            hint: "The map uses your coordinate data to drop a pin on your dataset's location.",
-            hintPosition: "bottom-left"
-          },
-          {
-            // Choose file button
-            element: document.querySelector(".step2"),
-            hint: "If you have a LiPD file and would like to upload it, use the 'Choose File' button to browse your computer and select the file.",
-            hintPosition: 'top'
-          },
-          {
-            // Validate button
-            element: document.querySelector(".step3"),
-            hint: 'LiPD files must abide by our designed structure, follow standards, and meet minimum data requirements to be considered a valid file. Use this button to determine if your file is valid.',
-            hintPosition: 'right'
-          },
-          {
-            // Save Session button
-            element: document.querySelector(".step4"),
-            hint: "Need a break from your dataset? Did your internet connection disconnect? Save the session and come back later. Just don't close your internet browser!",
-            hintPosition: 'right'
-          },
-          {
-            // Download lipd button
-            element: document.querySelector(".step5"),
-            hint: 'Download your validated data as a LiPD file to your local computer.',
-            hintPosition: "top-middle"
-          },
-          {
-            // Download NOAA button
-            element: document.querySelector(".step6"),
-            hint: "Download your validated data as a NOAA template text file. Please note, one text file is created for every paleo measurement table in your dataset.",
-            hintPosition: "top-middle"
-          },
-          {
-            // NOAA ready, wiki ready switches
-            element: document.querySelector(".step7"),
-            hint: "The LinkedEarth Wiki and NOAA have additional data requirements on top of the normal LiPD requirements. Turning on these switches will add custom data input fields to the page and add rules to the validation process.",
-            hintPosition: "middle-left"
-          },
-          {
-            // Feedback boxes
-            element: document.querySelector(".step8"),
-            hint: "Validation results. Every time you press the 'Validate' button, these boxes will show the results. A valid file may have warnings, but must not have any errors.",
-            hintPosition: "right"
-          },
-          {
-            // Requirements boxes
-            element: document.querySelector(".step9"),
-            hint: "The requirements boxes give you feedback on how complete your dataset is and if you meet different levels of requirements. Hover your mouse pointer over each box to view specific requirements for each.",
-            hintPosition: "right"
-          },
-          {
-            // Files list
-            element: document.querySelector(".step10"),
-            hint: "All files ( .jsonld, .csv, .txt ) archived withing the LiPD file are listed here after upload. The filenames listed may be clicked to view the contents inside.",
-            hintPosition: "right"
-          }
-        ]
-      });
-      intro.onhintsadded(function() {
-        console.log('all hints added');
-      });
-      intro.onhintclick(function(hintElement, item, stepId) {
-        console.log('hint clicked', hintElement, item, stepId);
-      });
-      intro.onhintclose(function (stepId) {
-        console.log('hint closed', stepId);
-      });
-      intro.addHints();
     };
 
     $scope.toggleCsvBox = function(entry) {

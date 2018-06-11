@@ -697,39 +697,39 @@ var create = (function(){
         {
           // Paleo
           element: document.querySelector(".step16"),
-          intro: "Use this section to build the columns of your data table. Enter the header row (where applicable) and column values ONLY. We recommend copying your data from a text file or spreadsheet, but entering data by hand works as well. (with one small exception noted in the next step)",
+          intro: "Add values to your tables via the Spreadsheet (Beta) or Classic parser. The Spreadsheet is similar to a normal Excel spreadsheet. However, please note that if you enter data and you don't see the changes, please click 'Refresh' to update the view. When using the Classic parser, copy/paste your values into the box and choose the parsing options.",
           position: "top"
         },
-        {
-          // Delimiter
-          element: document.querySelector(".step17"),
-          intro: "Choose the delimiter that matches what you see in the input box below. One exception: When copying data from a spreadsheet, the delimiter is 'Tab (\\t)'.",
-          position: "right"
-        },
-        {
-          // Parse Mode
-          element: document.querySelector(".step18"),
-          intro: "The parse box has multiple modes attached to it. Choose the one that fits your situation. 'Start New' builds a brand new table. 'Update' keeps all existing column metadata, and replaces all column values. 'Add' keeps all existing columns and adds the parsed values as new columns to the table  ",
-          position: "right"
-        },
-        {
-          // Header
-          element: document.querySelector(".step19"),
-          intro: "Header row data will parse into the 'variableName' field for each column. Please note, units will not be parsed from the header row.",
-          position: "right"
-        },
-        {
-          // Parse Values Box
-          element: document.querySelector(".step20"),
-          intro: "Here's an example of some data with a header line. This is what the data would look like if you copied it from a spreadsheet and it had a 'Tab' delimiter. Click 'Parse Values' to see how it creates columns in this table.",
-          position: "top"
-        },
-        {
-          // Add table dropdown and button
-          element: document.querySelector(".step21"),
-          intro: "Add a new data table to paleoData or chronData by choosing the table type from the dropdown menu and clicking '+ Add Table'. We're working to add support for more tables!",
-          position: "top"
-        },
+        // {
+        //   // Delimiter
+        //   element: document.querySelector(".step17"),
+        //   intro: "Choose the delimiter that matches what you see in the input box below. One exception: When copying data from a spreadsheet, the delimiter is 'Tab (\\t)'.",
+        //   position: "right"
+        // },
+        // {
+        //   // Parse Mode
+        //   element: document.querySelector(".step18"),
+        //   intro: "The parse box has multiple modes attached to it. Choose the one that fits your situation. 'Start New' builds a brand new table. 'Update' keeps all existing column metadata, and replaces all column values. 'Add' keeps all existing columns and adds the parsed values as new columns to the table  ",
+        //   position: "right"
+        // },
+        // {
+        //   // Header
+        //   element: document.querySelector(".step19"),
+        //   intro: "Header row data will parse into the 'variableName' field for each column. Please note, units will not be parsed from the header row.",
+        //   position: "right"
+        // },
+        // {
+        //   // Parse Values Box
+        //   element: document.querySelector(".step20"),
+        //   intro: "Here's an example of some data with a header line. This is what the data would look like if you copied it from a spreadsheet and it had a 'Tab' delimiter. Click 'Parse Values' to see how it creates columns in this table.",
+        //   position: "top"
+        // },
+        // {
+        //   // Add table dropdown and button
+        //   element: document.querySelector(".step21"),
+        //   intro: "Add a new data table to paleoData or chronData by choosing the table type from the dropdown menu and clicking '+ Add Table'. We're working to add support for more tables!",
+        //   position: "top"
+        // },
         {
           // Delete Section buttons
           element: document.querySelector(".step22"),
@@ -935,7 +935,7 @@ var create = (function(){
       var _popovers = {
         "lipd": '' +
         '<h5>LiPD Requirements</h5><br>' +
-        '<p>Root Level:</p><ul>' +
+        '<p>Root:</p><ul>' +
         '<li>dataSetName</li>' +
         '<li>archiveType</li>' +
         '<li>createdBy</li>' +
@@ -943,7 +943,7 @@ var create = (function(){
         '<li>coordinates</li>' +
         '</ul><br><p>paleoData:</p><ul>' +
         '<li>measurementTable</li>' +
-        '</ul><br><p>Column Level:</p><ul>' +
+        '</ul><br><p>Columns:</p><ul>' +
         '<li>variableName</li>' +
         '<li>units ("unitless" if units not applicable)</li>' +
         '<li>values</li>' +
@@ -951,7 +951,7 @@ var create = (function(){
         "wiki": '' +
         '<h5>Linked Earth Wiki Requirements</h5><br>' +
         '<p>In addition to the normal LiPD Requirements: </p>' +
-        '</ul><br><p>Column Level:</p><ul>' +
+        '</ul><br><p>Columns:</p><ul>' +
         '<li>proxyObservationType</li>' +
         '<li>variableType</li>' +
         '<li>takenAtDepth</li>' +
@@ -972,7 +972,7 @@ var create = (function(){
         '</ul><br><p>Geo:</p><ul>' +
         '<li>siteName</li>' +
         '<li>location</li>' +
-        '</ul><br><p>Column Level:</p><ul>' +
+        '</ul><br><p>Columns:</p><ul>' +
         '<li>description</li>' +
         '<li>dataFormat</li>' +
         '<li>dataType</li>'

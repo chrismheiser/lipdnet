@@ -7,21 +7,21 @@ div(ng-show="entry2.tmp.parse" layout="" layout-padding="" layout-sm="column")
 div(ng-hide="entry2.tmp.parse")
     // Textarea to Copy/Paste CSV data
     div(layout='', layoust-padding='', layout-sm='column')
-        .step17(style="padding:2px; margin:18px;")
+        div(style="padding:2px; margin:18px;")
             md-input-container
                 md-label Delimiter
                 md-select(ng-model='dropdowns.current.delimiter' ng-model-options="{trackBy: '$value.id'}" aria-label="filler")
                     md-option(ng-value="delimiter" ng-repeat="delimiter in dropdowns.delimiters") {{ delimiter.view }}
                 md-tooltip Generally, copy/pasting data results in a 'Tab' delimiter. Please note if another delimiter is in use.
-        .step18(style="padding:2px; margin:18px;")
+        div(style="padding:2px; margin:18px;")
             md-input-container
                 md-label Parse Mode
                 md-select(ng-model='dropdowns.current.parseMode' ng-model-options="{trackBy: '$value.id'}" aria-label="filler")
                     md-option(ng-value="opt" ng-repeat="opt in dropdowns.parseMode") {{ opt.view }}
                 md-tooltip What parsing action would you like to take?
-        .step19(style="padding:2px; margin:18px;")
+        div(style="padding:2px; margin:18px;")
             md-switch(ng-model='pageMeta.header') Header: {{ pageMeta.header? "Yes": "No"}}
                 md-tooltip If your values include a variable name header, feel free to include it. They must use the same formatting as the values, and not include any units
 
-    div.step20(layout='', layout-padding='', layout-sm='column')
+    div(layout='', layout-padding='', layout-sm='column')
         textarea(placeholder='Copy/Paste your CSV data here...' ng-model="entry2.tmp.values" style="border:0.1em solid #ccc;border-radius:0.5em;height:10em;width:80em")

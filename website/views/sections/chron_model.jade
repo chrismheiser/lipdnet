@@ -10,12 +10,22 @@ div(ng-repeat='entry in files.json.chronData track by $index' layout-wrap="" ng-
         md-card(ng-if="entry2.tmp.toggle")
             md-subheader.md-primary chron {{parentIdx+1}} > model 1 > summary {{$index+1}}
             include ./table_root
-            // Toggle the csv entry2 box and the parse csv button. Once we parse CSV, these elements are not longer needed.
-            include ./parse_csv.jade
-                button.green-btn-off(ng-click="parseCsv(entry2, parentIdx, $index, {'pc': 'chron', 'tt': 'summary'}); toggleCsvBox(entry2)" style="margin: 1.5em; float:right;" type="button") Parse Values
+            // Toggle for switching between Classic and Spreadsheet parsers.
+            md-switch(style="margin:1em" ng-model="pageMeta.spreadsheetBeta") Parse Mode: {{ pageMeta.spreadsheetBeta? "Spreadsheet (Beta)": "Classic"}}
+
             br
-            // Column Data
-            include ./table_column.jade
+
+            div(ng-controller="SpreadsheetCtrl as sc")
+                // Column Data
+                include ./table_column
+                div
+                    // Classic parser
+                    div(ng-if="!pageMeta.spreadsheetBeta")
+                        include ./parse_csv.jade
+                            button.green-btn-off(ng-click="parseCsv(entry2, parentIdx, $index, {'pc': 'chron', 'tt': 'summary'}); toggleCsvBox(entry2)" style="margin: 1.5em; float:right;" type="button") Parse Values
+                    // Spreadsheet parser
+                    div(ng-if="pageMeta.spreadsheetBeta")
+                        include ./spreadsheet_csv.jade
 
             button.red-btn-off(type="button" ng-click="removeBlock(entry.model[0].summaryTable, $index)" style="margin: 1.5em; padding: 2px 2px 2px 2px;") Delete Table
 
