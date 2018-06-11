@@ -16,6 +16,9 @@ block css
 block body
 	body.step0(ng-app='validateApp' ng-cloak)
 		#wrapper
+			div.alert.alert-success.alert-dismissable
+				strong Spreadsheets!
+				p Table values are now editable in an familiar spreadsheet format. There are known issues using it with Safari, so please give it a try with an alternate internet browser. If you need to use the old parser, it is still available via a switch.
 
 			include ./include/navbar.jade
 			md-toolbar

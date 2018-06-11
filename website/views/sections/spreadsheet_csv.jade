@@ -4,7 +4,7 @@ div.container
     div(ng-if="entry2.columns.length < 1")
         p(style="text-align: center; margin:auto auto; padding: 20px;") Add a column to get started
     div(ng-if="entry2.columns.length > 0" style="margin:1em; padding:1em;")
-        hot-table(settings="settings" height='400' width='1000' datarows="files.csv[entry2.filename].data")
+        hot-table(settings="settings" height='400' width='1120' datarows="files.csv[entry2.filename].data")
             hot-column(ng-repeat="col in entry2.columns track by $index")
 
     button.red-btn-off(style="float:right; margin:1em;" ng-click="removeColumn(entry2)" type="button") Remove Column

@@ -4,7 +4,6 @@ function SpreadsheetCtrl($scope){
 
   // $scope.headers = [];
   $scope.settings = {
-    // data: [[0,0,0]],
     rowHeaders: false,
     colHeaders: [],
     colWidths: 160,
@@ -13,7 +12,7 @@ function SpreadsheetCtrl($scope){
     minSpareCols: 0,
     startRows: 10,
     startCols: 0,
-    contextMenu: ["row_above", "row_below", "remove_row", "undo", "redo"],
+    contextMenu: ["row_above", "row_below", "remove_row", "undo", "redo", "copy", "cut"],
     afterInit: function(index, amount){
       // Use this to keep a reference to the hot instance.
       $scope.hot = this;
