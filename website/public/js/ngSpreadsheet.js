@@ -13,7 +13,7 @@ function SpreadsheetCtrl($scope){
     minSpareCols: 0,
     startRows: 10,
     startCols: 0,
-    contextMenu: true,
+    contextMenu: ["row_above", "row_below", "remove_row", "undo", "redo"],
     afterInit: function(index, amount){
       // Use this to keep a reference to the hot instance.
       $scope.hot = this;

@@ -697,7 +697,7 @@ var create = (function(){
         {
           // Paleo
           element: document.querySelector(".step16"),
-          intro: "Add values to your tables via the Spreadsheet (Beta) or Classic parser. The Spreadsheet is similar to a normal Excel spreadsheet. However, please note that if you enter data and you don't see the changes, please click 'Refresh' to update the view. When using the Classic parser, copy/paste your values into the box and choose the parsing options.",
+          intro: "Add values to your tables via the Spreadsheet (Beta) or Classic parser. The Spreadsheet is similar to a normal Excel spreadsheet. However, please note that if you enter data and you don't see the changes, please click 'Refresh' to update the view. When using the Classic parser, copy/paste your values into the box and choose the parsing options. We recommend using the Spreadsheet unless you are experiencing issues with it.",
           position: "top"
         },
         // {
