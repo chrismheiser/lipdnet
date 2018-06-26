@@ -52,7 +52,7 @@ var cleanTmpDir = function(){
             // 60000 - one minute
             // 300000 - five minutes
             // 3600000 - one hour
-            endTime = new Date(stat.ctime).getTime() + 300000;
+            endTime = new Date(stat.ctime).getTime() + 60000;
             if (now > endTime) {
               return rimraf(path.join(tmpDir, innerDir), function(err) {
                 if (err) {
@@ -71,7 +71,7 @@ var cleanTmpDir = function(){
 };
 
 // Call the cleaning function every 5 minutes
-setTimeout(cleanTmpDir, 300000);
+setTimeout(cleanTmpDir, 100000);
 
 // Multer functions to save uploaded files
 var storage = multer.diskStorage({

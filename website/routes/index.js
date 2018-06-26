@@ -13,6 +13,57 @@ var dev = port === 3000;
 var router = express.Router();
 
 
+// HELPERS
+var batchDownloadWiki = function(dsns, cb){
+  var _errCt = 0;
+  var _errNames = [];
+  var request = require('request');
+
+  // Options for creating a temp folder
+  var _opts = {"pathTmpPrefix": path.join(process.cwd(), "tmp", "wiki-"), "pathTmp": ""};
+  // Create a temp directory with the options, and return the path at pathTmp
+  _opts = createTmpDir(_opts);
+  console.log(_opts);
+
+  // For each dataset, make a download request from the LinkedEarth server
+  for(var _i=0; _i<dsns.length; _i++){
+
+    console.log(dsns[_i]);
+
+    // // Send out ONE request, and download the LiPD file to our server
+    // console.log("link");
+    // console.log('http://wiki.linked.earth/wiki/index.php/Special:WTLiPD?op=export&lipdid=' + dsns[_i]);
+    // // Pack up the options that we want to give the LinkedEarth Wiki
+    // var options = {
+    //   uri: 'http://wiki.linked.earth/wiki/index.php/Special:WTLiPD?op=export&lipdid=' + dsns[_i],
+    //   method: 'GET',
+    //   timeout: 3000
+    // };
+    // // If we're on the production server, then we need to add in the proxy option
+    // if (!dev){
+    //   options.proxy = "http://rishi.cefns.nau.edu:3128";
+    // }
+    // try{
+    //   console.log("downloadall: Sending request to LinkedEarth Wiki");
+    //   request(options, function (err1, res1, body1) {
+    //     console.log("downloadall: LinkedEarth Wiki: Response Status: ", res1.statusCode);
+    //     if(err1){
+    //       console.log("downloadall: LinkedEarth Wiki: Error making the request");
+    //     } else {
+    //       console.log("downloadall: LinkedEarth Wiki: I think it...worked? ");
+    //       // console.log(res1);
+    //       // console.log(body1);
+    //     }
+    //   }).pipe(fs.createWriteStream(dsns[_i] + ".lpd"));
+    // } catch(err){
+    //   // _errNames.push(dsns[_i]);
+    //   // _errCt++;
+    //   console.log("downloadall: Overall error, this could be anything: " + err);
+    // }
+  }
+
+  cb()
+};
 
 var downloadResponse = function(options, res){
   // set headers and initiate download.
@@ -88,7 +139,7 @@ var parseWikiQueryResults = function(results, cb){
   cb(_query_results);
 };
 
-var createTmpDir = function(master){
+var createTmpDir = function(master, res){
   try {
     // create tmp folder at "/tmp/<lipd-xxxxx>"
     // logger.info("POST: creating tmp dir...");
@@ -110,7 +161,7 @@ var createTmpDir = function(master){
 };
 
 // Create the subfolders
-var createSubdirs = function(master, pathTmp){
+var createSubdirs = function(master, res){
     logger.info("createSubdirs");
     try{
       // tmp bagit level folder. will be removed before zipping.
@@ -325,36 +376,39 @@ var createArchive = function(pathTmp, pathTmpZip, pathTmpBag, filename, cb){
 
 }; // end createArchive
 
-// Get the home page
+// END HELPERS
+
+
+// PAGE ROUTES
+
 router.get('/', function(req, res, next) {
   res.render('index', { title: 'LiPD' });
 });
 
-// Receive a POST from the contact form on the home page
 router.post('/', function(req, res, next){
+  // Receive a POST from the contact form on the home page
   // logger.info(req.body);
 });
 
-// Get the schema page
-// router.get('/faq', function(req, res, next){
-//     res.render('faq', {title: 'Frequently Asked Questions'});
-// });
-
-// Get the upload page
-// router.get('/validator', function(req, res, next){
-//   res.render('validator', {title: 'Validator'});
-// });
+router.get("/playground", function(req, res, next){
+  // Render the playground page
+  res.render('playground', {title: 'Playground'});
+});
 
 router.post("/files", function(req, res, next){
+  // Request data : Client sends LiPD data. Create csv, json, and text files. Zip contents into a LiPD file stored on the server.
+  // Response data : A string ID that corresponds to the LiPD file on the server.
+
   logger.info("POST: /files");
-  // REQ
-  //
+  // Request
   var master = {};
   master = parseRequest(master, req, res);
-  master = createTmpDir(master);
-  master = createSubdirs(master);
+  console.log(master);
+  master = createTmpDir(master, res);
+  console.log(master);
+  master = createSubdirs(master, res);
   try{
-    // use req data to write csv and jsonld files into "/files/<lipd-xxxxx>/files/"
+    // Use the request data to write csv and jsonld files into "/tmp/<lipd-xxxxx>/files/"
     writeFiles(master.files, master.pathTmpFiles, res, function(){});
 
     logger.info("Start Bagit...");
@@ -398,6 +452,8 @@ router.post("/files", function(req, res, next){
 });
 
 router.get("/files/:tmp", function(req, res, next){
+  // Request: Client sends a string ID of the LiPD file that they want to download.
+  // Response: Initiate a download of the LiPD file to the client.
   try {
     // Tmp string provided by client
     logger.info("/files get");
@@ -424,13 +480,16 @@ router.get("/files/:tmp", function(req, res, next){
 });
 
 router.post("/noaa", function(req, res, next){
+  // Request: Client sends LiPD data. Send it to PythonAnywhere script to convert it to NOAA text(s). Write NOAA texts to server.
+  // Response: A string ID that corresponds to the NOAA file (or zip of multi NOAA files) on the server.
+
   try{
     // Parse the angular request data into a form that we can use
     var master = {};
     // console.log(JSON.stringify(req.body.dat));
     master = parseRequestNoaa(master, req, res);
     // console.log(JSON.stringify(master.dat));
-    master = createTmpDir(master);
+    master = createTmpDir(master, res);
     console.log(master.name);
     // console.log(JSON.stringify(master.dat));
     try {
@@ -531,6 +590,8 @@ router.post("/noaa", function(req, res, next){
 });
 
 router.get("/noaa/:tmp", function(req, res, next){
+  // Request: Client sends a string ID of the NOAA file that they want to download.
+  // Response: Initiate a download of the NOAA file to the client.
   try {
     logger.info("/noaa get: Ya! Take it away, Ern!");
     // NOAA ID provided by client
@@ -565,15 +626,10 @@ router.get("/noaa/:tmp", function(req, res, next){
   }
 });
 
-router.get("/playground", function(req, res, next){
-  res.render('playground', {title: 'Playground'});
-});
-
-router.get("/query", function(req, res, next){
-  res.render('query', {title: 'Query Datasets'});
-});
-
 router.post("/query", function(req, res, next){
+  // Request: A JSON object of query parameters. Send these parameters to PythonAnywhere script to get query text-blob. Send query text blob to LinkedEarth Wiki to get query results.
+  // Response: Query dataset name results. Parsed and formatted in an array to be useful on client-side
+
   // Bring in the request module to work some magic
   var request = require('request');
   // Pack up the options that we want to give the Python request
@@ -591,8 +647,13 @@ router.post("/query", function(req, res, next){
     console.log("query: Python: Sending request...");
     request(options, function (err1, res1, body1) {
       console.log("query: Python: Response Status: ", res1.statusCode);
+      if(err1){
+        console.log("query: Python: Error making the request");
+        res.writeHead(res1.statusCode, "Error talking to the API", {'content-type' : 'text/plain'});
+        res.end();
+      }
       // If the Python script has an error, it'll return an empty string.
-      if(typeof(res1.body) === 'undefined' || res1.body === ""){
+      else if(typeof(res1.body) === 'undefined' || res1.body === ""){
         res.writeHead(500, "Error creating the query string. Cannot query Wiki.", {'content-type' : 'text/plain'});
         res.end();
       }
@@ -609,6 +670,11 @@ router.post("/query", function(req, res, next){
         console.log("query: Wiki: Sending request...");
         request(options, function(err2, res2, body2){
           console.log("query: Wiki: Response Status: ", res2.statusCode);
+          if(err2){
+            console.log("query: Wiki: Error making the request");
+            res.writeHead(res2.statusCode, "Error talking to the LE API", {'content-type' : 'text/plain'});
+            res.end();
+          }
           // All good, keep going.
           if (!err2 && res2.statusCode === 200) {
             // Bring in xml2js to parse the Wiki results into a usable form. XML *sigh*
@@ -654,9 +720,41 @@ router.post("/query", function(req, res, next){
   }
 });
 
-router.get("/create", function(req, res, next){
-  res.render('playground', {title: 'Playground'});
+router.get("/query", function(req, res, next){
+  // Render the query page
+  res.render('query', {title: 'Query Datasets'});
 });
+
+router.get("/downloadall/:tmp", function(req, res, next){
+  // Render the playground page
+
+
+});
+
+router.post("/downloadall", function(req, res, next){
+  // Array of dataset names to retrieve
+  var _dsns = req.body.dsns;
+
+  // Create a tmp folder
+  // var _tmp_dir = ;
+
+  batchDownloadWiki(_dsns, function(){
+    console.log("in batch download  callback");
+    res.status(200).send("hehe");
+  });
+
+
+
+});
+
+router.get("/compare", function(req, res, next){
+  // Render the compare page
+  res.render('compare', {title: 'Compare'});
+});
+
+// END PAGE ROUTES
+
+// MODALS AND PIECES
 
 router.get("/modal-file", function(req, res, next){
   res.render('modal/modal-file', {title: ''});
@@ -678,7 +776,10 @@ router.get("/loading", function(req, res, next){
   res.render("loading", {title: ""});
 });
 
-// API
+// END MODALS AND PIECES
+
+
+// API ENDPOINTS
 router.post("/api/validator", function(req, res, next){
   logger.info("------------------------");
   logger.info("enter /api/validator");
@@ -719,7 +820,6 @@ router.post("/api/validator", function(req, res, next){
 
   // logger.info("exit /api/validator");
 });
-
 
 // Use data from a LiPD file to create TSids, register them in the master list, and send data in response
 router.post("/api/tsid/create", function(req, res, next){

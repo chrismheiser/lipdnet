@@ -36,6 +36,9 @@ function SpreadsheetCtrl($scope){
     afterChange: function (index, amount) {
       $scope.settings.colHeaders = $scope.updateHeaders($scope.$parent.entry2);
       this.updateSettings($scope.settings);
+      // console.log(this.getData());
+      // console.log($scope.$parent.files.csv[$scope.$parent.entry2.filename]);
+
     },
 
   };
@@ -48,11 +51,16 @@ function SpreadsheetCtrl($scope){
   };
 
   $scope.addColumn = function(table){
-    if(typeof($scope.files.csv[table.filename]) === "undefined"){
-      $scope.files.csv[table.filename] = {data: [[]]};
+    if(typeof($scope.$parent.files.csv[table.filename]) === "undefined"){
+      $scope.$parent.files.csv[table.filename] = {data: [[]], rows: 5, cols: 1};
+    } else {
+      $scope.$parent.files.csv[table.filename].data.push([]);
+      $scope.$parent.files.csv[table.filename].cols++;
     }
-    if(typeof(table.columns) !== "undefined"){
-      table.columns.push({});
+    if(typeof(table.columns) === "undefined") {
+      table.columns = [{"number": 1}];
+    } else {
+      table.columns.push({"number": table.columns.length + 1});
     }
   };
 
@@ -66,7 +74,13 @@ function SpreadsheetCtrl($scope){
           $scope.$parent.files.csv[table.filename].data[_p].pop();
         }
       }
+      if($scope.$parent.files.csv[table.filename].hasOwnProperty("cols")){
+        $scope.$parent.files.csv[table.filename].cols--;
+      } else {
+        $scope.$parent.files.csv[table.filename].cols = $scope.hot.countCols();
+      }
     }
+
   };
 
   $scope.updateHeadersNull = function (table) {
@@ -83,14 +97,22 @@ function SpreadsheetCtrl($scope){
     var _headers = [];
     if (table.hasOwnProperty("columns")) {
       for (var _n = 0; _n < table.columns.length; _n++) {
-        if(table.columns[_n].hasOwnProperty("units")){
-          _headers.push(table.columns[_n].variableName + " (" + table.columns[_n].units + ") ");
-        } else {
-          _headers.push(table.columns[_n].variableName);
+        var _varName = "variableName";
+        var _units = "units";
+
+        if(table.columns[_n].hasOwnProperty("variableName")){
+          if(typeof table.columns[_n].variableName !== "undefined"){
+            _varName = table.columns[_n].variableName;
+          }
         }
+        if(table.columns[_n].hasOwnProperty("units")){
+          if(typeof table.columns[_n].units !== "undefined"){
+            _units = table.columns[_n].units;
+          }
+        }
+        _headers.push(_varName + " (" + _units + ") ");
       }
     }
-    // $scope.headers = _headers;
     return _headers;
   };
 

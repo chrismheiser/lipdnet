@@ -19,6 +19,20 @@ f.value('cgBusyDefaults',{
   templateUrl: "loading",
 });
 
+f.directive('customOnChange', function() {
+  return {
+    restrict: 'A',
+    link: function (scope, element, attrs) {
+      var onChangeHandler = scope.$eval(attrs.customOnChange);
+      element.on('change', onChangeHandler);
+      element.on('$destroy', function() {
+        element.off();
+      });
+
+    }
+  };
+});
+
 // Google Maps API key to allow us to embed the map
 f.config(function (uiGmapGoogleMapApiProvider, $mdThemingProvider) {
   // $mdThemingProvider.theme('dark-grey').backgroundPalette('grey').dark();
@@ -28,68 +42,6 @@ f.config(function (uiGmapGoogleMapApiProvider, $mdThemingProvider) {
     v: '3.20',
     libraries: 'weather,geometry,visualization'
   });
-});
-
-f.directive('formatValues', function () {
-  return {
-    restrict: 'A',
-    require: 'ngModel',
-    scope:{
-      value:'=ngModel',
-      model: "="
-    },
-    link: function (scope, element, attrs, ngModel) {
-      //format text going to user (model to view)
-      ngModel.$formatters.push(function(value) {
-        // console.log(value);
-        var _str = "";
-        // if the array is longer than 5 values, then take snippets from beginning and end of array (common)
-        if(value.length > 5){
-          for(var _i=0; _i<5;_i++){
-            if (_i === 3){
-              _str += "...   " + value[value.length-2];
-            } else if (_i === 4){
-              _str += ",   " + value[value.length-1];
-            } else {
-              _str += value[_i] + ",   ";
-            }
-          }
-        // if array is less than 5 values, then display the whole thing. no truncation.
-        } else {
-          for(var _w=0; _w<value.length;_w++){
-            _str += value[_w];
-            if (_w !== value.length-1){
-              _str += ",   ";
-            }
-          }
-        }
-      return _str;
-      });
-    }
-  };
-});
-
-f.directive("spaceValues", function(){
-  return {
-    restrict: 'A',
-    require: 'ngModel',
-    scope:{
-      value:'=ngModel',
-      model: "="
-    },
-    link: function (scope, element, attrs, ngModel) {
-      //format text going to user (model to view)
-      ngModel.$formatters.push(function(value) {
-        var _str = "";
-        if(typeof(value) !== "undefined"){
-          for(var _i=0; _i<value.length;_i++){
-            _str += value[_i] + ",  ";
-          }
-        }
-      return _str;
-      });
-    }
-  };
 });
 
 // IMPORT SERVICE

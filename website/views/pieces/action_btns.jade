@@ -1,7 +1,7 @@
 //- File chooser: Select a lipd file
 div
   li#buttons(style="list-style-type: none;")
-    input.step2#file-input(title="Upload your LiPD file for validation" name='file' type="file" accept=".lpd" style="max-width:200px; width:175px; padding:4px; display:inline;")
+    input.step2.choosefile(custom-on-change="uploadBtnChange" ng-click="uploadBtnClick" title="Upload LiPD file for comparison" name='file' type="file" accept=".lpd")
 
 div
   li#buttons(style="list-style-type: none;")

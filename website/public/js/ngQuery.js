@@ -17,13 +17,11 @@ q.controller('QueryCtrl', ['$scope', '$log', '$timeout', '$q', '$http', "$uibMod
       "infVarType": {},
       "proxyObsType": {}
     };
-
     $scope.keyLib = {
       "archiveType": {},
       "infVarType": {},
       "proxyObsType": {}
     };
-
     $scope.dropdowns = {
       "ageBoundType": ["any", "entire", "entirely"],
       "archiveType": create.archiveTypeList(),
@@ -31,27 +29,6 @@ q.controller('QueryCtrl', ['$scope', '$log', '$timeout', '$q', '$http', "$uibMod
       "infVarType": create.inferredVariableTypeList(),
       "proxyObsType": create.proxyObservationTypeList(),
     };
-
-    // These fields match up with what parameters a LinkedEarth query will accept. They should be "plug-and-play" for
-    // the python script
-    // $scope.query = {
-    //   archiveType: ["marine sediment", "Marine Sediment"],
-    //   proxyObsType: ["Mg/Ca", "Mg Ca"],
-    //   infVarType: ["Sea Surface Temperature"],
-    //   sensorGenus: ["Globigerinoides"],
-    //   sensorSpecies: ["ruber"],
-    //   interpName: ["temperature", "Temperature"],
-    //   interpDetail: ["sea surface"],
-    //   ageUnits: ["yr BP"],
-    //   ageBound: [3000, 6000],
-    //   ageBoundType: ["entirely"],
-    //   recordLength: [1500],
-    //   resolution: [100],
-    //   lat: [-30, 30],
-    //   lon:  [100, 160],
-    //   alt:  [-10000, 0],
-    // };
-
     $scope.query = {
       archiveType: [],
       proxyObsType: [],
@@ -69,7 +46,6 @@ q.controller('QueryCtrl', ['$scope', '$log', '$timeout', '$q', '$http', "$uibMod
       lon:  [],
       alt:  [],
     };
-
     $scope.feedback = {
       "errCt": 0,
       "errMsgs": []
@@ -81,74 +57,16 @@ q.controller('QueryCtrl', ['$scope', '$log', '$timeout', '$q', '$http', "$uibMod
     $scope.resultMsg = "";
     $scope.resultObjs = "";
 
-    // $scope.resultObjs = [
-    //   {
-    //     "dsn": "MD982176.Stott.2004",
-    //     "url_dataset": "http://wiki.linked.earth/Special:URIResolver/MD982176.Stott.2004",
-    //     "url_download": "http://wiki.linked.earth/wiki/index.php/Special:WTLiPD?op=export&lipdid=MD982176.Stott.2004"
-    //   },
-    //   {
-    //     "dsn": "MD982181.Khider.2014",
-    //     "url_dataset": "http://wiki.linked.earth/Special:URIResolver/MD982181.Khider.2014",
-    //     "url_download": "http://wiki.linked.earth/wiki/index.php/Special:WTLiPD?op=export&lipdid=MD982181.Khider.2014"
-    //   },
-    //   {
-    //     "dsn": "P178-2D15P.Tierney.2015",
-    //     "url_dataset": "http://wiki.linked.earth/Special:URIResolver/P178-2D15P.Tierney.2015",
-    //     "url_download": "http://wiki.linked.earth/wiki/index.php/Special:WTLiPD?op=export&lipdid=P178-2D15P.Tierney.2015"
-    //   },
-    //   {
-    //     "dsn": "MD98-2D2165.Levi.2007",
-    //     "url_dataset": "http://wiki.linked.earth/Special:URIResolver/MD98-2D2165.Levi.2007",
-    //     "url_download": "http://wiki.linked.earth/wiki/index.php/Special:WTLiPD?op=export&lipdid=MD98-2D2165.Levi.2007"
-    //   },
-    //   {
-    //     "dsn": "MD03-2D2797.Weldeab.2007",
-    //     "url_dataset": "http://wiki.linked.earth/Special:URIResolver/MD03-2D2797.Weldeab.2007",
-    //     "url_download": "http://wiki.linked.earth/wiki/index.php/Special:WTLiPD?op=export&lipdid=MD03-2D2797.Weldeab.2007"
-    //   },
-    //   {
-    //     "dsn": "MD01-2D2412.Harada.2006",
-    //     "url_dataset": "http://wiki.linked.earth/Special:URIResolver/MD01-2D2412.Harada.2006",
-    //     "url_download": "http://wiki.linked.earth/wiki/index.php/Special:WTLiPD?op=export&lipdid=MD01-2D2412.Harada.2006"
-    //   },
-    //   {
-    //     "dsn": "MD01-2D2390.Steinke.2008",
-    //     "url_dataset": "http://wiki.linked.earth/Special:URIResolver/MD01-2D2390.Steinke.2008",
-    //     "url_download": "http://wiki.linked.earth/wiki/index.php/Special:WTLiPD?op=export&lipdid=MD01-2D2390.Steinke.2008"
-    //   },
-    //   {
-    //     "dsn": "KNR195-2D5_CDH26.Bova.2015",
-    //     "url_dataset": "http://wiki.linked.earth/Special:URIResolver/KNR195-2D5_CDH26.Bova.2015",
-    //     "url_download": "http://wiki.linked.earth/wiki/index.php/Special:WTLiPD?op=export&lipdid=KNR195-2D5_CDH26.Bova.2015"
-    //   },
-    //   {
-    //     "dsn": "KNR195-2D5-2DCDH23.Bova.2015",
-    //     "url_dataset": "http://wiki.linked.earth/Special:URIResolver/KNR195-2D5-2DCDH23.Bova.2015",
-    //     "url_download": "http://wiki.linked.earth/wiki/index.php/Special:WTLiPD?op=export&lipdid=KNR195-2D5-2DCDH23.Bova.2015"
-    //   },
-    //   {
-    //     "dsn": "BJ8-2D03-2D70GGC.Linsley.2010",
-    //     "url_dataset": "http://wiki.linked.earth/Special:URIResolver/BJ8-2D03-2D70GGC.Linsley.2010",
-    //     "url_download": "http://wiki.linked.earth/wiki/index.php/Special:WTLiPD?op=export&lipdid=BJ8-2D03-2D70GGC.Linsley.2010"
-    //   },
-    //   {
-    //     "dsn": "BJ8-2D03-2D13GGC.Linsley.2010",
-    //     "url_dataset": "http://wiki.linked.earth/Special:URIResolver/BJ8-2D03-2D13GGC.Linsley.2010",
-    //     "url_download": "http://wiki.linked.earth/wiki/index.php/Special:WTLiPD?op=export&lipdid=BJ8-2D03-2D13GGC.Linsley.2010"
-    //   },
-    //   {
-    //     "dsn": "A7.Oppo.2005",
-    //     "url_dataset": "http://wiki.linked.earth/Special:URIResolver/A7.Oppo.2005",
-    //     "url_download": "http://wiki.linked.earth/wiki/index.php/Special:WTLiPD?op=export&lipdid=A7.Oppo.2005"
-    //   }
-    // ];
+    $scope.downloadAll = function(){
+      $scope.uploadDownloadAll({"dsns": ["Asi-2DKunashirIsland.Demezhko.2009", "MD98-2D2170.Stott.2004"]}, function(resp){
+        console.log("Received backend response");
+        console.log(resp);
+      });
+    };
 
     $scope.getTooltip = function(section, key){
       return create.fieldMetadataLibrary(section, key);
     };
-
-
 
     $scope.submitQuery = function(){
       $scope.validate(function(){
@@ -175,8 +93,27 @@ q.controller('QueryCtrl', ['$scope', '$log', '$timeout', '$q', '$http', "$uibMod
             }
           });
         } else {
-          console.log("There are errors ");
+          console.log("There are errors");
         }
+      });
+    };
+
+    $scope.uploadDownloadAll = function (dat, cb) {
+      // Upload *validated* lipd data to backend
+      $scope.pageMeta.busyPromise = Upload.upload({
+        url: '/downloadall',
+        data: dat
+      });
+      $scope.pageMeta.busyPromise.then(function (resp) {
+        // console.log('Success');
+        // console.log(resp);
+        cb(resp);
+      }, function (resp) {
+        console.log(resp);
+        console.log('Error status: ' + resp.status);
+        cb(resp);
+      }, function (evt) {
+        var progressPercentage = parseInt(100.0 * evt.loaded / evt.total);
       });
     };
 
@@ -314,3 +251,35 @@ q.controller('QueryCtrl', ['$scope', '$log', '$timeout', '$q', '$http', "$uibMod
     };
 
 }]); // end Anonymous
+
+// EXAMPLES
+
+
+// $scope.resultObjs = [
+//   {
+//     "dsn": "MD982176.Stott.2004",
+//     "url_dataset": "http://wiki.linked.earth/Special:URIResolver/MD982176.Stott.2004",
+//     "url_download": "http://wiki.linked.earth/wiki/index.php/Special:WTLiPD?op=export&lipdid=MD982176.Stott.2004"
+//   },
+//  ...
+// ];
+
+// These fields match up with what parameters a LinkedEarth query will accept. They should be "plug-and-play" for
+// the python script
+// $scope.query = {
+//   archiveType: ["marine sediment", "Marine Sediment"],
+//   proxyObsType: ["Mg/Ca", "Mg Ca"],
+//   infVarType: ["Sea Surface Temperature"],
+//   sensorGenus: ["Globigerinoides"],
+//   sensorSpecies: ["ruber"],
+//   interpName: ["temperature", "Temperature"],
+//   interpDetail: ["sea surface"],
+//   ageUnits: ["yr BP"],
+//   ageBound: [3000, 6000],
+//   ageBoundType: ["entirely"],
+//   recordLength: [1500],
+//   resolution: [100],
+//   lat: [-30, 30],
+//   lon:  [100, 160],
+//   alt:  [-10000, 0],
+// };

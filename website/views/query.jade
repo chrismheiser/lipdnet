@@ -22,6 +22,9 @@ block body
 
                 br
                 md-subheader.md-primary Query Results
+
+                //button.green-btn-on(ng-click="downloadAll()") Download All
+
                 div(ng-if="feedback.errCt > 0")
                     li(style="list-style-type: none;")
                         pre(ng-class="on" style="background-color:#FEBABB; border: none;" uib-popover="Cannot send the query in the current state. Please fix errors listed." popover-trigger="'mouseenter'") {{ feedback.errCt}} errors
@@ -62,7 +65,7 @@ block body
                     //    md-checkbox LinkedEarth
                     //    md-checkbox PANGAEA
                     div(style="float:right;")
-                        button.green-btn-on(ng-click="downloadAll()" ng-if="resultCt > 1") Download All
+                        //button.green-btn-on(ng-click="downloadAll()" ng-if="resultCt > 1") Download All
                         button.green-btn-on(ng-click="submitQuery()") Search
                 br
                 br
@@ -164,23 +167,3 @@ block js
     script(src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/2.5.0/ui-bootstrap-tpls.min.js")
     script(src="https://cdnjs.cloudflare.com/ajax/libs/angular-sanitize/1.5.8/angular-sanitize.min.js")
     script(src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js")
-
-// ALL ITEMS ARE LISTS
-
-// archiveType
-// proxyObsType
-// infVarType
-// sensorGenus
-// sensorSpecies
-// lat
-// lon
-// alt
-// ageUnits
-// ageBound
-// ageBoundType
-// recordLength
-// resolution
-// interpName
-// interpDetail
-
-

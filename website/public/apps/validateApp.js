@@ -1,3 +1,3 @@
-var u = angular.module('validateApp', ['ngValidate', 'ngGraphs', 'ngMaterial', 'ngColors', 'ngAnimate', "ngSpreadsheet"]);
+var u = angular.module('validateApp', ['ngValidate', 'ngGraphs', 'ngMaterial', 'ngColors', 'ngAnimate', "ngSpreadsheet", "ngCompare"]);
 
 

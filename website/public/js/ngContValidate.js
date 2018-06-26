@@ -156,10 +156,10 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
     // All files, w/ contents, found in the LiPD archive. Used in "feedback.jade"
     $scope.allFiles = [];
 
-    $scope.$watch("files.json", function () {
-      // Create the Simple View
-      $scope.files.jsonSimple = misc.advancedToSimple($scope.files.json);
-    }, true);
+    // $scope.$watch("files.json", function () {
+    //   // Create the Simple View
+    //   $scope.files.jsonSimple = misc.advancedToSimple($scope.files.json);
+    // }, true);
 
     $scope.addBlock = function(entry, blockType, pc){
       toaster.pop('success', "Added a new " + blockType + " entry", "", 4000);
@@ -979,12 +979,53 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       };
     }
 
-    window.onload = $scope.checkSession();
+    $scope.uploadBtnClick = function(){
+      this.value = null;
+    };
 
-    // Anyonymous
-    (function (obj) {
+    $scope.uploadBtnChange = function(event, cb){
+      var fileInput = event.target;
+      console.log(fileInput.files);
+      // var fileInput = document.getElementById("file-input");
+      // if the upload button is clicked && a file is chosen, THEN reset the page and data.
+      $scope.resetPage();
+      $scope.files.lipdFilename = fileInput.files[0].name;
+      $scope.files.dataSetName = fileInput.files[0].name.slice(0, -4);
+      // get a list of file entries inside this zip
+      $scope.model.getEntries(fileInput.files[0], function (entries) {
+        // use the service to parse data from the ZipJS entries
+        $scope.pageMeta.busyPromise = ImportService.parseFiles(entries);
+        $scope.pageMeta.busyPromise.then(function (res) {
+          // Set response to allFiles so we can list all the filenames found in the LiPD archive.
+          $scope.allFiles = res;
+          $scope.pageMeta.fileUploaded = true;
+          $scope.pageMeta.keepColumnMeta = true;
+          // Gather some metadata about the lipd file, and organize it so it's easier to manage.
+          lipdValidator.restructure(res, $scope.files, function(_response_1){
+            $scope.files = _response_1;
+            if($scope.files.fileCt > 40){
+              $scope.showModalAlert({"title": "Wow! That's a lot of files!", "message": "We expanded the page to fit everything, so be sure to scroll down to see your data tables."})
+            }
+            $scope.validate();
+            $scope.files.json = create.initColumnTmp($scope.files.json);
+            $scope.files.json = create.initMissingArrs($scope.files.json);
+            $scope.$broadcast('newUpload', $scope.files);
+          }); // end sortBeforeValidate
+          //RETURNS OBJECT : {"dat": files.json, "feedback": feedback, "filename": files.lipdFilename, "status": feedback.status};
+
+        }, function(reason){
+          $scope.resetPage();
+          alert("Error parsing JSON-LD file. File cannot be validated");
+        }); // end ImportService
+
+      }); // end model.getEntries
+      // once the change even has triggered, it cannot be triggered again until page refreshes.
+      typeof cb === 'function' && cb();
+    };
+
+    $scope.uploadBtnUpload = function(){
       // Set up zip.js object and its corresponding functions
-      var requestFileSystem = obj.webkitRequestFileSystem || obj.mozRequestFileSystem || obj.requestFileSystem;
+      var requestFileSystem = this.webkitRequestFileSystem || this.mozRequestFileSystem || this.requestFileSystem;
       function onerror(message) {
         alert(message);
       }
@@ -1004,10 +1045,9 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
           }, create);
         });
       }
-
-      var model = function () {
+      $scope.model = function () {
         var zipFileEntry, zipWriter, writer, creationMethod;
-        URL = window.webkitURL || obj.mozURL || obj.URL;
+        URL = window.webkitURL || this.mozURL || this.URL;
 
         return {
           setCreationMethod : function(method) {
@@ -1079,64 +1119,175 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
           getBlob : function(callback) {
             zipWriter.close(callback);
           }
-
         }; // end return
-
-
       }(); // end var model
+      $scope.model.setCreationMethod("Blob");
+    };
+
+    window.onload = (function(){
+      $scope.checkSession();
+      $scope.uploadBtnUpload();
+    });
 
 
-      // // Attach to respective DOM elements and set up listener for change event on file-input
-      // // When file is uploadesd, it will trigger data to be set to sessionStorage and be parsed.
-      (function () {
-        var fileInput = document.getElementById("file-input");
-        var creationMethodInput = "Blob";
-        var downloadButton = document.getElementById("download-btn");
-        model.setCreationMethod("Blob");
-        // if (typeof requestFileSystem == "undefined") creationMethodInput.options.length = 1;
 
-        fileInput.onclick = function () {
-          this.value = null;
-        };
+    // // Anyonymous
+    // (function (obj) {
+    //   // Set up zip.js object and its corresponding functions
+    //   var requestFileSystem = obj.webkitRequestFileSystem || obj.mozRequestFileSystem || obj.requestFileSystem;
+    //   function onerror(message) {
+    //     alert(message);
+    //   }
+    //   function createTempFile(callback) {
+    //     var keysFilename = "keys.dat";
+    //     requestFileSystem(TEMPORARY, 4 * 1024 * 1024 * 1024, function (filesystem) {
+    //       function create() {
+    //         filesystem.root.getFile(keysFilename, {
+    //           create: true
+    //         }, function (zipFile) {
+    //           callback(zipFile);
+    //         });
+    //       }
+    //
+    //       filesystem.root.getFile(keysFilename, null, function (entry) {
+    //         entry.remove(create, create);
+    //       }, create);
+    //     });
+    //   }
+    //
+    //   var model = function () {
+    //     var zipFileEntry, zipWriter, writer, creationMethod;
+    //     URL = window.webkitURL || obj.mozURL || obj.URL;
+    //
+    //     return {
+    //       setCreationMethod : function(method) {
+    //         creationMethod = method;
+    //       },
+    //       addFiles : function addFiles(files, oninit, onadd, onprogress, onend) {
+    //         var addIndex = 0;
+    //
+    //         function nextFile() {
+    //           var file = files[addIndex];
+    //           onadd(file);
+    //           zipWriter.add(file.name, new zip.BlobReader(file), function() {
+    //             addIndex++;
+    //             if (addIndex < files.length)
+    //               nextFile();
+    //             else
+    //               onend();
+    //           }, onprogress);
+    //         }
+    //
+    //         function createZipWriter() {
+    //           zip.createWriter(writer, function(writer) {
+    //             zipWriter = writer;
+    //             oninit();
+    //             nextFile();
+    //           }, onerror);
+    //         }
+    //
+    //         if (zipWriter)
+    //           nextFile();
+    //         else if (creationMethod == "Blob") {
+    //           writer = new zip.BlobWriter();
+    //           createZipWriter();
+    //         } else {
+    //           createTempFile(function(fileEntry) {
+    //             zipFileEntry = fileEntry;
+    //             writer = new zip.FileWriter(zipFileEntry);
+    //             createZipWriter();
+    //           });
+    //         }
+    //       },
+    //       getEntries: function getEntries(file, onend) {
+    //         zip.createReader(new zip.BlobReader(file), function (zipReader) {
+    //           zipReader.getEntries(onend);
+    //         }, onerror);
+    //       }, // end getEntries
+    //       getEntryFile: function getEntryFile(entry, creationMethod, onend, onprogress) {
+    //         var writer, zipFileEntry;
+    //
+    //         function getData() {
+    //           entry.getData(writer, function (blob) {
+    //             var blobURL = URL.createObjectURL(blob);
+    //             onend(blobURL);
+    //           }, onprogress);
+    //         }
+    //
+    //         if (creationMethod == "Blob") {
+    //           writer = new zip.BlobWriter();
+    //           getData();
+    //         }
+    //       },
+    //       getBlobURL : function(callback) {
+    //         zipWriter.close(function(blob) {
+    //           var blobURL = creationMethod == "Blob" ? URL.createObjectURL(blob) : zipFileEntry.toURL();
+    //           callback(blobURL);
+    //           zipWriter = null;
+    //         });
+    //       },
+    //       getBlob : function(callback) {
+    //         zipWriter.close(callback);
+    //       }
+    //
+    //     }; // end return
+    //
+    //
+    //   }(); // end var model
+    //
+    //
+    //   // // Attach to respective DOM elements and set up listener for change event on file-input
+    //   // // When file is uploadesd, it will trigger data to be set to sessionStorage and be parsed.
+    //   (function () {
+    //     var fileInput = document.getElementById("file-input");
+    //     var creationMethodInput = "Blob";
+    //     var downloadButton = document.getElementById("download-btn");
+    //     model.setCreationMethod("Blob");
+    //     // if (typeof requestFileSystem == "undefined") creationMethodInput.options.length = 1;
+    //
+    //     fileInput.onclick = function () {
+    //       this.value = null;
+    //     };
+    //
+    //     // When a file is chosen for upload, trigger the change event
+    //     fileInput.addEventListener('change', function () {
+    //
+    //       // if the upload button is clicked && a file is chosen, THEN reset the page and data.
+    //       $scope.resetPage();
+    //       $scope.files.lipdFilename = fileInput.files[0].name;
+    //       $scope.files.dataSetName = fileInput.files[0].name.slice(0, -4);
+    //       // get a list of file entries inside this zip
+    //       model.getEntries(fileInput.files[0], function (entries) {
+    //         // use the service to parse data from the ZipJS entries
+    //         $scope.pageMeta.busyPromise = ImportService.parseFiles(entries);
+    //         $scope.pageMeta.busyPromise.then(function (res) {
+    //           // Set response to allFiles so we can list all the filenames found in the LiPD archive.
+    //           $scope.allFiles = res;
+    //           $scope.pageMeta.fileUploaded = true;
+    //           $scope.pageMeta.keepColumnMeta = true;
+    //           // Gather some metadata about the lipd file, and organize it so it's easier to manage.
+    //           lipdValidator.restructure(res, $scope.files, function(_response_1){
+    //             $scope.files = _response_1;
+    //             if($scope.files.fileCt > 40){
+    //               $scope.showModalAlert({"title": "Wow! That's a lot of files!", "message": "We expanded the page to fit everything, so be sure to scroll down to see your data tables."})
+    //             }
+    //             $scope.validate();
+    //             $scope.files.json = create.initColumnTmp($scope.files.json);
+    //             $scope.files.json = create.initMissingArrs($scope.files.json);
+    //           }); // end sortBeforeValidate
+    //           //RETURNS OBJECT : {"dat": files.json, "feedback": feedback, "filename": files.lipdFilename, "status": feedback.status};
+    //
+    //         }, function(reason){
+    //           $scope.resetPage();
+    //           alert("Error parsing JSON-LD file. File cannot be validated");
+    //         }); // end ImportService
+    //
+    //       }); // end model.getEntries
+    //       // once the change even has triggered, it cannot be triggered again until page refreshes.
+    //     }, false); // end upload event listener
+    //
+    //   })();
+    // })(this);
 
-        // When a file is chosen for upload, trigger the change event
-        fileInput.addEventListener('change', function () {
-
-          // if the upload button is clicked && a file is chosen, THEN reset the page and data.
-          $scope.resetPage();
-          $scope.files.lipdFilename = fileInput.files[0].name;
-          $scope.files.dataSetName = fileInput.files[0].name.slice(0, -4);
-          // get a list of file entries inside this zip
-          model.getEntries(fileInput.files[0], function (entries) {
-            // use the service to parse data from the ZipJS entries
-            $scope.pageMeta.busyPromise = ImportService.parseFiles(entries);
-            $scope.pageMeta.busyPromise.then(function (res) {
-              // Set response to allFiles so we can list all the filenames found in the LiPD archive.
-              $scope.allFiles = res;
-              $scope.pageMeta.fileUploaded = true;
-              $scope.pageMeta.keepColumnMeta = true;
-              // Gather some metadata about the lipd file, and organize it so it's easier to manage.
-              lipdValidator.restructure(res, $scope.files, function(_response_1){
-                $scope.files = _response_1;
-                if($scope.files.fileCt > 40){
-                  $scope.showModalAlert({"title": "Wow! That's a lot of files!", "message": "We expanded the page to fit everything, so be sure to scroll down to see your data tables."})
-                }
-                $scope.validate();
-                $scope.files.json = create.initColumnTmp($scope.files.json);
-                $scope.files.json = create.initMissingArrs($scope.files.json);
-              }); // end sortBeforeValidate
-              //RETURNS OBJECT : {"dat": files.json, "feedback": feedback, "filename": files.lipdFilename, "status": feedback.status};
-
-            }, function(reason){
-              $scope.resetPage();
-              alert("Error parsing JSON-LD file. File cannot be validated");
-            }); // end ImportService
-
-          }); // end model.getEntries
-          // once the change even has triggered, it cannot be triggered again until page refreshes.
-        }, false); // end upload event listener
-
-      })();
-    })(this);
   }]); // end Anonymous
 

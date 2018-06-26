@@ -462,3 +462,10 @@ input[type=number]::-webkit-outer-spin-button {
     background: white;
     color: #8FA864;
 }
+
+.choosefile {
+    max-width:200px;
+    width:175px;
+    padding:4px;
+    display:inline;
+}

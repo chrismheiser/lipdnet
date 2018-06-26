@@ -1,0 +1,82 @@
+extends layout
+
+//- block css will insert css scripts listed in head.jade that are needed on every page.
+block css
+    //- files below are page specific
+    link(rel='stylesheet' href='css/validate.css')
+    link(rel="stylesheet" href="css/json-tree.css")
+    link(rel="stylesheet" href="lib/ngDiff/angular-object-diff.css")
+    link(rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons")
+    link(rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/angular-busy/4.1.4/angular-busy.min.css")
+
+block body
+    body(ng-app='validateApp' ng-cloak)
+        #wrapper(ng-controller="ValidateCtrl as vc")
+            include ./include/navbar.jade
+            md-toolbar
+                .md-toolbar-tools
+                    .md-title Compare
+
+            .col-sm-12(ng-controller="CompareCtrl as cc" cg-busy="pageMeta.busyPromise")
+                include ./pieces/action_btns_compare.jade
+                .row
+
+                    .col-md-4
+                        h6 {{file1.filename ||'File 1'}}
+                        pre(ng-bind-html="file1JsonView")
+                    .col-md-4
+                        h6 {{file2.filename || 'File 2'}}
+                        pre(ng-bind-html="file2JsonView")
+                        //textarea(class="form-control" ng-class="[{'error': errorB}]" rows="15" ng-model="file2.json")
+                    //.col-md-4
+                    //    pre(ng-bind-html="diffValue")
+                    .col-md-4
+                        h6 Differences
+                        pre(ng-if="uploadCount>=2" ng-bind-html="diffValueChanges")
+                        pre(ng-if="uploadCount<2") Upload two files to see differences
+
+
+
+
+//- block js will insert js scripts listed in footer.jade that are needed on every page.
+block js
+    //- files below are page specific
+    script(src='apps/validateApp.js')
+    script(src='js/ngValidate.js')
+    script(src='js/ngContValidate.js')
+    script(src='js/ngContModFile.js')
+    script(src='js/ngContModInt.js')
+    script(src='js/ngContModAsk.js')
+    script(src='js/ngContModAlert.js')
+    script(src='js/ngContModBlock.js')
+    script(src='js/ngSpreadsheet.js')
+    script(src='js/ngCompare.js')
+    script(src='js/ngGraphs.js')
+    script(src="lib/zip/zip.js")
+    script(src="lib/ngDiff/angular-object-diff.min.js")
+    script(src='lib/json-tree.js')
+    script(src="lib/zip/zip-ext.js")
+    script(src="lib/papaparse.min.js")
+    script(src="lib/FileSaver.min.js")
+    script(src="lib/ngHandsontable/dist/handsontable.full.js")
+    script(src="lib/ngHandsontable/dist/ngHandsontable.js")
+    script(src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.min.js")
+    script(src="https://cdnjs.cloudflare.com/ajax/libs/nvd3/1.8.1/nv.d3.min.js")
+    script(src="lib/angularjs-nvd3-directives.min.js")
+    script(src="modules/ng_map.js")
+    script(src="modules/ng_create.js")
+    script(src="modules/ng_misc.js")
+    script(src="modules/ng_versions.js")
+    script(src="modules/ng_validator.js")
+    script(src="https://cdnjs.cloudflare.com/ajax/libs/intro.js/2.7.0/intro.min.js")
+    script(src="https://cdnjs.cloudflare.com/ajax/libs/angularjs-toaster/2.1.0/toaster.js")
+    script(src="https://cdnjs.cloudflare.com/ajax/libs/angular-busy/4.1.4/angular-busy.min.js")
+    script(src='https://cdnjs.cloudflare.com/ajax/libs/angular-ui-router/0.2.15/angular-ui-router.min.js')
+    script(src='https://cdnjs.cloudflare.com/ajax/libs/angular-google-maps/2.2.0/angular-google-maps.min.js')
+    script(src="https://cdnjs.cloudflare.com/ajax/libs/danialfarid-angular-file-upload/12.2.13/ng-file-upload.min.js")
+    script(src="https://cdnjs.cloudflare.com/ajax/libs/danialfarid-angular-file-upload/12.2.13/ng-file-upload-shim.min.js")
+    script(src="https://cdnjs.cloudflare.com/ajax/libs/ngStorage/0.3.6/ngStorage.min.js")
+    script(src='https://maps.googleapis.com/maps/api/js?libraries=places&key=AIzaSyA7HRzSi5HhyKTX9Xw7CZ-9XScwq04TZyc')
+    script(src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/2.5.0/ui-bootstrap-tpls.min.js")
+    script(src="https://cdnjs.cloudflare.com/ajax/libs/angular-sanitize/1.5.8/angular-sanitize.min.js")
+    script(src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js")
