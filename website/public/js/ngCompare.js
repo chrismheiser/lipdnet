@@ -9,10 +9,10 @@ c.controller('CompareCtrl', ['$scope', 'ObjectDiff', function($scope, ObjectDiff
       $scope.uploadCount++;
       if(Object.keys($scope.file1.json).length === 0 && $scope.file1.json.constructor === Object){
         $scope.file1.filename = data.lipdFilename;
-        $scope.file1.json = data.json;
+        $scope.file1.json = create.rmTmpEmptyData(data.json);
       } else {
         $scope.file2.filename = data.lipdFilename;
-        $scope.file2.json = data.json;
+        $scope.file2.json = create.rmTmpEmptyData(data.json);
       }
 
       // Pretty print for JSON
