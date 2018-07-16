@@ -96,8 +96,8 @@ var versions = (function(){
      * now all interpretations are merged into a single collective "interpretation" field. Given the different way that
      * this data has been stored over the version history, we need to account for different possibilities.
      *
-     * @param {object} d Metadata
-     * @return {object} d Metadata
+     * @param {object} d Column metadata
+     * @return {object} d Column metadata
      *
      */
     merge_interpretations: (function(d, cb){
@@ -105,23 +105,34 @@ var versions = (function(){
       var _keys = ["climateInterpretation", "isotopeInterpretation", "interpretation"];
 
       try{
-
+        // loop through each of our possible interpretation keys
         for(var _p = 0; _p < _keys.length; _p++){
+          // get the current interpretation key
           var _key = _keys[_p];
+          // Does this column have this interpretation key?
           if(d.hasOwnProperty(_key)){
+            // Is this interpretation an array of data?
             if(Array.isArray(d[_key])){
+              // For every object in the interpretation, push it to our temporary array
               for(var _h=0; _h < d[_key].length; _h++){
                 _tmp.push(d[_key][_h]);
               }
-            } else if (typeof(d[_key]) === "object"){
+            }
+            // Is this interpretation data a json object? I hope so!
+            else if (typeof(d[_key]) === "object"){
+              // push it to our temporary array
               _tmp.push(d[_key]);
             }
+            // Delete the old interpretation data from the column, now that we have it saved in _tmp
+            delete d[_key];
           }
         }
+        // Create the new catch-all interpretation key with our collected interpretation data.
         d["interpretation"] = _tmp;
       } catch(err){
         console.log("merge_interpretations: " + err);
       }
+      // Send the column data through the callback to be saved to the overall json data.
       cb(d);
     }),
 
@@ -330,7 +341,10 @@ var versions = (function(){
           "paleoEnsembleTableMD5": "tableMD5",
 
           "paleoMeasurementTableMD5": "tableMD5",
-          "chronMeasurementTableMD5": "tableMD5"
+          "chronMeasurementTableMD5": "tableMD5",
+
+          "paleoMeasurementTableNumber": "tableNumber",
+          "chronMeasurementTableNumber": "tableNumber"
         },
         "interpretations": ["climateInterpretation", "isotopeInterpretation"]
       };
@@ -357,10 +371,14 @@ var versions = (function(){
                 delete d[_key];
               }
             }
-            // merge interpretations where necessary
+            // merge interpretations where necessary. loop through our interpretation keys
             for(var _c=0; _c < VER_1_3["interpretations"].length; _c++){
+              // Does this data object have this interpretation key?
               if(d.hasOwnProperty(VER_1_3["interpretations"][_c])){
+                // Yes. Merge all interpretation data into an array of objects. One object per interpretation
+                // "d" in this instance would be a single column, since interpretation keys are at the column level
                 versions.merge_interpretations(d, function(d2){
+                  // Overwrite the current column "d" with the new updated column data "d2"
                   d = d2;
                 });
               }

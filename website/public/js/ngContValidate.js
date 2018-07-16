@@ -537,6 +537,8 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       // // Remove the values from the text field. After being processed, the values formatting gets jumbled and cannot be parsed again.
       // // If they want to update or parse new values, they'll have to copy/paste them in again.
       table.tmp.values = "";
+      // console.log("Parse Table---");
+      // console.log(table);
       return table;
     };
 

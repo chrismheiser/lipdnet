@@ -38,7 +38,8 @@ function SpreadsheetCtrl($scope){
       this.updateSettings($scope.settings);
       // console.log(this.getData());
       // console.log($scope.$parent.files.csv[$scope.$parent.entry2.filename]);
-
+      // console.log("Spreadsheet change---");
+      // console.log($scope.$parent.entry2);
     },
 
   };
