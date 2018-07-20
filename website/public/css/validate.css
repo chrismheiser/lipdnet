@@ -486,8 +486,9 @@ input[type=number]::-webkit-outer-spin-button {
 
 /* Multi step progress bar indicator for Compare.jade page */
 .progressbarcontainer {
-    width: 600px;
-    margin: 100px auto;
+    width: 100%;
+    display: inline-grid;
+    margin: 50px auto;
 }
 .progressbar {
     margin: 0;
@@ -496,12 +497,12 @@ input[type=number]::-webkit-outer-spin-button {
 }
 .progressbar li {
     list-style-type: none;
-    width: 33%;
+    width: 25%;
     float: left;
     font-size: 12px;
     position: relative;
     text-align: center;
-    text-transform: uppercase;
+    /*text-transform: uppercase;*/
     color: #7d7d7d;
 }
 .progressbar li:before {
@@ -538,4 +539,10 @@ input[type=number]::-webkit-outer-spin-button {
 }
 .progressbar li.active + li:after {
     background-color: #55b776;
+}
+
+.compareitem {
+    margin-left: 20px;
+    position: relative;
+    vertical-align: middle;
 }

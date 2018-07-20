@@ -747,9 +747,9 @@ router.post("/downloadall", function(req, res, next){
 
 });
 
-router.get("/compare", function(req, res, next){
+router.get("/merge", function(req, res, next){
   // Render the compare page
-  res.render('compare', {title: 'Compare'});
+  res.render('merge', {title: 'Merge'});
 });
 
 // END PAGE ROUTES

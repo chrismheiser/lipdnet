@@ -156,6 +156,15 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
     // All files, w/ contents, found in the LiPD archive. Used in "feedback.jade"
     $scope.allFiles = [];
 
+    $scope.$on('mergedData', function(event, data){
+      console.log("Received mergedData from MergeCtrl.");
+      console.log(data);
+      // Place new json data into our scope
+      $scope.files.json = data;
+      // Trigger download
+      $scope.downloadZip();
+    });
+
     // $scope.$watch("files.json", function () {
     //   // Create the Simple View
     //   $scope.files.jsonSimple = misc.advancedToSimple($scope.files.json);

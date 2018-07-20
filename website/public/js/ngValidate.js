@@ -34,7 +34,7 @@ f.directive('customOnChange', function() {
 });
 
 // Google Maps API key to allow us to embed the map
-f.config(function (uiGmapGoogleMapApiProvider, $mdThemingProvider) {
+f.config(function (uiGmapGoogleMapApiProvider, $mdThemingProvider, $mdAriaProvider) {
   // $mdThemingProvider.theme('dark-grey').backgroundPalette('grey').dark();
   uiGmapGoogleMapApiProvider.configure({
     // key: 'AIzaSyB8nllB0zwraQo5qJMGdtcxulsTPJOnd8U',
@@ -42,6 +42,7 @@ f.config(function (uiGmapGoogleMapApiProvider, $mdThemingProvider) {
     v: '3.20',
     libraries: 'weather,geometry,visualization'
   });
+  $mdAriaProvider.disableWarnings();
 });
 
 // IMPORT SERVICE

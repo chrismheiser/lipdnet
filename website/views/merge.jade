@@ -15,27 +15,44 @@ block body
             include ./include/navbar.jade
             md-toolbar
                 .md-toolbar-tools
-                    .md-title Compare
+                    .md-title Merge
 
-            .col-sm-12(ng-controller="CompareCtrl as cc" cg-busy="pageMeta.busyPromise")
-                include ./pieces/action_btns_compare.jade
-                .row
+            .col-sm-12(ng-controller="MergeCtrl as mc" cg-busy="pageMeta.busyPromise")
+                include ./pieces/action_btns_merge.jade
 
-                    .col-md-4
-                        h6 {{file1.filename ||'File 1'}}
-                        pre(ng-bind-html="file1JsonView")
-                    .col-md-4
-                        h6 {{file2.filename || 'File 2'}}
-                        pre(ng-bind-html="file2JsonView")
-                        //textarea(class="form-control" ng-class="[{'error': errorB}]" rows="15" ng-model="file2.json")
-                    //.col-md-4
-                    //    pre(ng-bind-html="diffValue")
-                    .col-md-4
-                        h6 Differences
-                        pre(ng-if="uploadCount>=2" ng-bind-html="diffValueChanges")
+                // Progress bar gives indication on what steps are completed and what workflow should be followed.
+                .progressbarcontainer
+                    ul.progressbar
+                        li(ng-class="{active: uploadCount>0}") File 1 : <br/>{{file1.filename}}
+                        li(ng-class="{active: uploadCount>1}") File 2 : <br/>{{file2.filename}}
+                        li(ng-class="{active: resolveTrigger}") Resolve differences
+                        li(ng-class="{active: downloadTrigger}") Download LiPD file
+
+
+                div
+                    // The full diff shows diffs AND the rest of the JSON data too.
+                    .col-md-6
+                        h3 Full Diff
+                        pre(ng-if="uploadCount>=2" ng-bind-html="diffValue")
                         pre(ng-if="uploadCount<2") Upload two files to see differences
-
-
+                    // Diff resolution pane
+                    .col-md-6
+                        // How many differences did it find?
+                        h3 Diff Count: {{diffCount}}
+                        // Give multiple choice resolution options for each field
+                        div(ng-repeat="item in diffList")
+                            h5 {{item.crumbs.join(" > ")}}
+                            // Fields are disabled if delete option is checked. Multiple choice is not active.
+                            md-radio-group(ng-model="item.selected")
+                                .compareitem
+                                    md-radio-button(ng-click="addRmValue(item, 0)" value="item.options[0]") {{item.options[0]}}
+                                .compareitem
+                                    md-radio-button(ng-click="addRmValue(item, 1)" value="item.options[1]") {{item.options[1]}}
+                                .compareitem
+                                    md-radio-button(ng-click="addRmValue(item, 3)" value="delete") Delete
+                                .compareitem
+                                    md-radio-button(ng-click="addRmValue(item, 2)" value="other") Other
+                                    input(ng-model="item.options[2]")
 
 
 //- block js will insert js scripts listed in footer.jade that are needed on every page.
@@ -50,7 +67,7 @@ block js
     script(src='js/ngContModAlert.js')
     script(src='js/ngContModBlock.js')
     script(src='js/ngSpreadsheet.js')
-    script(src='js/ngCompare.js')
+    script(src='js/ngMerge.js')
     script(src='js/ngGraphs.js')
     script(src="lib/zip/zip.js")
     script(src="lib/ngDiff/angular-object-diff.min.js")

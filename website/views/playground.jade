@@ -15,7 +15,7 @@ block css
 	link(rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/handsontable/3.0.0/handsontable.full.min.css")
 
 block body
-	body.step0(ng-app='validateApp' ng-cloak)
+	body.step0(ng-app='validateApp' ng-cloak style="min-height: 100%; background-color:white;")
 		#wrapper
 			div.alert.alert-success.alert-dismissable
 				strong Spreadsheets!
@@ -88,7 +88,7 @@ block js
 	script(src='js/ngContModAlert.js')
 	script(src='js/ngContModBlock.js')
 	script(src='js/ngSpreadsheet.js')
-	script(src='js/ngCompare.js')
+	script(src='js/ngMerge.js')
 	script(src='js/ngGraphs.js')
 	script(src="lib/zip/zip.js")
 	script(src='lib/json-tree.js')

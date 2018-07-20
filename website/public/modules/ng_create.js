@@ -364,11 +364,13 @@ var create = (function(){
 
             // Are we at table level? We'll know based on if columns are present.
             if(_key === "columns"){
+              x["tmp"] = {};
               // X is currently a data table. Set the toggle
               x["tmp"] = {"toggle": false, "parse": true, "toggleGraph": false};
               // loop for each column
               for (var _v = 0; _v < x.columns.length; _v++){
                 var _col = x.columns[_v];
+                // Create the tmp object in each column
                 x.columns[_v].tmp = {"toggle": false, "toggleGraph": false, "toggleGraphDisabled": false};
                 // loop for each property in one column
                 for (var _prop in _col){
@@ -385,20 +387,17 @@ var create = (function(){
               // console.log(_x);
             }
 
-            // Is this a table? We need to add a temp object
-            if (_key === "filename"){
-
-            }
-
-            // Check if this is a nested structure and we need to process deeper.
-            if (x[_key].constructor === [].constructor && x[_key].length > 0) {
-              // value is an array. iterate over array and recursive call
-              for (var _g=0; _g < x[_key].length; _g++){
-                // process, then return in place.
-                x[_key][_g] = create.initColumnTmp(x[_key][_g]);
+            if(x[_key]){
+              // Check if this is a nested structure and we need to process deeper.
+              if (x[_key].constructor === [].constructor && x[_key].length > 0) {
+                // value is an array. iterate over array and recursive call
+                for (var _g=0; _g < x[_key].length; _g++){
+                  // process, then return in place.
+                  x[_key][_g] = create.initColumnTmp(x[_key][_g]);
+                }
+              } else if (x[_key].constructor === {}.constructor && x[_key].length > 0){
+                x[_key] = create.initColumnTmp(x[_key]);
               }
-            } else if (x[_key].constructor === {}.constructor && x[_key].length > 0){
-              x[_key] = create.initColumnTmp(x[_key]);
             }
           }
         }
@@ -437,32 +436,34 @@ var create = (function(){
         for (var _key in x){
           // safety check: don't want prototype attributes
           if (x.hasOwnProperty(_key)){
-            if (typeof(x[_key]) === "string" && !x[_key]){
-              delete x[_key];
-            } // if string
-            // if this key is in the array of items to be removed, then remove it.
-            else if(_removables.includes(_key)){
-              // remove this key
-              delete x[_key];
-            } // if key in removables
-            else if (x[_key].constructor === [].constructor) {
-              // value is an array. iterate over array and recursive call
-              if (x[_key].length === 0){
+            if(x[_key]){
+              if (typeof(x[_key]) === "string" && !x[_key]){
                 delete x[_key];
-              } else {
-                for (var _g=0; _g < x[_key].length; _g++){
-                  // process, then return in place.
-                  x[_key][_g] = create.rmTmpEmptyData(x[_key][_g]);
+              } // if string
+              // if this key is in the array of items to be removed, then remove it.
+              else if(_removables.includes(_key)){
+                // remove this key
+                delete x[_key];
+              } // if key in removables
+              else if (x[_key].constructor === [].constructor) {
+                // value is an array. iterate over array and recursive call
+                if (x[_key].length === 0){
+                  delete x[_key];
+                } else {
+                  for (var _g=0; _g < x[_key].length; _g++){
+                    // process, then return in place.
+                    x[_key][_g] = create.rmTmpEmptyData(x[_key][_g]);
+                  }
                 }
-              }
-            } // if array
-            else if (x[_key].constructor === {}.constructor){
-              if (JSON.stringify(x[_key]) === JSON.stringify({})){
-                delete x[_key];
-              } else {
-                x[_key] = create.rmTmpEmptyData(x[_key]);
-              }
-            } // if object
+              } // if array
+              else if (x[_key].constructor === {}.constructor){
+                if (JSON.stringify(x[_key]) === JSON.stringify({})){
+                  delete x[_key];
+                } else {
+                  x[_key] = create.rmTmpEmptyData(x[_key]);
+                }
+              } // if object
+            }
           } // hasownproperty
         } // for key in object
       } catch (err){
