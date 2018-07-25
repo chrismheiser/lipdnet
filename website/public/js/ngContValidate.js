@@ -1017,10 +1017,15 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
             if($scope.files.fileCt > 40){
               $scope.showModalAlert({"title": "Wow! That's a lot of files!", "message": "We expanded the page to fit everything, so be sure to scroll down to see your data tables."})
             }
-            $scope.validate();
-            $scope.files.json = create.initColumnTmp($scope.files.json);
-            $scope.files.json = create.initMissingArrs($scope.files.json);
-            $scope.$broadcast('newUpload', $scope.files);
+            if(typeof($scope.files.json) !== "object"){
+                $scope.showModalAlert({"title": "Metadata.jsonld file is incorrect", "message": "There is something wrong with that file. The metadata.jsonld file is missing or incorrectly formatted. Please check the file manually, or create an issue on our Github repository and provide the problematic file."})
+                $scope.resetPage();
+            } else {
+                $scope.validate();
+                $scope.files.json = create.initColumnTmp($scope.files.json);
+                $scope.files.json = create.initMissingArrs($scope.files.json);
+                $scope.$broadcast('newUpload', $scope.files);
+            }
           }); // end sortBeforeValidate
           //RETURNS OBJECT : {"dat": files.json, "feedback": feedback, "filename": files.lipdFilename, "status": feedback.status};
 
