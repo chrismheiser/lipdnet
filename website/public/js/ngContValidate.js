@@ -63,6 +63,7 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
         "lon": [{id: 1, name: "E"}, {id: 2, name: "W"}]
       },
       "archiveType": create.archiveTypeList(),
+      "variableNames": create.variableNameList(),
       "timeUnit": create.timeUnitList(),
       "years": create.yearList(),
       "createdBy": create.createdByList(),
