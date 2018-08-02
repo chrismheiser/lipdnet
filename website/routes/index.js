@@ -5,6 +5,7 @@ var gladstone = require('gladstone');
 var path = require("path");
 var process = require("process");
 var fastcsv = require("fast-csv");
+var request = require('request');
 var logger = require("../node_modules_custom/node_log.js");
 var lipdValidator = require("../node_modules_custom/node_validator.js");
 var misc = require("../node_modules_custom/node_misc.js");
@@ -14,6 +15,104 @@ var router = express.Router();
 
 
 // HELPERS
+var _ontology = {
+    "infVarType": [],
+    "archiveType": [],
+    "proxyObsType": [],
+    "units": []
+};
+
+// Sort the results of the LinkedEarth Wiki ontology results. Get all the string values from the XML response.
+var parseWikiQueryOntology = function(results, cb){
+    try {
+        var _tmp = [];
+        // If there are results, they'll be in this location.
+        // If there aren't results, this location won't exist and we'll trigger the error catch
+        var _data = results.sparql.results[0].result;
+        for(var _m=0; _m<_data.length; _m++) {
+            // console.log(_results[_m]["binding"][0]["literal"][0]);
+            // Push the current data result onto the array
+            _tmp.push(_data[_m]["binding"][0]["literal"][0]);
+        }
+        cb(_tmp);
+    } catch(err) {
+        // There was a problem. We don't want to update our ontology if there was an error.
+        // return null instead to show there was a problem.
+        console.log("index.js: parseWikiQueryOntology: No Results? : " + err);
+        cb(null);
+    }
+};
+
+// Send SPARQL request to LinkedEarth Wiki for ONE ontology field.
+var _getWikiOntologyField = function(field, query){
+    // Pack up the options that we want to give the Python request
+    var options = {
+        uri: "http://wiki.linked.earth/store/ds/query",
+        method: 'POST',
+        timeout: 3000,
+        qs: {"query": query}
+    };
+    // If we're on the production server, then we need to add in the proxy option
+    if (!dev){
+        options.proxy = "http://rishi.cefns.nau.edu:3128";
+    }
+    try{
+        // Send out the POST request
+        request(options, function (err, res, body){
+            if(err){
+                // There was an error in the response. Don't continue. Return null
+                console.log("index.js: getWikiOntologyField: err response: " + err);
+            }
+            // Response is ugly xml
+            var parseString = require('xml2js').parseString;
+            // Store the body of the response
+            var _xml = res.body;
+            // Parse the XML into a JSON object
+            parseString(_xml, function (err, result) {
+                parseWikiQueryOntology(result, function(arr){
+                    if(arr){
+                        _ontology[field] = arr;
+                    }
+                });
+            });
+        });
+    } catch(err){
+        // There was an error before sending out the request.
+        // Note the error and move to the next ontology field loop. No ontology data is updated for this field.
+        console.log("index.js: getWikiOntologyField: Request failed: " + err);
+    }
+};
+
+// Use SPARQL queries to get possible field entries for the specific listed fields. From LinkedEarth Wiki
+var getWikiOntology = function(){
+
+    // The prefix to each query is the same.
+    var _prefix = "PREFIX core: <http://linked.earth/ontology#>PREFIX wiki: <http://wiki.linked.earth/Special:" +
+                    "URIResolver/>PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>";
+
+    // These are the query strings for each of the fields.
+    var _fields = {
+        "infVarType": "SELECT distinct ?a WHERE { ?w core:inferredVariableType ?t. ?t rdfs:label ?a }",
+        "archiveType": "SELECT distinct ?a WHERE {{ ?dataset wiki:Property-3AArchiveType ?a. }UNION{ ?w core:proxyArchiveType ?t. ?t rdfs:label ?a }}",
+        "proxyObsType": "SELECT distinct ?a WHERE { ?w core:proxyObservationType ?t. ?t rdfs:label ?a }",
+        "units": "SELECT distinct ?b WHERE { ?w core:inferredVariableType ?a. ?w core:hasUnits ?b . { ?a rdfs:label \"Age\" . }UNION { ?a rdfs:label \"Year\" . }}",
+    };
+
+    // Send out a query request for each of the fields we're keeping a local copy of.
+    for(var field in _fields){
+        if(_fields.hasOwnProperty(field)){
+            // Go send the POST request for this field.
+            _getWikiOntologyField(field, _prefix + _fields[field]);
+        }
+    }
+};
+
+// Run once on initialization. All other updates are done on the timer below.
+getWikiOntology();
+// Refresh the LinkedEarth Wiki ontology data every 1 week
+setTimeout(getWikiOntology, 610000000);
+
+// TODO Need to finish this. Batch download button for /query page
 var batchDownloadWiki = function(dsns, cb){
   var _errCt = 0;
   var _errNames = [];
@@ -65,6 +164,148 @@ var batchDownloadWiki = function(dsns, cb){
   cb()
 };
 
+// Create a zip file of one LiPD file. All lipd directories and file are in one zip.
+var createArchive = function(pathTmp, pathTmpZip, pathTmpBag, filename, cb){
+    try{
+        logger.info("Creating ZIP/LiPD archive...");
+        var archive = archiver('zip');
+        var _origin = process.cwd();
+        process.chdir(pathTmp);
+        // path where the LiPD will ultimately be located in "/zip" dir.
+        var pathTmpZipLipd = path.join(pathTmpZip, filename);
+        // open write stream to LiPD file location
+        var output = fs.createWriteStream(pathTmpZipLipd);
+        logger.info("Write Stream Open: " + pathTmpZipLipd);
+
+        // "close" event. processing is finished.
+        output.on('close', function () {
+            logger.info(archive.pointer() + ' total bytes');
+            // logger.info('archiver has been finalized and the output file descriptor has closed.');
+            logger.info("LiPD Created at: " + pathTmpZipLipd);
+            // callback to finish POST request
+            process.chdir(_origin);
+            cb();
+        });
+
+        // error event
+        archive.on('error', function(err){
+            logger.info("archive error");
+            throw err;
+        });
+
+        archive.pipe(output);
+        // Add the data directory to the archive
+        try{
+            logger.info("Archiving bag directory: " + pathTmpBag);
+            archive.directory("bag");
+            logger.info("Archive bag success");
+        }catch(err){
+            logger.info("Error archive bag directory: " + err);
+        }
+
+        // all files are done, finalize the archive
+        archive.finalize();
+    } catch(err){
+        console.log("Error: createArchive: " + err);
+    }
+
+}; // end createArchive
+
+// Create a zip file of multiple NOAA text files. Bundle them for a single download event.
+var createArchiveNoaa = function(pathTmpNoaa, cb){
+    logger.info("Creating NOAA archive...");
+    var archive = archiver('zip');
+    var _origin = process.cwd();
+    process.chdir(pathTmpNoaa);
+    // path where the NOAA archive write to
+    var pathTmpNoaaZip = path.join(pathTmpNoaa, "noaa_archive.zip");
+    // open write stream to LiPD file location
+    var output = fs.createWriteStream(pathTmpNoaaZip);
+    logger.info("Write Stream Open: " + pathTmpNoaaZip);
+
+    // "close" event. processing is finished.
+    output.on('close', function () {
+        logger.info(archive.pointer() + ' total bytes');
+        // logger.info('archiver has been finalized and the output file descriptor has closed.');
+        logger.info("ZIP Created at: " + pathTmpNoaaZip);
+        // callback to finish POST request
+        process.chdir(_origin);
+        cb();
+    });
+
+    // error event
+    archive.on('error', function(err){
+        logger.info("archive error");
+        throw err;
+    });
+
+    archive.pipe(output);
+    // Add the data directory to the archive
+    try {
+        logger.info("Archiving NOAA text files: " + pathTmpNoaa);
+        try {
+            // read in all filenames from the "/bag" dir
+            var files = fs.readdirSync(pathTmpNoaa);
+            for (var i in files) {
+                // if this is a text file (.txt) archive it
+                if (path.extname(files[i]) === ".txt") {
+                    logger.info("archiving: " + files[i]);
+                    archive.file(files[i], {name: files[i]});
+                }
+            }
+        } catch (err) {
+            logger.info(err);
+        }
+    }catch(err){
+        logger.info(err);
+    }
+    // all files are done, finalize the archive
+    archive.finalize();
+};
+
+// Create the subfolders needed for creating a LiPD file. Each folder has its own purpose during the process.
+var createSubdirs = function(master, res){
+    logger.info("createSubdirs");
+    try{
+        // tmp bagit level folder. will be removed before zipping.
+        master.pathTmpBag = path.join(master.pathTmp, "bag");
+        master.pathTmpZip = path.join(master.pathTmp, "zip");
+        master.pathTmpFiles = path.join(master.pathTmp, "files");
+
+        // logger.info("POST: make other dirs...");
+        mkdirSync(master.pathTmpZip);
+        mkdirSync(master.pathTmpFiles);
+        return master;
+        // logger.info("POST: created dir: " + pathTmpZip);
+        // logger.info("POST: created dir: " + pathTmpFiles);
+    } catch(err){
+        logger.info("index.js: createSubdirs: " + err);
+        res.status(500).send("POST: createSubdirs: Error creating LiPD: " + err);
+    }
+};
+
+var createTmpDir = function(master, res){
+    try {
+        // create tmp folder at "/tmp/<lipd-xxxxx>"
+        // logger.info("POST: creating tmp dir...");
+        master.pathTmp = misc.makeid(master.pathTmpPrefix, function(_pathTmp){
+            // logger.info("POST: created tmp dir str: " + _pathTmp);
+            try{
+                logger.info("mkdir: " + _pathTmp);
+                mkdirSync(_pathTmp);
+            } catch(err){
+                logger.info("createTmpDir: Couldn't mkdirs" + err);
+            }
+            return _pathTmp;
+        });
+        return master;
+    }catch(err){
+        logger.info("createTmpDir: error making tmp IDs: " + err);
+        res.status(500).send("createTmpDir: error making tmp IDs: " + err);
+    }
+};
+
+// Initiate a download response. Necessary for sending clients the files they want. Used for all our downloads.
 var downloadResponse = function(options, res){
   // set headers and initiate download.
   var pathFinal = path.join(options.path, options.file);
@@ -74,25 +315,20 @@ var downloadResponse = function(options, res){
   res.download(pathFinal);
 };
 
-var writeFiles = function(dat, dst, res, cb){
-  try{
-    // console.log("writeFiles");
-    dat.forEach(function(file){
-      for(var _filename in file){
-        try{
-          logger.info("writing file: " + path.join(dst,  _filename));
-          fs.writeFileSync(path.join(dst, _filename), file[_filename]);
-        } catch(err){
-          res.status(500).send("Unable to process file: " + _filename);
+// create a directory, but catch error when the dir already exists.
+var mkdirSync = function (path) {
+    try {
+        fs.mkdirSync(path);
+    } catch(e) {
+        if ( e.code == 'EEXIST' ){
+            logger.info("folder exists: " + path);
+        } else {
+            logger.info(e);
         }
-      }
-    });
-  } catch(err){
-    console.log("writeFiles: ", err);
-  }
-  cb();
+    }
 };
 
+// LiPD parse request. Put request data into one organized object.
 var parseRequest = function(master, req, res){
   try {
     // set data about the file
@@ -109,6 +345,7 @@ var parseRequest = function(master, req, res){
   }
 };
 
+// NOAA parse request. Put request data into one organized object.
 var parseRequestNoaa = function(master, req, res){
   try {
     // set data about the file
@@ -125,6 +362,7 @@ var parseRequestNoaa = function(master, req, res){
   }
 };
 
+// Wiki: Parse all the resil
 var parseWikiQueryResults = function(results, cb){
   var _query_results = [];
   for(var _m=0; _m<results.length; _m++) {
@@ -139,45 +377,26 @@ var parseWikiQueryResults = function(results, cb){
   cb(_query_results);
 };
 
-var createTmpDir = function(master, res){
-  try {
-    // create tmp folder at "/tmp/<lipd-xxxxx>"
-    // logger.info("POST: creating tmp dir...");
-    master.pathTmp = misc.makeid(master.pathTmpPrefix, function(_pathTmp){
-      // logger.info("POST: created tmp dir str: " + _pathTmp);
-      try{
-        logger.info("mkdir: " + _pathTmp);
-        mkdirSync(_pathTmp);
-      } catch(err){
-        logger.info("createTmpDir: Couldn't mkdirs" + err);
-      }
-      return _pathTmp;
-    });
-    return master;
-  }catch(err){
-    logger.info("createTmpDir: error making tmp IDs: " + err);
-    res.status(500).send("createTmpDir: error making tmp IDs: " + err);
-  }
-};
-
-// Create the subfolders
-var createSubdirs = function(master, res){
-    logger.info("createSubdirs");
+// Read the tsid_only.csv file, and put the TSids in a flat array.
+var readTSidOnly = function(cb){
+    logger.info("index: readTSidOnly");
+    var _path = path.join(process.cwd(), "tmp", "tsid_only.csv");
+    logger.info("path to tsid only: " + _path);
+    var _data = [];
     try{
-      // tmp bagit level folder. will be removed before zipping.
-      master.pathTmpBag = path.join(master.pathTmp, "bag");
-      master.pathTmpZip = path.join(master.pathTmp, "zip");
-      master.pathTmpFiles = path.join(master.pathTmp, "files");
-
-      // logger.info("POST: make other dirs...");
-      mkdirSync(master.pathTmpZip);
-      mkdirSync(master.pathTmpFiles);
-      return master;
-      // logger.info("POST: created dir: " + pathTmpZip);
-      // logger.info("POST: created dir: " + pathTmpFiles);
+        logger.info("try to read from csv file.");
+        fastcsv
+            .fromPath(_path)
+            .on("data", function(_entry){
+                // row comes as an array of one string. just grab the string.
+                _data.push(_entry[0]);
+            })
+            .on("end", function(){
+                //  logger.info(_data);
+                cb(_data);
+            });
     } catch(err){
-      logger.info("index.js: createSubdirs: " + err);
-      res.status(500).send("POST: createSubdirs: Error creating LiPD: " + err);
+        logger.info(err);
     }
 };
 
@@ -218,43 +437,6 @@ var updateTSidOnly = function(_objs){
   }
 };
 
-// Read the tsid_only.csv file, and put the TSids in a flat array.
-var readTSidOnly = function(cb){
-  logger.info("index: readTSidOnly");
-  var _path = path.join(process.cwd(), "tmp", "tsid_only.csv");
-  logger.info("path to tsid only: " + _path);
-  var _data = [];
-  try{
-    logger.info("try to read from csv file.");
-    fastcsv
-     .fromPath(_path)
-     .on("data", function(_entry){
-       // row comes as an array of one string. just grab the string.
-        _data.push(_entry[0]);
-     })
-     .on("end", function(){
-      //  logger.info(_data);
-       cb(_data);
-     });
-  } catch(err){
-    logger.info(err);
-  }
-};
-
-// create a directory, but catch error when the dir already exists.
-var mkdirSync = function (path) {
-  try {
-    fs.mkdirSync(path);
-  } catch(e) {
-    if ( e.code == 'EEXIST' ){
-      logger.info("folder exists: " + path);
-    } else {
-      logger.info(e);
-    }
-  }
-};
-
-
 var walk = function(directoryName) {
   fs.readdir(directoryName, function(e, files) {
     if (e) {
@@ -278,103 +460,25 @@ var walk = function(directoryName) {
   });
 };
 
-var createArchiveNoaa = function(pathTmpNoaa, cb){
-  logger.info("Creating NOAA archive...");
-  var archive = archiver('zip');
-  var _origin = process.cwd();
-  process.chdir(pathTmpNoaa);
-  // path where the NOAA archive write to
-  var pathTmpNoaaZip = path.join(pathTmpNoaa, "noaa_archive.zip");
-  // open write stream to LiPD file location
-  var output = fs.createWriteStream(pathTmpNoaaZip);
-  logger.info("Write Stream Open: " + pathTmpNoaaZip);
-
-  // "close" event. processing is finished.
-  output.on('close', function () {
-    logger.info(archive.pointer() + ' total bytes');
-    // logger.info('archiver has been finalized and the output file descriptor has closed.');
-    logger.info("ZIP Created at: " + pathTmpNoaaZip);
-    // callback to finish POST request
-    process.chdir(_origin);
-    cb();
-  });
-
-  // error event
-  archive.on('error', function(err){
-    logger.info("archive error");
-    throw err;
-  });
-
-  archive.pipe(output);
-  // Add the data directory to the archive
-  try {
-    logger.info("Archiving NOAA text files: " + pathTmpNoaa);
-    try {
-      // read in all filenames from the "/bag" dir
-      var files = fs.readdirSync(pathTmpNoaa);
-      for (var i in files) {
-        // if this is a text file (.txt) archive it
-        if (path.extname(files[i]) === ".txt") {
-          logger.info("archiving: " + files[i]);
-          archive.file(files[i], {name: files[i]});
-        }
-      }
-    } catch (err) {
-      logger.info(err);
+var writeFiles = function(dat, dst, res, cb){
+    try{
+        // console.log("writeFiles");
+        dat.forEach(function(file){
+            for(var _filename in file){
+                try{
+                    logger.info("writing file: " + path.join(dst,  _filename));
+                    fs.writeFileSync(path.join(dst, _filename), file[_filename]);
+                } catch(err){
+                    res.status(500).send("Unable to process file: " + _filename);
+                }
+            }
+        });
+    } catch(err){
+        console.log("writeFiles: ", err);
     }
-  }catch(err){
-    logger.info(err);
-  }
-  // all files are done, finalize the archive
-  archive.finalize();
+    cb();
 };
 
-// use the archiver model to create the LiPD file
-var createArchive = function(pathTmp, pathTmpZip, pathTmpBag, filename, cb){
-  try{
-    logger.info("Creating ZIP/LiPD archive...");
-    var archive = archiver('zip');
-    var _origin = process.cwd();
-    process.chdir(pathTmp);
-    // path where the LiPD will ultimately be located in "/zip" dir.
-    var pathTmpZipLipd = path.join(pathTmpZip, filename);
-    // open write stream to LiPD file location
-    var output = fs.createWriteStream(pathTmpZipLipd);
-    logger.info("Write Stream Open: " + pathTmpZipLipd);
-
-    // "close" event. processing is finished.
-    output.on('close', function () {
-      logger.info(archive.pointer() + ' total bytes');
-      // logger.info('archiver has been finalized and the output file descriptor has closed.');
-      logger.info("LiPD Created at: " + pathTmpZipLipd);
-      // callback to finish POST request
-      process.chdir(_origin);
-      cb();
-    });
-
-    // error event
-    archive.on('error', function(err){
-      logger.info("archive error");
-      throw err;
-    });
-
-    archive.pipe(output);
-    // Add the data directory to the archive
-    try{
-      logger.info("Archiving bag directory: " + pathTmpBag);
-      archive.directory("bag");
-      logger.info("Archive bag success");
-    }catch(err){
-      logger.info("Error archive bag directory: " + err);
-    }
-
-    // all files are done, finalize the archive
-    archive.finalize();
-  } catch(err){
-    console.log("Error: createArchive: " + err);
-  }
-
-}; // end createArchive
 
 // END HELPERS
 
@@ -630,8 +734,6 @@ router.post("/query", function(req, res, next){
   // Request: A JSON object of query parameters. Send these parameters to PythonAnywhere script to get query text-blob. Send query text blob to LinkedEarth Wiki to get query results.
   // Response: Query dataset name results. Parsed and formatted in an array to be useful on client-side
 
-  // Bring in the request module to work some magic
-  var request = require('request');
   // Pack up the options that we want to give the Python request
   var options = {
     uri: 'http://cheiser.pythonanywhere.com/api/wikiquery',
@@ -780,6 +882,11 @@ router.get("/loading", function(req, res, next){
 
 
 // API ENDPOINTS
+
+router.get("/api/ontology", function(req, res, next){
+    res.status(200).send(JSON.stringify(_ontology));
+});
+
 router.post("/api/validator", function(req, res, next){
   logger.info("------------------------");
   logger.info("enter /api/validator");

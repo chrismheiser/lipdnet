@@ -43,6 +43,8 @@ f.config(function (uiGmapGoogleMapApiProvider, $mdThemingProvider, $mdAriaProvid
     libraries: 'weather,geometry,visualization'
   });
   $mdAriaProvider.disableWarnings();
+
+
 });
 
 // IMPORT SERVICE
