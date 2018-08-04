@@ -36,18 +36,25 @@ div(layout="column" ng-repeat='entry3 in entry2.columns track by $index' layout-
                 md-subheader.md-primary Add Fields
 
                 div(layout='', layout-padding='', layout-sm='column')
-                    md-input-container(flex="75")
-                        md-select(ng-model='dropdowns.current.columnField' ng-model-options="{trackBy: '$value.id'}" aria-label="Filler")
-                            md-option(ng-value="field" ng-repeat="field in dropdowns.columnFields") {{ field.name }}
+                    md-input-container(flex="")
+                        label Enter Field Name
+                        input.mdautocomplete(type="text" ng-model="entry3.tmp.custom" uib-typeahead="field for field in dropdowns.columnFields | filter:$viewValue | limitTo:8")
                         md-tooltip {{getTooltip("misc", "addFields")}}
-                    button.green-btn-off(flex='' type="button" ng-click='addColumnField(entry3)' style="margin: 1.5em;") Add
+                    button.green-btn-off(flex='' type="button" ng-click='addCustom(entry3)' style="margin: 1.5em;") Add
 
-                div(layout='', layout-padding='', layout-sm='column')
-                    button.invisible(ng-click="addCustom(entry3)")
-                    md-input-container(flex="25")
-                        label Add custom
-                        input(ng-model="entry3.tmp.custom")
-                        md-tooltip {{getTooltip("misc", "addCustom")}}
+                //div(layout='', layout-padding='', layout-sm='column')
+                //    md-input-container(flex="75")
+                //        md-select(ng-model='dropdowns.current.columnField' ng-model-options="{trackBy: '$value.id'}" aria-label="Filler")
+                //            md-option(ng-value="field" ng-repeat="field in dropdowns.columnFields") {{ field.name }}
+                //        md-tooltip {{getTooltip("misc", "addFields")}}
+                //    button.green-btn-off(flex='' type="button" ng-click='addColumnField(entry3)' style="margin: 1.5em;") Add
+                //
+                //div(layout='', layout-padding='', layout-sm='column')
+                //    button.invisible(ng-click="addCustom(entry3)")
+                //    md-input-container(flex="25")
+                //        label Add custom
+                //        input(ng-model="entry3.tmp.custom")
+                //        md-tooltip {{getTooltip("misc", "addCustom")}}
 
                 div(layout='', layout-padding='', layout-sm='column')
                     button.yellow-btn-off(type="button" ng-if="!pageMeta.editColumn" ng-click="pageMeta.editColumn = !pageMeta.editColumn") Edit
@@ -65,9 +72,15 @@ div(layout="column" ng-repeat='entry3 in entry2.columns track by $index' layout-
 
                 div(style="overflow: scroll; height: 550px;")
                     div(ng-repeat="(k,v) in entry3" ng-if="isProperty(k)" layout='', layout-padding='', layout-sm='column')
-                        md-input-container(flex='', class="md-input-has-value")
+                        md-input-container(ng-if="!isAutocomplete(k)" flex='', class="md-input-has-value")
                             label {{k}}
                             input(ng-model="entry3[k]" ng-disabled="k==='TSid'")
+                            //input.mdautocomplete(ng-if="isAutocomplete(k)" type="text" ng-model="entry3[k]" uib-typeahead="entry for entry in ontology[k] | filter:$viewValue | limitTo:8")
+                            md-tooltip {{getTooltip("paleoData", k)}}
+
+                        md-input-container(flex="" ng-if="isAutocomplete(k)")
+                            label {{k}}
+                            input.mdautocomplete(type="text" ng-model="entry3[k]" uib-typeahead="entry for entry in ontology[k] | filter:$viewValue | limitTo:8")
                             md-tooltip {{getTooltip("paleoData", k)}}
 
                         div(flex='10' layout='', layout-padding='', layout-sm='column')

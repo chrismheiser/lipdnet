@@ -16,9 +16,9 @@ var router = express.Router();
 
 // HELPERS
 var _ontology = {
-    "infVarType": [],
+    "inferredVariableType": [],
     "archiveType": [],
-    "proxyObsType": [],
+    "proxyObservationType": [],
     "units": []
 };
 
@@ -92,9 +92,9 @@ var getWikiOntology = function(){
 
     // These are the query strings for each of the fields.
     var _fields = {
-        "infVarType": "SELECT distinct ?a WHERE { ?w core:inferredVariableType ?t. ?t rdfs:label ?a }",
+        "inferredVariableType": "SELECT distinct ?a WHERE { ?w core:inferredVariableType ?t. ?t rdfs:label ?a }",
         "archiveType": "SELECT distinct ?a WHERE {{ ?dataset wiki:Property-3AArchiveType ?a. }UNION{ ?w core:proxyArchiveType ?t. ?t rdfs:label ?a }}",
-        "proxyObsType": "SELECT distinct ?a WHERE { ?w core:proxyObservationType ?t. ?t rdfs:label ?a }",
+        "proxyObservationType": "SELECT distinct ?a WHERE { ?w core:proxyObservationType ?t. ?t rdfs:label ?a }",
         "units": "SELECT distinct ?b WHERE { ?w core:inferredVariableType ?a. ?w core:hasUnits ?b . { ?a rdfs:label \"Age\" . }UNION { ?a rdfs:label \"Year\" . }}",
     };
 
@@ -110,7 +110,7 @@ var getWikiOntology = function(){
 // Run once on initialization. All other updates are done on the timer below.
 getWikiOntology();
 // Refresh the LinkedEarth Wiki ontology data every 1 week
-setTimeout(getWikiOntology, 610000000);
+setTimeout(getWikiOntology, 5000);
 
 // TODO Need to finish this. Batch download button for /query page
 var batchDownloadWiki = function(dsns, cb){

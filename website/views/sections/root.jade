@@ -19,8 +19,10 @@ div(layout='', layout-padding='', layout-sm='column')
     md-tooltip {{getTooltip("root", "createdBy")}}
   md-input-container(flex="")
     label Archive Type *
-    md-select(ng-model="files.json.archiveType")
-      md-option(ng-repeat="archive in dropdowns.archiveType" ng-value="archive") {{archive}}
+    input.mdautocomplete(type="text" ng-model="files.json.archiveType"
+                          uib-typeahead="entry for entry in ontology['archiveType'] | filter:$viewValue | limitTo:8")
+    //md-select(ng-model="files.json.archiveType")
+    //  md-option(ng-repeat="archive in dropdowns.archiveType" ng-value="archive") {{archive}}
     md-tooltip {{getTooltip("root", "archiveType")}}
 div(layout='', layout-padding='', layout-sm='column')
   md-input-container(flex='33', ng-class="md-input-has-value")

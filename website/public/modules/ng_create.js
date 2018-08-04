@@ -580,22 +580,42 @@ var create = (function(){
     }),
 
     fieldsList: (function(){
-      return [
-        { id: 1, name: "calibration"},
-        { id: 2, name: "hasResolution"},
-        { id: 3, name: "inferredVariableType"},
-        { id: 4, name: "interpretation"},
-        { id: 5, name: "measurementMaterial"},
-        { id: 6, name: "method"},
-        { id: 7, name: "notes"},
-        { id: 8, name: "physicalSample"},
-        { id: 9, name: "proxy"},
-        { id: 10, name: "proxyObservationType"},
-        { id: 11, name: "sensorGenus"},
-        { id: 12, name: "sensorSpecies"},
-        { id: 13, name: "takenAtDepth"},
-        { id: 14, name: "variableType"},
-      ]
+      var _og = [
+          { id: 1, name: "calibration"},
+          { id: 2, name: "hasResolution"},
+          { id: 3, name: "inferredVariableType"},
+          { id: 4, name: "interpretation"},
+          { id: 5, name: "measurementMaterial"},
+          { id: 6, name: "method"},
+          { id: 7, name: "notes"},
+          { id: 8, name: "physicalSample"},
+          { id: 9, name: "proxy"},
+          { id: 10, name: "proxyObservationType"},
+          { id: 11, name: "sensorGenus"},
+          { id: 12, name: "sensorSpecies"},
+          { id: 13, name: "takenAtDepth"},
+          { id: 14, name: "variableType"},
+      ];
+
+      var _new = [
+          "calibration",
+          "hasResolution",
+          "inferredVariableType",
+          "interpretation",
+          "measurementMaterial",
+          "method",
+          "notes",
+          "physicalSample",
+          "proxy",
+          "proxyObservationType",
+          "sensorGenus",
+          "sensorSpecies",
+          "takenAtDepth",
+          "variableType"
+      ];
+
+
+      return _new;
     }),
 
     tourSteps: (function(){

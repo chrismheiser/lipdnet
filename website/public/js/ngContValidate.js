@@ -3,31 +3,30 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
   function ($scope, $log, $timeout, $q, $http, Upload, ImportService, ExportService, $uibModal, $sce, toaster) {
 
     var vc = this;
-    vc.properties = {
-      item : null,
-      search : null,
-      properties: vc.properties || [],
-      list : [
-        // physical sample
-        // calibration
-        // climate interpretation
-        // {"view": "Climate Interpretation", "name": "climateInterpretation", "checked": false},
-        {"view": "Basis", "name": "basis", "checked": false},
-        {"view": "Proxy", "name": "proxy", "checked": false},
-        {"view": "Material", "name": "material", "checked": false},
-        {"view": "Method", "name": "method", "checked": false},
-        {"view": "Seasonality", "name": "seasonality", "checked": false},
-        {"view": "Data Type", "name": "dataType", "checked": false},
-        {"view": "UseInGlobalTemperatureAnalysis", "name": "useInGlobalTemperatureAnalysis", "checked": false},
-
-        {"view": "Sensor Species", "name": "sensorSpecies", "checked": false},
-        {"view": "Sensor Genus", "name": "sensorGenus", "checked": false},
-        {"view": "Variable Type", "name": "variableType", "checked": false},
-        {"view": "Proxy Observation Type", "name": "proxyObservationType", "checked": false},
-        {"view": "Inferred Variable Type", "name": "inferredVariableType", "checked": false},
-        {"view": "Notes", "name": "notes", "checked": false},
-      ]
-    };
+    // vc.properties = {
+    //   item : null,
+    //   search : null,
+    //   properties: vc.properties || [],
+    //   list : [
+    //     // physical sample
+    //     // calibration
+    //     // climate interpretation
+    //     // {"view": "Climate Interpretation", "name": "climateInterpretation", "checked": false},
+    //     {"view": "Basis", "name": "basis", "checked": false},
+    //     {"view": "Proxy", "name": "proxy", "checked": false},
+    //     {"view": "Material", "name": "material", "checked": false},
+    //     {"view": "Method", "name": "method", "checked": false},
+    //     {"view": "Seasonality", "name": "seasonality", "checked": false},
+    //     {"view": "Data Type", "name": "dataType", "checked": false},
+    //     {"view": "UseInGlobalTemperatureAnalysis", "name": "useInGlobalTemperatureAnalysis", "checked": false},
+    //     {"view": "Sensor Species", "name": "sensorSpecies", "checked": false},
+    //     {"view": "Sensor Genus", "name": "sensorGenus", "checked": false},
+    //     {"view": "Variable Type", "name": "variableType", "checked": false},
+    //     {"view": "Proxy Observation Type", "name": "proxyObservationType", "checked": false},
+    //     {"view": "Inferred Variable Type", "name": "inferredVariableType", "checked": false},
+    //     {"view": "Notes", "name": "notes", "checked": false},
+    //   ]
+    // };
 
     $scope.ontology = {};
     $scope.lipdPopover = $sce.trustAsHtml(create.getPopover("lipd"));
@@ -82,13 +81,13 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
             .then(function(response) {
               // Success. Set the data to the scope directly
                 $scope.ontology = response.data;
-                console.log($scope.ontology);
+                // console.log($scope.ontology);
             }, function myError(err) {
                 console.log(err);
                 // Error, use our hardcoded lists as a fallback.
                 $scope.ontology["archiveType"] = create.archiveTypeList;
-                $scope.ontology["infVarType"] = create.inferredVariableTypeList;
-                $scope.ontology["proxyObsType"] = create.proxyObservationTypeList;
+                $scope.ontology["inferredVariableType"] = create.inferredVariableTypeList;
+                $scope.ontology["proxyObservationType"] = create.proxyObservationTypeList;
             });
     };
     initOntology();
@@ -725,6 +724,14 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       return false;
     };
 
+    $scope.isAutocomplete = function(field){
+        // These fields use an autocomplete input box with suggested data from the linked earth wiki ontology.
+        if(["proxyObservationType", "inferredVariableType"].includes(field)){
+            return true;
+        }
+        return false;
+    };
+
     $scope.isProperty = function(field){
       // Do not show any temporary fields, data, or nested blocks.
       if(["number", "variableName", "units", "toggle", "description", "values", "checked", "tmp", "interpretation", "physicalSample", "hasResolution", "calibration"].includes(field)){
@@ -999,18 +1006,18 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
 
     };
 
-    vc.propertiesQuerySearch = function(query) {
-      return query ? vc.properties.list.filter(createFilterFor(query)) : vc.properties.list.filter(createFilterFor(''));
-    };
-
-    function createFilterFor(query) {
-      var lowercaseQuery = angular.lowercase(query);
-      return function filterFn(item) {
-        // console.log(item);
-        return (angular.lowercase(item.name).indexOf(lowercaseQuery) === 0) ||
-          (angular.lowercase(item.name).indexOf(lowercaseQuery) === 0);
-      };
-    }
+    // vc.propertiesQuerySearch = function(query) {
+    //   return query ? vc.properties.list.filter(createFilterFor(query)) : vc.properties.list.filter(createFilterFor(''));
+    // };
+    //
+    // function createFilterFor(query) {
+    //   var lowercaseQuery = angular.lowercase(query);
+    //   return function filterFn(item) {
+    //     // console.log(item);
+    //     return (angular.lowercase(item.name).indexOf(lowercaseQuery) === 0) ||
+    //       (angular.lowercase(item.name).indexOf(lowercaseQuery) === 0);
+    //   };
+    // }
 
     $scope.uploadBtnClick = function(){
       this.value = null;
