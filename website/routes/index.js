@@ -8,6 +8,7 @@ var fastcsv = require("fast-csv");
 var request = require('request');
 var logger = require("../node_modules_custom/node_log.js");
 var lipdValidator = require("../node_modules_custom/node_validator.js");
+// var ontology = require("../node_modules_custom/node_ontology.js");
 var misc = require("../node_modules_custom/node_misc.js");
 var port = process.env.PORT || 3000;
 var dev = port === 3000;
@@ -15,11 +16,164 @@ var router = express.Router();
 
 
 // HELPERS
-var _ontology = {
+var _ontology_query = {
     "inferredVariableType": [],
     "archiveType": [],
     "proxyObservationType": [],
     "units": []
+};
+// All 'labels' imported and processed from the ontology.json file
+var _ontology_json = [];
+
+
+// Global counter for recursive getOntologyLabels function below
+var count = 0;
+var getOntologyLabels = function(json, cb) {
+    // Recursively collect all the "label" items from within the ontology file
+    count++;
+    if(typeof(json) === "string") {
+    }
+    else if (Array.isArray(json)){
+        for(var _i=0; _i < json.length; _i++){
+            getOntologyLabels(json[_i], null);
+            count--;
+        }
+    } else if(typeof(json) === "object"){
+        for(var _key in json){
+            if(json.hasOwnProperty(_key)){
+                if (_key === "rdfs:label"){
+                    if(json[_key].hasOwnProperty("@value")){
+                        _ontology_json.push(json[_key]["@value"]);
+                    }
+                } else {
+                    getOntologyLabels(json[_key], null);
+                    count--;
+                }
+            }
+        }
+    }
+    if (count-1 === 0 && cb)
+        cb();
+
+};
+
+var cleanOntology = function(){
+    // REQUIREMENTS
+
+    // 1. remove any words that have "." period equivalents
+    // ie. 'yr bp' and "yr b.p."
+
+    // 2. remove any words that have no spacing equivalents
+    // ie.  "glacier ice" and "GlacierIce"
+
+    // 3. remove any words that have uppercase equivalents
+    // ie. "Glacierice" and "glacierice"
+
+    // lower all items in query, and remove the period characters
+    for(var _key in _ontology_query) {
+        if(_ontology_query.hasOwnProperty(_key)) {
+            for(var _k = 0; _k < _ontology_query[_key].length; _k++) {
+                try{
+                    _ontology_query[_key][_k] = _ontology_query[_key][_k].toLowerCase().replace(/\./g, "");
+                } catch(err){
+                    // pass
+                }
+            }
+        }
+    }
+
+    for(var _key2 in _ontology_query) {
+        if (_ontology_query.hasOwnProperty(_key2)) {
+            var _bad = [];
+            for (var _k2 = 0; _k2 < _ontology_query[_key2].length; _k2++) {
+                var _word = _ontology_query[_key2][_k2];
+                // Is there a space in this word?
+                if(_word.indexOf(" ") !== -1){
+                    // Get rid of the space to look for a 'no-space' equivalent
+                    var _nospaceword = _word.replace(" ", "");
+                    // Is there a no space equivalent
+                    if(_ontology_query[_key2].indexOf(_nospaceword) !== -1){
+                        // We'll remove this word later.
+                        _bad.push(_nospaceword);
+                    }
+                }
+
+                // Are there duplicates of this word in the key array? Is the word tracked in the bad array yet?
+                if(countDuplicates(_ontology_query[_key2], _word) > 1 && _bad.indexOf(_word) === -1){
+                    _bad.push(_word);
+                }
+            }
+
+            // Remove all the words in the bad array that we don't want anymore.
+            for(var _p=0; _p<_bad.length; _p++){
+                var _removeword = _bad[_p];
+                // Since there might be multiple instances of bad words, we have to loop to remove all of them.
+                for(var _rm=0; _rm<countDuplicates(_ontology_query[_key2], _removeword); _rm++){
+                    var _idx = _ontology_query[_key2].indexOf(_removeword);
+                    if (_idx > -1) {
+                        _ontology_query[_key2].splice(_idx, 1);
+                    }
+                }
+            }
+        }
+    }
+
+    // Go through the ontology json data and replace any wiki items with the ontology counterpart. (better formatting)
+    for(var _h=0; _h<_ontology_json.length; _h++){
+        // Ontology word to look for
+        var _word1 = _ontology_json[_h];
+        for(var _key3 in _ontology_query) {
+            if (_ontology_query.hasOwnProperty(_key3)) {
+                // Is the ontology version in here in a lowercase version?
+                var _idx2 = _ontology_query[_key3].indexOf(_word1.toLowerCase());
+                if (_idx2 > -1) {
+                    // Remove the wiki version
+                    _ontology_query[_key3].splice(_idx2, 1);
+                    // Add the ontology version
+                    _ontology_query[_key3].push(_word1);
+                }
+            }
+        }
+    }
+
+};
+
+var countDuplicates = function(arr, word){
+    var _count = 0;
+    for(var i = 0; i < arr.length; i++){
+        if(arr[i] === word)
+            _count++;
+    }
+    return _count;
+};
+
+var readOntologyFile = function(cb){
+    try{
+        fs.readFile('./data/ontology.json', function (err, data) {
+            cb(err, data);
+        });
+    } catch(err){
+        console.log("index.js: readOntologyFile: " + err);
+    }
+};
+
+var mergeOntologies = function(){
+    readOntologyFile(function(err, _data){
+        try{
+            if (err){
+                console.log("index.js: readOntologyFile: Couldn't read ontology.json: " + err);
+            } else {
+                // Flatten the json object into an array of keys ("labels")
+                getOntologyLabels(JSON.parse(_data), function(){
+                    // Compare and combine the Ontology data with the Wiki query data. Give Ontology priority.
+                    cleanOntology();
+                    console.log("index.js: cleanOntology: end");
+                });
+            }
+        }catch(err){
+            console.log("index.js: mergeOntologies: " + err);
+        }
+    });
 };
 
 // Sort the results of the LinkedEarth Wiki ontology results. Get all the string values from the XML response.
@@ -39,56 +193,60 @@ var parseWikiQueryOntology = function(results, cb){
         // There was a problem. We don't want to update our ontology if there was an error.
         // return null instead to show there was a problem.
         console.log("index.js: parseWikiQueryOntology: No Results? : " + err);
-        cb(null);
+        cb([]);
     }
 };
 
 // Send SPARQL request to LinkedEarth Wiki for ONE ontology field.
 var _getWikiOntologyField = function(field, query){
-    // Pack up the options that we want to give the Python request
-    var options = {
-        uri: "http://wiki.linked.earth/store/ds/query",
-        method: 'POST',
-        timeout: 3000,
-        qs: {"query": query}
-    };
-    // If we're on the production server, then we need to add in the proxy option
-    if (!dev){
-        options.proxy = "http://rishi.cefns.nau.edu:3128";
-    }
-    try{
-        // Send out the POST request
-        request(options, function (err, res, body){
-            if(err){
-                // There was an error in the response. Don't continue. Return null
-                console.log("index.js: getWikiOntologyField: err response: " + err);
-            }
-            // Response is ugly xml
-            var parseString = require('xml2js').parseString;
-            // Store the body of the response
-            var _xml = res.body;
-            // Parse the XML into a JSON object
-            parseString(_xml, function (err, result) {
-                parseWikiQueryOntology(result, function(arr){
-                    if(arr){
-                        _ontology[field] = arr;
+        // Pack up the options that we want to give the Python request
+        var options = {
+            uri: "http://wiki.linked.earth/store/ds/query",
+            method: 'POST',
+            timeout: 3000,
+            qs: {"query": query}
+        };
+        // If we're on the production server, then we need to add in the proxy option
+        if (!dev){
+            options.proxy = "http://rishi.cefns.nau.edu:3128";
+        }
+        try{
+            // Send out the POST request
+            request(options, function (err, res, body){
+                if(err){
+                    // There was an error in the response. Don't continue. Return null
+                    console.log("index.js: getWikiOntologyField: err response: " + err);
+                }
+                // Response is ugly xml
+                var parseString = require('xml2js').parseString;
+                // Store the body of the response
+                var _xml = res.body;
+                // Parse the XML into a JSON object
+                parseString(_xml, function (err, result) {
+                    if(err){
+                        console.log("index.js: getWikiOntologyField: parseString: " + err);
+                    } else {
+                        parseWikiQueryOntology(result, function(arr){
+                            if(arr){
+                                _ontology_query[field] = arr;
+                            }
+                        });
                     }
                 });
             });
-        });
-    } catch(err){
-        // There was an error before sending out the request.
-        // Note the error and move to the next ontology field loop. No ontology data is updated for this field.
-        console.log("index.js: getWikiOntologyField: Request failed: " + err);
-    }
+        } catch(err){
+            // There was an error before sending out the request.
+            // Note the error and move to the next ontology field loop. No ontology data is updated for this field.
+            console.log("index.js: getWikiOntologyField: Request failed: " + err);
+        }
+
 };
 
 // Use SPARQL queries to get possible field entries for the specific listed fields. From LinkedEarth Wiki
 var getWikiOntology = function(){
-
     // The prefix to each query is the same.
     var _prefix = "PREFIX core: <http://linked.earth/ontology#>PREFIX wiki: <http://wiki.linked.earth/Special:" +
-                    "URIResolver/>PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>";
+        "URIResolver/>PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>";
 
     // These are the query strings for each of the fields.
     var _fields = {
@@ -101,16 +259,35 @@ var getWikiOntology = function(){
     // Send out a query request for each of the fields we're keeping a local copy of.
     for(var field in _fields){
         if(_fields.hasOwnProperty(field)){
-            // Go send the POST request for this field.
+            // Go send the POST request for this field
             _getWikiOntologyField(field, _prefix + _fields[field]);
         }
     }
 };
 
-// Run once on initialization. All other updates are done on the timer below.
-getWikiOntology();
-// Refresh the LinkedEarth Wiki ontology data every 1 week
-setTimeout(getWikiOntology, 5000);
+var compileOntology = function(){
+    console.log("index.js: compileOntology: start");
+    try{
+        getWikiOntology();
+        // Fake a sync function so the query items come back first before continuing
+        setTimeout(function(){
+            mergeOntologies();
+        }, 4000);
+    } catch(err){
+        console.log("index.js: compileOntology: " + err);
+    }
+};
+
+
+try{
+    // Run once on initialization. All other updates are done on the timer below.
+    compileOntology();
+    // Refresh the LinkedEarth Wiki ontology data every 1 WEEK
+    setInterval(compileOntology, 604800000);
+}catch(err){
+    console.log(err);
+}
+
 
 // TODO Need to finish this. Batch download button for /query page
 var batchDownloadWiki = function(dsns, cb){
@@ -884,7 +1061,7 @@ router.get("/loading", function(req, res, next){
 // API ENDPOINTS
 
 router.get("/api/ontology", function(req, res, next){
-    res.status(200).send(JSON.stringify(_ontology));
+    res.status(200).send(JSON.stringify(_ontology_query));
 });
 
 router.post("/api/validator", function(req, res, next){

@@ -92,6 +92,8 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
     };
     initOntology();
 
+
+    console.log($scope.ontology);
     $scope.fields = create.defaultColumnFields();
     $scope.fieldMetadata = create.fieldMetadataLibrary();
     // Compilation of all LiPD file data
