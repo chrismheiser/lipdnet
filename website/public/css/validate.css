@@ -293,6 +293,8 @@ input[type=number]::-webkit-outer-spin-button {
   	border-radius: 5px;
   	color: #8FA864;
   	border: solid 1px #8FA864;
+      font-weight: 400;
+
   }
 
   .green-btn[disabled]{
@@ -306,6 +308,7 @@ input[type=number]::-webkit-outer-spin-button {
   	border-radius: 5px;
   	color: #eee;
   	border: solid 1px #eee;
+      font-weight: 400;
   }
 
     .blue-btn-on{
@@ -317,6 +320,8 @@ input[type=number]::-webkit-outer-spin-button {
         border: solid 1px #2C6FAE;
         background-color: #2C6FAE;
         border-radius: 5px;
+        font-weight: 400;
+
     }
 
     .blue-btn-off{
@@ -328,6 +333,8 @@ input[type=number]::-webkit-outer-spin-button {
         color: #2C6FAE;
         background-color: white;
         border: solid 1px #2C6FAE;
+        font-weight: 400;
+
     }
 
 
@@ -343,6 +350,8 @@ input[type=number]::-webkit-outer-spin-button {
     border-radius: 5px;
     color: #8FA864;
     border: solid 1px #8FA864;
+      font-weight: 400;
+
   }
 
 .yellow-btn-on{
@@ -356,6 +365,8 @@ input[type=number]::-webkit-outer-spin-button {
     border-radius: 5px;
     color: white;
     border: solid 1px #E8C34A;
+    font-weight: 400;
+
 }
 .yellow-btn-off{
     font-size: 10pt;
@@ -368,6 +379,8 @@ input[type=number]::-webkit-outer-spin-button {
     border-radius: 5px;
     color: #E8C34A;
     border: solid 1px #E8C34A;
+    font-weight: 400;
+
 }
 
 
@@ -382,6 +395,8 @@ input[type=number]::-webkit-outer-spin-button {
     color: white;
     background-color:#C63B3B;
     border: solid 1px #C63B3B;
+    font-weight: 400;
+
 }
 
 
@@ -396,6 +411,8 @@ input[type=number]::-webkit-outer-spin-button {
     border-radius: 5px;
     color: #C63B3B;
     border: solid 1px #C63B3B;
+    font-weight: 400;
+
 }
 
 .red-btn-sm-on{
@@ -409,6 +426,8 @@ input[type=number]::-webkit-outer-spin-button {
     border-radius: 5px;
     color: white;
     border: solid 1px #C63B3B;
+    font-weight: 400;
+
 }
 
 .red-btn-sm-off{
@@ -422,6 +441,8 @@ input[type=number]::-webkit-outer-spin-button {
     border-radius: 5px;
     color: #C63B3B;
     border: solid 1px #C63B3B;
+    font-weight: 400;
+
 }
 
   progress {
@@ -444,18 +465,24 @@ input[type=number]::-webkit-outer-spin-button {
     background-color: #FDBABC;
     color: white;
     border: solid 1px #FDBABC;
+    font-weight: 400;
+
 }
 
 .btn-success {
     background-color: #DBEFB9;
     color: white;
     border: solid 1px #DBEFB9;
+    font-weight: 400;
+
 }
 
 .btn-primary {
     background-color: #99C5FF;
     color: white;
     border: solid 1px #99C5FF;
+    font-weight: 400;
+
 }
 
 .plain {
@@ -558,4 +585,30 @@ input[type=number]::-webkit-outer-spin-button {
     border-bottom-style: solid !important;
     border-bottom-width: 1px !important;
 
+}
+
+
+/*md-input-container:not(.md-input-invalid).md-input-has-value label {*/
+    /*color: rgba(0,0,0,.7);*/
+/*}*/
+/*md-input-container:not(.md-input-invalid).md-input-focused label {*/
+    /*color: rgba(0,0,0,.7);*/
+/*}*/
+
+.md-input-container label:not(md-container-ignore) label {
+    color: rgba(0,0,0,.7);
+}
+
+label , md-label{
+    color: rgba(0,0,0,.7) !important;
+    font-weight: 500 !important;
+}
+
+md-input-container.md-input-focused:not(.md-input-has-value) md-select .md-select-value.md-select-placeholder {
+    color: rgba(0,0,0,.7) !important;
+}
+
+.md-select-value span{
+    color: rgba(0,0,0,.7) !important;
+    font-weight: 500 !important;
 }
