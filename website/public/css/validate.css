@@ -588,27 +588,36 @@ input[type=number]::-webkit-outer-spin-button {
 }
 
 
-/*md-input-container:not(.md-input-invalid).md-input-has-value label {*/
-    /*color: rgba(0,0,0,.7);*/
-/*}*/
-/*md-input-container:not(.md-input-invalid).md-input-focused label {*/
-    /*color: rgba(0,0,0,.7);*/
-/*}*/
-
+/* Make the text darker on all inputs, labels, and spans. The default opacity is too light to see well. */
 .md-input-container label:not(md-container-ignore) label {
-    color: rgba(0,0,0,.7);
+    color: rgba(0,0,0,.9);
 }
 
-label , md-label{
-    color: rgba(0,0,0,.7) !important;
-    font-weight: 500 !important;
+label , md-label, input{
+    color: rgba(0,0,0,.9) !important;
+    font-weight: 400 !important;
+}
+
+input{
+    color: rgba(0,0,0,1) !important;
+    font-weight: 400 !important;
+}
+
+/* Removes the "No File Chosen" text on file chooser buttons */
+input[type='file'] {
+    color: transparent !important;
+}
+
+span{
+    color: rgba(0,0,0,.9) !important;
+    font-weight: 400 !important;
 }
 
 md-input-container.md-input-focused:not(.md-input-has-value) md-select .md-select-value.md-select-placeholder {
-    color: rgba(0,0,0,.7) !important;
+    color: rgba(0,0,0,.9) !important;
 }
 
 .md-select-value span{
-    color: rgba(0,0,0,.7) !important;
-    font-weight: 500 !important;
+    color: rgba(0,0,0,.9) !important;
+    font-weight: 400 !important;
 }

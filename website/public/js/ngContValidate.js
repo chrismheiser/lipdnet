@@ -81,7 +81,6 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
             .then(function(response) {
               // Success. Set the data to the scope directly
                 $scope.ontology = response.data;
-                // console.log($scope.ontology);
             }, function myError(err) {
                 console.log(err);
                 // Error, use our hardcoded lists as a fallback.
@@ -92,8 +91,6 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
     };
     initOntology();
 
-
-    console.log($scope.ontology);
     $scope.fields = create.defaultColumnFields();
     $scope.fieldMetadata = create.fieldMetadataLibrary();
     // Compilation of all LiPD file data
@@ -214,7 +211,7 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
     };
 
     $scope.addColumnField = function(entry){
-      var _field = $scope.dropdowns.current.columnField.name;
+      var _field = entry.tmp.custom;
       // Adding an entry that is a nested array item
       if(["interpretation"].indexOf(_field) !== -1){
         $scope.showModalBlock(entry, true, _field, 0);
@@ -225,8 +222,15 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       }
       // Adding any regular field
       else if(!entry.hasOwnProperty(_field)){
-        entry[_field] = "";
+        if(_field.toLowerCase() === "tsid"){
+            $scope.showModalAlert({"title": "Automated field", "message": "You may not add, remove, or edit fields that are automatically generated"});
+        } else {
+            $scope.showModalAlert("That field already exists in this column.");
+            entry[_field] = "";
+        }
       }
+      // Wipe the field input box to be ready for another use.
+      entry.tmp.custom = "";
     };
 
     $scope.checkSession = function(){
@@ -257,16 +261,18 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       // setInterval($scope.saveSession(),3000);
     };
 
-    $scope.addCustom = function(entry){
-      // Adding a field that is restricted / automated. Don't allow
-      if (["TSid"].indexOf(entry.tmp.custom) !== -1){
-        $scope.showModalAlert({"title": "Restricted field", "message": "You may not add, remove, or edit fields that are automatically generated"});
-      }
-      else if(entry.tmp.custom && !entry.hasOwnProperty(entry.tmp.custom)){
-        entry[entry.tmp.custom] = "";
-      }
-      entry.tmp.custom = "";
-    };
+    // $scope.addCustom = function(entry){
+    //   console.log(entry.tmp.custom);
+    //   console.log(entry);
+    //   // Adding a field that is restricted / automated. Don't allow
+    //   if (["TSid"].indexOf(entry.tmp.custom) !== -1){
+    //     $scope.showModalAlert({"title": "Restricted field", "message": "You may not add, remove, or edit fields that are automatically generated"});
+    //   }
+    //   else if(entry.tmp.custom && !entry.hasOwnProperty(entry.tmp.custom)){
+    //     entry[entry.tmp.custom] = "";
+    //   }
+    //   entry.tmp.custom = "";
+    // };
 
     $scope.convertCoordinates = function(){
       if(typeof($scope.files.json.geo.geometry.coordinates) === "undefined"){
@@ -365,25 +371,6 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
         entry.tmp.toggle = true;
       }
     };
-
-    // $scope.expandEntry = function(arr, idx){
-    //   // Expand the target idx, and make sure that all other idx's are collapsed. Only allow one expansion at once.
-    //   if(typeof arr[idx].tmp === "undefined"){
-    //     arr[idx]["tmp"] = {"toggle": true};
-    //   } else {
-    //     arr[idx].tmp.toggle = true;
-    //   }
-    //   for(var _p = 0; _p<arr.length; _p++){
-    //     if(_p !== idx){
-    //       if(typeof arr[_p].tmp === "undefined") {
-    //         arr[_p]["tmp"] = {"toggle": false};
-    //       } else {
-    //         arr[_p].tmp.toggle = false;
-    //       }
-    //     }
-    //   }
-    //   return arr;
-    // };
 
     $scope.fetchPublication = function(entry){
       console.log(entry);
@@ -777,7 +764,7 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
 
     $scope.showModalBlock = function(entry, _create, _key, idx){
       // FORMAT: options = {"data": [] or {}, "create": bool, "key": "", "idx": null or int}
-      // Use idx === null or !== null to determine if this is an
+      // Use idx === null or !== null to determine if this is an array
       var arrType = idx !== null;
 
       // Get the data
@@ -1007,19 +994,6 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       );
 
     };
-
-    // vc.propertiesQuerySearch = function(query) {
-    //   return query ? vc.properties.list.filter(createFilterFor(query)) : vc.properties.list.filter(createFilterFor(''));
-    // };
-    //
-    // function createFilterFor(query) {
-    //   var lowercaseQuery = angular.lowercase(query);
-    //   return function filterFn(item) {
-    //     // console.log(item);
-    //     return (angular.lowercase(item.name).indexOf(lowercaseQuery) === 0) ||
-    //       (angular.lowercase(item.name).indexOf(lowercaseQuery) === 0);
-    //   };
-    // }
 
     $scope.uploadBtnClick = function(){
       this.value = null;

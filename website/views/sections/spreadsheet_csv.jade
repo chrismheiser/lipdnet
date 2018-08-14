@@ -2,7 +2,7 @@ md-subheader.md-primary Spreadsheet (Beta)
 
 div.container
     div(ng-if="entry2.columns.length < 1")
-        p(style="text-align: center; margin:auto auto; padding: 20px;") Add a column to get started
+        h6(style="font-size: 14px; text-align: center; margin:auto auto; padding: 20px;") Add a column to get started
     div(ng-if="entry2.columns.length > 0" style="margin:1em; padding:1em;")
         hot-table(settings="settings" height='400' width='1120' datarows="files.csv[entry2.filename].data")
             hot-column(ng-repeat="col in entry2.columns track by $index")

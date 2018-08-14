@@ -24,7 +24,10 @@ angular.module('ngValidate').controller('ModalCtrlBlock', function ($scope, $uib
   } else if (data.key === "calibration"){
     $scope.optional = ["equation", "uncertaintyType"];
   } else if (data.key === "hasResolution"){
-    $scope.optional = ["hasMedianValue", "hasMeanValue", "hasMaxValue", "hasMinValue"];
+    $scope.standard = ["hasMedianValue", "hasMeanValue", "hasMaxValue", "hasMinValue"];
+    $scope.selected = ["hasMedianValue", "hasMeanValue", "hasMaxValue", "hasMinValue"];
+    $scope.initial = ["hasMedianValue", "hasMeanValue", "hasMaxValue", "hasMinValue"];
+
   } else if (data.key === "interpretation") {
     $scope.required = ["variable", "direction", "scope"];
     $scope.standard = ["variableDetail", "seasonality", "rank"];
