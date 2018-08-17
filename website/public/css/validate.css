@@ -526,11 +526,12 @@ input[type=number]::-webkit-outer-spin-button {
     list-style-type: none;
     width: 25%;
     float: left;
-    font-size: 12px;
+    font-size: 14px;
+    font-weight: 400;
     position: relative;
     text-align: center;
     /*text-transform: uppercase;*/
-    color: #7d7d7d;
+    color: rgba(0,0,0,0.8);
 }
 .progressbar li:before {
     width: 30px;
@@ -538,7 +539,7 @@ input[type=number]::-webkit-outer-spin-button {
     content: counter(step);
     counter-increment: step;
     line-height: 30px;
-    border: 2px solid #7d7d7d;
+    border: 2px solid rgba(0,0,0,0.8);
     display: block;
     text-align: center;
     margin: 0 auto 10px auto;
@@ -550,7 +551,7 @@ input[type=number]::-webkit-outer-spin-button {
     height: 2px;
     content: '';
     position: absolute;
-    background-color: #7d7d7d;
+    background-color: rgba(0,0,0,0.8);
     top: 15px;
     left: -50%;
     z-index: -1;
@@ -559,13 +560,13 @@ input[type=number]::-webkit-outer-spin-button {
     content: none;
 }
 .progressbar li.active {
-    color: green;
+    color: #8FA864;
 }
 .progressbar li.active:before {
-    border-color: #55b776;
+    border-color: #8FA864;
 }
 .progressbar li.active + li:after {
-    background-color: #55b776;
+    background-color: #8FA864;
 }
 
 /* Used on the Merge page */
@@ -620,4 +621,9 @@ md-input-container.md-input-focused:not(.md-input-has-value) md-select .md-selec
 .md-select-value span{
     color: rgba(0,0,0,.9) !important;
     font-weight: 400 !important;
+}
+
+.darkertext, ::placeholder, label {
+    font-weight: 400;
+    color: rgba(0,0,0,0.8);
 }

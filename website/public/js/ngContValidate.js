@@ -2,32 +2,6 @@
 angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Upload', "ImportService", "ExportService", "$uibModal","$sce", "toaster",
   function ($scope, $log, $timeout, $q, $http, Upload, ImportService, ExportService, $uibModal, $sce, toaster) {
 
-    var vc = this;
-    // vc.properties = {
-    //   item : null,
-    //   search : null,
-    //   properties: vc.properties || [],
-    //   list : [
-    //     // physical sample
-    //     // calibration
-    //     // climate interpretation
-    //     // {"view": "Climate Interpretation", "name": "climateInterpretation", "checked": false},
-    //     {"view": "Basis", "name": "basis", "checked": false},
-    //     {"view": "Proxy", "name": "proxy", "checked": false},
-    //     {"view": "Material", "name": "material", "checked": false},
-    //     {"view": "Method", "name": "method", "checked": false},
-    //     {"view": "Seasonality", "name": "seasonality", "checked": false},
-    //     {"view": "Data Type", "name": "dataType", "checked": false},
-    //     {"view": "UseInGlobalTemperatureAnalysis", "name": "useInGlobalTemperatureAnalysis", "checked": false},
-    //     {"view": "Sensor Species", "name": "sensorSpecies", "checked": false},
-    //     {"view": "Sensor Genus", "name": "sensorGenus", "checked": false},
-    //     {"view": "Variable Type", "name": "variableType", "checked": false},
-    //     {"view": "Proxy Observation Type", "name": "proxyObservationType", "checked": false},
-    //     {"view": "Inferred Variable Type", "name": "inferredVariableType", "checked": false},
-    //     {"view": "Notes", "name": "notes", "checked": false},
-    //   ]
-    // };
-
     $scope.ontology = {};
     $scope.lipdPopover = $sce.trustAsHtml(create.getPopover("lipd"));
     $scope.wikiPopover = $sce.trustAsHtml(create.getPopover("wiki"));
@@ -186,12 +160,6 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       $scope.downloadZip();
     });
 
-
-    // $scope.$watch("files.json", function () {
-    //   // Create the Simple View
-    //   $scope.files.jsonSimple = misc.advancedToSimple($scope.files.json);
-    // }, true);
-
     $scope.addBlock = function(entry, blockType, pc){
       toaster.pop('success', "Added a new " + blockType + " entry", "", 4000);
       // Need to initialize the first entry of chronData measurement table, when it doesn't yet exist.
@@ -225,7 +193,7 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
         if(_field.toLowerCase() === "tsid"){
             $scope.showModalAlert({"title": "Automated field", "message": "You may not add, remove, or edit fields that are automatically generated"});
         } else {
-            $scope.showModalAlert("That field already exists in this column.");
+            $scope.showModalAlert({"title": "Duplicate entry", "message": "That field already exists in this column."});
             entry[_field] = "";
         }
       }
@@ -235,7 +203,8 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
 
     $scope.checkSession = function(){
       var _prevSession = sessionStorage.getItem("lipd");
-      if(_prevSession){
+      // Only ask to restore the session on the /playground route, and if a session exists.
+      if(_prevSession && window.location.pathname.indexOf("playground") !== -1){
         $scope.showModalAsk({"title": "Found previous session",
             "message": "We detected LiPD data from a previous session. Would you like to restore the data?",
             "button1": "Restore Data",
@@ -1020,10 +989,10 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
           lipdValidator.restructure(res, $scope.files, function(_response_1){
             $scope.files = _response_1;
             if($scope.files.fileCt > 40){
-              $scope.showModalAlert({"title": "Wow! That's a lot of files!", "message": "We expanded the page to fit everything, so be sure to scroll down to see your data tables."})
+              $scope.showModalAlert({"title": "Wow! That's a lot of files!", "message": "We expanded the page to fit everything, so be sure to scroll down to see your data tables."});
             }
             if(typeof($scope.files.json) !== "object"){
-                $scope.showModalAlert({"title": "Metadata.jsonld file is incorrect", "message": "There is something wrong with that file. The metadata.jsonld file is missing or incorrectly formatted. Please check the file manually, or create an issue on our Github repository and provide the problematic file."})
+                $scope.showModalAlert({"title": "Metadata.jsonld file is incorrect", "message": "There is something wrong with that file. The metadata.jsonld file is missing or incorrectly formatted. Please check the file manually, or create an issue on our Github repository and provide the problematic file."});
                 $scope.resetPage();
             } else {
                 $scope.validate();

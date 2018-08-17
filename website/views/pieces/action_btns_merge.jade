@@ -1,7 +1,14 @@
-//- File chooser: Select a lipd file
-div(style="margin:10px; padding:5px;")
-    input.choosefile(custom-on-change="uploadBtnChange" ng-click="uploadBtnClick" title="Upload LiPD file for comparison" name='file' type="file" accept=".lpd" style="display: inline-block;")
-    //button.green-btn-off#download-btn(type="button" ng-click="downloadZip()") Download LiPD
-    //    md-tooltip Download LiPD file after resolving conflicts
-    button.green-btn-off#download-btn(type="button" ng-click="mergeAndDownload()") Download LiPD
-        md-tooltip Download LiPD file when you've resolved all file differences
+
+div
+    md-content
+        md-tabs.step1.md-border-bottom.md-dynamic-height
+            md-tab(label="Upload File")
+                md-content.md-padding
+                    input.choosefile(custom-on-change="uploadBtnChange" ng-click="uploadBtnClick" title="Upload LiPD file for comparison" name='file' type="file" accept=".lpd" style="display: inline-block;")
+
+
+            md-tab(label="Copy/Paste JSON")
+                md-content.md-padding
+                    div(layout='', layout-padding='', layout-sm='column')
+                        textarea.darkertext(placeholder='Copy/Paste your JSON data here...' ng-model="jsonTextInput" style="border:0.1em solid #ccc;border-radius:0.5em;height:20em;width:90em")
+                    button.green-btn-off(ng-click="parseJson()" style="margin: 1.5em; float:left;" type="button") Parse

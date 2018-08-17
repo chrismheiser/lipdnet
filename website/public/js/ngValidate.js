@@ -67,8 +67,6 @@ f.factory("ImportService", ["$q", function ($q) {
     x.type = type;
     x.filenameFull = entry.filename;
     x.filenameShort = entry.filename.split("/").pop();
-    // how do we get the blobURL here?
-    // x["blobURL"] = "";
     x.data = dat;
     x.pretty = JSON.stringify(dat, undefined, 2);
     return x;
@@ -160,13 +158,6 @@ f.factory("ExportService", ["$q", function ($q) {
     var _jsonPrepped = JSON.stringify(_d1.json, null, 4);
     promises.push(getText(_jsonFilename, _jsonPrepped));
 
-    // BAGIT ITEMS IGNORED. NEW BAGIT FILES WILL BE GENERATED IN BACKEND
-    // loop for bagit items
-    // for (var _filename1 in _d1.bagit) {
-    //   // create entry in flat scope obj. ref by filename, and link data. no special work needed here
-    //   promises.push(getText(_filename1, _d1.bagit[_filename1]["data"]));
-    // }
-
     // loop for csv items
     for (var _filename2 in _d1.csv) {
       // skip loop if the property is from prototype
@@ -188,11 +179,10 @@ f.factory("ExportService", ["$q", function ($q) {
     // header for the csv file
     var csvContent = "";
     angular.forEach(csvArrs, function(entry, idx){
-      // turn the array into a joined string by commas.
-       dataString = entry.join(",");
+        // turn the array into a joined string by commas.
+        dataString = entry.join(",");
        // add this new string onto the growing master string. if it's the end of the data string, then add newline char
-      //  csvContent += idx < entry.length ? dataString + "\n" : dataString;
-      csvContent += dataString + "\n";
+        csvContent += dataString + "\n";
     });
     return(csvContent);
   }; // end prepCsvEntry

@@ -5,6 +5,7 @@ block css
     //- files below are page specific
     link(rel='stylesheet' href='css/validate.css')
     link(rel="stylesheet" href="css/json-tree.css")
+    link(rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/angularjs-toaster/2.1.0/toaster.css")
     link(rel="stylesheet" href="lib/ngDiff/angular-object-diff.css")
     link(rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons")
     link(rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/angular-busy/4.1.4/angular-busy.min.css")
@@ -18,6 +19,7 @@ block body
                     .md-title Merge
 
             .col-sm-12(ng-controller="MergeCtrl as mc" cg-busy="pageMeta.busyPromise")
+                toaster-container(toaster-options="{'close-button':false, 'time-out':{ 'toast-warning': 2000, 'toast-error': 0 } }")
                 include ./pieces/action_btns_merge.jade
 
                 // Progress bar gives indication on what steps are completed and what workflow should be followed.
@@ -26,33 +28,47 @@ block body
                         li(ng-class="{active: uploadCount>0}") File 1 : <br/>{{file1.filename}}
                         li(ng-class="{active: uploadCount>1}") File 2 : <br/>{{file2.filename}}
                         li(ng-class="{active: resolveTrigger}") Resolve differences
-                        li(ng-class="{active: downloadTrigger}") Download LiPD file
-
+                        li(ng-class="{active: downloadTrigger}") Save results
 
                 div
-                    // The full diff shows diffs AND the rest of the JSON data too.
-                    .col-md-6
-                        h3 Full Diff
-                        pre(ng-if="uploadCount>=2" ng-bind-html="diffValue")
-                        pre(ng-if="uploadCount<2") Upload two files to see differences
-                    // Diff resolution pane
-                    .col-md-6
-                        // How many differences did it find?
-                        h3 Diff Count: {{diffCount}}
-                        // Give multiple choice resolution options for each field
-                        div(ng-repeat="item in diffList")
-                            h5 {{item.crumbs.join(" > ")}}
-                            // Fields are disabled if delete option is checked. Multiple choice is not active.
-                            md-radio-group(ng-model="item.selected")
-                                .compareitem
-                                    md-radio-button(ng-click="addRmValue(item, 0)" value="item.options[0]") {{item.options[0]}}
-                                .compareitem
-                                    md-radio-button(ng-click="addRmValue(item, 1)" value="item.options[1]") {{item.options[1]}}
-                                .compareitem
-                                    md-radio-button(ng-click="addRmValue(item, 3)" value="delete") Delete
-                                .compareitem
-                                    md-radio-button(ng-click="addRmValue(item, 2)" value="other") Other
-                                    input(ng-model="item.options[2]")
+                    md-content
+                        md-tabs.step1.md-border-bottom.md-dynamic-height
+                            md-tab(label="Resolve differences")
+                                md-content.md-padding
+                                    div
+                                        // The full diff shows diffs AND the rest of the JSON data too.
+                                        .col-md-6
+                                            h3 Full Diff
+                                            pre(ng-if="uploadCount>=2" ng-bind-html="diffValue")
+                                            pre(ng-if="uploadCount<2") Provide two data sources to see differences
+                                        // Diff resolution pane
+                                        .col-md-6
+                                            // How many differences did it find?
+                                            h3 Diff Count: {{diffCount}}
+                                            // Give multiple choice resolution options for each field
+                                            div(ng-repeat="item in diffList")
+                                                h5 {{item.crumbs.join(" > ")}}
+                                                // Fields are disabled if delete option is checked. Multiple choice is not active.
+                                                md-radio-group(ng-model="item.selected")
+                                                    .compareitem
+                                                        md-radio-button(ng-click="addRmValue(item, 0)" value="{{item.options[0]}}") {{item.options[0]}}
+                                                    .compareitem
+                                                        md-radio-button(ng-click="addRmValue(item, 1)" value="{{item.options[1]}}") {{item.options[1]}}
+                                                    .compareitem
+                                                        md-radio-button(ng-click="addRmValue(item, 3)" value="delete") Delete
+                                                    .compareitem
+                                                        md-radio-button(ng-click="addRmValue(item, 2)" value="{{item.options[[2]]}}") Other
+                                                        input(ng-model="item.options[2]")
+
+                            md-tab(label="Results")
+                                md-content.md-padding
+                                    button.green-btn-off#download-btn(ng-class="resolveTrigger ? 'on' : 'off'" type="button" ng-click="download()" ng-disabled="!resolveTrigger") Download LiPD
+                                        md-tooltip Download LiPD file when you've resolved all file differences
+                                    div(layout='', layout-padding='', layout-sm='column')
+                                        textarea(ng-focus="downloadTrigger=true;" placeholder='Data not ready. Come back here after all differences are resolved.' ng-model="jsonTextOutput" style="border:0.1em solid #ccc;border-radius:0.5em;height:20em;width:90em")
+
+
+
 
 
 //- block js will insert js scripts listed in footer.jade that are needed on every page.
