@@ -62,7 +62,7 @@ f.factory("ImportService", ["$q", function ($q) {
 
   var compilePromise = function compilePromise(entry, dat, type) {
     console.log("parsing: " + entry.filename.split("/").pop());
-    var d = $q.defer();
+    // var d = $q.defer();
     var x = {};
     x.type = type;
     x.filenameFull = entry.filename;
@@ -75,23 +75,27 @@ f.factory("ImportService", ["$q", function ($q) {
   // get the text from the ZipJs entry object. Parse JSON as-is and pass CSV to next step.
   var getText = function getText(entry, type) {
     var d = $q.defer();
-    // var filename = entry.filename;
-    entry.getData(new zip.TextWriter(), function (text) {
-      if (type === "bagit") {
-        d.resolve(compilePromise(entry, text, type));
-      } else if (type === "json") {
-        // blindly attempt to parse as jsonld file
-        try{
-          var _json_parsed = JSON.parse(text);
-          d.resolve(compilePromise(entry, _json_parsed, type));
-        } catch(err){
-          d.reject("JSONLD file could not be parsed");
-        }
-      } else if (type === "csv") {
-        // if parsing jsonld file fails, that's because it's a csv file. So parse as csv instead.
-        d.resolve(compilePromise(entry, setCsvMeta(text), type));
-      }
-    });
+
+    // Case for JSON data. Need exception because we validate the JSON with JSONLint
+    // It is no longer a zip.TextWriter object like the other entries.
+    if(entry.hasOwnProperty("type")){
+      d.resolve(compilePromise(entry, entry.data, entry.type));
+    }
+    // For all other normal cases.
+    else {
+        // var filename = entry.filename;
+        entry.getData(new zip.TextWriter(), function (text) {
+            if (type === "bagit") {
+                d.resolve(compilePromise(entry, text, type));
+            } else if (type === "json") {
+              d.resolve();
+            } else if (type === "csv") {
+                // if parsing jsonld file fails, that's because it's a csv file. So parse as csv instead.
+                d.resolve(compilePromise(entry, setCsvMeta(text), type));
+            }
+        });
+    }
+
     return d.promise;
   };
 

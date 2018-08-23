@@ -1,0 +1,16 @@
+.modal-content
+    .modal-header
+        h3.modal-title Invalid JSON-LD data
+    .modal-body
+        p.darkertext The metadata.jsonld data in this LiPD file is not valid JSON-LD data and cannot be loaded.
+        p.darkertext 1. Copy the JSON-LD below
+        p.darkertext 2. Validate the JSON-LD using
+            a(onclick="window.open('http://jsonlint.com', '_blank', 'location=yes,height=800,width=1100,scrollbars=yes,status=yes');")  JSONLint.com
+        p.darkertext 3. Paste validated JSON-LD below, and Save
+
+        pre.on(ng-if="error" style="background-color:#FEBABB; border: none;") Errors still exist. Cannot continue to playground yet.
+
+        textarea(ng-model="jsondata" style="border:0.1em solid #ccc;border-radius:0.5em;height:30em;width:100%;")
+    .modal-footer
+        button(class="btn btn-success" data-dismiss="modal" ng-click="save()") Save
+        button(class="btn btn-danger" data-dismiss="modal" ng-click="quit()") Cancel & Quit

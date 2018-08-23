@@ -1051,6 +1051,11 @@ router.get("/modal-ask", function(req, res, next){
   res.render('modal/modal-ask', {title: ''});
 });
 
+router.get("/modal-jsonfix", function(req, res, next){
+    res.render('modal/modal-jsonfix', {title: ''});
+});
+
+
 router.get("/loading", function(req, res, next){
   res.render("loading", {title: ""});
 });

@@ -227,21 +227,7 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
             }
           });
       }
-      // setInterval($scope.saveSession(),3000);
     };
-
-    // $scope.addCustom = function(entry){
-    //   console.log(entry.tmp.custom);
-    //   console.log(entry);
-    //   // Adding a field that is restricted / automated. Don't allow
-    //   if (["TSid"].indexOf(entry.tmp.custom) !== -1){
-    //     $scope.showModalAlert({"title": "Restricted field", "message": "You may not add, remove, or edit fields that are automatically generated"});
-    //   }
-    //   else if(entry.tmp.custom && !entry.hasOwnProperty(entry.tmp.custom)){
-    //     entry[entry.tmp.custom] = "";
-    //   }
-    //   entry.tmp.custom = "";
-    // };
 
     $scope.convertCoordinates = function(){
       if(typeof($scope.files.json.geo.geometry.coordinates) === "undefined"){
@@ -968,9 +954,58 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       this.value = null;
     };
 
+
+    $scope.validateJsonld = function(entries, cb){
+      for(var _p=0; _p<entries.length; _p++){
+        var entry = entries[_p];
+          // if the object isn't empty
+          if(entry) {
+              // filter out the system files that being with '._' These slow down processing and we don't want them
+              if (entry.filename.split("/").pop().indexOf("._") !== 0) {
+                  if (entry.filename.indexOf(".jsonld") >= 0 || entry.filename.indexOf(".json") >= 0) {
+                      // push the promise to the master list
+                      entry.getData(new zip.TextWriter(), function (text) {
+                          // blindly attempt to parse as jsonld file
+                          try{
+                              var _json_parsed = JSON.parse(text);
+                              entries.push({"filename": "metadata.jsonld", "data": _json_parsed, "type": "json"});
+                              cb(entries);
+                          } catch(err) {
+                              //Set options to pass to modal controller
+                              $scope.modal = {"data": text, "error": err};
+                              console.log("opening modal");
+                              var modalInstance = $uibModal.open({
+                                  templateUrl: 'modal-jsonfix',
+                                  controller: 'ModalCtrlJson',
+                                  size: "lg",
+                                  resolve: {
+                                      data: function () {
+                                          return $scope.modal;
+                                      }
+                                  }
+                              });
+                              modalInstance.result.then(function(result) {
+                                  if(result) {
+                                      // var d = $q.defer();
+                                      var _json_parsed = JSON.parse(result);
+                                      entries.push({"filename": "metadata.jsonld", "data": _json_parsed, "type": "json"});
+                                      cb(entries);
+                                  } else {
+                                      toaster.pop('error', "File upload cancelled", "JSON-LD must be fixed to upload the file", 5000);
+                                      cb(null);
+                                  }
+                              });
+                          }
+                      });
+                  }
+              }
+          }
+      }
+    };
+
     $scope.uploadBtnChange = function(event, cb){
       var fileInput = event.target;
-      console.log(fileInput.files);
+      // console.log(fileInput.files);
       // var fileInput = document.getElementById("file-input");
       // if the upload button is clicked && a file is chosen, THEN reset the page and data.
       $scope.resetPage();
@@ -978,37 +1013,47 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       $scope.files.dataSetName = fileInput.files[0].name.slice(0, -4);
       // get a list of file entries inside this zip
       $scope.model.getEntries(fileInput.files[0], function (entries) {
-        // use the service to parse data from the ZipJS entries
-        $scope.pageMeta.busyPromise = ImportService.parseFiles(entries);
-        $scope.pageMeta.busyPromise.then(function (res) {
-          // Set response to allFiles so we can list all the filenames found in the LiPD archive.
-          $scope.allFiles = res;
-          $scope.pageMeta.fileUploaded = true;
-          $scope.pageMeta.keepColumnMeta = true;
-          // Gather some metadata about the lipd file, and organize it so it's easier to manage.
-          lipdValidator.restructure(res, $scope.files, function(_response_1){
-            $scope.files = _response_1;
-            if($scope.files.fileCt > 40){
-              $scope.showModalAlert({"title": "Wow! That's a lot of files!", "message": "We expanded the page to fit everything, so be sure to scroll down to see your data tables."});
-            }
-            if(typeof($scope.files.json) !== "object"){
-                $scope.showModalAlert({"title": "Metadata.jsonld file is incorrect", "message": "There is something wrong with that file. The metadata.jsonld file is missing or incorrectly formatted. Please check the file manually, or create an issue on our Github repository and provide the problematic file."});
-                $scope.resetPage();
-            } else {
-                $scope.validate();
-                $scope.files.json = create.initColumnTmp($scope.files.json);
-                $scope.files.json = create.initMissingArrs($scope.files.json);
-                $scope.$broadcast('newUpload', $scope.files);
-            }
-          }); // end sortBeforeValidate
-          //RETURNS OBJECT : {"dat": files.json, "feedback": feedback, "filename": files.lipdFilename, "status": feedback.status};
+        $scope.validateJsonld(entries, function(entries){
+          // If the user cancelled fixing the JSON data, then they cannot continue with the upload.
+          if(entries){
+              // use the service to parse data from the ZipJS entries
+              $scope.pageMeta.busyPromise = ImportService.parseFiles(entries);
+              $scope.pageMeta.busyPromise.then(function (res) {
+                  // There will be one undefined entry in this array. Placeholder for the original JSON promise.
+                  // Remove it. We already have the fixed JSON as a separate entry.
+                  res = res.filter(function(n){ return n !== undefined });
+                  // Set response to allFiles so we can list all the filenames found in the LiPD archive.
+                  $scope.allFiles = res;
+                  $scope.pageMeta.fileUploaded = true;
+                  $scope.pageMeta.keepColumnMeta = true;
+                  // Gather some metadata about the lipd file, and organize it so it's easier to manage.
+                  lipdValidator.restructure(res, $scope.files, function(_response_1){
+                      $scope.files = _response_1;
+                      if($scope.files.fileCt > 40){
+                          $scope.showModalAlert({"title": "Wow! That's a lot of files!", "message": "We expanded the page to fit everything, so be sure to scroll down to see your data tables."});
+                      }
+                      if(typeof($scope.files.json) !== "object"){
+                          $scope.showModalAlert({"title": "Metadata.jsonld file is incorrect", "message": "There is something wrong with that file. The metadata.jsonld file is missing or incorrectly formatted. Please check the file manually, or create an issue on our Github repository and provide the problematic file."});
+                          $scope.resetPage();
+                      } else {
+                          $scope.validate();
+                          $scope.files.json = create.initColumnTmp($scope.files.json);
+                          $scope.files.json = create.initMissingArrs($scope.files.json);
+                          $scope.$broadcast('newUpload', $scope.files);
+                      }
+                  }); // end sortBeforeValidate
+                  //RETURNS OBJECT : {"dat": files.json, "feedback": feedback, "filename": files.lipdFilename, "status": feedback.status};
+              }, function(reason){
+                  $scope.resetPage();
+                  alert("Error parsing JSON-LD file. File cannot be validated");
+              }); // end ImportService
+          }
+        }); // end model.getEntries
+      });
+      // console.log(entries);
 
-        }, function(reason){
-          $scope.resetPage();
-          alert("Error parsing JSON-LD file. File cannot be validated");
-        }); // end ImportService
 
-      }); // end model.getEntries
+
       // once the change even has triggered, it cannot be triggered again until page refreshes.
       typeof cb === 'function' && cb();
     };
