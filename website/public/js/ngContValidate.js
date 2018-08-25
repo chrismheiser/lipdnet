@@ -81,6 +81,7 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
         "paleoData": [{"measurementTable": [{"tableName": "paleo0measurement0", "filename": "paleo0measurement0.csv",
           "columns": []}]}]}
     };
+    $scope.jsonCache = null;
     // Metadata about the page view, and manipulations
     $scope.pageMeta = {
       "spreadsheetBeta": true,
@@ -763,18 +764,23 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
     };
 
     $scope.showModalFileContent = function(data){
-      // Showing contents of individual file links
-      $scope.modal = data;
-      var modalInstance = $uibModal.open({
-        templateUrl: 'modal-file',
-        controller: 'ModalCtrlFile',
-        size: "lg",
-        resolve: {
-          data: function () {
-            return $scope.modal;
-          }
-        }
-      });
+
+      if(data.type === "json"){
+        $scope.advancedJsonEdit();
+      } else {
+          // Showing contents of individual file links
+          $scope.modal = data;
+          var modalInstance = $uibModal.open({
+              templateUrl: 'modal-file',
+              controller: 'ModalCtrlFile',
+              size: "lg",
+              resolve: {
+                  data: function () {
+                      return $scope.modal;
+                  }
+              }
+          });
+      }
     };
 
     $scope.startTour = function(){
@@ -954,6 +960,53 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       this.value = null;
     };
 
+    $scope.advancedJsonEdit = function(){
+
+      // Push these options through to the modal
+      var _opts = {"initialUpload": false,
+                  "cached": $scope.jsonCache,
+                  "errorTitle": "Exit Without Save",
+                  "errorMessage": "No changes saved to metadata",
+                  "title": "Advanced JSON-LD Editor"
+      };
+      // Open the modal editor
+      $scope.showModalEditJson(JSON.stringify($scope.files.json, null, 2), _opts, function(_json){
+        // If json data is returned
+        if(_json){
+            // Set the new json back to the scope variable.
+            $scope.files.json = _json;
+        }
+        // If we get a null return, then that means we keep the existing json data and don't do anything.
+
+      });
+    };
+
+    $scope.showModalEditJson = function(data, options, cb){
+
+        //Set options to pass to modal controller
+        $scope.modal = {"data": data, "options": options};
+        var modalInstance = $uibModal.open({
+            templateUrl: 'modal-jsonfix',
+            controller: 'ModalCtrlJson',
+            size: "lg",
+            resolve: {
+                data: function () {
+                    return $scope.modal;
+                }
+            }
+        });
+        modalInstance.result.then(function(result) {
+            if(result) {
+                // Parse the result and use callback.
+                var _json_parsed = JSON.parse(result);
+                cb(_json_parsed);
+            } else {
+                // Exited without validating the JSON-LD. Can't
+                toaster.pop('error', options.errorTitle, options.errorMessage, 5000);
+                cb(null);
+            }
+        });
+    };
 
     $scope.validateJsonld = function(entries, cb){
       for(var _p=0; _p<entries.length; _p++){
@@ -971,29 +1024,20 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
                               entries.push({"filename": "metadata.jsonld", "data": _json_parsed, "type": "json"});
                               cb(entries);
                           } catch(err) {
-                              //Set options to pass to modal controller
-                              $scope.modal = {"data": text, "error": err};
-                              console.log("opening modal");
-                              var modalInstance = $uibModal.open({
-                                  templateUrl: 'modal-jsonfix',
-                                  controller: 'ModalCtrlJson',
-                                  size: "lg",
-                                  resolve: {
-                                      data: function () {
-                                          return $scope.modal;
-                                      }
-                                  }
-                              });
-                              modalInstance.result.then(function(result) {
-                                  if(result) {
-                                      // var d = $q.defer();
-                                      var _json_parsed = JSON.parse(result);
-                                      entries.push({"filename": "metadata.jsonld", "data": _json_parsed, "type": "json"});
-                                      cb(entries);
-                                  } else {
-                                      toaster.pop('error', "File upload cancelled", "JSON-LD must be fixed to upload the file", 5000);
-                                      cb(null);
-                                  }
+
+                              // Err here is pretty vague and unhelpful.
+                              // Showing it to the user would only cause more confusion.
+
+                              // Open the JSON editor modal. Send in the options with it.
+                              var _opts = {"errorTitle": "File Upload Cancelled",
+                                  "errorMessage": "JSON-LD must be fixed to upload the file",
+                                  "cached": false,
+                                  "initialUpload": true,
+                                  "title": "Invalid JSON-LD Data"
+                              };
+                              $scope.showModalEditJson(text, _opts, function(_json_parsed){
+                                  entries.push({"filename": "metadata.jsonld", "data": _json_parsed, "type": "json"});
+                                  cb(entries);
                               });
                           }
                       });
