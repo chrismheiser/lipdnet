@@ -765,9 +765,12 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
 
     $scope.showModalFileContent = function(data){
 
+      // If this is the metadata.jsonld file, we want to open the advancedJsonEdit modal window
       if(data.type === "json"){
         $scope.advancedJsonEdit();
-      } else {
+      }
+      // If csv or txt file data, then show the data in a view-only modal window
+      else {
           // Showing contents of individual file links
           $scope.modal = data;
           var modalInstance = $uibModal.open({
@@ -961,6 +964,7 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
     };
 
     $scope.advancedJsonEdit = function(){
+      // Edit the JSON data directly through a modal with a large textarea. JSON must be valid to save.
 
       // Push these options through to the modal
       var _opts = {"initialUpload": false,
@@ -971,7 +975,7 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       };
       // Open the modal editor
       $scope.showModalEditJson(JSON.stringify($scope.files.json, null, 2), _opts, function(_json){
-        // If json data is returned
+        // If json data is returned, continue to set.
         if(_json){
             // Set the new json back to the scope variable.
             $scope.files.json = _json;
@@ -982,6 +986,10 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
     };
 
     $scope.showModalEditJson = function(data, options, cb){
+        // Edit the JSON data directly through a modal with a large textarea. JSON must be valid to save.
+        // This modal is used for:
+        //     1. Fixing invalid JSON during initial LiPD file upload
+        //     2. Editing JSON directly at any point AFTER initial LiPD file upload
 
         //Set options to pass to modal controller
         $scope.modal = {"data": data, "options": options};

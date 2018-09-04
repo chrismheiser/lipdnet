@@ -437,7 +437,16 @@ var create = (function(){
           // safety check: don't want prototype attributes
           if (x.hasOwnProperty(_key)){
             if(x[_key]){
-              if (typeof(x[_key]) === "string" && !x[_key]){
+
+              // To prevent 'null' elevation coordinate from being left in the metadata. Causes readLipd issues.
+              if(_key === "coordinates"){
+                if(x[_key].length === 3){
+                  if(x[_key][2] === "null" || x[_key][2] === null){
+                    x[_key].pop();
+                  }
+                }
+              }
+              else if (typeof(x[_key]) === "string" && !x[_key]){
                 delete x[_key];
               } // if string
               // if this key is in the array of items to be removed, then remove it.
