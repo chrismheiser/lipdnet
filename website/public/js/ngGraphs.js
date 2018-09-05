@@ -9,12 +9,13 @@ angular.module('ngGraphs', ['nvd3ChartDirectives']).controller('GraphCtrl', func
 
   $scope.expandEntryGraph = function(x, entry){
     // Reset everything
-    $scope.resetGraph();
+    $scope.resetGraph(x);
     // Now turn on the toggle for this specific entry
     if (typeof entry.tmp === "undefined"){
       entry["tmp"] = {"toggleGraph": true};
     } else{
       entry.tmp.toggleGraph = true;
+
     }
     return x;
   };
