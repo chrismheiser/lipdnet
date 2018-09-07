@@ -1019,15 +1019,18 @@ router.get("/downloadall/:tmp", function(req, res, next){
 
 router.post("/downloadall", function(req, res, next){
   // Array of dataset names to retrieve
+
+    // TODO finish this process
   var _dsns = req.body.dsns;
+  console.log(_dsns);
 
   // Create a tmp folder
   // var _tmp_dir = ;
 
-  batchDownloadWiki(_dsns, function(){
-    console.log("in batch download  callback");
-    res.status(200).send("hehe");
-  });
+  // batchDownloadWiki(_dsns, function(){
+  //   console.log("in batch download  callback");
+  //   res.status(200).send("hehe");
+  // });
 
 
 

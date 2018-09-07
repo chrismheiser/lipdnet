@@ -880,8 +880,20 @@ var lipdValidator = (function(){
         }
       };
 
+      var correctColumnCounts = function(csvs){
+        for(var _filename in csvs){
+          if(csvs.hasOwnProperty(_filename)){
+              // Our column count should be whatever the length of the data arrays are. Use the first array.
+              csvs[_filename]["cols"] = csvs[_filename]["data"][0].length;
+          }
+        }
+        return csvs;
+      };
+
       // check that column count in a table match the column count in the CSV data
       var requiredColumnsCtMatch = function (filename, columns) {
+        // Fix the column counts.
+        files.csv = correctColumnCounts(files.csv);
         var csvCt = 0;
         try{
           // Get the column count for this csv file.

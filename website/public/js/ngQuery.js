@@ -58,7 +58,7 @@ q.controller('QueryCtrl', ['$scope', '$log', '$timeout', '$q', '$http', "$uibMod
     $scope.resultObjs = "";
 
     $scope.downloadAll = function(){
-      $scope.uploadDownloadAll({"dsns": ["Asi-2DKunashirIsland.Demezhko.2009", "MD98-2D2170.Stott.2004"]}, function(resp){
+      $scope.uploadDownloadAll($scope.resultObjs, function(resp){
         console.log("Received backend response");
         console.log(resp);
       });
