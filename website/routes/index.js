@@ -542,15 +542,21 @@ var parseRequestNoaa = function(master, req, res){
 // Wiki: Parse all the resil
 var parseWikiQueryResults = function(results, cb){
   var _query_results = [];
-  for(var _m=0; _m<results.length; _m++) {
-      var _item = {};
-      var _dsn_link = results[_m]["binding"][0]["uri"][0];
-      var _dsn = _dsn_link.match(/http:\/\/wiki.linked.earth\/Special:URIResolver\/(.*)/);
-      _item["dsn"] = _dsn[1];
-      _item["url_dataset"] = _dsn_link;
-      _item["url_download"] = 'http://wiki.linked.earth/wiki/index.php/Special:WTLiPD?op=export&lipdid=' + _dsn[1];
-      _query_results.push(_item);
-  }
+  // There are results to process.
+    try{
+        for(var _m=0; _m<results.length; _m++) {
+            var _item = {};
+            var _dsn_link = results[_m]["binding"][0]["uri"][0];
+            var _dsn = _dsn_link.match(/http:\/\/wiki.linked.earth\/Special:URIResolver\/(.*)/);
+            _item["dsn"] = _dsn[1];
+            _item["url_dataset"] = _dsn_link;
+            _item["url_download"] = 'http://wiki.linked.earth/wiki/index.php/Special:WTLiPD?op=export&lipdid=' + _dsn[1];
+            _query_results.push(_item);
+        }
+    } catch(err){
+        // Don't do anything. We don't really care about "results" being undefined and not having a length.
+        // We'll return the empty array conveying that there were no results.
+    }
   cb(_query_results);
 };
 
@@ -925,6 +931,7 @@ router.post("/query", function(req, res, next){
   try{
     console.log("query: Python: Sending request...");
     request(options, function (err1, res1, body1) {
+        console.log("RESPONSE");
       console.log("query: Python: Response Status: ", res1.statusCode);
       if(err1){
         console.log("query: Python: Error making the request");
@@ -951,7 +958,7 @@ router.post("/query", function(req, res, next){
           console.log("query: Wiki: Response Status: ", res2.statusCode);
           if(err2){
             console.log("query: Wiki: Error making the request");
-            res.writeHead(res2.statusCode, "Error talking to the LE API", {'content-type' : 'text/plain'});
+            res.writeHead(res2.statusCode, "Error talking to the Wiki API", {'content-type' : 'text/plain'});
             res.end();
           }
           // All good, keep going.

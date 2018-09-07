@@ -81,6 +81,7 @@ q.controller('QueryCtrl', ['$scope', '$log', '$timeout', '$q', '$http', "$uibMod
               // window.alert("HTTP " + resp.status + ": There was a problem completing your request\n" + resp.statusText);
               $scope.resultMsg = "HTTP " + resp.status + ": This is embarrassing..." + resp.statusText;
               $scope.resultCt = 0;
+              $scope.resultObjs = "";
             } else {
               console.log("Looks good! Displaying results.");
               $scope.resultObjs = resp.data;
