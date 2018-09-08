@@ -26,6 +26,9 @@ div.step9
   //- pre#csvPretty
   
 li.step10(style="list-style-type: none;")
-  pre(ng-class="files.fileCt > 0? 'on' : 'off'" style="background-color:#eee; border: none;" uib-popover="Click any filename to view the data within that specific file" popover-trigger="'mouseenter'") {{files.fileCt}} files in LiPD
+  pre.on(style="background-color:#eee; border: none;" uib-popover="Click any filename to view the data within that specific file" popover-trigger="'mouseenter'") {{files.fileCt}} files in LiPD
     ul
-      li(ng-repeat="file in allFiles track by $index" ng-click="showModalFileContent(file)") {{ file.filenameShort }}
+      // The metadata.jsonld will always have a two-way bind to the json.
+      li(ng-click="showModalFileContent({data: files.json, type: 'json', filenameShort: 'metadata.jsonld'})") metadata.jsonld
+      // The CSV files and bagit data will only refresh during a validation cycle.
+      li(ng-repeat="file in allFiles track by $index" ng-click="showModalFileContent(file)" ng-if="file.type !== 'json' ") {{ file.filenameShort }}

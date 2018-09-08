@@ -72,7 +72,7 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       "modal": {},
       "lipdFilename": "",
       "dataSetName": "",
-      "fileCt": 0,
+      "fileCt": 1,
       "bagit": {},
       "csv": {},
       "jsonSimple": {"lipdVersion": 1.3},
@@ -570,7 +570,7 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
         "modal": {},
         "lipdFilename": "",
         "dataSetName": "",
-        "fileCt": 0,
+        "fileCt": 1, // This should always be at least 1, because metadata.jsonld is always present
         "bagit": {},
         "csv": {},
         "jsonSimple": {"lipdVersion": 1.3},
@@ -888,6 +888,28 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       entry.tmp.parse=!entry.tmp.parse;
     };
 
+    $scope.updateFilesList = function(fileList, csvs){
+        // We use ng-repeat to create file links in the file list in the feedback section.
+        // ng-repeat needs an array, and the CSV data is not stored in an array.
+        // Every time we run a validation cycle, update the data for the fileList to be current.
+        var _newFileList = [];
+        // Copy over bagit and jsonld files.
+        // Bagit files are only present if a file was uploaded and NOT created from scratch
+        for(var _p=0; _p<fileList.length; _p++){
+          if(fileList[_p]["type"] !== "csv"){
+            _newFileList.push(fileList[_p]);
+          }
+        }
+
+        for(var _filename in csvs){
+          if(csvs.hasOwnProperty(_filename)){
+            _newFileList.push({"filenameShort": _filename, "type": "csv", "data": csvs[_filename].data});
+          }
+        }
+        return _newFileList;
+
+    };
+
     $scope.uploadNoaa = function (_file, cb) {
       // Upload *validated* lipd data to backend
       $scope.pageMeta.busyPromise = Upload.upload({
@@ -949,7 +971,8 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
               $scope.files = _results.files;
               $scope.feedback = _results.feedback;
               $scope.status = _results.status;
-              console.log(_results);
+              // Update the fileList in the feedback section.
+              $scope.allFiles = $scope.updateFilesList($scope.allFiles, $scope.files.csv);
             } catch(err){
               console.log("validate: Error trying to prepare results: " + err);
             }

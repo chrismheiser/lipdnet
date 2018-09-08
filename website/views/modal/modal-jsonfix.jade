@@ -17,7 +17,7 @@
         pre.on(ng-if="reverted" style="background-color:#DFF1C1; border: none;") JSON-LD data reverted to original uploaded data.
         pre.on(ng-if="error" style="background-color:#FEBABB; border: none;") Errors exist in JSON structure. Please fix all errors to continue.
 
-        textarea(ng-model="jsondata" style="border:0.1em solid #ccc;border-radius:0.5em;height:30em;width:100%;")
+        textarea.darkertext(ng-model="jsondata" style="border:0.1em solid #ccc;border-radius:0.5em;height:30em;width:100%;")
     .modal-footer
         button(ng-if="!options.initialUpload" class="btn btn-primary" data-dismiss="modal" ng-click="revert()") Revert to Original
         button(class="btn btn-success" data-dismiss="modal" ng-click="save()") Save

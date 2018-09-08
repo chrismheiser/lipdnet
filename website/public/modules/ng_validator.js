@@ -880,6 +880,8 @@ var lipdValidator = (function(){
         }
       };
 
+      // Column counts fluctuate throughout the playground workflow. Check for paired metadata-values during each
+      // validation cycle
       var correctColumnCounts = function(csvs){
         for(var _filename in csvs){
           if(csvs.hasOwnProperty(_filename)){

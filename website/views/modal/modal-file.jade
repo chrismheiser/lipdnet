@@ -1,13 +1,13 @@
 .modal-content
   .modal-header
     h3.modal-title {{data.filenameShort}}
-  .modal-body(ng-if="data.type==='csv'")
+  .modal-body(ng-if="data.type === 'csv'")
     table(class="table table-bordered")
       thead
       tbody(class="table table-bordered")
-        tr(ng-repeat='row in data.data.data track by $index')
-          td(ng-repeat="entry in row track by $index") {{entry}}
-  .modal-body(ng-if="data.type!=='csv'")
+        tr(ng-repeat='row in data.data track by $index')
+          td.darkertext(ng-repeat="entry in row track by $index") {{entry}}
+  .modal-body(ng-if="data.type !== 'csv'")
     pre {{pretty}}
   .modal-footer
     button(class="btn btn-primary" data-dismiss="modal" ng-click="close()") Close
