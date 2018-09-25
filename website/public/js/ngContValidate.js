@@ -2,6 +2,7 @@
 angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Upload', "ImportService", "ExportService", "$uibModal","$sce", "toaster",
   function ($scope, $log, $timeout, $q, $http, Upload, ImportService, ExportService, $uibModal, $sce, toaster) {
 
+    // Ontology: archiveType, units, inferredVariableType, proxyObservationType
     $scope.ontology = {};
     $scope.lipdPopover = $sce.trustAsHtml(create.getPopover("lipd"));
     $scope.wikiPopover = $sce.trustAsHtml(create.getPopover("wiki"));
@@ -55,6 +56,7 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
             .then(function(response) {
               // Success. Set the data to the scope directly
                 $scope.ontology = response.data;
+                // console.log($scope.ontology);
             }, function myError(err) {
                 console.log(err);
                 // Error, use our hardcoded lists as a fallback.
@@ -194,9 +196,10 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
         if(_field.toLowerCase() === "tsid"){
             $scope.showModalAlert({"title": "Automated field", "message": "You may not add, remove, or edit fields that are automatically generated"});
         } else {
-            $scope.showModalAlert({"title": "Duplicate entry", "message": "That field already exists in this column."});
             entry[_field] = "";
         }
+      } else if(entry.hasOwnProperty(_field)){
+          $scope.showModalAlert({"title": "Duplicate entry", "message": "That field already exists in this column."});
       }
       // Wipe the field input box to be ready for another use.
       entry.tmp.custom = "";
