@@ -174,7 +174,6 @@ f.factory("ExportService", ["$q", function ($q) {
       promises.push(getText(_filename2, csvStr));
     }
     // resolve the array
-    console.log(promises);
     return $q.all(promises);
   }; // end prepForDownload
 

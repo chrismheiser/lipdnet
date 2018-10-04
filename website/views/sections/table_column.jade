@@ -23,12 +23,10 @@ div(layout="column" ng-repeat='entry3 in entry2.columns track by $index' layout-
 
                     md-input-container(flex='', class="md-input-has-value")
                         label Units *
-                        // Use autocomplete for lists that are >20 items
-                        input.mdautocomplete(ng-if="ontology.units.length > 20" type="text" ng-model="entry3.units"
+                        // Use autocomplete - all cases
+                        input.mdautocomplete(ng-if="ontology.units" type="text" ng-model="entry3.units"
                                 uib-typeahead="entry for entry in ontology.units | filter:$viewValue | limitTo:8")
-                        // Use dropdown for lists that are <20 items
-                        md-select(ng-if="ontology.units.length < 20" ng-model="entry3.units")
-                            md-option(ng-repeat="entry in ontology.units" ng-value="entry") {{entry}}
+
                         //input(ng-model="entry3.units")
                         md-tooltip {{getTooltip("paleoData", "units")}}
 

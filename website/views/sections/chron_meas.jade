@@ -3,7 +3,9 @@ div(ng-repeat='entry in files.json.chronData track by $index' layout-wrap="" ng-
     // chronData[1] : Should only be one entry2. Don't need to loop
     div(ng-repeat="entry2 in entry.measurementTable track by $index" layout-wrap="")
         md-card(ng-show="entry2.tmp.toggle")
-            md-subheader.md-primary chron {{parentIdx+1}} > measurement {{$index+1}}
+            //md-subheader.md-primary chron {{parentIdx+1}} > measurement {{$index+1}}
+            md-subheader.md-primary chron {{parentIdx}} > measurement {{$index}}
+
             include ./table_root.jade
 
             div.step16

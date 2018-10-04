@@ -375,6 +375,7 @@ var lipdValidator = (function(){
           files.json["lipdVersion"]  = lipdVersion;
           feedback.lipdVersion = lipdVersion;
           console.log("Validating version: " + lipdVersion);
+          // files.csv = simplifyCsvFilenames(files.csv);
           if(lipdVersion === "1.3"){
             console.log("validate_1_3: LiPD Structure");
             structureBase(files.json, keys_base.miscKeys.concat(keys_1_3.miscKeys));
@@ -385,6 +386,7 @@ var lipdValidator = (function(){
           }
           console.log("validate: Bagit");
           logSpecialFeedback();
+          files.json = calculateInferredValues(files.json, files.csv);
           verifyBagit(files.bagit);
           verifyWiki(files.json);
           verifyNoaa(files.json);
@@ -677,10 +679,25 @@ var lipdValidator = (function(){
        * @param {object} tnks Required keys for this LiPD Version
        */
       var requiredTable = function (table, crumbs, tnks) {
-        // look for table filename
-        var filename = table.filename || crumbs + ".csv";
-        console.log(filename);
-        table.filename = filename;
+
+        var filename = null;
+
+        // Table has an existing filename. We need to fix it by removing the DSN prefix, and reconcile it to files.csv
+        if(table.hasOwnProperty("filename")){
+          // Chosen filename is returned. files.csv contains chosen filename as well.
+          filename = reconcileCsvFilenames(table.filename, crumbs + ".csv");
+          table.filename = filename;
+        }
+        // Table does not have a filename. Create one from the crumbs path.
+        else {
+            filename = crumbs + ".csv";
+            table['filename'] = filename;
+            if(!files.csv.hasOwnProperty(filename)){
+              files.csv[filename] = {};
+            }
+        }
+
+
         try {
           // required table root keys
           for (var _w = 0; _w < keys_base.reqTableKeys.length; _w++) {
@@ -1328,6 +1345,54 @@ var lipdValidator = (function(){
 
       // HELPERS
 
+      /**
+       * Simplify the CSV filenames. Remove the dataset name, or other prefixes, from the filename.
+       * i.e. Smith.paleo0measurement0.csv  becomes  paleo0measurement0.csv
+       *
+       * This helps prevent bad filenames when there are small dataset name differences.
+       * i.e. "Smith_Lake" and "Smith.Lake" would end up as "Smith_LakeSmith.Lake.paleo0measurement0.csv"
+       *
+       * @param {object} csvs Csv data sorted by filename
+       * @param {object} csvs Csv data sorted by (new) filename
+       */
+      // var simplifyCsvFilenames = function(csvs){
+      //   for(var _filename in csvs){
+      //     if(csvs.hasOwnProperty(_filename)){
+      //       if(_filename.indexOf("paleo") !== -1){
+      //         var _newfilename = _filename.substring(_filename.indexOf("paleo"));
+      //         csvs[_newfilename] = csvs[_filename];
+      //         delete csvs[_filename];
+      //       }
+      //       else if (_filename.indexOf("chron") !== -1){
+      //           var _newfilename2 = _filename.substring(_filename.indexOf("chron"));
+      //           csvs[_newfilename2] = csvs[_filename];
+      //           delete csvs[_filename];
+      //       }
+      //     }
+      //   }
+      //   console.log("NEW FILENAMES");
+      //   console.log(csvs);
+      //   return csvs;
+      // };
+
+      /**
+       * Simplify the CSV filenames. Remove the dataset name, or other prefixes, from the filename.
+       * i.e. Smith.paleo0measurement0.csv  becomes  paleo0measurement0.csv
+       *
+       * This helps prevent bad filenames when there are small dataset name differences.
+       * i.e. "Smith_Lake" and "Smith.Lake" would end up as "Smith_LakeSmith.Lake.paleo0measurement0.csv"
+       *
+       * @param {string} old_filename Original filename found in the LiPD upload
+       * @param {string} new_filename Standardized filename created with crumbs
+       */
+      var reconcileCsvFilenames = function(old_filename, new_filename){
+        if(files.csv.hasOwnProperty(old_filename)){
+          files.csv[new_filename] = files.csv[old_filename];
+          delete files.csv[old_filename];
+        }
+        return new_filename;
+      };
+
       // create a csv filename for a data table
       var createCsvFilename = function(crumbs){
         var _filename = crumbs + ".csv";
@@ -1425,7 +1490,266 @@ var lipdValidator = (function(){
         }
       };
 
-      // Call the local validate function, inside of processData
+      // HELPERS  - INFERRED DATA CALCULATIONS
+      var calculateInferredValues = function(jsons, csvs){
+
+          // WORKFLOW
+          // 1. Get Table data.  (IGNORE ENSEMBLES)
+          // 2. Calculate Resolution (when applicable)
+          // 2a. look for "age", "year", "yrbp" in column variable names. case - insensitive
+          // 2b. if no age year or yrbp exact matches found, try to find a variable name match loosely. with word in it.
+          // 2c. if you find some sort of age, calculate resolution
+          // 3. Calculate inferred data
+
+          // RULES
+          // Remove all NaNs before calculating
+          // Do not make resolution calculations on age or year columns
+          // Do not make calculations on columns that have string values
+          // Resolution values are always positive. Absolute values.
+          // We want Mean, Median, Max, Min
+
+          // Work your way down the tree and loop over all data tables.
+          var _keys = ["paleoData", "chronData"];
+          for(var _keyidx = 0; _keyidx <_keys.length; _keyidx++){
+              var _pc = _keys[_keyidx];
+              if(jsons.hasOwnProperty(_pc)){
+                  for(var _a = 0; _a < jsons[_pc].length; _a++){
+                      if(jsons[_pc][_a].hasOwnProperty("measurementTable")){
+                          for(var _met = 0; _met < jsons[_pc][_a]["measurementTable"].length; _met++){
+                              var _currTable = jsons[_pc][_a]["measurementTable"][_met];
+                              // Down to a single table. Send that table forward to processing
+                              jsons[_pc][_a].measurementTable[_met] = getInferredDataTable(_currTable, csvs, _pc);
+                          }
+                      }
+                  }
+              }
+          }
+          return jsons;
+      };
+
+      function mean(numbers) {
+        // Find the mean of the given numeric array.
+          var total = 0, i;
+          for (i = 0; i < numbers.length; i += 1) {
+              total += numbers[i];
+          }
+          return total / numbers.length;
+      }
+
+      function median(numbers) {
+          // Find the median of the given numeric array.
+          // median of [3, 5, 4, 4, 1, 1, 2, 3] = 3
+          var median = 0, numsLen = numbers.length;
+          numbers.sort();
+
+          if (
+              numsLen % 2 === 0 // is even
+          ) {
+              // average of two middle numbers
+              median = (numbers[numsLen / 2 - 1] + numbers[numsLen / 2]) / 2;
+          } else { // is odd
+              // middle number only
+              median = numbers[(numsLen - 1) / 2];
+          }
+
+          return median;
+      }
+
+      var parseArrFloats = function(numbers){
+        // Parse all the values in the given array as floats. If they're not numbers, they'll result as NaNs.
+        var _numbers2 = [];
+        for(var _u=0; _u<numbers.length; _u++){
+          _numbers2.push(parseFloat(numbers[_u]));
+        }
+        return _numbers2;
+      };
+
+      var removeOldInferredData = function(column){
+        // Remove inferred data from this column that might be using the old keys.
+        var _rm_keys = ["mean", "median", "max", "min"];
+        for(var _b=0; _b<_rm_keys.length;_b++){
+          var _rm_key = _rm_keys[_b];
+          if(column.hasOwnProperty(_rm_key)){
+            delete column[_rm_key];
+          }
+        }
+        return column;
+      };
+
+      var calculateInferredColumn = function(table, _values){
+          // Loop over all columns in the table.
+          for(var _i=0; _i<table.columns.length; _i++){
+
+                  // Grab the values for this column.
+                  var _current_values = parseArrFloats(_values[_i]);
+                  try{
+                      // Return an array that shows where all the non-NaN values are in the _values array.
+                      var _cleanValues = _current_values.filter(function(number) {
+                          if (!isNaN(number) && number !== null)
+                              return parseFloat(number);
+                      });
+                      // Only continue if the array has numeric values.
+                      if(_cleanValues.length > 0){
+                          // Place all calculations directly in the column.
+                          table.columns[_i]["hasMean"] = mean(_cleanValues);
+                          table.columns[_i]["hasMedian"] = median(_cleanValues);
+                          table.columns[_i]["hasMax"] = Math.max(..._cleanValues);
+                          table.columns[_i]["hasMin"] = Math.min(..._cleanValues);
+                          // Remove the old inferred data keys if they exist.
+                          table.columns[_i] = removeOldInferredData(table.columns[_i]);
+
+                      } else {
+                          console.log("Error calculateInferredColumn: No array values. No inferred data.");
+                      }
+                  } catch(err){
+                      console.log("Error calculateInferredColumn: main: ", err);
+                  }
+          }
+          return table;
+
+      };
+
+      var calculateResolution = function(table, _values, age){
+        // Loop over all columns in the table.
+        for(var _i=0; _i<table.columns.length; _i++){
+          // Get the variableName for this column.
+          var _name = table.columns[_i].variableName;
+          // Is this the age column? Skip. Is this not the age column? Keep going.
+          if(_name !== age.variableName){
+            // Grab the values for this column.
+            var _current_values = _values[_i];
+            try{
+                // Return an array that shows where all the non-NaN values are in the _values array.
+                var _isNotNaN = _current_values.reduce(function(a, e, i) {
+                    if (!isNaN(e))
+                        a.push(i);
+                    return a;
+                }, []);
+
+                // Only continue if the array has numeric values.
+                if(_isNotNaN.length > 0){
+                    // Create an array where we'll store the
+                    var _age2 = [];
+                    // Loop over the good non-NaN indicies that we found.
+                    for(var _p=0; _p<_isNotNaN.length; _p++){
+                        try{
+                            // Use the non-NaN indicies from the _values array, to grab indices from the age array.
+                            var _idx = _isNotNaN[_p];
+                            // Push the age value from N index onto our _age2 array, which is what we'll use to calculate resolution.
+                            _age2.push(age.values[_idx]);
+                        } catch(err){
+                            // In a perfect world, both the age and values array should be the same length.
+                            // But catch the error just in case. Who knows.
+                            console.log("Error calculateResolution: creating age2: ", err);
+                        }
+                    }
+
+                    // Calculate the resolution. This is the diff of the _age2 array.
+                    var _resolution = [];
+                    // Loop until n-1, since our resulting array will be 1 length less than the original.
+                    for(var _n=0;_n<_age2.length-1;_n++){
+                        var _upper = parseFloat(_age2[_n+1]);
+                        var _lower = parseFloat(_age2[_n]);
+                        var _val = Math.abs(_upper-_lower);
+                        if(_val !== null && _val !== "undefined" && !isNaN(_val)){
+                          _resolution.push(Math.abs(_upper-_lower));
+                        }
+                    }
+
+                    var _mmmm = {
+                      "hasMean": mean(_resolution),
+                      "hasMedian": median(_resolution),
+                      "hasMax": Math.max(..._resolution),
+                      "hasMin": Math.min(..._resolution)
+                    };
+
+                    table.columns[_i]["hasResolution"] = _mmmm;
+
+                } else {
+                  console.log("calculateResolution: No array values. No resolution.");
+                }
+
+            } catch(err){
+              console.log("Error calculateResolution: main: ", err);
+            }
+          }
+        }
+
+        return table;
+
+      };
+
+      var getInferredDataTable = function(table, csvs, pc) {
+          // Placeholder for age data.
+          var _age = {"variableName": null, "values": null};
+          // Get the values for the table columns from the csv data.
+          var _values = csvs[table.filename].transposed.slice();
+
+          // We need columns and a filename to continue working. If they don't exist, we can't continue.
+          if (table.hasOwnProperty("columns") && table.hasOwnProperty("filename")) {
+
+            // DO NOT calculate inferred data on ensemble tables. It'll wreak havoc and probably crash the site.
+            if(table.filename.indexOf("ensemble") === -1){
+                // Only calculate resolution for paleoData tables.
+                if (pc === "paleoData") {
+                    // Get the age values data first, since it's needed to calculate the other column data.
+                    _age = getAgeColumn(table, _values);
+                }
+                // Calculate resolution & inferred data. Only paleoData is possible here.
+                if (_age.values) {
+                    table = calculateResolution(table, _values, _age);
+                }
+                // Calculate inferred data without resolution. No age data present, or this is chronData.
+                table = calculateInferredColumn(table, _values);
+            }
+          }
+          // Table does not have columns and/or a filename
+          else {
+              console.log("Table missing columns or filename:" + table.tableName);
+          }
+
+          return table;
+
+      };
+
+      var getAgeColumn = function(table, values){
+        var _age = {"variableName": null, "values": null};
+        var _target_keys = ["year", "yrbp", "bp", "age"];
+
+        // Look for an exact key match (key === variableName)
+        for(var _m=0; _m<table.columns.length; _m++){
+          for(var _k=0; _k<_target_keys.length; _k++){
+              var _key = _target_keys[_k];
+              if(table.columns[_m].hasOwnProperty("variableName")){
+                  if(table.columns[_m].variableName === _key){
+                      _age.variableName = table.columns[_m].variableName;
+                      _age.values = values[_m];
+                      break
+                  }
+              }
+          }
+        }
+
+        // No exact matches found. Look for a loose match (key %in% variableName)
+        if(!_age.values){
+            for(var _m2=0; _m2<table.columns.length; _m2++){
+                for(var _k2=0; _k2<_target_keys.length; _k2++){
+                    var _key2 = _target_keys[_k2];
+                    if(table.columns[_m2].hasOwnProperty("variableName")){
+                        if(table.columns[_m2].variableName.indexOf(_key2) !== -1){
+                            _age.variableName = table.columns[_m2].variableName;
+                            _age.values = values[_m2];
+                            break
+                        }
+                    }
+                }
+            }
+        }
+        return _age;
+      };
+
+
+        // Call the local validate function, inside of processData
       cb(validate());
 
     }) // end processData

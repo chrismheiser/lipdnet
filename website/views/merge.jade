@@ -20,7 +20,7 @@ block body
 
             .col-sm-12(ng-controller="MergeCtrl as mc" cg-busy="pageMeta.busyPromise")
                 toaster-container(toaster-options="{'close-button':false, 'time-out':{ 'toast-warning': 2000, 'toast-error': 0 } }")
-                include ./pieces/action_btns_merge.jade
+                include buttons/action_btns_merge.jade
 
                 // Progress bar gives indication on what steps are completed and what workflow should be followed.
                 .progressbarcontainer

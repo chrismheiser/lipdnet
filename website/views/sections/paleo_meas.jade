@@ -3,7 +3,9 @@ div(ng-repeat='entry in files.json.paleoData track by $index' layout-wrap="" ng-
     // PaleoData[1] : Should only be one table. Don't need to loop
     div(ng-repeat="entry2 in entry.measurementTable track by $index" layout-wrap="")
         md-card(ng-show="entry2.tmp.toggle")
-            md-subheader.md-primary paleo {{parentIdx+1}} > measurement {{$index+1}}
+            //md-subheader.md-primary paleo {{parentIdx+1}} > measurement {{$index+1}}
+            md-subheader.md-primary paleo {{parentIdx}} > measurement {{$index}}
+
             include ./table_root.jade
 
             div.step16

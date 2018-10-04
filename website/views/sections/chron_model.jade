@@ -3,12 +3,15 @@ div(ng-repeat='entry in files.json.chronData track by $index' layout-wrap="" ng-
 
     div(ng-if="entry.model[0].method" layout-wrap="")
         md-card(ng-show="entry.model[0].method.tmp.toggle")
-            md-subheader.md-primary chron {{parentIdx+1}} > model 1 > method
+            //md-subheader.md-primary chron {{parentIdx+1}} > model 1 > method
+            md-subheader.md-primary chron {{parentIdx}} > model 0 > method
             include ./table_method
 
     div(ng-repeat="entry2 in entry.model[0].summaryTable track by $index" )
         md-card(ng-if="entry2.tmp.toggle")
-            md-subheader.md-primary chron {{parentIdx+1}} > model 1 > summary {{$index+1}}
+            //md-subheader.md-primary chron {{parentIdx+1}} > model 1 > summary {{$index+1}}
+            md-subheader.md-primary chron {{parentIdx}} > model 0 > summary {{$index}}
+
             include ./table_root
             // Toggle for switching between Classic and Spreadsheet parsers.
             md-switch(style="margin:1em" ng-model="pageMeta.spreadsheetBeta") Parse Mode: {{ pageMeta.spreadsheetBeta? "Spreadsheet (Beta)": "Classic"}}
@@ -31,7 +34,9 @@ div(ng-repeat='entry in files.json.chronData track by $index' layout-wrap="" ng-
 
     div(ng-repeat="entry2 in entry.model[0].ensembleTable track by $index" )
         md-card(ng-if="entry2.tmp.toggle")
-            md-subheader.md-primary chron {{parentIdx+1}} model 1 ensemble {{$index+1}}
+            //md-subheader.md-primary chron {{parentIdx+1}} model 1 ensemble {{$index+1}}
+            md-subheader.md-primary chron {{parentIdx}} model 0 ensemble {{$index}}
+
             include ./table_root
             // Toggle the csv entry2 box and the parse csv button. Once we parse CSV, these elements are not longer needed.
             //include ./parse_csv.jade

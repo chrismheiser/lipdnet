@@ -40,7 +40,7 @@ block body
 
 						div(cg-busy="pageMeta.busyPromise")
 
-							include ./pieces/version.jade
+							include buttons/version.jade
 
 							div
 								pre(style="background-color:#DFF1C1; border: none;")
@@ -56,10 +56,10 @@ block body
 										span Load & Validates
 								div
 									ol
-										include ./pieces/action_btns.jade
-										include ./pieces/noaa_wiki_btns.jade
-										include ./pieces/feedback.jade									
-											
+										include buttons/action_btns.jade
+										include buttons/noaa_wiki_btns.jade
+										include buttons/feedback.jade
+
 							div(class="span span50")
 								div.step11
 									include ./sections/root.jade

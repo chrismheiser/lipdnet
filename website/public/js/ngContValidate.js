@@ -188,7 +188,7 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
         $scope.showModalBlock(entry, true, _field, 0);
       }
       // Adding an entry that is a nested object item
-      else if (["calibration", "hasResolution", "physicalSample"].indexOf(_field) !== -1){
+      else if (["calibration", "hasResolution", "physicalSample", "takenAtDepth", "measuredOn"].indexOf(_field) !== -1){
         $scope.showModalBlock(entry, true, _field, null);
       }
       // Adding any regular field
@@ -298,7 +298,7 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       $scope._myPromiseExport.then(function (filesArray) {
         //upload zip to node backend, then callback and download it afterward.
         console.log("Let me bring this to the backroom.");
-        console.log(filesArray);
+        // console.log(filesArray);
         // console.log($scope.files);
         $scope.uploadZip({"filename": $scope.files.lipdFilename, "dat": filesArray}, function(resp){
           console.log("Received backend response");
@@ -658,7 +658,7 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
 
     $scope.isBlock = function(field){
       // Data is a block if the field is in this list.
-      if(["physicalSample", "hasResolution", "calibration"].includes(field)){
+      if(["physicalSample", "hasResolution", "calibration", "measuredOn", "takenAtDepth"].includes(field)){
         return true;
       }
       return false;
@@ -682,7 +682,7 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
 
     $scope.isProperty = function(field){
       // Do not show any temporary fields, data, or nested blocks.
-      if(["number", "variableName", "units", "toggle", "description", "values", "checked", "tmp", "interpretation", "physicalSample", "hasResolution", "calibration"].includes(field)){
+      if(["number", "variableName", "units", "toggle", "description", "values", "checked", "tmp", "interpretation", "physicalSample", "hasResolution", "calibration", "takenAtDepth", "measuredOn"].includes(field)){
         return false;
       }
       return true;

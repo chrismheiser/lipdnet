@@ -774,7 +774,7 @@ var create = (function(){
         },
         {
           element: document.querySelector(".step24"),
-          intro: "That's it! There many different pieces to this page, but hopefully this tour has explained some of the initial questions and the process makes more sense.",
+          intro: "That's it! There many different buttons to this page, but hopefully this tour has explained some of the initial questions and the process makes more sense.",
         },
 
 
