@@ -5,12 +5,12 @@ md-subheader.md-primary Columns
 
 div.btn-row(layout="row")
     div(ng-repeat='column in entry2.columns track by $index')
-        button.blue-btn-on(type="button" ng-if="column.tmp.toggle" ng-click="column.tmp.toggle = false") Column {{$index+1}}:<br />{{column.variableName}}
-        button.blue-btn-off(type="button" ng-if="!column.tmp.toggle" ng-click="expandEntry(entry2.columns, column)") Column {{$index+1}}:<br />{{column.variableName}}
+        button.blue-btn-on(type="button" ng-if="column.tmp.toggle" ng-click="column.tmp.toggle = false") Column {{$index}}:<br />{{column.variableName}}
+        button.blue-btn-off(type="button" ng-if="!column.tmp.toggle" ng-click="expandEntry(entry2.columns, column)") Column {{$index}}:<br />{{column.variableName}}
 
 div(layout="column" ng-repeat='entry3 in entry2.columns track by $index' layout-wrap="")
     md-card(ng-if="entry3.tmp.toggle")
-        md-subheader.md-primary column {{$index+1}}: {{entry3.variableName}}
+        md-subheader.md-primary column {{$index}}: {{entry3.variableName}}
         div(layout='row', layout-padding='', layout-sm='column')
             div(flex)
                 md-subheader.md-primary Standard fields

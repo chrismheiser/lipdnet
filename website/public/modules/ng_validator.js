@@ -24,7 +24,6 @@ var lipdValidator = (function(){
         lipdValidator.populateTSids(files, function(files_1){
           _output.files = files_1.files;
           pageMeta.tsids_generated = files_1.tsids_generated;
-
           lipdValidator.processData(files_1.files, pageMeta, function(_results){
             try{
               _output.feedback = _results.feedback;
@@ -368,7 +367,6 @@ var lipdValidator = (function(){
        * @return {object} validation results
        */
       var validate = function () {
-
         try{
           // Get the lipd version to determine which validation to use
           var lipdVersion = getLipdVersion(files.json);
@@ -737,24 +735,24 @@ var lipdValidator = (function(){
             for (var i = 0; i < table.columns.length; i++) {
 
               // Special Fields: variableType and proxyObservationType / inferredVariableType
-              if(table.columns[i].hasOwnProperty("variableType")){
-                var _varType = table.columns[i].variableType;
-                if(_varType === "measured" || _varType === "measuredVariable"){
-                  if(!table.columns[i].hasOwnProperty("proxyObservationType")){
-                    logFeedback("err", "Missing: " + crumbs + ".column" + i + ".proxyObservationType", "proxyObservationType");
-                  }
-                } else if(_varType === "inferred"){
-                  if(!table.columns[i].hasOwnProperty("inferredVariableType")){
-                    logFeedback("err", "Missing: " + crumbs + ".column" + i + ".inferredVariableType", "inferredVariableType");
-                  }
-                } else {
-                  logFeedback("err", "Missing: " + crumbs + ".column" + i + ".variableType", "variableType");
-                }
-
-              } else {
-                logFeedback("err", "Missing: " + crumbs + ".column" + i + ".variableType", "variableType");
-                logFeedback("err", "Missing: " + crumbs + ".column" + i + ".proxyObservationType OR inferredVariableType", "proxyObservationType|inferredVariableType");
-              }
+              // if(table.columns[i].hasOwnProperty("variableType")){
+              //   var _varType = table.columns[i].variableType;
+              //   if(_varType === "measured" || _varType === "measuredVariable"){
+              //     if(!table.columns[i].hasOwnProperty("proxyObservationType")){
+              //       logFeedback("err", "Missing: " + crumbs + ".column" + i + ".proxyObservationType", "proxyObservationType");
+              //     }
+              //   } else if(_varType === "inferred"){
+              //     if(!table.columns[i].hasOwnProperty("inferredVariableType")){
+              //       logFeedback("err", "Missing: " + crumbs + ".column" + i + ".inferredVariableType", "inferredVariableType");
+              //     }
+              //   } else {
+              //     logFeedback("err", "Missing: " + crumbs + ".column" + i + ".variableType", "variableType");
+              //   }
+              //
+              // } else {
+              //   logFeedback("err", "Missing: " + crumbs + ".column" + i + ".variableType", "variableType");
+              //   logFeedback("err", "Missing: " + crumbs + ".column" + i + ".proxyObservationType OR inferredVariableType", "proxyObservationType|inferredVariableType");
+              // }
 
               // Required column keys
               for (var k in keys_base.reqColumnKeys) {
@@ -1315,8 +1313,47 @@ var lipdValidator = (function(){
        */
       var requiredColumnNoaaWiki = function (column, crumbs, mode, lvl, keys){
         try{
+          // Special handling for "inferredVariableType" and "proxyObservationType" fields. Only in Wiki mode.
+          // This if statement is a bit of a band-aid because this is the best spot to put it, but it needed
+          // qualifiers so it would only run once per column.
+          if(mode === "Wiki" && lvl === "err"){
+
+              // Special Fields: variableType and proxyObservationType / inferredVariableType
+              if(column.hasOwnProperty("variableType")){
+                  var _varType = column.variableType;
+
+                  if(column.hasOwnProperty("inferredVariableType") && column.hasOwnProperty("proxyObservationType")){
+                    if(!column.inferredVariableType && !column.proxyObservationType){
+                        logFeedback("err", "(Wiki) Missing: " + crumbs + "proxyObservationType OR inferredVariableType", "proxyObservationType|inferredVariableType");
+                    }
+                  } else {
+                      if(_varType === "measured" || _varType === "measuredVariable"){
+                          if(!column.hasOwnProperty("proxyObservationType")){
+                              logFeedback("err", "(Wiki) Missing: " + crumbs + "proxyObservationType", "proxyObservationType");
+                          } else if (!column.proxyObservationType) {
+                              logFeedback("err", "(Wiki) Missing: " + crumbs + "proxyObservationType", "proxyObservationType");
+                          }
+                      } else if(_varType === "inferred"){
+                          if(!column.hasOwnProperty("inferredVariableType")){
+                              logFeedback("err", "(Wiki) Missing: " + crumbs + "inferredVariableType", "inferredVariableType");
+                          } else if(!column.inferredVariableType) {
+                              logFeedback("err", "(Wiki) Missing: " + crumbs + "inferredVariableType", "inferredVariableType");
+                          }
+                      } else {
+                          logFeedback("err", crumbs + ".variableType must be measured or inferred", "variableType");
+                      }
+                  }
+
+
+              } else {
+                  logFeedback("err", "Missing: " + crumbs + ".variableType", "variableType");
+                  logFeedback("err", "Missing: " + crumbs + ".proxyObservationType OR inferredVariableType", "proxyObservationType|inferredVariableType");
+              }
+          }
+
           for (var _p in keys["columns"]) {
             if(keys["columns"].hasOwnProperty(_p)){
+
               // current key
               var _currKey = keys["columns"][_p];
               // current key exists in this column?
@@ -1387,8 +1424,10 @@ var lipdValidator = (function(){
        */
       var reconcileCsvFilenames = function(old_filename, new_filename){
         if(files.csv.hasOwnProperty(old_filename)){
-          files.csv[new_filename] = files.csv[old_filename];
-          delete files.csv[old_filename];
+          if(new_filename !== old_filename){
+              files.csv[new_filename] = files.csv[old_filename];
+              delete files.csv[old_filename];
+          }
         }
         return new_filename;
       };
@@ -1683,6 +1722,7 @@ var lipdValidator = (function(){
           // Placeholder for age data.
           var _age = {"variableName": null, "values": null};
           // Get the values for the table columns from the csv data.
+
           var _values = csvs[table.filename].transposed.slice();
 
           // We need columns and a filename to continue working. If they don't exist, we can't continue.
