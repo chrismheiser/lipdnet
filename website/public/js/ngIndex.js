@@ -20,7 +20,8 @@ p.controller('IndexCtrl', function ($scope) {
         "title": "edit a LiPD file",
         "descriptions": [
           "Use the <a href='/playground'>LiPD Playground</a>: upload your LiPD file, edit, and download as a new LiPD file",
-          "Use the <a href='https://github.com/nickmckay/LiPD-utilities/'>LiPD Utilities</a>: read the LiPD file to the workspace, make manual edits, and write as a new file"
+          "Use the <a href='https://github.com/nickmckay/LiPD-utilities/'>LiPD Utilities</a>: read the LiPD file to the workspace, make manual edits, and write as a new file",
+          "Use the <a href='http://wiki.linked.earth/Main_Page'>Linked Earth Wiki</a> to upload and edit LiPD files. Use the <a href='http://wiki.linked.earth/Dataset_Tutorial#Uploading_a_LiPD_file'>Getting Started Guide</a> if you are new to using the Wiki."
         ]
       },
       {
@@ -151,7 +152,7 @@ p.controller('IndexCtrl', function ($scope) {
       {
         "question": "How do PyleoClim and GeoChronR packages fit into all this?",
         "answer": "PyleoClim and GeoChronR are complementary packages to the LiPD Utilities. The LiPD Utilities help " +
-        "facilitate the basic functions of reading, writing, and managing your LiPD files. GeoChronR and PyleoClim are meant to handle more advanced functions for analyzation and visualization in R and Python respectively."
+        "facilitate the basic functions of reading, writing, and managing your LiPD files. GeoChronR and PyleoClim are meant to handle more advanced functions for analysis and visualization in R and Python respectively."
       }
     ];
 

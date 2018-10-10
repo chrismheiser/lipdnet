@@ -931,11 +931,15 @@ router.post("/query", function(req, res, next){
   try{
     console.log("query: Python: Sending request...");
     request(options, function (err1, res1, body1) {
+        // Get status or if there is no status then use custom error status so we know.
+        var _status1 = res1.statusCode || 505;
+
         console.log("RESPONSE");
-      console.log("query: Python: Response Status: ", res1.statusCode);
-      if(err1){
+        console.log(res1);
+        console.log("query: Python: Response Status: ", _status1);
+      if(err1 || _status1 === 505){
         console.log("query: Python: Error making the request");
-        res.writeHead(res1.statusCode, "Error talking to the API", {'content-type' : 'text/plain'});
+        res.writeHead(_status1, "Error talking to the PythonAnywhere API", {'content-type' : 'text/plain'});
         res.end();
       }
       // If the Python script has an error, it'll return an empty string.
