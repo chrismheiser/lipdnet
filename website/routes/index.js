@@ -15,6 +15,11 @@ var dev = port === 3000;
 var router = express.Router();
 
 
+// Disable console logs in production
+if(!dev){
+    console.log = function(){};
+}
+
 // HELPERS
 var _ontology_query = {
     "inferredVariableType": [],
@@ -24,7 +29,6 @@ var _ontology_query = {
 };
 // All 'labels' imported and processed from the ontology.json file
 var _ontology_json = [];
-
 
 // Global counter for recursive getOntologyLabels function below
 var count = 0;
@@ -278,7 +282,6 @@ var compileOntology = function(){
     }
 };
 
-
 try{
     // Run once on initialization. All other updates are done on the timer below.
     compileOntology();
@@ -287,7 +290,6 @@ try{
 }catch(err){
     console.log(err);
 }
-
 
 // TODO Need to finish this. Batch download button for /query page
 var batchDownloadWiki = function(dsns, cb){
@@ -690,9 +692,9 @@ router.post("/files", function(req, res, next){
   // Request
   var master = {};
   master = parseRequest(master, req, res);
-  console.log(master);
+  // console.log(master);
   master = createTmpDir(master, res);
-  console.log(master);
+  // console.log(master);
   master = createSubdirs(master, res);
   try{
     // Use the request data to write csv and jsonld files into "/tmp/<lipd-xxxxx>/files/"
@@ -929,79 +931,90 @@ router.post("/query", function(req, res, next){
     options.proxy = "http://rishi.cefns.nau.edu:3128";
   }
   try{
+
+    process.on("uncaughtException", function(err){
+        console.log("UncaughtException! : " + err.message);
+        console.log(err.stack);
+        process.exit(1);
+
+    });
     console.log("query: Python: Sending request...");
     request(options, function (err1, res1, body1) {
-        // Get status or if there is no status then use custom error status so we know.
-        var _status1 = res1.statusCode || 505;
-
-        console.log("RESPONSE");
-        console.log(res1);
-        console.log("query: Python: Response Status: ", _status1);
-      if(err1 || _status1 === 505){
-        console.log("query: Python: Error making the request");
-        res.writeHead(_status1, "Error talking to the PythonAnywhere API", {'content-type' : 'text/plain'});
-        res.end();
-      }
-      // If the Python script has an error, it'll return an empty string.
-      else if(typeof(res1.body) === 'undefined' || res1.body === ""){
-        res.writeHead(500, "Error creating the query string. Cannot query Wiki.", {'content-type' : 'text/plain'});
-        res.end();
-      }
-      // If the Python request came back successfully, then start creating the Wiki request
-      else if (!err1 && res1.statusCode === 200) {
-        console.log("query: Wiki: Preparing to send");
-        options = {
-          uri: "http://wiki.linked.earth/store/ds/query",
-          qs: {"query": res1.body}
-        };
-        if (!dev){
-          options.proxy = "http://rishi.cefns.nau.edu:3128";
-        }
-        console.log("query: Wiki: Sending request...");
-        request(options, function(err2, res2, body2){
-          console.log("query: Wiki: Response Status: ", res2.statusCode);
-          if(err2){
-            console.log("query: Wiki: Error making the request");
-            res.writeHead(res2.statusCode, "Error talking to the Wiki API", {'content-type' : 'text/plain'});
+        // Sometimes if the proxy request we send gets an ERRCONREFUSED, the response is undefined. Tell the user
+        // to try one more time, because it often only happens rarely, and almost never in the same session.
+        if(typeof res1 === "undefined"){
+            console.log("query: Python response: There was no response object. Undefined. ERRCONNREFUSED");
+            res.writeHead(500, "The query request didn't send successfully. Please try the same request again.", {'content-type' : 'text/plain'});
             res.end();
-          }
-          // All good, keep going.
-          if (!err2 && res2.statusCode === 200) {
-            // Bring in xml2js to parse the Wiki results into a usable form. XML *sigh*
-            var parseString = require('xml2js').parseString;
-            var _xml = res2.body;
-            parseString(_xml, function (err, result) {
-              try {
-                // If there are results, they'll be in this location.
-                // If there aren't results, this location won't exist and we'll trigger the error catch
-                var _results = result.sparql.results[0].result;
-              } catch(err) {
-                console.log("No Results");
-                res.status(200).send([]);
-              }
-              try{
-                // Now that we have results(in the form of dataset links), start to compile them in a useful format.
-                parseWikiQueryResults(_results, function(_organized_results){
-                  // All done! This is the end of a complete and successful query.
-                  res.status(200).send(_organized_results);
-                });
-              } catch(err){
-                console.log("query: Wiki: error sorting the results: ", err);
-                res.writeHead(500, "Error sorting results received from LinkedEarth Wiki", {'content-type' : 'text/plain'});
+        } else {
+            console.log("query: Python: Response Status: ", res1.statusCode);
+            if(err1){
+                console.log("query: Python: Error making the request");
+                res.writeHead(res1.statusCode, "Error talking to the PythonAnywhere API", {'content-type' : 'text/plain'});
                 res.end();
-              }
-            });
-          } else {
-            console.log("query: Wiki: Error making the request");
-            res.writeHead(res2.statusCode, "Error talking to the Wiki API", {'content-type' : 'text/plain'});
-            res.end();
-          }
-        });
-      } else {
-        console.log("query: Python: Error making the request");
-        res.writeHead(res1.statusCode, "Error talking to the Python API", {'content-type' : 'text/plain'});
-        res.end();
-      }
+            }
+            // If the Python script has an error, it'll return an empty string.
+            else if(typeof(res1.body) === 'undefined' || res1.body === ""){
+                res.writeHead(500, "Error creating the query string. Cannot query Wiki.", {'content-type' : 'text/plain'});
+                res.end();
+            }
+            // If the Python request came back successfully, then start creating the Wiki request
+            else if (!err1 && res1.statusCode === 200) {
+                console.log("query: Wiki: Preparing to send");
+                options = {
+                    uri: "http://wiki.linked.earth/store/ds/query",
+                    qs: {"query": res1.body}
+                };
+                if (!dev){
+                    options.proxy = "http://rishi.cefns.nau.edu:3128";
+                }
+                console.log("query: Wiki: Sending request...");
+                request(options, function(err2, res2, body2){
+                    console.log("query: Wiki: Response Status: ", res2.statusCode);
+                    if(err2){
+                        console.log("query: Wiki: Error making the request");
+                        res.writeHead(res2.statusCode, "Error talking to the Wiki API", {'content-type' : 'text/plain'});
+                        res.end();
+                    }
+                    // All good, keep going.
+                    if (!err2 && res2.statusCode === 200) {
+                        // Bring in xml2js to parse the Wiki results into a usable form. XML *sigh*
+                        var parseString = require('xml2js').parseString;
+                        var _xml = res2.body;
+                        parseString(_xml, function (err, result) {
+                            try {
+                                // If there are results, they'll be in this location.
+                                // If there aren't results, this location won't exist and we'll trigger the error catch
+                                var _results = result.sparql.results[0].result;
+                            } catch(err) {
+                                console.log("No Results");
+                                res.status(200).send([]);
+                            }
+                            try{
+                                // Now that we have results(in the form of dataset links), start to compile them in a useful format.
+                                parseWikiQueryResults(_results, function(_organized_results){
+                                    // All done! This is the end of a complete and successful query.
+                                    res.status(200).send(_organized_results);
+                                });
+                            } catch(err){
+                                console.log("query: Wiki: error sorting the results: ", err);
+                                res.writeHead(500, "Error sorting results received from LinkedEarth Wiki", {'content-type' : 'text/plain'});
+                                res.end();
+                            }
+                        });
+                    } else {
+                        console.log("query: Wiki: Error making the request");
+                        res.writeHead(res2.statusCode, "Error talking to the Wiki API", {'content-type' : 'text/plain'});
+                        res.end();
+                    }
+                });
+            } else {
+                console.log("query: Python: Error making the request");
+                res.writeHead(res1.statusCode, "Error talking to the Python API", {'content-type' : 'text/plain'});
+                res.end();
+            }
+        }
+
     });
   } catch(err){
     console.log("query: Overall error, this could be anything: " + err);
@@ -1043,6 +1056,50 @@ router.post("/downloadall", function(req, res, next){
 router.get("/merge", function(req, res, next){
   // Render the compare page
   res.render('merge', {title: 'Merge'});
+});
+
+router.post("/wiki", function(req, res, next){
+
+    var request = require('request');
+    var _filename = req.body.filename;
+    var _id = req.body.id;
+    var _lipd_path = path.join(process.cwd(), "tmp", _id, "zip", _filename);
+
+    // Pack up the options that we want to give the request module
+    var options = {
+        "method": "POST",
+        "url": "http://wiki.linked.earth/Special:WTLiPD?op=importurl&name=" + _filename + "&url=" + _lipd_path,
+        "headers": {'Access-Control-Allow-Origin': "*"}
+    };
+
+    // If we're on the production server, then we need to add in the proxy option
+    if (!dev){
+        options.proxy = "http://rishi.cefns.nau.edu:3128";
+
+    }
+
+    console.log("Sending upload to Wiki");
+    request(options, function (error, res1, body) {
+        console.log("Got a response");
+        console.log("Response Status: ", res1.statusCode);
+        if(typeof res1 === "undefined"){
+            console.log("wiki: no response");
+            res.writeHead(500, "Wiki upload failed. No response", {'content-type' : 'text/plain'});
+            res.end();
+        } else {
+            if(res1.statusCode === 200){
+                console.log("Successful wiki upload: Status:" + res1.statusCode);
+                res.writeHead(res1.statusCode, "It worked" + res1.statusCode, {'content-type' : 'text/plain'});
+                res.end();
+            } else {
+                console.log("wiki: Wiki upload failed. Bad response. Status:" + res1.statusCode);
+                res.writeHead(res1.statusCode, "Error talking to the Wiki API" + res1.statusCode, {'content-type' : 'text/plain'});
+                res.end();
+            }
+
+        }
+    });
+
 });
 
 // END PAGE ROUTES

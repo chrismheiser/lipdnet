@@ -356,7 +356,7 @@ input[type=number]::-webkit-outer-spin-button {
 
 .yellow-btn-on{
     font-size: 10pt;
-    background-color: #E8C34A;
+    background-color: #e2b41d;
     font-family: RobotoDraft,Roboto,'Helvetica Neue',sans-serif;
     margin-right: 5px;
     padding: 4px;
@@ -364,7 +364,7 @@ input[type=number]::-webkit-outer-spin-button {
     height: 31px;
     border-radius: 5px;
     color: white;
-    border: solid 1px #E8C34A;
+    border: solid 1px #e2b41d;
     font-weight: 400;
 
 }
@@ -377,8 +377,8 @@ input[type=number]::-webkit-outer-spin-button {
     width: 150px;
     height: 31px;
     border-radius: 5px;
-    color: #E8C34A;
-    border: solid 1px #E8C34A;
+    color: #e2b41d;
+    border: solid 1px #e2b41d;
     font-weight: 400;
 
 }

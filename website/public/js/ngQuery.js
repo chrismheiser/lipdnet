@@ -12,6 +12,12 @@ q.value('cgBusyDefaults',{
 q.controller('QueryCtrl', ['$scope', '$log', '$timeout', '$q', '$http', "$uibModal","$sce", "toaster", "Upload",
   function ($scope, $log, $timeout, $q, $http, $uibModal, $sce, toaster, Upload) {
 
+    // Disable console logs in production
+    var dev = location.host === "localhost:3000";
+    if(!dev){
+        console.log = function(){};
+    }
+
     $scope.checked = {
       "archiveType": {},
       "infVarType": {},

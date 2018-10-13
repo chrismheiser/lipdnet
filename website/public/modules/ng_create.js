@@ -278,7 +278,7 @@ var create = (function(){
       // TODO copy the archiveType from the root, to each data table column
       _scopeFilesCopy.json = create.rmTmpEmptyData(_scopeFilesCopy.json);
       // Prepend DSN to CSV filenames wherever necessary. Do this for _csv metadata data and _json metadata.
-      _scopeFilesCopy = create.alterFilenames(_scopeFilesCopy);
+      // _scopeFilesCopy = create.alterFilenames(_scopeFilesCopy);
       return _scopeFilesCopy;
     }),
 

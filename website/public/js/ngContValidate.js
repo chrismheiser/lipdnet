@@ -2,6 +2,12 @@
 angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Upload', "ImportService", "ExportService", "$uibModal","$sce", "toaster",
   function ($scope, $log, $timeout, $q, $http, Upload, ImportService, ExportService, $uibModal, $sce, toaster) {
 
+    // Disable console logs in production
+    var dev = location.host === "localhost:3000";
+    if(!dev){
+        console.log = function(){};
+    }
+
     // Ontology: archiveType, units, inferredVariableType, proxyObservationType
     $scope.ontology = {};
     $scope.lipdPopover = $sce.trustAsHtml(create.getPopover("lipd"));
@@ -205,6 +211,89 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       entry.tmp.custom = "";
     };
 
+    $scope.beforeAfterTour = function(mode, cb){
+          if(mode === "before"){
+              var beforeSettings = {"noaaReady": false,
+                  "pub": {"added": false, "expanded": false},
+                  "funding": {"added": false, "expanded": false},
+                  "paleo": {"expanded": false, "values": false, "header": false}};
+              // Turn on NOAA switch
+              if (!$scope.pageMeta.noaaReady){
+                  $scope.makeNoaaReady(false);
+                  $scope.pageMeta.noaaReady = true;
+                  beforeSettings.noaaReady = false;
+              }
+
+              // create and/or open pub 1
+              // does pub 1 exist?
+              if(typeof $scope.files.json.pub[0] === "undefined"){
+                  // no, add block and expand
+                  $scope.files.json.pub = $scope.addBlock($scope.files.json.pub, "pub", null);
+                  $scope.files.json.pub[0].tmp = {"toggle": false};
+                  beforeSettings.pub.added = true;
+              }
+              // is it expanded?
+              if(!$scope.files.json.pub[0].tmp.toggle){
+                  // no, expand it.
+                  $scope.files.json.pub[0].tmp.toggle = true;
+                  beforeSettings.pub.expanded = true;
+              }
+
+              // create and/or open funding 1
+              // does funding 1 exist?
+              if(typeof $scope.files.json.funding[0] === "undefined"){
+                  // no, add block and expand
+                  $scope.files.json.funding = $scope.addBlock($scope.files.json.funding, "funding", null);
+                  $scope.files.json.funding[0].tmp = {"toggle": false};
+                  beforeSettings.funding.added = true;
+              }
+              // is it expanded?
+              if(!$scope.files.json.funding[0].tmp.toggle){
+                  // no, expand it.
+                  $scope.files.json.funding[0].tmp.toggle = true;
+                  beforeSettings.funding.expanded = true;
+              }
+
+              // open paleo 1 meas 1
+              var pdt = $scope.files.json.paleoData[0].measurementTable[0];
+              if (typeof pdt.tmp === "undefined"){
+                  pdt.tmp = {"toggle": false, "values": ""};
+              }
+              if (typeof pdt.tmp.toggle === "undefined"){
+                  pdt.tmp.toggle = true;
+                  beforeSettings.paleo.expanded = false;
+              }
+              if (!pdt.tmp.toggle){
+                  pdt.tmp.toggle = true;
+                  beforeSettings.paleo.expanded = false;
+              }
+              if (typeof pdt.tmp.values === "undefined" || !pdt.tmp.values) {
+                  $scope.pageMeta.header = true;
+                  pdt.tmp.values = "Depth\t Age\n3\t1900";
+                  beforeSettings.paleo.values = true;
+                  beforeSettings.paleo.header = true;
+              }
+              cb(beforeSettings);
+          } else if(mode === "after"){
+              $scope.pageMeta.noaaReady = $scope.pageMeta.tourMeta.noaaReady;
+              $scope.files.json.pub[0].tmp.toggle = $scope.pageMeta.tourMeta.pub.expanded;
+              $scope.files.json.funding[0].tmp.toggle = $scope.pageMeta.tourMeta.funding.expanded;
+              $scope.files.json.paleoData[0].measurementTable[0].tmp.toggle = $scope.pageMeta.tourMeta.paleo.expanded;
+              $scope.pageMeta.header = $scope.pageMeta.tourMeta.paleo.header;
+
+              if($scope.pageMeta.tourMeta.pub.added){
+                  $scope.files.json.pub.splice(0,1);
+              }
+              if($scope.pageMeta.tourMeta.funding.added){
+                  $scope.files.json.funding.splice(0,1);
+              }
+              if($scope.pageMeta.tourMeta.paleo.values){
+                  $scope.files.json.paleoData[0].measurementTable[0].tmp.values = "";
+              }
+              cb({});
+          }
+  };
+
     $scope.checkSession = function(){
       var _prevSession = sessionStorage.getItem("lipd");
       // Only ask to restore the session on the /playground route, and if a session exists.
@@ -245,11 +334,8 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
     };
 
     $scope.downloadNoaa = function(){
-
-      var dev = location.host === "localhost:3000";
       $scope.files.dataSetName = $scope.files.json.dataSetName;
       $scope.files.lipdFilename = $scope.files.dataSetName + ".lpd";
-
       $scope.showModalAlert({"title": "NOAA Beta", "message": "Please note the 'NOAA Ready' and 'NOAA Download' features of this web site are BETA features, and as such are not fully implemented and are being improved. If you would like to contribute LiPD data to NOAA, please contact NOAA WDS-Paleo at: paleo@noaa.gov"});
       if ($scope.feedback.errCt > 0){
         $scope.showModalAlert({"title": "File contains errors", "message": "You are downloading data that still has errors. Be aware that using a file that isn't fully valid may cause issues."});
@@ -258,64 +344,33 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       create.closingWorkflowNoaa($scope.files, $scope.files.dataSetName, $scope.files.csv, function(_newScopeFiles){
         // Receive a new, corrected version of $scope.files
         console.log("Let me bring this to the backroom.");
-        // The original $scope.files
-        // console.log($scope.files);
-        // The corrected version of $scope.files
-        console.log(_newScopeFiles);
-        $scope.uploadNoaa({"name": $scope.files.lipdFilename, "dat": _newScopeFiles}, function(resp){
-          console.log("Received backend response");
-          console.log(resp);
-          if (resp.status !== 200){
-            window.alert("HTTP " + resp.status + ": Error downloading file\n" + resp.statusText);
-          } else {
-            console.log("We have liftoff. Here ya go!");
-            // Are we on dev or production? Use href accordingly
-            if(dev){
-              window.location.href = "http://localhost:3000/noaa/" + resp.data;
-            } else {
-              window.location.href = "http://www.lipd.net/noaa/" + resp.data;
-            }
-          }
+        var _url_route = "/noaa";
+        var _payload = {"name": $scope.files.lipdFilename, "dat": _newScopeFiles};
+        $scope.uploadToBackend(_url_route, _payload, function(resp){
+            $scope.initiateDownload(resp, "noaa", null);
         });
       });
     };
 
-    $scope.downloadZip = function(){
-      var dev = location.host === "localhost:3000";
+    $scope.downloadZip = function(cb){
       $scope.files.dataSetName = $scope.files.json.dataSetName;
       $scope.files.lipdFilename = $scope.files.dataSetName + ".lpd";
-
       if ($scope.feedback.errCt > 0){
         $scope.showModalAlert({"title": "File contains errors", "message": "You are downloading data that still has errors. Be aware that using a file that isn't fully valid may cause issues."});
       }
-
       // Correct the filenames, clean out the empty entries, and make $scope.files data ready for the ExportService
       var _newScopeFiles = create.closingWorkflow($scope.files, $scope.files.dataSetName, $scope.files.csv);
-
       // Go to the export service. Create an array where each object represents one output file. {Filename: Text} data pairs
       $scope._myPromiseExport = ExportService.prepForDownload(_newScopeFiles);
       $scope.pageMeta.busyPromise = $scope._myPromiseExport;
       $scope._myPromiseExport.then(function (filesArray) {
         //upload zip to node backend, then callback and download it afterward.
         console.log("Let me bring this to the backroom.");
-        // console.log(filesArray);
-        // console.log($scope.files);
-        $scope.uploadZip({"filename": $scope.files.lipdFilename, "dat": filesArray}, function(resp){
-          console.log("Received backend response");
-          console.log(resp);
-          // do get request to trigger download file immediately after download
-          if (resp.status !== 200){
-            window.alert("HTTP " + resp.status + ": Error downloading file!");
-          } else {
-            console.log("We have liftoff. Here ya go!");
-            // Are we on dev or production? Use href accordingly
-            if(dev){
-              window.location.href = "http://localhost:3000/files/" + resp.data;
-            } else {
-              window.location.href = "http://www.lipd.net/files/" + resp.data;
-            }
-          }
-
+        // Set up where to POST the data to in nodejs, and package the payload.
+        var _url_route = "/files";
+        var _payload = {"filename": $scope.files.lipdFilename, "file": filesArray};
+        $scope.uploadToBackend(_url_route, _payload, function(resp){
+            $scope.initiateDownload(resp, "files", cb);
         });
       });
     };
@@ -362,6 +417,66 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
 
     $scope.getTooltip = function(section, key){
       return create.fieldMetadataLibrary(section, key);
+    };
+
+    $scope.initiateDownload = function(resp, mode, cb){
+          // mode: "noaa" or "files"
+          console.log("Received backend response");
+          console.log(resp);
+          if (resp.status !== 200){
+              window.alert("HTTP " + resp.status + ": Error downloading file\n" + resp.statusText);
+          } else {
+              console.log("We have liftoff. Here ya go!");
+              // If there is a callback, that means we're doing a wiki upload and need to send the response data in the
+              // callback.
+              // Are we on dev or production? Use href accordingly
+              var _url = "";
+              if(dev){
+                  _url = "http://localhost:3000/" + mode + "/" + resp.data;
+              } else {
+                  _url = "http://www.lipd.net/" + mode + "/" + resp.data;
+              }
+
+              if(cb){
+                  // Uses the "files" mode.
+                  cb(resp.data);
+              } else {
+                  window.location.href = _url;
+
+              }
+          }
+      };
+
+    $scope.isArr = function(field){
+        // Data is a block if the field is in this list.
+        if(["interpretation"].includes(field)){
+            return true;
+        }
+        return false;
+    };
+
+    $scope.isAutocomplete = function(field){
+        // These fields use an autocomplete input box with suggested data from the linked earth wiki ontology.
+        if(["proxyObservationType", "inferredVariableType"].includes(field)){
+            return true;
+        }
+        return false;
+    };
+
+    $scope.isBlock = function(field){
+          // Data is a block if the field is in this list.
+          if(["physicalSample", "hasResolution", "calibration", "measuredOn", "takenAtDepth"].includes(field)){
+              return true;
+          }
+          return false;
+      };
+
+    $scope.isProperty = function(field){
+        // Do not show any temporary fields, data, or nested blocks.
+        if(["number", "variableName", "units", "toggle", "description", "values", "checked", "tmp", "interpretation", "physicalSample", "hasResolution", "calibration", "takenAtDepth", "measuredOn"].includes(field)){
+            return false;
+        }
+        return true;
     };
 
     $scope.makeNoaaReady = function(alert){
@@ -656,38 +771,6 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       $scope.files.json.geo.properties.country = name;
     };
 
-    $scope.isBlock = function(field){
-      // Data is a block if the field is in this list.
-      if(["physicalSample", "hasResolution", "calibration", "measuredOn", "takenAtDepth"].includes(field)){
-        return true;
-      }
-      return false;
-    };
-
-    $scope.isArr = function(field){
-      // Data is a block if the field is in this list.
-      if(["interpretation"].includes(field)){
-        return true;
-      }
-      return false;
-    };
-
-    $scope.isAutocomplete = function(field){
-        // These fields use an autocomplete input box with suggested data from the linked earth wiki ontology.
-        if(["proxyObservationType", "inferredVariableType"].includes(field)){
-            return true;
-        }
-        return false;
-    };
-
-    $scope.isProperty = function(field){
-      // Do not show any temporary fields, data, or nested blocks.
-      if(["number", "variableName", "units", "toggle", "description", "values", "checked", "tmp", "interpretation", "physicalSample", "hasResolution", "calibration", "takenAtDepth", "measuredOn"].includes(field)){
-        return false;
-      }
-      return true;
-    };
-
     $scope.showModalAlert = function(msg){
       // FORMAT: msg = {"title": "", "msg": ""}
       $scope.modal = msg;
@@ -804,89 +887,6 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       });
     };
 
-    $scope.beforeAfterTour = function(mode, cb){
-      if(mode === "before"){
-        var beforeSettings = {"noaaReady": false,
-          "pub": {"added": false, "expanded": false},
-          "funding": {"added": false, "expanded": false},
-          "paleo": {"expanded": false, "values": false, "header": false}};
-        // Turn on NOAA switch
-        if (!$scope.pageMeta.noaaReady){
-          $scope.makeNoaaReady(false);
-          $scope.pageMeta.noaaReady = true;
-          beforeSettings.noaaReady = false;
-        }
-
-        // create and/or open pub 1
-        // does pub 1 exist?
-        if(typeof $scope.files.json.pub[0] === "undefined"){
-          // no, add block and expand
-          $scope.files.json.pub = $scope.addBlock($scope.files.json.pub, "pub", null);
-          $scope.files.json.pub[0].tmp = {"toggle": false};
-          beforeSettings.pub.added = true;
-        }
-        // is it expanded?
-        if(!$scope.files.json.pub[0].tmp.toggle){
-          // no, expand it.
-          $scope.files.json.pub[0].tmp.toggle = true;
-          beforeSettings.pub.expanded = true;
-        }
-
-        // create and/or open funding 1
-        // does funding 1 exist?
-        if(typeof $scope.files.json.funding[0] === "undefined"){
-          // no, add block and expand
-          $scope.files.json.funding = $scope.addBlock($scope.files.json.funding, "funding", null);
-          $scope.files.json.funding[0].tmp = {"toggle": false};
-          beforeSettings.funding.added = true;
-        }
-        // is it expanded?
-        if(!$scope.files.json.funding[0].tmp.toggle){
-          // no, expand it.
-          $scope.files.json.funding[0].tmp.toggle = true;
-          beforeSettings.funding.expanded = true;
-        }
-
-        // open paleo 1 meas 1
-        var pdt = $scope.files.json.paleoData[0].measurementTable[0];
-        if (typeof pdt.tmp === "undefined"){
-          pdt.tmp = {"toggle": false, "values": ""};
-        }
-        if (typeof pdt.tmp.toggle === "undefined"){
-          pdt.tmp.toggle = true;
-          beforeSettings.paleo.expanded = false;
-        }
-        if (!pdt.tmp.toggle){
-          pdt.tmp.toggle = true;
-          beforeSettings.paleo.expanded = false;
-        }
-        if (typeof pdt.tmp.values === "undefined" || !pdt.tmp.values) {
-          $scope.pageMeta.header = true;
-          pdt.tmp.values = "Depth\t Age\n3\t1900";
-          beforeSettings.paleo.values = true;
-          beforeSettings.paleo.header = true;
-        }
-        cb(beforeSettings);
-      } else if(mode === "after"){
-        $scope.pageMeta.noaaReady = $scope.pageMeta.tourMeta.noaaReady;
-        $scope.files.json.pub[0].tmp.toggle = $scope.pageMeta.tourMeta.pub.expanded;
-        $scope.files.json.funding[0].tmp.toggle = $scope.pageMeta.tourMeta.funding.expanded;
-        $scope.files.json.paleoData[0].measurementTable[0].tmp.toggle = $scope.pageMeta.tourMeta.paleo.expanded;
-        $scope.pageMeta.header = $scope.pageMeta.tourMeta.paleo.header;
-
-        if($scope.pageMeta.tourMeta.pub.added){
-          $scope.files.json.pub.splice(0,1);
-        }
-        if($scope.pageMeta.tourMeta.funding.added){
-          $scope.files.json.funding.splice(0,1);
-        }
-        if($scope.pageMeta.tourMeta.paleo.values){
-          $scope.files.json.paleoData[0].measurementTable[0].tmp.values = "";
-        }
-        cb({});
-      }
-    };
-
     $scope.toggleCsvBox = function(entry) {
       entry.tmp.parse=!entry.tmp.parse;
     };
@@ -913,42 +913,226 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
 
     };
 
-    $scope.uploadNoaa = function (_file, cb) {
-      // Upload *validated* lipd data to backend
-      $scope.pageMeta.busyPromise = Upload.upload({
-        url: '/noaa',
-        data: {dat: _file.dat,
-          name: _file.name}
-      });
-      $scope.pageMeta.busyPromise.then(function (resp) {
-        // console.log('Success');
-        // console.log(resp);
-        cb(resp);
-      }, function (resp) {
-        console.log(resp);
-        console.log('Error status: ' + resp.status);
-        cb(resp);
-      }, function (evt) {
-        var progressPercentage = parseInt(100.0 * evt.loaded / evt.total);
-      });
+    $scope.uploadBtnClick = function(){
+        this.value = null;
     };
 
-    $scope.uploadZip = function (_file, cb) {
+    $scope.uploadBtnChange = function(event, cb){
+      var fileInput = event.target;
+      // console.log(fileInput.files);
+      // var fileInput = document.getElementById("file-input");
+      // if the upload button is clicked && a file is chosen, THEN reset the page and data.
+      $scope.resetPage();
+      $scope.files.lipdFilename = fileInput.files[0].name;
+      $scope.files.dataSetName = fileInput.files[0].name.slice(0, -4);
+      // get a list of file entries inside this zip
+      $scope.model.getEntries(fileInput.files[0], function (entries) {
+          $scope.validateJsonld(entries, function(entries){
+              // If the user cancelled fixing the JSON data, then they cannot continue with the upload.
+              if(entries){
+                  // use the service to parse data from the ZipJS entries
+                  $scope.pageMeta.busyPromise = ImportService.parseFiles(entries);
+                  $scope.pageMeta.busyPromise.then(function (res) {
+                      // There will be one undefined entry in this array. Placeholder for the original JSON promise.
+                      // Remove it. We already have the fixed JSON as a separate entry.
+                      res = res.filter(function(n){ return n !== undefined });
+                      // Set response to allFiles so we can list all the filenames found in the LiPD archive.
+                      $scope.allFiles = res;
+                      $scope.pageMeta.fileUploaded = true;
+                      $scope.pageMeta.keepColumnMeta = true;
+                      // Gather some metadata about the lipd file, and organize it so it's easier to manage.
+                      lipdValidator.restructure(res, $scope.files, function(_response_1){
+                          $scope.files = _response_1;
+                          if($scope.files.fileCt > 40){
+                              $scope.showModalAlert({"title": "Wow! That's a lot of files!", "message": "We expanded the page to fit everything, so be sure to scroll down to see your data tables."});
+                          }
+                          if(typeof($scope.files.json) !== "object"){
+                              $scope.showModalAlert({"title": "Metadata.jsonld file is incorrect", "message": "There is something wrong with that file. The metadata.jsonld file is missing or incorrectly formatted. Please check the file manually, or create an issue on our Github repository and provide the problematic file."});
+                              $scope.resetPage();
+                          } else {
+                              $scope.validate();
+                              $scope.files.json = create.initColumnTmp($scope.files.json);
+                              $scope.files.json = create.initMissingArrs($scope.files.json);
+                              $scope.$broadcast('newUpload', $scope.files);
+                          }
+                      }); // end sortBeforeValidate
+                      //RETURNS OBJECT : {"dat": files.json, "feedback": feedback, "filename": files.lipdFilename, "status": feedback.status};
+                  }, function(reason){
+                      $scope.resetPage();
+                      alert("Error parsing JSON-LD file. File cannot be validated");
+                  }); // end ImportService
+              }
+          }); // end model.getEntries
+      });
+      // console.log(entries);
+
+
+
+      // once the change even has triggered, it cannot be triggered again until page refreshes.
+      typeof cb === 'function' && cb();
+  };
+
+    $scope.uploadBtnUpload = function(){
+        // Set up zip.js object and its corresponding functions
+        var requestFileSystem = this.webkitRequestFileSystem || this.mozRequestFileSystem || this.requestFileSystem;
+        function onerror(message) {
+            alert(message);
+        }
+        function createTempFile(callback) {
+            var keysFilename = "keys.dat";
+            requestFileSystem(TEMPORARY, 4 * 1024 * 1024 * 1024, function (filesystem) {
+                function create() {
+                    filesystem.root.getFile(keysFilename, {
+                        create: true
+                    }, function (zipFile) {
+                        callback(zipFile);
+                    });
+                }
+
+                filesystem.root.getFile(keysFilename, null, function (entry) {
+                    entry.remove(create, create);
+                }, create);
+            });
+        }
+        $scope.model = function () {
+            var zipFileEntry, zipWriter, writer, creationMethod;
+            URL = window.webkitURL || this.mozURL || this.URL;
+
+            return {
+                setCreationMethod : function(method) {
+                    creationMethod = method;
+                },
+                addFiles : function addFiles(files, oninit, onadd, onprogress, onend) {
+                    var addIndex = 0;
+
+                    function nextFile() {
+                        var file = files[addIndex];
+                        onadd(file);
+                        zipWriter.add(file.name, new zip.BlobReader(file), function() {
+                            addIndex++;
+                            if (addIndex < files.length)
+                                nextFile();
+                            else
+                                onend();
+                        }, onprogress);
+                    }
+
+                    function createZipWriter() {
+                        zip.createWriter(writer, function(writer) {
+                            zipWriter = writer;
+                            oninit();
+                            nextFile();
+                        }, onerror);
+                    }
+
+                    if (zipWriter)
+                        nextFile();
+                    else if (creationMethod == "Blob") {
+                        writer = new zip.BlobWriter();
+                        createZipWriter();
+                    } else {
+                        createTempFile(function(fileEntry) {
+                            zipFileEntry = fileEntry;
+                            writer = new zip.FileWriter(zipFileEntry);
+                            createZipWriter();
+                        });
+                    }
+                },
+                getEntries: function getEntries(file, onend) {
+                    zip.createReader(new zip.BlobReader(file), function (zipReader) {
+                        zipReader.getEntries(onend);
+                    }, onerror);
+                }, // end getEntries
+                getEntryFile: function getEntryFile(entry, creationMethod, onend, onprogress) {
+                    var writer, zipFileEntry;
+
+                    function getData() {
+                        entry.getData(writer, function (blob) {
+                            var blobURL = URL.createObjectURL(blob);
+                            onend(blobURL);
+                        }, onprogress);
+                    }
+
+                    if (creationMethod == "Blob") {
+                        writer = new zip.BlobWriter();
+                        getData();
+                    }
+                },
+                getBlobURL : function(callback) {
+                    zipWriter.close(function(blob) {
+                        var blobURL = creationMethod == "Blob" ? URL.createObjectURL(blob) : zipFileEntry.toURL();
+                        callback(blobURL);
+                        zipWriter = null;
+                    });
+                },
+                getBlob : function(callback) {
+                    zipWriter.close(callback);
+                }
+            }; // end return
+        }(); // end var model
+        $scope.model.setCreationMethod("Blob");
+    };
+
+    $scope.uploadToWiki = function(){
+
+        var popupWindow = window.open('http://wiki.linked.earth/Special:UserLogin', '_blank', 'location=yes,height=600,width=800,scrollbars=yes,status=yes');
+        // function parent_disable() {
+        //     if(popupWindow && !popupWindow.closed)
+        //         popupWindow.focus();
+        // }
+
+        // Valid wiki file. continue
+        if($scope.feedback.validWiki === 'PASS'){
+            console.log("Wiki file is valid");
+            $scope.downloadZip(function(file_id){
+                console.log(file_id);
+                var _payload = {"filename": $scope.files.lipdFilename, "id": file_id};
+                $scope.uploadToBackend("/wiki", _payload, function(resp){
+                    console.log("It worked");
+                    console.log(resp);
+                });
+
+                // var _local_url = "http://localhost:3000/files/" + file_id;
+                // var _local_url = "http://localhost:3000/tmp/" + file_id + "/zip/" + $scope.files.lipdFilename;
+                // var _wiki_url = "http://wiki.linked.earth/Special:WTLiPD?op=importurl&name=" + $scope.files.lipdFilename + "&url=" + _local_url;
+                // var _req = {
+                //     "method": "POST",
+                //     "url": _wiki_url,
+                //     "headers": {'Access-Control-Allow-Origin': "http://localhost:3000"}
+                // };
+                // try{
+                //     console.log("sending request");
+                //     console.log(_req);
+                //     $http(_req).then(function successCallback(res){
+                //         console.log("IT WORKED");
+                //         console.log(res);
+                //     }, function errorCallback(err){
+                //         console.log("Something went wrong.");
+                //         console.log(err);
+                //     });
+                // } catch(err){
+                //     console.log(err);
+                // }
+
+
+            });
+        }
+        // Not a valid wiki file. Stop process and correct errors
+        else {
+            $scope.showModalAlert({"title": "Cannot upload to Wiki", "message": "The data does not meet Wiki " +
+                "standards. Make sure that you have the 'Wiki Ready' switch turned on, and there are no Wiki " +
+                "errors after validation."});
+        }
+
+    };
+
+    $scope.uploadToBackend = function (url_route, payload, cb) {
       // Upload *validated* lipd data to backend
       $scope.pageMeta.busyPromise = Upload.upload({
-        url: '/files',
-        data: {file: _file.dat,
-          filename: _file.filename
-          // headers: {"Content-type": "application/json",
-          //           'Access-Control-Allow-Origin': '*',
-          //           'Access-Control-Allow-Methods': 'GET, POST',
-          //           'Access-Control-Allow-Headers': 'x-prototype-version,x-requested-with'
-          // }
-        }
+        url: url_route,
+        data: payload
       });
       $scope.pageMeta.busyPromise.then(function (resp) {
-        // console.log('Success');
-        // console.log(resp);
         cb(resp);
       }, function (resp) {
         console.log(resp);
@@ -983,10 +1167,6 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
         }
       );
 
-    };
-
-    $scope.uploadBtnClick = function(){
-      this.value = null;
     };
 
     $scope.advancedJsonEdit = function(){
@@ -1081,161 +1261,7 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       }
     };
 
-    $scope.uploadBtnChange = function(event, cb){
-      var fileInput = event.target;
-      // console.log(fileInput.files);
-      // var fileInput = document.getElementById("file-input");
-      // if the upload button is clicked && a file is chosen, THEN reset the page and data.
-      $scope.resetPage();
-      $scope.files.lipdFilename = fileInput.files[0].name;
-      $scope.files.dataSetName = fileInput.files[0].name.slice(0, -4);
-      // get a list of file entries inside this zip
-      $scope.model.getEntries(fileInput.files[0], function (entries) {
-        $scope.validateJsonld(entries, function(entries){
-          // If the user cancelled fixing the JSON data, then they cannot continue with the upload.
-          if(entries){
-              // use the service to parse data from the ZipJS entries
-              $scope.pageMeta.busyPromise = ImportService.parseFiles(entries);
-              $scope.pageMeta.busyPromise.then(function (res) {
-                  // There will be one undefined entry in this array. Placeholder for the original JSON promise.
-                  // Remove it. We already have the fixed JSON as a separate entry.
-                  res = res.filter(function(n){ return n !== undefined });
-                  // Set response to allFiles so we can list all the filenames found in the LiPD archive.
-                  $scope.allFiles = res;
-                  $scope.pageMeta.fileUploaded = true;
-                  $scope.pageMeta.keepColumnMeta = true;
-                  // Gather some metadata about the lipd file, and organize it so it's easier to manage.
-                  lipdValidator.restructure(res, $scope.files, function(_response_1){
-                      $scope.files = _response_1;
-                      if($scope.files.fileCt > 40){
-                          $scope.showModalAlert({"title": "Wow! That's a lot of files!", "message": "We expanded the page to fit everything, so be sure to scroll down to see your data tables."});
-                      }
-                      if(typeof($scope.files.json) !== "object"){
-                          $scope.showModalAlert({"title": "Metadata.jsonld file is incorrect", "message": "There is something wrong with that file. The metadata.jsonld file is missing or incorrectly formatted. Please check the file manually, or create an issue on our Github repository and provide the problematic file."});
-                          $scope.resetPage();
-                      } else {
-                          $scope.validate();
-                          $scope.files.json = create.initColumnTmp($scope.files.json);
-                          $scope.files.json = create.initMissingArrs($scope.files.json);
-                          $scope.$broadcast('newUpload', $scope.files);
-                      }
-                  }); // end sortBeforeValidate
-                  //RETURNS OBJECT : {"dat": files.json, "feedback": feedback, "filename": files.lipdFilename, "status": feedback.status};
-              }, function(reason){
-                  $scope.resetPage();
-                  alert("Error parsing JSON-LD file. File cannot be validated");
-              }); // end ImportService
-          }
-        }); // end model.getEntries
-      });
-      // console.log(entries);
 
-
-
-      // once the change even has triggered, it cannot be triggered again until page refreshes.
-      typeof cb === 'function' && cb();
-    };
-
-    $scope.uploadBtnUpload = function(){
-      // Set up zip.js object and its corresponding functions
-      var requestFileSystem = this.webkitRequestFileSystem || this.mozRequestFileSystem || this.requestFileSystem;
-      function onerror(message) {
-        alert(message);
-      }
-      function createTempFile(callback) {
-        var keysFilename = "keys.dat";
-        requestFileSystem(TEMPORARY, 4 * 1024 * 1024 * 1024, function (filesystem) {
-          function create() {
-            filesystem.root.getFile(keysFilename, {
-              create: true
-            }, function (zipFile) {
-              callback(zipFile);
-            });
-          }
-
-          filesystem.root.getFile(keysFilename, null, function (entry) {
-            entry.remove(create, create);
-          }, create);
-        });
-      }
-      $scope.model = function () {
-        var zipFileEntry, zipWriter, writer, creationMethod;
-        URL = window.webkitURL || this.mozURL || this.URL;
-
-        return {
-          setCreationMethod : function(method) {
-            creationMethod = method;
-          },
-          addFiles : function addFiles(files, oninit, onadd, onprogress, onend) {
-            var addIndex = 0;
-
-            function nextFile() {
-              var file = files[addIndex];
-              onadd(file);
-              zipWriter.add(file.name, new zip.BlobReader(file), function() {
-                addIndex++;
-                if (addIndex < files.length)
-                  nextFile();
-                else
-                  onend();
-              }, onprogress);
-            }
-
-            function createZipWriter() {
-              zip.createWriter(writer, function(writer) {
-                zipWriter = writer;
-                oninit();
-                nextFile();
-              }, onerror);
-            }
-
-            if (zipWriter)
-              nextFile();
-            else if (creationMethod == "Blob") {
-              writer = new zip.BlobWriter();
-              createZipWriter();
-            } else {
-              createTempFile(function(fileEntry) {
-                zipFileEntry = fileEntry;
-                writer = new zip.FileWriter(zipFileEntry);
-                createZipWriter();
-              });
-            }
-          },
-          getEntries: function getEntries(file, onend) {
-            zip.createReader(new zip.BlobReader(file), function (zipReader) {
-              zipReader.getEntries(onend);
-            }, onerror);
-          }, // end getEntries
-          getEntryFile: function getEntryFile(entry, creationMethod, onend, onprogress) {
-            var writer, zipFileEntry;
-
-            function getData() {
-              entry.getData(writer, function (blob) {
-                var blobURL = URL.createObjectURL(blob);
-                onend(blobURL);
-              }, onprogress);
-            }
-
-            if (creationMethod == "Blob") {
-              writer = new zip.BlobWriter();
-              getData();
-            }
-          },
-          getBlobURL : function(callback) {
-            zipWriter.close(function(blob) {
-              var blobURL = creationMethod == "Blob" ? URL.createObjectURL(blob) : zipFileEntry.toURL();
-              callback(blobURL);
-              zipWriter = null;
-            });
-          },
-          getBlob : function(callback) {
-            zipWriter.close(callback);
-          }
-        }; // end return
-      }(); // end var model
-      $scope.model.setCreationMethod("Blob");
-    };
 
     window.onload = (function(){
       $scope.checkSession();

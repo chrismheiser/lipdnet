@@ -5,14 +5,19 @@ div
 
 div
   li#buttons(style="list-style-type: none;")
-    button.green-btn-off.step3(type="button" ng-click="validate()" ng-disabled="pageMeta.filePicker") Validate
+    button.yellow-btn-off.step3(type="button" ng-click="validate()" ng-disabled="pageMeta.filePicker") Validate
       md-tooltip LiPD data is validated during upload. If you make any corrections to the file, validate again to show updated results.
-    button.green-btn-off.step4(type="button" ng-click="saveSession()") Save Session
+    button.yellow-btn-off.step4(type="button" ng-click="saveSession()") Save Session
       md-tooltip Save your progress. The data will be stored in your browser for as long as you keep the window open.
-    button.green-btn-off.step5#download-btn(type="button" ng-click="downloadZip()") Download LiPD
+
+div
+  li#buttons(style="list-style-type: none;")
+    button.green-btn-off.step5#download-btn(type="button" ng-click="downloadZip(null)") Download LiPD
       md-tooltip Download LiPD file when all requirements are met and errors are fixed
     button.green-btn-off.step6#download-btn(type="button" ng-click="downloadNoaa()" ) Download NOAA (Beta)
       md-tooltip Download NOAA file when all requirements are met and errors are fixed
+    button.green-btn-off.step6#download-btn(type="button" ng-click="uploadToWiki()" ) Upload to Wiki
+      md-tooltip Upload data to the Linked Earth Wiki once it successfully conforms to Wiki standards
     //div(vc-recaptcha key="'6LdkZEAUAAAAADoC8AFc8f2DLkIuQ0zmvx0S34jx'" ng-model="gRecaptchaResponse" on-success="checkCaptcha(pageMeta.downloadMode, true)" ng-show="pageMeta.captcha")
     //button(class="g-recaptcha" data-sitekey="6LdkZEAUAAAAADoC8AFc8f2DLkIuQ0zmvx0S34jx" data-callback="ccb(resp)") Submit
 

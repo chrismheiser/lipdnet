@@ -43,7 +43,7 @@ div(layout="column" ng-repeat='entry3 in entry2.columns track by $index' layout-
                     md-input-container(flex="")
                         label Enter Field Name
                         // Use autocomplete for lists that are >20 items
-                        input.mdautocomplete(ng-if="dropdowns.columnFields.length > 20" type="text" ng-model="entry3.tmp.custom"
+                        input.mdautocomplete(type="text" ng-model="entry3.tmp.custom"
                             uib-typeahead="entry for entry in dropdowns.columnFields | filter:$viewValue | limitTo:8")
                         // Use dropdown for lists that are <20 items ** Don't want to use this because it disallows custom fields
                         //md-select(ng-if="dropdowns.columnFields.length < 20" ng-model="entry3.tmp.custom")
