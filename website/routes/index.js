@@ -1063,7 +1063,17 @@ router.post("/wiki", function(req, res, next){
     var request = require('request');
     var _filename = req.body.filename;
     var _id = req.body.id;
-    var _lipd_path = path.join(process.cwd(), "tmp", _id, "zip", _filename);
+    var _lipd_path = "";
+    var _pathTmpZip = path.join(process.cwd(), "tmp", _id, "zip");
+
+    var res_options = {"path": pathTmpZip, "file": _filename, "content": "application/zip", "message": "/files get: Sending LiPD to client"};
+    // downloadResponse(options, res);
+    // if(dev){
+    //     // _lipd_path = path.join(process.cwd(), "tmp", _id, "zip", _filename);
+    //     _lipd_path =
+    // } else {
+    //     _lipd_path =
+    // }
 
     // Pack up the options that we want to give the request module
     var options = {

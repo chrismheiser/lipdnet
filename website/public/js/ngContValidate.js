@@ -484,19 +484,15 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       if(!$scope.pageMeta.noaaReady){
         // Make Ready
         create.addFieldsToCols($scope.files.json, ["dataType", "dataFormat"], function(_d2){
-          if(alert){
             $scope.showModalAlert({"title": "NOAA Validation", "message": "The fields that NOAA requires have been " +
             "added where necessary. For a list of these requirements, hover your mouse pointer over the 'NOAA " +
             "requirements' bar on the left side of the page. Reference the 'NOAA Variable Naming' link under 'Quick Links' on the home page for variable information."});
-          }
           $scope.files.json = _d2;
           console.log($scope.files.json.paleoData);
         });
       } else {
-        if(alert){
-          // Don't remove fields, only remove
-          $scope.showModalAlert({"title": "Fields may be ignored", "message": "Validation is no longer using NOAA rules."});
-        }
+        // Don't remove fields, only remove validation rules
+        $scope.showModalAlert({"title": "Fields may be ignored", "message": "Validation is no longer using NOAA rules."});
       }
     };
 
