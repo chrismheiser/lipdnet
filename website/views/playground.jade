@@ -11,13 +11,13 @@ block css
 	link(rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/angularjs-toaster/2.1.0/toaster.css")
 	link(rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons")
 	link(rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/angular-busy/4.1.4/angular-busy.min.css")
-	link(rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intro.js/2.7.0/introjs.min.css")
+	link(rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intro.js/2.9.3/introjs.min.css")
 	link(rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/handsontable/3.0.0/handsontable.full.min.css")
 
 block body
 	body.step0(ng-app='validateApp' ng-cloak style="min-height: 100%; background-color:white;")
 		#wrapper
-			div.alert.alert-success.alert-dismissable
+			div.tourbanner.alert.alert-success.alert-dismissable
 				strong Spreadsheets!
 				p Table values are now editable in an familiar spreadsheet format. There are known issues using it with Safari, so please give it a try with an alternate internet browser. If you need to use the old parser, it is still available via a switch.
 
@@ -47,7 +47,7 @@ block body
 									p Are you new here? Take the tour to learn more about how to use this page.
 									br
 									button.green-btn-off(type="button" ng-click="startTour()") Take the tour!
-									a.btn.btn-default.green-btn-off(href="https://github.com/chrismheiser/geoChronR/issues" type="button" style="width:250px") Questions, comments, concerns
+									a.tourgithub.btn.btn-default.green-btn-off(href="https://github.com/chrismheiser/geoChronR/issues" type="button" style="width:250px") Questions, comments, concerns
 										md-tooltip Use the Github repository to see upcoming changes, fixes, report bugs, and make suggestions
 
 							div(class="span span50" style="padding-right:3em;")
@@ -107,7 +107,7 @@ block js
 	script(src="modules/ng_misc.js")
 	script(src="modules/ng_versions.js")
 	script(src="modules/ng_validator.js")
-	script(src="https://cdnjs.cloudflare.com/ajax/libs/intro.js/2.7.0/intro.min.js")
+	script(src="https://cdnjs.cloudflare.com/ajax/libs/intro.js/2.9.3/intro.min.js")
 	script(src="https://cdnjs.cloudflare.com/ajax/libs/angularjs-toaster/2.1.0/toaster.js")
 	script(src="https://cdnjs.cloudflare.com/ajax/libs/angular-busy/4.1.4/angular-busy.min.js")
 	script(src='https://cdnjs.cloudflare.com/ajax/libs/angular-ui-router/0.2.15/angular-ui-router.min.js')

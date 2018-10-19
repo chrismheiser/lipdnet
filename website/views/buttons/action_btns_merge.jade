@@ -1,11 +1,11 @@
 
-div
+div.tourmergeupload
     md-content
-        md-tabs.step1.md-border-bottom.md-dynamic-height
+        md-tabs.md-border-bottom.md-dynamic-height
             md-tab(label="Upload File")
                 md-content.md-padding
                     input.choosefile(custom-on-change="uploadBtnChange" ng-click="uploadBtnClick" title="Upload LiPD file for comparison" name='file' type="file" accept=".lpd" style="display: inline-block;")
-
+                    button.green-btn-off(type="button" ng-click="startTourMerge()") Take the tour!
 
             md-tab(label="Copy/Paste JSON")
                 md-content.md-padding

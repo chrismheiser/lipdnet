@@ -19,6 +19,13 @@ c.controller('MergeCtrl', ['$scope', 'ObjectDiff', 'toaster', function($scope, O
     $scope.jsonTextInput = "";
     $scope.jsonTextOutput = "";
 
+    $scope.startTourMerge = function(){
+        var intro = introJs();
+        intro.setOptions({
+            steps: create.tourStepsMerge()});
+        intro.start();
+    };
+
     $scope.download = function(){
         // If AT LEAST one of the two upload was a LiPD file, we can offer a LiPD file download AND/OR a json data
         // textarea for copy/paste

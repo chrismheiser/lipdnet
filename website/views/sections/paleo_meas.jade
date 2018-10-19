@@ -1,14 +1,14 @@
 div(ng-repeat='entry in files.json.paleoData track by $index' layout-wrap="" ng-init="parentIdx = $index")
 
     // PaleoData[1] : Should only be one table. Don't need to loop
-    div(ng-repeat="entry2 in entry.measurementTable track by $index" layout-wrap="")
+    div.tourtable(ng-repeat="entry2 in entry.measurementTable track by $index" layout-wrap="")
         md-card(ng-show="entry2.tmp.toggle")
             //md-subheader.md-primary paleo {{parentIdx+1}} > measurement {{$index+1}}
             md-subheader.md-primary paleo {{parentIdx}} > measurement {{$index}}
 
             include ./table_root.jade
 
-            div.step16
+            div
                 // Toggle for switching between Classic and Spreadsheet parsers.
                 md-switch(style="margin:1em" ng-model="pageMeta.spreadsheetBeta") Parse Mode: {{ pageMeta.spreadsheetBeta? "Spreadsheet (Beta)": "Classic"}}
                 br

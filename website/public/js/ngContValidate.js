@@ -213,10 +213,13 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
 
     $scope.beforeAfterTour = function(mode, cb){
           if(mode === "before"){
+              // Keep track of the state of the page BEFORE you start the tour, so you know how to put everything back afterwards
               var beforeSettings = {"noaaReady": false,
                   "pub": {"added": false, "expanded": false},
                   "funding": {"added": false, "expanded": false},
-                  "paleo": {"expanded": false, "values": false, "header": false}};
+                  "paleo": {"expanded": false, "values": false, "header": false},
+                  "column": {"expanded": false, "added": false}
+              };
               // Turn on NOAA switch
               if (!$scope.pageMeta.noaaReady){
                   $scope.makeNoaaReady(false);
@@ -231,6 +234,9 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
                   $scope.files.json.pub = $scope.addBlock($scope.files.json.pub, "pub", null);
                   $scope.files.json.pub[0].tmp = {"toggle": false};
                   beforeSettings.pub.added = true;
+              }
+              if(!$scope.files.json.pub[0].hasOwnProperty("tmp")){
+                  $scope.files.json.pub[0].tmp = {"toggle": true};
               }
               // is it expanded?
               if(!$scope.files.json.pub[0].tmp.toggle){
@@ -253,7 +259,6 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
                   $scope.files.json.funding[0].tmp.toggle = true;
                   beforeSettings.funding.expanded = true;
               }
-
               // open paleo 1 meas 1
               var pdt = $scope.files.json.paleoData[0].measurementTable[0];
               if (typeof pdt.tmp === "undefined"){
@@ -267,11 +272,19 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
                   pdt.tmp.toggle = true;
                   beforeSettings.paleo.expanded = false;
               }
-              if (typeof pdt.tmp.values === "undefined" || !pdt.tmp.values) {
-                  $scope.pageMeta.header = true;
-                  pdt.tmp.values = "Depth\t Age\n3\t1900";
-                  beforeSettings.paleo.values = true;
-                  beforeSettings.paleo.header = true;
+              if(!pdt.columns[0]){
+                  // $scope.$broadcast("tourAdd", pdt);
+                  // pdt.columns[0]["tmp"] = {"toggle": true};
+                  pdt.columns.push({"number":1, "variableName": "Depth", "units": "cm", "variableType": "measured", "tmp":{"toggle": true}});
+                  beforeSettings.column.added = true;
+              }
+              if(typeof pdt.columns[0].tmp === "undefined"){
+                  pdt.columns[0].tmp = {"toggle": true};
+                  beforeSettings.column.expanded = false;
+              }
+              if (!pdt.tmp.toggle){
+                  pdt.columns[0].tmp.toggle = true;
+                  beforeSettings.column.expanded = false;
               }
               cb(beforeSettings);
           } else if(mode === "after"){
@@ -280,6 +293,8 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
               $scope.files.json.funding[0].tmp.toggle = $scope.pageMeta.tourMeta.funding.expanded;
               $scope.files.json.paleoData[0].measurementTable[0].tmp.toggle = $scope.pageMeta.tourMeta.paleo.expanded;
               $scope.pageMeta.header = $scope.pageMeta.tourMeta.paleo.header;
+              $scope.files.json.paleoData[0].measurementTable[0].columns[0].tmp.toggle = false;
+
 
               if($scope.pageMeta.tourMeta.pub.added){
                   $scope.files.json.pub.splice(0,1);
@@ -287,8 +302,8 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
               if($scope.pageMeta.tourMeta.funding.added){
                   $scope.files.json.funding.splice(0,1);
               }
-              if($scope.pageMeta.tourMeta.paleo.values){
-                  $scope.files.json.paleoData[0].measurementTable[0].tmp.values = "";
+              if($scope.pageMeta.tourMeta.column.added){
+                  $scope.files.json.paleoData[0].measurementTable[0].columns = [];
               }
               cb({});
           }
@@ -480,19 +495,25 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
     };
 
     $scope.makeNoaaReady = function(alert){
+        // Alert: True if alerts should be displayed, False if not.
+        // Why? Because we don't want the modal alerts to pop up when users take the tour of the page. It prohibits scrolling.
+
       // The noaaReady boolean is bound to the switch
       if(!$scope.pageMeta.noaaReady){
         // Make Ready
         create.addFieldsToCols($scope.files.json, ["dataType", "dataFormat"], function(_d2){
-            $scope.showModalAlert({"title": "NOAA Validation", "message": "The fields that NOAA requires have been " +
-            "added where necessary. For a list of these requirements, hover your mouse pointer over the 'NOAA " +
-            "requirements' bar on the left side of the page. Reference the 'NOAA Variable Naming' link under 'Quick Links' on the home page for variable information."});
+            if(alert){
+                $scope.showModalAlert({"title": "NOAA Validation", "message": "The fields that NOAA requires have been " +
+                    "added where necessary. For a list of these requirements, hover your mouse pointer over the 'NOAA " +
+                    "requirements' bar on the left side of the page. Reference the 'NOAA Variable Naming' link under 'Quick Links' on the home page for variable information."});
+            }
           $scope.files.json = _d2;
-          console.log($scope.files.json.paleoData);
         });
       } else {
-        // Don't remove fields, only remove validation rules
-        $scope.showModalAlert({"title": "Fields may be ignored", "message": "Validation is no longer using NOAA rules."});
+          if(alert){
+              // Don't remove fields, only remove validation rules
+              $scope.showModalAlert({"title": "Fields may be ignored", "message": "Validation is no longer using NOAA rules."});
+          }
       }
     };
 

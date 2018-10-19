@@ -636,62 +636,79 @@ var create = (function(){
           "inevitably need more explanation. Don't forget to hover your mouse pointer on items throughout the page to see more hints. "
         },
         {
+          element:document.querySelector(".tourbanner"),
+          intro: "The Playground is regularly updated to correct bugs, add features, and make your experience better. Occasionally, there will be a banner at the top of the page to notify you of a recent change or other important information."
+
+        },
+        {
           // Map
           element: document.querySelector(".step1"),
-          intro: "Use the map to verify the location for the dataset. A pin drops on the map using the coordinate data. Use the graph to plot a simple line graph with the values from your data tables."
+          intro: "Use the map to verify the location for the dataset. A pin drops on the map using the coordinate data. Use the graph to plot a simple line graph with the values from your data tables.",
+          position: "bottom"
         },
+        {
+            element: document.querySelector(".tourgithub"),
+            intro: "Help us make your experience better! Let us know what you think is done well, and what we can do better. This link will take you to the LiPD Github page where we track issues and comments about the website.",
+        },
+
         {
           // Choose file button
           element: document.querySelector(".step2"),
-          intro: "If you have a LiPD file you want to upload, you can do that here. If not, that's okay too! Use the fields to start building a LiPD file",
+          intro: "If you have a LiPD file you want to upload, you can do that here. If not, that's okay too! Use the fields to start building your dataset.",
           position: 'right'
         },
         {
           // Validate button
           element: document.querySelector(".step3"),
-          intro: 'LiPD files must abide by a set of standards for key names, data structure, minimum data thresholds, etc. to be considered a valid file. The validation process gives you feedback on how to make your data a valid LiPD file.',
+          intro: 'LiPD files must abide by a set of standards to be considered a valid file. Standards for data structure, field names, and controlled vocabulary are verified. The validation process gives you feedback on how to alter your dataset to meet these standards.',
           position: 'right'
         },
         {
           // Save Session button
           element: document.querySelector(".step4"),
-          intro: "Need a break from your dataset? Did your internet connection disconnect? Save the session and come back later. Just don't close your internet browser! We'll offer to load an older session if we find one saved in the browser.",
+          intro: "If you've spent considerable time working on your dataset, but it's not quite ready to download, please save the session! The data will be saved to your internet browser for as long as you keep the browser window open.  We'll offer to load a saved session if there is one available when you return to the Playground page. You may only save one session at a time.",
           position: 'right'
         },
         {
           // Download lipd button
-          element: document.querySelector(".step5"),
-          intro: 'Download your validated data as a LiPD file to your local computer.',
+          element: document.querySelector(".stepdllipd"),
+          intro: 'Download your validated dataset as a LiPD file to your computer.',
           position: "right"
         },
         {
           // Download NOAA button
-          element: document.querySelector(".step6"),
-          intro: "Download your validated data as a NOAA template text file. Please note, one text file is created for every paleo measurement table in your dataset. A multi-file output is downloaded as a ZIP file.",
+          element: document.querySelector(".stepdlnoaa"),
+          intro: "Download your validated dataset as a NOAA template text file. Please note, one text file is created for every paleo measurement table in your dataset. A multi-file output is downloaded as a ZIP file.",
           position: "right"
+        },
+        {
+            // Upload to Wiki button
+            element: document.querySelector(".stepwikiupload"),
+            intro: "Upload your validate dataset to the LinkedEarth Wiki. Must be logged in to Linked Earth Wiki, and dataset must meet Wiki standards prior to upload. ('Wiki Ready' switch)",
+            position: "right"
         },
         {
           // NOAA ready, wiki ready switches
           element: document.querySelector(".step7"),
-          intro: "The LinkedEarth Wiki and NOAA have additional data requirements to the LiPD requirements. Turning on these switches will add custom data input fields to the page and add rules to the validation process.",
+          intro: "The LinkedEarth Wiki and NOAA have additional requirements to our normal LiPD standards. Turning on these switches adds required fields to the page and add rules to the validation process.",
           position: "right"
         },
         {
           // Feedback boxes
           element: document.querySelector(".step8"),
-          intro: "Validation results. Every time you press the 'Validate' button, these boxes will show the results. Warnings are recommended fixes, but not required. Errors MUST be fixed.",
+          intro: "Validation results. Every time you press the 'Validate' button, these feedback boxes will show the validation results. Warnings are recommended fixes, but not required. Errors MUST be fixed.",
           position: "right"
         },
         {
           // Requirements boxes
           element: document.querySelector(".step9"),
-          intro: "The requirements boxes give you feedback on how complete your dataset is and if you meet different levels of requirements. Hover your mouse pointer over each box to view specific requirements for each.",
+          intro: "The requirements boxes give you feedback on how complete your dataset is and if you meet different levels of requirements. Hover your mouse pointer over each box to view specific requirements for each organization.",
           position: "right"
         },
         {
           // Files list
           element: document.querySelector(".step10"),
-          intro: "All files ( .jsonld, .csv, .txt ) archived withing the LiPD file are listed here after upload. The filenames listed may be clicked to view the contents inside.",
+          intro: "All files ( .jsonld, .csv, .txt ) archived withing the LiPD file are listed here. The filenames listed may be clicked to view the contents inside. Advanced users may click the 'metadata.jsonld' to edit metadata directly.",
           position: "right"
         },
         {
@@ -703,7 +720,7 @@ var create = (function(){
         {
           // NOAA Specific
           element: document.querySelector(".step12"),
-          intro: "The section for NOAA specific data is hidden until you flip the switch for 'NOAA Ready (Beta)'",
+          intro: "The section for NOAA specific data is hidden until you enable the switch 'NOAA Ready (Beta)'",
           position: "left"
         },
         {
@@ -726,8 +743,8 @@ var create = (function(){
         },
         {
           // Paleo
-          element: document.querySelector(".step16"),
-          intro: "Add values to your tables via the Spreadsheet (Beta) or Classic parser. The Spreadsheet is similar to a normal Excel spreadsheet. However, please note that if you enter data and you don't see the changes, please click 'Refresh' to update the view. When using the Classic parser, copy/paste your values into the box and choose the parsing options. We recommend using the Spreadsheet unless you are experiencing issues with it.",
+          element: document.querySelector(".tourtable"),
+          intro: "Data tables cover a lot of functionality. Tables and columns collapse and expand. Column fields are suggested to you, but you may enter custom fields if needed. Add values to your tables via the Spreadsheet (Beta) or the classic parser. The Spreadsheet is similar to an Excel spreadsheet. Please note that if you enter data and you don't see the changes, click the 'Refresh' button to update the table. When using the classic parser, copy/paste your values into the box and select parsing options. We recommend using the Spreadsheet unless you are experiencing issues with it.",
           position: "top"
         },
         // {
@@ -769,16 +786,33 @@ var create = (function(){
         {
           // chronData
           element: document.querySelector(".step23"),
-          intro: "The chronData section is identical to everything you've seen in the paleoData section, so I'll skip this section of the page.",
+          intro: "The chronData section is identical to everything you saw in the paleoData section.",
           position: "top"
         },
         {
           element: document.querySelector(".step24"),
-          intro: "That's it! There many different buttons to this page, but hopefully this tour has explained some of the initial questions and the process makes more sense.",
+          intro: "That's it! The Playground has a lot going on, but hopefully this tour has explained some of your initial questions and the process makes more sense. Remember, you can use the 'Questions, comments, concerns' button to report issues or ask for help.",
         },
 
 
       ]
+    }),
+
+    tourStepsMerge: (function(){
+        return [
+            {
+                element:document.querySelector(".tourmergeupload"),
+                intro: "There are two ways to merge your data. You can upload LiPD files or paste data from your 'metadata.jsonld' files. Please note, your merged output will only be a LiPD file if both input files are also LiPD files."
+            },
+            {
+                element:document.querySelector(".tourmergeprogress"),
+                intro: "The progress bar shows you how to proceed through the merge process. When you finish a step, it will highlight green."
+            },
+            {
+                element:document.querySelector(".tourmergediff"),
+                intro: "When two datasets are loaded, the differences are calculated and shown here in the 'Resolve Differences' tab. When all differences are resolved between the two files, the output is shown in the 'Results' tab. "
+            },
+        ];
     }),
 
     inferredVariableTypeList: (function(){

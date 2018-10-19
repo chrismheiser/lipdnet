@@ -50,6 +50,14 @@ function SpreadsheetCtrl($scope){
     $scope.hot.updateSettings($scope.settings);
 
   };
+  //
+  // $scope.$on("tourAdd", function(event, data){
+  //   $scope.addColumn(data);
+  // });
+  //
+  // $scope.$on("tourRm", function(event, data){
+  //   $scope.removeColumn(data);
+  // });
 
   $scope.addColumn = function(table){
     if(typeof($scope.$parent.files.csv[table.filename]) === "undefined"){
