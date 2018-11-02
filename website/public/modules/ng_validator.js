@@ -900,8 +900,15 @@ var lipdValidator = (function(){
       var correctColumnCounts = function(csvs){
         for(var _filename in csvs){
           if(csvs.hasOwnProperty(_filename)){
+              var _max = 0;
               // Our column count should be whatever the length of the data arrays are. Use the first array.
-              csvs[_filename]["cols"] = csvs[_filename]["data"][0].length;
+              // csvs[_filename]["cols"] = csvs[_filename]["data"][0].length;
+              for(var _c = 0; _c < csvs[_filename]["data"].length; _c++){
+                if(csvs[_filename]["data"][_c].length > _max){
+                    _max = csvs[_filename]["data"][_c].length;
+                }
+              }
+              csvs[_filename]["cols"] = _max;
           }
         }
         return csvs;
@@ -1597,10 +1604,14 @@ var lipdValidator = (function(){
       var parseArrFloats = function(numbers){
         // Parse all the values in the given array as floats. If they're not numbers, they'll result as NaNs.
         var _numbers2 = [];
-        for(var _u=0; _u<numbers.length; _u++){
-          _numbers2.push(parseFloat(numbers[_u]));
+        try {
+            for(var _u=0; _u<numbers.length; _u++){
+                _numbers2.push(parseFloat(numbers[_u]));
+            }
+            return _numbers2;
+        } catch(err){
+          return _numbers2;
         }
-        return _numbers2;
       };
 
       var removeOldInferredData = function(column){
@@ -1638,7 +1649,7 @@ var lipdValidator = (function(){
                           table.columns[_i] = removeOldInferredData(table.columns[_i]);
 
                       } else {
-                          console.log("Error calculateInferredColumn: No array values. No inferred data.");
+                          // console.log("Error calculateInferredColumn: No array values. No inferred data.");
                       }
                   } catch(err){
                       console.log("Error calculateInferredColumn: main: ", err);
@@ -1658,12 +1669,15 @@ var lipdValidator = (function(){
             // Grab the values for this column.
             var _current_values = _values[_i];
             try{
+                var _isNotNaN = 0;
                 // Return an array that shows where all the non-NaN values are in the _values array.
-                var _isNotNaN = _current_values.reduce(function(a, e, i) {
-                    if (!isNaN(e))
-                        a.push(i);
-                    return a;
-                }, []);
+                if(typeof _current_values !== "undefined"){
+                    _isNotNaN = _current_values.reduce(function(a, e, i) {
+                        if (!isNaN(e))
+                            a.push(i);
+                        return a;
+                    }, []);
+                }
 
                 // Only continue if the array has numeric values.
                 if(_isNotNaN.length > 0){
@@ -1705,11 +1719,11 @@ var lipdValidator = (function(){
                     table.columns[_i]["hasResolution"] = _mmmm;
 
                 } else {
-                  console.log("calculateResolution: No array values. No resolution.");
+                  // console.log("calculateResolution: No array values. No resolution.");
                 }
 
             } catch(err){
-              console.log("Error calculateResolution: main: ", err);
+              console.log("Error: calculateResolution: main: ", err);
             }
           }
         }
