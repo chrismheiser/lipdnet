@@ -303,8 +303,10 @@ var lipdValidator = (function(){
         "advKeys": ["@context", "tsid", "number", "google", "md5", "lipdVersion", "investigators"],
         "miscKeys": ["studyName", "proxy", "metadataMD5", "googleSpreadSheetKey", "googleMetadataWorksheet",
           "@context", "tagMD5", "dataSetName", "description", "maxYear",
-          "minYear", "originalDataUrl", "originalDataURL", "dataContributor", "collectionName", "googleDataUrl",
-          "googleDataURL", "paleoData", "chronData", "notes"],
+          "minYear", "originalDataUrl", "dataContributor", "collectionName", "googleDataUrl",
+          "googleDataURL", "paleoData", "chronData", "notes", "earliestYear", "mostRecentYear", "NOAAdataType",
+          "NOAAseasonality", "NOAAstudyName", "originalSourceUrl", "originalSourceUrlDescription", "onlineResource",
+          "gcmdLocation", "location", "timeUnit", "modifiedDate", "datasetDOI", "NOAAdataFormat"],
         "reqRootKeys": ["archiveType", "dataSetName", "paleoData", "geo"],
         "reqPubKeys": ["author", "title", "year", "journal"],
         "reqPubDcKeys": ["author", "title"],
@@ -319,7 +321,7 @@ var lipdValidator = (function(){
       var keys_1_3 = {
         "miscKeys": ["WDCPaleoUrl","hasMinValue", "hasMaxValue", "hasMedianValue", "hasMeanValue", "hasResolution",
           "lipdVersion", "createdBy", "investigators", "maxYear", "minYear", "timeUnit", "onlineResource",
-          "onlineResourceDescription", "modifiedDate", "originalSourceUrl", "datasetDOI"],
+          "onlineResource", "modifiedDate", "originalSourceUrl", "datasetDOI"],
         "reqRootKeys": ["lipdVersion", "createdBy"],
         "reqTableNameKeys": ["tableName", "name"]
       };
@@ -344,18 +346,20 @@ var lipdValidator = (function(){
 
       var _noaa_validate = {
         "required": {
-          "root": ["investigators", "mostRecentYear", "earliestYear", "timeUnit", "onlineResource", "onlineResourceDescription", "modifiedDate"],
+          "root": ["collectionName", "investigators", "mostRecentYear", "earliestYear", "timeUnit",
+                    "onlineResource", "modifiedDate"],
           "pub": [],
           "funding": [],
-          "geo": ["location", "siteName"],
-          "columns": ["description", "dataFormat", "dataType"]
+          "geo": ["location", "siteName", "gcmdLocation"],
+          "columns": ["description", "NOAAdataFormat", "NOAAdataType"]
         },
         "preferred": {
           "root": ["originalSourceUrl", "datasetDOI", "funding"],
           "pub": ["author", "title", "year", "journal", "volume", "edition", "issue", "pages", "report", "doi",
-                  "onlineResource", "citation", "abstract"],
+                  "citation", "abstract"],
           "funding": ["agency", "grant"],
           "geo": [],
+          // NOAAseasonality, detail, measurementMethod, measurementMaterial, notes, error
           "columns": []
         }
       };
@@ -373,7 +377,7 @@ var lipdValidator = (function(){
           files.json["lipdVersion"]  = lipdVersion;
           feedback.lipdVersion = lipdVersion;
           console.log("Validating version: " + lipdVersion);
-          // files.csv = simplifyCsvFilenames(files.csv);
+          files.csv = removeEmptyValueRows(files.csv);
           if(lipdVersion === "1.3"){
             console.log("validate_1_3: LiPD Structure");
             structureBase(files.json, keys_base.miscKeys.concat(keys_1_3.miscKeys));
@@ -609,7 +613,6 @@ var lipdValidator = (function(){
         }
 
     }; // end required 1.3
-
 
       // VERSION INDEPENDENT FUNCTIONS
 
@@ -1624,6 +1627,42 @@ var lipdValidator = (function(){
           }
         }
         return column;
+      };
+
+      var rowOfNulls = function(row){
+        // Check if this whole row of value data is null or empty values.
+        var _count = 0;
+        var _cur = "";
+        for(var _p=0; _p<row.length; _p++){
+          _cur = row[_p];
+          if(_cur === null || _cur === "" || _cur === undefined){
+            _count++;
+          } else {
+            return false;
+          }
+        }
+        return true;
+      };
+
+      var removeEmptyValueRows = function(csv){
+        // Loop over all our value data rows and remove any rows that are empty data placeholders.
+        for(var _filename in csv){
+          if(csv.hasOwnProperty(_filename)){
+            if(csv[_filename].hasOwnProperty("data")){
+              // Start at the end of the values arrays and work backwards. Null rows are at the bottom.
+              for(var _i=csv[_filename].data.length-1; _i>0; _i--){
+
+                if(rowOfNulls(csv[_filename].data[_i])){
+                  csv[_filename].data.pop();
+                }
+              }
+            }
+            // Transpose each data table because we need this data current for NOAA file conversions.
+            csv[_filename].transposed = misc.transpose(csv[_filename].data);
+          }
+        }
+        return csv;
+
       };
 
       var calculateInferredColumn = function(table, _values){

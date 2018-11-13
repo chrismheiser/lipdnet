@@ -627,3 +627,8 @@ md-input-container.md-input-focused:not(.md-input-has-value) md-select .md-selec
     font-weight: 400;
     color: rgba(0,0,0,0.8);
 }
+
+.sub-card {
+    /*background-color: #fcfcfc;*/
+    border: 1px dotted #AAAAAA;
+}

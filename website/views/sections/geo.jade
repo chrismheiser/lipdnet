@@ -80,11 +80,11 @@ div(layout='', layout-padding='', layout-sm='column')
 		input(ng-model='files.json.geo.properties.location' aria-label="Location")
 		md-tooltip {{getTooltip("geo", "location")}}
 
-	md-input-container(flex="")
-		label Country
-		md-select(ng-model="files.json.geo.properties.country")
-			md-option(ng-repeat="country in dropdowns.countries" ng-value="country.name") {{country.name}} ({{country.code}})
-		md-tooltip {{getTooltip("geo", "country")}}
+	//md-input-container(flex="")
+	//	label Country
+	//	md-select(ng-model="files.json.geo.properties.country")
+	//		md-option(ng-repeat="country in dropdowns.countries" ng-value="country.name") {{country.name}} ({{country.code}})
+	//	md-tooltip {{getTooltip("geo", "country")}}
 
 div(layout='', layout-padding='', layout-sm='column' ng-if="pageMeta.noaaReady")
 	md-input-container(flex='', ng-class="md-input-has-value")

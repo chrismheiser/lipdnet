@@ -22,24 +22,6 @@ div(ng-if="pageMeta.noaaReady")
             md-tooltip {{getTooltip("noaa", "timeUnit")}}
 
     div(layout='', layout-padding='', layout-sm='column')
-        md-input-container(flex='')
-            label Online Resource *
-            input(ng-model='files.json.onlineResource')
-            md-tooltip {{getTooltip("noaa", "onlineResource")}}
-
-    div(layout='', layout-padding='', layout-sm='column')
-        md-input-container(flex='')
-            label Online Resource Description *
-            input(ng-model='files.json.onlineResourceDescription')
-            md-tooltip {{getTooltip("noaa", "onlineResourceDescription")}}
-
-    div(layout='', layout-padding='', layout-sm='column')
-        md-input-container(flex='')
-            label Original Source URL *
-            input(ng-model='files.json.originalSourceUrl')
-            md-tooltip {{getTooltip("noaa", "originalSourceUrl")}}
-
-    div(layout='', layout-padding='', layout-sm='column')
         md-input-container(flex='50', ng-class="md-input-has-value")
             label Modified Date *
             input(ng-model='files.json.modifiedDate')
@@ -50,3 +32,38 @@ div(ng-if="pageMeta.noaaReady")
             input(ng-model='files.json.datasetDOI')
             md-tooltip {{getTooltip("noaa", "datasetDOI")}}
 
+    div(layout='', layout-padding='', layout-sm='column')
+        md-input-container(flex='50', ng-class="md-input-has-value")
+            label Data Type *
+            input(ng-model='files.json.NOAAdataType')
+            md-tooltip {{getTooltip("noaa", "NOAAdataType")}}
+        md-input-container(flex='50', ng-class="md-input-has-value")
+            label Study Name *
+            input(ng-model='files.json.NOAAstudyName')
+            md-tooltip {{getTooltip("noaa", "NOAAstudyName")}}
+
+    div(layout='', layout-padding='', layout-sm='column')
+        md-input-container(flex='')
+            label Original Source URL *
+            input(ng-model='files.json.originalSourceUrl')
+            md-tooltip {{getTooltip("noaa", "originalSourceUrl")}}
+        md-input-container(flex='')
+            label Description *
+            input(ng-model='files.json.originalSourceUrlDescription')
+            md-tooltip {{getTooltip("noaa", "originalSourceUrlDescription")}}
+
+    div(layout='', layout-padding='', layout-sm='column' ng-repeat="entry in files.json.onlineResource track by $index")
+        md-input-container(flex='')
+            label Online Resource *
+            input(ng-model='entry.onlineResource')
+            md-tooltip {{getTooltip("noaa", "onlineResource")}}
+
+        md-input-container(flex='')
+            label Description *
+            input(ng-model='entry.description')
+            md-tooltip {{getTooltip("noaa", "onlineResourceDescription")}}
+        div(layout='', layout-padding='', layout-sm='column' style="float: right;")
+            button.red-btn-sm-off(ng-click='removeBlock(files.json.onlineResource, $index)' style="margin: 1.5em;" type="button")  -
+
+    div(layout='', layout-padding='', layout-sm='column' style="float: right;")
+        button.green-btn-off(ng-click='addBlock(files.json.onlineResource, "onlineResource", null); ' style="margin: 1.5em;" type="button")  + Online Resource

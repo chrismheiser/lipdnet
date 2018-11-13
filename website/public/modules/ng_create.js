@@ -46,7 +46,10 @@ var create = (function(){
             entry = create.addTableColumn(entry);
           } else if (blockType === "geo"){
             entry = create.addGeo(entry);
+          } else if (blockType === "onlineResource"){
+            entry = create.addOnlineResource(entry);
           }
+
         }
         return entry;
       } catch (err){
@@ -87,6 +90,12 @@ var create = (function(){
       }
       entry.push(_block);
       return entry;
+    }),
+
+    addOnlineResource: (function(entry){
+        var _block = {"onlineResource": "", "onlineResourceDescription": ""};
+        entry.push(_block);
+        return entry;
     }),
 
     addPublication: (function(entry){
@@ -272,19 +281,18 @@ var create = (function(){
      * For example: removing temporary fields, fixing filenames, and moving data around.
      *
      */
-    closingWorkflow: (function(_scopeFiles, _dsn, _csv){
+    closingWorkflow: (function(_scopeFiles){
       // Remove temporary fields from the JSON data
       var _scopeFilesCopy = JSON.parse(JSON.stringify(_scopeFiles));
       // TODO copy the archiveType from the root, to each data table column
       _scopeFilesCopy.json = create.rmTmpEmptyData(_scopeFilesCopy.json);
-      // Prepend DSN to CSV filenames wherever necessary. Do this for _csv metadata data and _json metadata.
-      // _scopeFilesCopy = create.alterFilenames(_scopeFilesCopy);
+
       return _scopeFilesCopy;
     }),
 
     closingWorkflowNoaa: (function(_scopeFiles, _dsn, _csv, cb){
       var _newScopeFiles = create.closingWorkflow(_scopeFiles, _dsn, _csv);
-      var _newCsv = create.structureCsvForPy(_newScopeFiles.csv, _dsn);
+      var _newCsv = create.structureCsvForPy(_newScopeFiles.csv);
       cb({"metadata": _newScopeFiles.json, "csvs": _newCsv});
     }),
 
@@ -536,7 +544,7 @@ var create = (function(){
       return entry;
     }),
 
-    structureCsvForPy: (function(_csv, _dsn){
+    structureCsvForPy: (function(_csv){
       var _newCsv = {};
       for(var _filename in _csv){
         if(_csv.hasOwnProperty(_filename)){
@@ -898,8 +906,11 @@ var create = (function(){
           "onlineResource": {"tooltip": "NA"},
           "onlineResourceDescription": {"tooltip": "NA"},
           "originalSourceUrl": {"tooltip": "NA"},
+          "originalSourceUrlDescription": {"tooltip": ""},
           "modifiedDate": {"tooltip": "NA"},
           "datasetDOI": {"tooltip": "What is the digital object identifier associated with the dataset? Example: 10.1000/sample123"},
+          "NOAAdataType": {"tooltip": "NA"},
+          "NOAAstudyName": {"tooltip": "NA"}
         },
         "pub": {
           "publication": {"tooltip": "A document that serves as reference for a Dataset or its components"},
@@ -925,7 +936,8 @@ var create = (function(){
           "siteName": {"tooltip": "NA"},
           "location": {"tooltip": "NA"},
           "country" : {"tooltip": "ISO 3166 standard country list"},
-          "gcmdLocation": {"tooltip": "Example: Continent>North America>United States of America>Baltimore"},
+          "gcmdLocation": {"tooltip": "Use the GCMD Keyword Valids from https://wiki.earthdata.nasa.gov/display/CMR/GCMD+Keyword+Access , " +
+              "Example: OCEAN>ATLANTIC OCEAN>NORTH ATLANTIC OCEAN>BALTIC SEA"},
 
         },
         "paleoData": {
@@ -946,7 +958,6 @@ var create = (function(){
           "inferredVariableType": {"tooltip": "What type of InferredVariable does the InferredVariable belongs to?"},
           "interpretation": {"tooltip": "A suite of metadata that describes which phenomena drove variability in this Variable (e.g. environmental drivers)."},
           "direction": {"tooltip": "Is the InferredVariable value increasing or decreasing as the value of the MeasuredVariable is increasing?"},
-          "measurementMaterial": {"tooltip": "NA"},
           "method": {"tooltip": "How is the information obtained from the resource?"},
           "missingValue": {"tooltip": "How are the missing values of the Variable identified in the DataTable?"},
           "notes": {"tooltip": "Use to add information that does not fit elsewhere in the dataset"},
@@ -960,6 +971,14 @@ var create = (function(){
           "name": {"tooltip": "NA"},
           "runCommand": {"tooltip": "NA"},
           "runEnv": {"tooltip": "NA"},
+          "error" : {"tooltip" :"NA"},
+          "NOAAseasonality": {"tooltip": "NA"},
+          "NOAAdataType": {"tooltip": "NA"},
+          "NOAAdataFormat": {"tooltip": ""},
+          "detail" : {"tooltip": "NA"},
+          "measurementMaterial": {"tooltip": "NA"},
+          "measurementMethod": {"tooltip" : "NA"},
+
         },
         "chronData": {
           "chronData": {"tooltip": "The data, metadata, and Model that describe the set of Variables used to relate depth/position to time (chronological information)"},

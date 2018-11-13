@@ -374,7 +374,7 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
         $scope.showModalAlert({"title": "File contains errors", "message": "You are downloading data that still has errors. Be aware that using a file that isn't fully valid may cause issues."});
       }
       // Correct the filenames, clean out the empty entries, and make $scope.files data ready for the ExportService
-      var _newScopeFiles = create.closingWorkflow($scope.files, $scope.files.dataSetName, $scope.files.csv);
+      var _newScopeFiles = create.closingWorkflow($scope.files);
       // Go to the export service. Create an array where each object represents one output file. {Filename: Text} data pairs
       $scope._myPromiseExport = ExportService.prepForDownload(_newScopeFiles);
       $scope.pageMeta.busyPromise = $scope._myPromiseExport;
@@ -501,7 +501,8 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       // The noaaReady boolean is bound to the switch
       if(!$scope.pageMeta.noaaReady){
         // Make Ready
-        create.addFieldsToCols($scope.files.json, ["dataType", "dataFormat"], function(_d2){
+        create.addFieldsToCols($scope.files.json, ["measurementMaterial","error", "NOAAseasonality",  "NOAAdataType", "detail", "measurementMethod", "NOAAdataFormat", "notes"], function(_d2){
+
             if(alert){
                 $scope.showModalAlert({"title": "NOAA Validation", "message": "The fields that NOAA requires have been " +
                     "added where necessary. For a list of these requirements, hover your mouse pointer over the 'NOAA " +
@@ -509,6 +510,10 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
             }
           $scope.files.json = _d2;
         });
+        // We need to add online resource specifically if it is not present. It's because this field allows for multiple entries.
+        if(!$scope.files.json.hasOwnProperty("onlineResource")){
+            $scope.files.json.onlineResource = [{"onlineResource": "", "description": ""}];
+        }
       } else {
           if(alert){
               // Don't remove fields, only remove validation rules
