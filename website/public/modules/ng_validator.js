@@ -1776,30 +1776,34 @@ var lipdValidator = (function(){
           var _age = {"variableName": null, "values": null};
           // Get the values for the table columns from the csv data.
 
-          var _values = csvs[table.filename].transposed.slice();
+          if(typeof csvs[table.filename] !== "undefined"){
+              var _values = csvs[table.filename].transposed.slice();
 
-          // We need columns and a filename to continue working. If they don't exist, we can't continue.
-          if (table.hasOwnProperty("columns") && table.hasOwnProperty("filename")) {
+              // We need columns and a filename to continue working. If they don't exist, we can't continue.
+              if (table.hasOwnProperty("columns") && table.hasOwnProperty("filename")) {
 
-            // DO NOT calculate inferred data on ensemble tables. It'll wreak havoc and probably crash the site.
-            if(table.filename.indexOf("ensemble") === -1){
-                // Only calculate resolution for paleoData tables.
-                if (pc === "paleoData") {
-                    // Get the age values data first, since it's needed to calculate the other column data.
-                    _age = getAgeColumn(table, _values);
-                }
-                // Calculate resolution & inferred data. Only paleoData is possible here.
-                if (_age.values) {
-                    table = calculateResolution(table, _values, _age);
-                }
-                // Calculate inferred data without resolution. No age data present, or this is chronData.
-                table = calculateInferredColumn(table, _values);
-            }
+                  // DO NOT calculate inferred data on ensemble tables. It'll wreak havoc and probably crash the site.
+                  if(table.filename.indexOf("ensemble") === -1){
+                      // Only calculate resolution for paleoData tables.
+                      if (pc === "paleoData") {
+                          // Get the age values data first, since it's needed to calculate the other column data.
+                          _age = getAgeColumn(table, _values);
+                      }
+                      // Calculate resolution & inferred data. Only paleoData is possible here.
+                      if (_age.values) {
+                          table = calculateResolution(table, _values, _age);
+                      }
+                      // Calculate inferred data without resolution. No age data present, or this is chronData.
+                      table = calculateInferredColumn(table, _values);
+                  }
+              }
+              // Table does not have columns and/or a filename
+              else {
+                  console.log("Table missing columns or filename:" + table.tableName);
+              }
           }
-          // Table does not have columns and/or a filename
-          else {
-              console.log("Table missing columns or filename:" + table.tableName);
-          }
+
+
 
           return table;
 
