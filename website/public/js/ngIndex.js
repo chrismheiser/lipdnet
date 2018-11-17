@@ -44,7 +44,14 @@ p.controller('IndexCtrl', function ($scope) {
         "icon": "code",
         "title": "LiPD Playground Github",
         "link": "https://github.com/chrismheiser/lipdnet",
-        "tooltip": "The Github repository for the LiPD Playground. Please use it to make suggestions on improving the Playground and to report bugs"
+        "tooltip": "The Github repository for the LiPD Playground. Please use it to make suggestions on improving the Playground and to report bugs."
+      },
+      {
+        "icon": "videocam",
+        "title": "LiPD Tutorials",
+        "link": "https://www.youtube.com/channel/UCOoRYB7I9SOpI11W2hcVBkA",
+        "tooltip": "Watch tutorial videos to learn how to use the LiPD Playground."
+
       },
       {
         "icon": "code",
@@ -56,61 +63,61 @@ p.controller('IndexCtrl', function ($scope) {
         "icon": "chrome_reader_mode",
         "title": "LiPD Utilities Docs",
         "link": "http://nickmckay.github.io/LiPD-utilities/",
-        "tooltip": "An overview on how to download and use the LiPD Utilities. Docs are available in Matlab, Python, and R languages"
+        "tooltip": "An overview on how to download and use the LiPD Utilities. Docs are available in Matlab, Python, and R languages."
       },
       {
         "icon": "code",
         "title": "GeoChronR",
         "link": "http://nickmckay.github.io/GeoChronR/",
-        "tooltip": "An R package for analyzing and visualizing paleoclimate data in LiPD"
+        "tooltip": "An R package for analyzing and visualizing paleoclimate data in LiPD."
       },
       {
         "icon": "code",
         "title": "PyleoClim Github",
         "link": "https://github.com/LinkedEarth/Pyleoclim_util",
-        "tooltip": "A Python package for analyzing and visualizing paleoclimate data in LiPD"
+        "tooltip": "A Python package for analyzing and visualizing paleoclimate data in LiPD."
       },
       {
         "icon": "chrome_reader_mode",
         "title": "PyleoClim Docs",
         "link": "http://linkedearth.github.io/Pyleoclim_util/",
-        "tooltip": "The PyleoClim package documentation"
+        "tooltip": "The PyleoClim package documentation."
       },
       {
         "icon": "public",
         "title": "LinkedEarth Wiki",
         "link": "http://wiki.linked.earth/Main_Page",
-        "tooltip": "The LinkedEarth Wiki contains a database of viewable LiPD datasets, guides for learning various tasks, and community activities"
+        "tooltip": "The LinkedEarth Wiki contains a database of viewable LiPD datasets, guides for learning various tasks, and community activities."
       },
       {
         "icon": "search",
         "title": "NOAA + LiPD examples",
         "link": "https://www1.ncdc.noaa.gov/pub/data/paleo/pages2k/NAm2kHydro-2017/",
-        "tooltip": "A sample of NOAA text template files that have been generated from LiPD files"
+        "tooltip": "A sample of NOAA text template files that have been generated from LiPD files."
       },
       {
         "icon": "chrome_reader_mode",
         "title": "LiPD Ontology",
         "link": "http://linked.earth/ontology/core/1.2.0/index-en.html",
-        "tooltip": "A controlled vocabulary of terms used in LiPD"
+        "tooltip": "A controlled vocabulary of terms used in LiPD."
       },
       {
         "icon": "chrome_reader_mode",
         "title": "LinkedEarth Ontology",
         "link": "http://linked.earth/ontology/",
-        "tooltip": "A controlled vocabulary of terms used by LinkedEarth"
+        "tooltip": "A controlled vocabulary of terms used by LinkedEarth."
       },
       {
         "icon": "cloud_download",
         "title": "LiPD Excel Template",
         "link": "https://github.com/nickmckay/LiPD-utilities/raw/master/Examples/LiPD_template.xlsx",
-        "tooltip": "Create a LiPD file by entering your data into the Excel template and converting it using the LiPD Utilities (Python)"
+        "tooltip": "Create a LiPD file by entering your data into the Excel template and converting it using the LiPD Utilities (Python)."
       },
       {
         "icon": "chrome_reader_mode",
         "title": "NOAA Variable Naming",
         "link": "https://www1.ncdc.noaa.gov/pub/data/paleo/templates/Variable_naming_guide.pdf",
-        "tooltip": "A short guide to naming variables using NOAA standards"
+        "tooltip": "A short guide to naming variables using NOAA standards."
       },
 
 
@@ -153,6 +160,10 @@ p.controller('IndexCtrl', function ($scope) {
         "question": "How do PyleoClim and GeoChronR packages fit into all this?",
         "answer": "PyleoClim and GeoChronR are complementary packages to the LiPD Utilities. The LiPD Utilities help " +
         "facilitate the basic functions of reading, writing, and managing your LiPD files. GeoChronR and PyleoClim are meant to handle more advanced functions for analysis and visualization in R and Python respectively."
+      },
+      {
+        "question": "How do I use the LiPD Playground?",
+        "answer": "Use the 'Take the Tour!' button on the playground to walk through each section with step-by-step instructions and tips. Additionally, there are video tutorials on our LiPD Manager YouTube page."
       }
     ];
 
