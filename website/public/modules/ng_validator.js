@@ -1,16 +1,22 @@
 /**
  * ng_validator.js
  *
- * Provides validation for LiPD data on the lipd.net client-side
+ * Provides validation for LiPD data on the lipd.net client-side. This process covers a lot of ground.
+ * It is responsible for fixing LiPD structures, updating old LiPD versions into new LiPD versions, and checking
+ * if the data conforms to our LiPD standards. Validate and validate_w_restructure are two entry points. processData is
+ * the main validation function. The others are helpers.
  *
  */
 
 var lipdValidator = (function(){
+
+
+
   // 'use strict';
   return {
 
     /**
-     * Validator: Entry point for the validation process.
+     * Validate: Entry point for the validation process.
      *
      * @param {array} files LiPD data sorted by type.
      *   files = { "modal": {}, "lipdFilename": "", "dataSetName": "", "fileCt": 0, "bagit": {}, "csv": {},
@@ -41,7 +47,7 @@ var lipdValidator = (function(){
     }),
 
     /**
-     * Entry point for the validation process - INCLUDING restructuring the raw data
+     * Validate & Restructure - Includes restructuring raw data when it is not yet validator-ready.
      *
      * @param {array} files LiPD data sorted by type.
      *   files = { "modal": {}, "lipdFilename": "", "dataSetName": "", "fileCt": 0, "bagit": {}, "csv": {},
@@ -62,7 +68,7 @@ var lipdValidator = (function(){
     }),
 
     /**
-     * Generate a TSid. An alphanumeric unique ID.
+     * Generate a TSid. This is a Time Series Identifier. It allows us to index all columns with a unique ID.
      * 'VAL' prefix for validator + 8 generated characters (TsID standard)
      *
      * @return {string} _tsid TsID
@@ -248,11 +254,12 @@ var lipdValidator = (function(){
     }),
 
     /**
-     * Validator: main validation process
+     * processData: the main validation process
      *
      * Validate based on lipdVersion found, or default to v1.1 if not found
-     * Check data for required fields, proper structure, and proper data types.
-     * Attempt to fix invalid data, and return data with and feedback (errors and warnings)
+     * Check data for required fields, standard structure, and standard data types.
+     * Attempt to fix invalid data. For all else, return data with and feedback for the user to fix (errors and
+     * warnings)
      *
      * @param {array} files LiPD data sorted.
      *   files = { "modal": {}, "lipdFilename": "", "dataSetName": "", "fileCt": 0, "bagit": {}, "csv": {},
@@ -326,6 +333,7 @@ var lipdValidator = (function(){
         "reqTableNameKeys": ["tableName", "name"]
       };
 
+      // Wiki Mode - All keys that are required and preferred for the LinkedEarth Wiki
       var _wiki_validate = {
         "required": {
           "root": ["dataSetName", "archiveType"],
@@ -344,6 +352,7 @@ var lipdValidator = (function(){
         }
       };
 
+      // NOAA Mode - All keys that are required and preferred for NOAA Paleo
       var _noaa_validate = {
         "required": {
           "root": ["collectionName", "investigators", "mostRecentYear", "earliestYear", "timeUnit",
@@ -368,7 +377,7 @@ var lipdValidator = (function(){
        *  Validate
        *  Main validation function that calls all subroutines
        *
-       * @return {object} validation results
+       * @return {object}    Metadata and validation feedback results
        */
       var validate = function () {
         try{
@@ -377,7 +386,10 @@ var lipdValidator = (function(){
           files.json["lipdVersion"]  = lipdVersion;
           feedback.lipdVersion = lipdVersion;
           console.log("Validating version: " + lipdVersion);
+          // Preliminary legwork. Fix some things before validating
           files.csv = removeEmptyValueRows(files.csv);
+          files.json = fixOnlineResource(files.json);
+
           if(lipdVersion === "1.3"){
             console.log("validate_1_3: LiPD Structure");
             structureBase(files.json, keys_base.miscKeys.concat(keys_1_3.miscKeys));
@@ -415,6 +427,11 @@ var lipdValidator = (function(){
        *
        * Since all of the base structure has remained the same from v1.0 to v1.3, we can use all of these
        * rules the same way
+       *
+       *
+       *  @param {Object} D     Metadata
+       *  @param {Object} keys  Valid keys for this specific LiPD version ontology.
+       *  @return None          Data updated in global scope
        */
       var structureBase = function(D, keys){
         // check that data fields are holding the correct value data types
@@ -453,9 +470,9 @@ var lipdValidator = (function(){
 
       /**
        * Structure v1.3
-       * Top-level that calls down to individual sections
+       * Top level that calls on the paleoData and chronData sections
        *
-       * @param D
+       * @param {Object} D   Metadata
        */
       var structure_1_3 = function (D) {
         try {
@@ -475,14 +492,16 @@ var lipdValidator = (function(){
        *
        * paleo: array of objects, with nested tables
        * chron: array of objects, with nested tables
-       * measurement: multiple
-       * summary: multiple
-       * method: single
-       * ensemble: multiple
-       * distribution: multiple
        *
-       * @param {string} pc paleo or chron
-       * @param {Array} d Metadata
+       * measurement: multiple objects
+       * summary: multiple objects
+       * method: single object
+       * ensemble: multiple objects
+       * distribution: multiple objects
+       *
+       * @param {String} pc   paleo or chron mode
+       * @param {Array}  d    Metadata
+       * @return None         Data updated in global scope
        */
       var structureSection_1_3 = function(pc, d){
         try{
@@ -529,9 +548,10 @@ var lipdValidator = (function(){
         // REQUIRED DATA
 
       /**
-       * Required data that is consistent across all versions
+       * Required data that is consistent across all versions.
        *
-       * @param {object} D Metadata
+       * @param {Object} D    Metadata
+       * @return None         Data updated in global scope
        */
       var requiredBase = function(D){
         requiredPubs(D);
@@ -539,8 +559,10 @@ var lipdValidator = (function(){
 
       /**
        * Required data for v1.3
+       * Top level, check root metadata, and then dive into chron and paleo sections.
        *
-       * @param {object} D Metadata
+       * @param {Object} D     Metadata
+       * @return None          Data is updated in global scope
        */
       var required_1_3 = function(D){
         requiredRoot(D, keys_base.reqRootKeys.concat(keys_1_3.reqRootKeys));
@@ -550,10 +572,12 @@ var lipdValidator = (function(){
 
       /**
        *  Required data for v1.3 - section
-       *  Required data for the paleoData || chronData section
+       *  Required data for the paleoData and chronData sections
+       *  Loop for each object in paleoData and chronData
        *
-       * @param {string} pc paleo or chron
-       * @param {object} D Metadata
+       * @param {String} pc    paleo or chron
+       * @param {Object} D     Metadata
+       * @return None          Data is updated in global scope
        */
       var requiredSection_1_3 = function(pc, D){
         var pdData = pc + "Data";
@@ -783,8 +807,14 @@ var lipdValidator = (function(){
       }; // end requiredTable fn
 
       /**
-       * Notify the user: If there were any tsids that were auto-generated,
-       * they only persist if the file is downloaded (web) or saved (API)
+       *
+       * Special feedback log
+       *
+       * Notify the user if there were any tsids that were auto-generated. TsIDs only persist if the file is downloaded
+       * (web) or saved (API).
+       *
+       * @return none : data sent to another function.
+       *
        */
       var logSpecialFeedback = function(){
         try{
@@ -792,7 +822,7 @@ var lipdValidator = (function(){
             logFeedback("warn", "Missing: TSid (" + feedback.missingTsidCt + " columns)\nTSids has been generated and added automatically", "TSid");
           }
           if(feedback.missingUnitCt > 0){
-            logFeedback("warn", "Missing: units (" + feedback.missingUnitCt + " columns)\nThese columns have been assumed unitless and given a 'unitless' value")
+            logFeedback("warn", "Missing: units (" + feedback.missingUnitCt + " columns)\nThese columns have been assumed unitless and given a 'unitless' value", null)
           }
           if(feedback.missingMvCt > 0){
             logFeedback("warn",  "Missing: missingValue (" + feedback.missingMvCt + " columns)\nThese columns have been given the standard 'NaN' missing value")
@@ -805,7 +835,8 @@ var lipdValidator = (function(){
       /**
        * Check that publication data follows the BibJson standard
        *
-       * @param {object} pub Publication data
+       * @param {Object} pub   Publication data (all)
+       * @return None          Data updated in global scope
        */
       var verifyBibJson = function(pub){
         try {
@@ -814,20 +845,24 @@ var lipdValidator = (function(){
           var _crumbs = "";
           // in case author is formatted wrong, convert it to BibJson format
           pub = fixAuthor(pub);
+          // Loop over each publication entry
           for (var _p = 0; _p < pub.length; _p++){
+            // One publication entry
             var _pub = pub[_p];
             for(var _key in _pub){
+              // Increase a 0-indexing to 1-indexing
               var _up1 = _p + 1;
+              // Create the crumbs path string
               _crumbs = "pub" + _up1 + "." + _key;
               if(_pub.hasOwnProperty(_key)){
                 if (_arrs.includes(_key)){
                   if (_key === "identifier"){
                     _crumbs = "pub" + _up1 + ".DOI";
                   }
-                  // these keys must be an array
+                  // These keys must be an array
                   verifyArrObjs(_crumbs, _pub[_key], true);
                 } else if (_key === "journal"){
-                  // this key must be an object
+                  // This key must be an object
                   verifyDataType("object", _crumbs, _pub[_key], false);
                 } else {
                   // this key must be a string
@@ -837,15 +872,25 @@ var lipdValidator = (function(){
             }
           }
         } catch (err) {
+          // Something unknown went wrong.
           console.log("validate: verifyBibJson: " + err);
         }
       };
 
       var verifyGeoJson = function(v){
-        // TODO might need to do this at some point
+        // TODO This isn't an imminent need, but we do use the GeoJSON format, so we may want to check for compliance
+        // TODO at some point.
       };
 
-      // check if the data type for a given key matches what we expect for that key
+      /**
+       * Verify that the data for a given field matches the data type that should belong to that field.
+       *
+       * @param {String} dt        Data type - string, array, or object
+       * @param {String} k         The key name / field name that this data belongs to.
+       * @param {*}      v         The object to be tested for the given data type
+       * @param {Boolean} addToLog Whether or not this feedback ought to be logged
+       * @return {Boolean} : Data type is or isn't the correct type
+       */
       var verifyDataType = function (dt, k, v, addToLog) {
         try {
           // special case: check for object array.
@@ -879,7 +924,14 @@ var lipdValidator = (function(){
         return true;
       };
 
-      // Check for an Array with objects in it.
+      /**
+       * Check the given data (v) is an Array with objects in it.
+       *
+       * @param {String}  k         The key name / field name that this data belongs to.
+       * @param {*}       v         The object to be tested for the given data type
+       * @param {Boolean} addToLog  Whether or not this feedback ought to be logged
+       * @return {Boolean}          Data type is or isn't the correct type
+       */
       var verifyArrObjs = function (k, v, addToLog) {
         try{
           var isArr = verifyDataType("array", k, v, addToLog);
@@ -898,8 +950,14 @@ var lipdValidator = (function(){
         }
       };
 
-      // Column counts fluctuate throughout the playground workflow. Check for paired metadata-values during each
-      // validation cycle
+      /**
+       * Column counts fluctuate throughout the playground workflow. Check for paired metadata-values during each
+       * validation cycle.
+       *
+       * @param  {Object} csvs   Table data values that are sorted by filename. Accompanied by metadata about the values
+       *                         (delimiter, column count, row count, etc)
+       * @return {Object}        The same csv data object, but with updated column counts
+       */
       var correctColumnCounts = function(csvs){
         for(var _filename in csvs){
           if(csvs.hasOwnProperty(_filename)){
@@ -917,7 +975,16 @@ var lipdValidator = (function(){
         return csvs;
       };
 
-      // check that column count in a table match the column count in the CSV data
+      /**
+       * Compare the column count of the table values with the column count stored in metadata. Log an error if these
+       * do not match
+       *
+       * Column count metadata is accessed from the global scope
+       *
+       * @param {String} filename   The csv filename of the current table data
+       * @param {Object} columns    Column values (full table) stored as nested arrays.
+       * @return None               Feedback is logged to global scope
+       */
       var requiredColumnsCtMatch = function (filename, columns) {
         // Fix the column counts.
         files.csv = correctColumnCounts(files.csv);
@@ -981,10 +1048,11 @@ var lipdValidator = (function(){
       }; // end requiredColumnsCtMatch fn
 
       /**
-       * Check _multiple_ publications for required keys
-       * Publication data is not mandatory, but if present, it must have the required keys
+       * Loop over each publication entry and check for required keys.
+       * Publication data is not required, but if an entry is present, certain data is required.
        *
-       * @param {object} D Metadata
+       * @param {object} D LiPD Metadata
+       * @return None      Feedback is logged to global scope
        */
       var requiredPubs = function (D) {
         try {
@@ -1017,16 +1085,16 @@ var lipdValidator = (function(){
           }
         } catch (err) {
           console.log("validator: requiredPub: " + err);
-          logFeedback("warn", "Encountered problem validating: pub");
+          logFeedback("warn", "Encountered problem validating: Publication", null);
         }
       };
 
       /**
-       * Check _one_ publication for required keys
+       * Check one publication entry for required keys
        *
-       * @param {object} pub Metadata
-       * @param {string} crumbs
-       * @param {Array} pubKeys Required pub keys
+       * @param {object} pub       Metadata for this one publication entry
+       * @param {string} crumbs    Path crumbs leading to this location
+       * @param {Array}  pubKeys   Required publication keys
        */
       var requiredPub = function(pub, crumbs, pubKeys){
         try{
@@ -1048,7 +1116,13 @@ var lipdValidator = (function(){
         }
       };
 
-      // checks if there is coordinate information needed to plot a map of the location
+      /**
+       * Does coordinate information exist to plot a map? Are the coordinates within the correct range for
+       * longitude and latitude values?
+       *
+       * @param {object} m   Metadata (all)
+       * @return None        Feedback is logged to the global scope
+       */
       var requiredGeo = function (m) {
         try {
           // COORDINATE CHECKS
@@ -1095,7 +1169,14 @@ var lipdValidator = (function(){
         }
       };
 
-      // Error log: Tally the error counts, and log messages to user
+      /**
+       * Error log: Tally the error counts, and log feedback to be relayed to the user.
+       *
+       * @param {String} errType  Type of error: warn, pos, err
+       * @param {String} msg      Error or warning message that is displayed
+       * @param {String} key      The key that caused the error
+       * @return None             Feedback is logged to the global scope
+       */
       var logFeedback = function (errType, msg, key) {
         try{
           key = key || "";
@@ -1103,6 +1184,7 @@ var lipdValidator = (function(){
             feedback.wrnCt++;
             feedback.wrnMsgs.push(msg);
           } else if (key === "TSid") {
+            // TSid errors are tallied into a counter, because we want to consolidate into one error message.
             feedback.missingTsidCt++;
             feedback.tsidMsgs.push(msg);
           } else if (errType === "err") {
@@ -1116,7 +1198,12 @@ var lipdValidator = (function(){
         }
       };
 
-      // verify the 4 bagit files are present, indicating a properly bagged LiPD file.
+      /**
+       * Verify the 4 bagit files are present, indicating a properly bagged LiPD file.
+       *
+       * @param {Object} files   List of files found in the LiPD archive.
+       * @return None            Feedback is logged to the global scope
+       */
       var verifyBagit = function (files) {
         try{
           // Bagit filenames are static. Check that each is present.
@@ -1127,12 +1214,16 @@ var lipdValidator = (function(){
           if(pageMeta.fileUploaded){
             var count = 0;
             var errors = 0;
+            // Loop for each required filename
             validBagitFiles.forEach(function (filename) {
+              // Check if the required filename is in the uploaded files.
               if (files.hasOwnProperty(filename)) {
+                // Yes, file present.
                 count++;
               } else {
+                // No, file is missing.
                 errors++;
-                logFeedback("warn", "Missing bagit file: " + filename);
+                logFeedback("warn", "Missing bagit file: " + filename, null);
               }
             });
             // Requires 4 bagit files to be valid bagit
@@ -1151,7 +1242,8 @@ var lipdValidator = (function(){
        * Verify that the Wiki required fields are present when the user wishes to meet Wiki standards.
        * Data is split into "required" and "preferred" fields, and logged as errors and warnings respectively.
        *
-       * @param D Metadata
+       * @param {Object} D      Metadata
+       * @return None
        *
        */
       var verifyWiki = function (D){
@@ -1167,7 +1259,8 @@ var lipdValidator = (function(){
        * Verify that the NOAA required fields are present when the user wishes to meet NOAA standards.
        * Data is split into "required" and "preferred" fields, and logged as errors and warnings respectively.
        *
-       * @param D Metadata
+       * @param {Object} D  Metadata
+       * @return None
        */
       var verifyNoaa = function(D){
         var _opts = {"mode": "NOAA", "ready": pageMeta.noaaReady, "keys": _noaa_validate, "count": feedback.errCtNoaa};
@@ -1179,13 +1272,15 @@ var lipdValidator = (function(){
       };
 
       // NOAA
+
       /**
        * Verify that the NOAA required fields are present when the user wishes to meet NOAA standards.
        * Data is split into "required" and "preferred" fields, and logged as errors and warnings respectively.
        *
-       * @param D Metadata
-       * @param opts Parameters that are needed depending on the mode being run (noaa v. wiki)
-       * @param cb Callback
+       * @param {Object} D       Metadata
+       * @param {Object} opts    Parameters that are needed depending on the mode being run (noaa v. wiki)
+       * @param {Function} cb    Callback
+       * @return None
        */
       var verifyNoaaWiki = function(D, opts, cb){
         if(opts.ready){
@@ -1272,15 +1367,17 @@ var lipdValidator = (function(){
       };
 
       /**
-       * Check _multiple_ tables for required keys
+       * Check multiple tables for required keys
        *
-       * @param {object} tables Metadata
-       * @param {string} crumbs Crumbs for path so far
-       * @param {object} keys Keys to look for
-       * @param {string} mode NOAA or Wiki mode
+       * @param {Object} tables   Metadata
+       * @param {String} crumbs   Crumbs for path so far
+       * @param {Object} keys     Keys to look for
+       * @param {String} mode     NOAA or Wiki mode
+       * @return None
        */
       var requiredTablesNoaaWiki = function(tables, crumbs, keys, mode){
         try{
+          // Loop over all the tables
           for (var _w = 0; _w < tables.length; _w++) {
             requiredTableNoaaWiki(tables[_w], crumbs + _w, keys, mode);
           }
@@ -1290,12 +1387,13 @@ var lipdValidator = (function(){
       };
 
       /**
-       * Check _one_ table for required keys
+       * Check one table for required NOAA or Wiki keys
        *
-       * @param {object} table Metadata
-       * @param {string} crumbs Crumbs for path so far
-       * @param {object} keys Keys to look for
-       * @param {string} mode NOAA or Wiki mode
+       * @param {Object} table     Metadata
+       * @param {String} crumbs    Crumbs for path so far
+       * @param {Object} keys      Keys to look for
+       * @param {String} mode      NOAA or Wiki mode
+       * @return None
        */
       var requiredTableNoaaWiki = function (table, crumbs, keys, mode) {
         try {
@@ -1313,13 +1411,14 @@ var lipdValidator = (function(){
       }; // end requiredTable fn
 
       /**
-       * Check _one_ table for required keys
+       * Check one table for required keys
        *
-       * @param {object} column Metadata
-       * @param {string} crumbs Crumbs for path so far
-       * @param {string} mode NOAA or Wiki mode
-       * @param {string} lvl err or warn log level
-       * @param {object} keys Keys to look for
+       * @param  {Object} column   Metadata
+       * @param  {String} crumbs   Crumbs for path so far
+       * @param  {String} mode     NOAA or Wiki mode
+       * @param  {String} lvl      err or warn log level
+       * @param  {Object} keys     Keys to look for
+       * @return None
        */
       var requiredColumnNoaaWiki = function (column, crumbs, mode, lvl, keys){
         try{
@@ -1382,6 +1481,14 @@ var lipdValidator = (function(){
         }
       };
 
+      /**
+       *
+       * Use the error counts to determine if this data passes or fails the validation process
+       *
+       * @param  {Number}   count  Error count
+       * @param  {Function} cb     Callback
+       * @return None
+       * */
       var checkPassFail = function(count, cb){
         if(count === 0){
           cb("PASS");
@@ -1399,38 +1506,9 @@ var lipdValidator = (function(){
        * This helps prevent bad filenames when there are small dataset name differences.
        * i.e. "Smith_Lake" and "Smith.Lake" would end up as "Smith_LakeSmith.Lake.paleo0measurement0.csv"
        *
-       * @param {object} csvs Csv data sorted by filename
-       * @param {object} csvs Csv data sorted by (new) filename
-       */
-      // var simplifyCsvFilenames = function(csvs){
-      //   for(var _filename in csvs){
-      //     if(csvs.hasOwnProperty(_filename)){
-      //       if(_filename.indexOf("paleo") !== -1){
-      //         var _newfilename = _filename.substring(_filename.indexOf("paleo"));
-      //         csvs[_newfilename] = csvs[_filename];
-      //         delete csvs[_filename];
-      //       }
-      //       else if (_filename.indexOf("chron") !== -1){
-      //           var _newfilename2 = _filename.substring(_filename.indexOf("chron"));
-      //           csvs[_newfilename2] = csvs[_filename];
-      //           delete csvs[_filename];
-      //       }
-      //     }
-      //   }
-      //   console.log("NEW FILENAMES");
-      //   console.log(csvs);
-      //   return csvs;
-      // };
-
-      /**
-       * Simplify the CSV filenames. Remove the dataset name, or other prefixes, from the filename.
-       * i.e. Smith.paleo0measurement0.csv  becomes  paleo0measurement0.csv
-       *
-       * This helps prevent bad filenames when there are small dataset name differences.
-       * i.e. "Smith_Lake" and "Smith.Lake" would end up as "Smith_LakeSmith.Lake.paleo0measurement0.csv"
-       *
-       * @param {string} old_filename Original filename found in the LiPD upload
-       * @param {string} new_filename Standardized filename created with crumbs
+       * @param   {String} old_filename   Original filename found in the LiPD upload
+       * @param   {String} new_filename   Standardized filename created with crumbs
+       * @return  {String} new_filename   Standardized filename that is now being used
        */
       var reconcileCsvFilenames = function(old_filename, new_filename){
         if(files.csv.hasOwnProperty(old_filename)){
@@ -1442,7 +1520,12 @@ var lipdValidator = (function(){
         return new_filename;
       };
 
-      // create a csv filename for a data table
+      /**
+       * Create a csv filename for a data table
+       *
+       * @param   {String}  crumbs   The path crumbs leading up to this table. This creates the filename we want.
+       * @returns {string}           The filename built from crumbs. Returned so other functions know what filename we used.
+       */
       var createCsvFilename = function(crumbs){
         var _filename = crumbs + ".csv";
         try{
@@ -1457,43 +1540,105 @@ var lipdValidator = (function(){
         return _filename;
       };
 
-      // Check that geo coordinates are within the proper latitude and longitude ranges.
+      /**
+       * Check that geo coordinates are within the proper latitude and longitude ranges.
+       *
+       * @param   {Number}  start  The start of the coordinate range
+       * @param   {Number}  end    The end of the coordinate range
+       * @param   {Number}  val    Coordinate value to check
+       * @returns {Boolean}        True if number in range, false if not.
+       */
       var numberInRange = function (start, end, val) {
         return val >= start && val <= end
       };
 
+      /**
+       * Online Resource structure changed in v1.3 to allow multiple entries to be added.
+       * Formerly, onlineResource and onlineResourceDescription had single entry string values.
+       * Now, onlineResourceDescription is removed, and onlineResource is an array with the possbility of multiple
+       * entries. Each array entry will have the 'onlineResource', and 'description' to accompany it.
+       *
+       * @param   {Object}  j   LiPD Metadata
+       * @returns {Object}  j   LiPD Metadata (with corrected onlineResource structure)
+       */
+      var fixOnlineResource = function(j){
+        // Use the metadata to determine if onlineResource and onlineResourceDescription are strings. (old format)
+        // If so, change them to an entry within an array (new format)
+        if(j.hasOwnProperty("onlineResource")){
+          if(!Array.isArray(j.onlineResource)){
+            console.log("fixing onlineResource");
+            // This onlineResource is not an array, so it must be a string. Make it an object within an array.
+            j.onlineResource = [{"onlineResource": j.onlineResource}]
+
+          }
+        }
+        if(j.hasOwnProperty("onlineResourceDescription")){
+          if(j.onlineResource.length > 0){
+              if(!j.onlineResource[0].hasOwnProperty("description")){
+                console.log("fixing description");
+                j.onlineResource[0]["description"] = j.onlineResourceDescription;
+                delete j.onlineResourceDescription;
+              }
+          }
+        }
+        return j;
+      };
+
+      /**
+       * The 'author' field in publication is often structured incorrectly. Either the field is stored as "authors"
+       * (plural), the values are stored as a single string of many author names, or the values are stored as an array.
+       *
+       * Wrong: "Smith, K; Jones, D; Long, W;"
+       * Wrong: ["Smith, K", "Jones, D", "Long, W"]
+       * Correct: [{"name": "Smith, K"}, {"name": "Jones, D"}, {"name": "Long, W"}]
+       *
+       *
+       * @param p
+       * @returns {*}
+       */
       var fixAuthor = function(p){
         try {
+          // The output array. This will hold the correctly formatted author data
           var _d = [];
+
+          // Loop through each publication entry
           for (var _u = 0; _u < p.length; _u++){
+            // Does the 'authors' field exist? If so, correct it.
             if(p[_u].hasOwnProperty("authors")){
-              p[_u].author = p[_u].authors;
-              delete p[_u].authors;
+              // Create a new field called 'author' and give it the data that is found under 'authors'
+              p[_u]['author'] = p[_u]['authors'];
+              // Now delete 'authors'. It's the wrong field name.
+              delete p[_u]['authors'];
             }
           } // end for loop authors key
 
-          // for loop each pub
+          // Loop through each publication entry
           for (var _e = 0; _e < p.length; _e++){
+            // Does the author field exist?
             if(p[_e].hasOwnProperty("author")){
+              // If the data type is a string
               if (typeof(p[_e].author) === "string"){
                 var _split = [];
+                // If each author name is separated by "and", split the string.
                 if (p[_e].author.indexOf("and") !== -1){
                   _split = p[_e].author.split(" and ");
-                } // if author string sep by "and"
+                } // If each author name is separated by semicolon ;
                 else if (p[_e].author.indexOf(";") !== -1){
                   _split = p[_e].author.split(";");
-                } // if author string sep by ";"
+                }
+                // For each author name that we parsed from the string, push it onto output array as an entry.
                 for (var _a = 0; _a < _split.length; _a++){
                   _d.push({"name": _split[_a]});
                 }
-                // set the new object in place of the old string.
+                // Set the new, correct array as the entry to the author field.
                 p[_e].author = _d;
               } // end if author value is string
 
-              // author is an array of strings (one name per entry)
-              else if (Array.isArray(p[_e].author)){
+              // Author is an array of strings (one author name per entry)
+              else if (Array.isArray(p[_e]['author'])){
                 try{
-                  if (p[_e].author[0] && typeof(p[_e].author[0])=== "string"){
+                  // Loop over each author name, and check if the entry is a string.
+                  if (p[_e]['author'][0] && typeof(p[_e]['author'][0])=== "string"){
                     for (var _c = 0; _c < p[_e].author.length; _c++){
                       _d.push({"name": p[_e].author[_c]});
                     }
@@ -1503,67 +1648,94 @@ var lipdValidator = (function(){
                   console.log("validate: fixAuthor: " + err);
                 }
               }
-            } // if pub had author entry
-          } // for loop author data type
+            } // end if pub had author entry
+          } // end for loop author data type
         } catch(err){
           console.log("validate: fixAuthor: " + err);
         }
         return p;
       };
 
+      /**
+       * Get the LiPD verson from the LiPD metadata. Why is the extra footwork necessary? Well, because there are
+       * multiple ways that the "lipdVersion" string exists for some reason.
+       *
+       * @param   {Object}   D             LiPD Metadata
+       * @returns {String}   _lipdVersion  The string representing the LiPD version number. Currently 1.0 to 1.3
+       */
       var getLipdVersion = function(D){
         try{
+          // Bool to determine if field is found or not.
           var _found = false;
+          // Possible Keys. lipdVersion is the correct casing for this field.
           var _keys = ["lipdVersion", "LiPDVersion", "liPDVersion"];
-          var _lipdVersion = "1.0";
+          // Default version in case we don't find one.
+          var _lipdVersion = "1.3";
 
+          // Loop for each possbile casing of the lipdVersion key.
           for(var _i=0; _i<_keys.length; _i++){
             if(D.hasOwnProperty(_keys[_i])) {
               // Cast to float
               _lipdVersion = D[_keys[_i]].toString();
               // Remove the key in case it's one that's not the standard 'lipdVersion'
               delete D[_keys[_i]];
+              // Note that we found the lipdVersion
               _found = true;
             }
           }
+          // No LiPD version found. We'll assume it's version 1.3, but if that's wrong, the file may not load properly.
           if(!_found){
-            logFeedback("warn", "LiPD Version unknown. Defaulting to v1.3. Results may be inaccurate");
+            logFeedback("warn", "LiPD Version unknown. Defaulting to v1.3. Results may be inaccurate", null);
           }
-          // The given lipdVersion is not one of the allowed values
+          // The given lipdVersion is not one of the allowed values. Neither in string or float form.
           if (["1.0", "1.1", "1.2", "1.3", 1.0, 1.1, 1.2, 1.3].indexOf(_lipdVersion) === -1){
-            logFeedback("err", "Invalid LiPD Version: " + _lipdVersion);
+            logFeedback("err", "Invalid LiPD Version: " + _lipdVersion, null);
           }
           return _lipdVersion;
         } catch(err){
           console.log("processData: getLipdVersion: " + err);
+          return _lipdVersion;
         }
       };
 
       // HELPERS  - INFERRED DATA CALCULATIONS
+
+      /**
+       * Top level
+       * Calculate inferred data for all the values in this dataset.
+       *
+       *  WORKFLOW
+       *   1. Get Table data.  (IGNORE ENSEMBLES)
+       *   2. Calculate Resolution (when applicable)
+       *   2a. look for "age", "year", "yrbp" in column variable names. case - insensitive
+       *   2b. if no age year or yrbp exact matches found, try to find a variable name match loosely. with word in it.
+       *   2c. if you find some sort of age, calculate resolution
+       *   3. Calculate inferred data
+       *
+       *
+       *  RULES
+       *   Remove all NaNs before calculating
+       *   Do not make resolution calculations on age or year columns
+       *   Do not make calculations on columns that have string values
+       *   Resolution values are always positive. Absolute values.
+       *   We want Mean, Median, Max, Min
+       *
+       * @param    {Object}  jsons  LiPD Metadata
+       * @param    {Object}  csvs   Csv data, sorted by filename
+       * @returns  {Object}  jsons  LiPD Metadata (with inferred data in each data table column)
+       */
       var calculateInferredValues = function(jsons, csvs){
 
-          // WORKFLOW
-          // 1. Get Table data.  (IGNORE ENSEMBLES)
-          // 2. Calculate Resolution (when applicable)
-          // 2a. look for "age", "year", "yrbp" in column variable names. case - insensitive
-          // 2b. if no age year or yrbp exact matches found, try to find a variable name match loosely. with word in it.
-          // 2c. if you find some sort of age, calculate resolution
-          // 3. Calculate inferred data
-
-          // RULES
-          // Remove all NaNs before calculating
-          // Do not make resolution calculations on age or year columns
-          // Do not make calculations on columns that have string values
-          // Resolution values are always positive. Absolute values.
-          // We want Mean, Median, Max, Min
-
-          // Work your way down the tree and loop over all data tables.
+          // Work your way down the metadata levels and loop over all data tables.
           var _keys = ["paleoData", "chronData"];
           for(var _keyidx = 0; _keyidx <_keys.length; _keyidx++){
+              // Get a paleo or chron key
               var _pc = _keys[_keyidx];
               if(jsons.hasOwnProperty(_pc)){
+                  // Loop for each entry in paleoData/chronData
                   for(var _a = 0; _a < jsons[_pc].length; _a++){
                       if(jsons[_pc][_a].hasOwnProperty("measurementTable")){
+                          // Loop for each measurement table
                           for(var _met = 0; _met < jsons[_pc][_a]["measurementTable"].length; _met++){
                               var _currTable = jsons[_pc][_a]["measurementTable"][_met];
                               // Down to a single table. Send that table forward to processing
@@ -1576,6 +1748,12 @@ var lipdValidator = (function(){
           return jsons;
       };
 
+      /**
+       * Calculate the mean of a numeric array
+       *
+       * @param   {Array}   numbers  An array of numbers
+       * @returns {Number}           The mean of the array of numbers
+       */
       function mean(numbers) {
         // Find the mean of the given numeric array.
           var total = 0, i;
@@ -1585,6 +1763,12 @@ var lipdValidator = (function(){
           return total / numbers.length;
       }
 
+      /**
+       * Calculate the median of a numeric array
+       *
+       * @param   {Array}   numbers  An array of numbers
+       * @returns {Number}           The median of the array of numbers
+       */
       function median(numbers) {
           // Find the median of the given numeric array.
           // median of [3, 5, 4, 4, 1, 1, 2, 3] = 3
@@ -1604,11 +1788,19 @@ var lipdValidator = (function(){
           return median;
       }
 
+      /**
+       * Parse all values from an array as floats. Often these numbers are strings, and we want them to be floats
+       * for calculations later.
+       *
+       * @param    {Array}   numbers    An array of numbers
+       * @returns  {Array}   _numbers2  An array of numbers (as floats)
+       */
       var parseArrFloats = function(numbers){
         // Parse all the values in the given array as floats. If they're not numbers, they'll result as NaNs.
         var _numbers2 = [];
         try {
             for(var _u=0; _u<numbers.length; _u++){
+
                 _numbers2.push(parseFloat(numbers[_u]));
             }
             return _numbers2;
@@ -1617,6 +1809,13 @@ var lipdValidator = (function(){
         }
       };
 
+      /**
+       * Remove old inferred data that may still be in the columns. We want to recalculate during each validation
+       * in case any data changes or if the provided inferred data is incorrect.
+       *
+       * @param   {Object}  column  Column Metadata
+       * @returns {Object}  column  Column Metadata (possibly without former inferred data)
+       */
       var removeOldInferredData = function(column){
         // Remove inferred data from this column that might be using the old keys.
         var _rm_keys = ["mean", "median", "max", "min"];
@@ -1629,21 +1828,37 @@ var lipdValidator = (function(){
         return column;
       };
 
+      /**
+       * Check if this one row of data is only null or empty values. Sometimes this happens when value data is entered
+       * and there are extra rows or columns of empty cells that never got used or removed.
+       *
+       * @param   {Array}    row   One row of numeric values from the data table values
+       * @returns {Boolean}        True if row is all empty values, false if real values exist.
+       */
       var rowOfNulls = function(row){
-        // Check if this whole row of value data is null or empty values.
         var _count = 0;
         var _cur = "";
+        // Loop for each value
         for(var _p=0; _p<row.length; _p++){
           _cur = row[_p];
+          // Is it a null or empty value?
           if(_cur === null || _cur === "" || _cur === undefined){
             _count++;
           } else {
+            // Value is good, that means that at least one entry is a real value and we can quit.
             return false;
           }
         }
         return true;
       };
 
+      /**
+       * Loop through each data table and each row of values to find and remove any empty rows. Sometimes this happens
+       * when value data is entered and there are extra rows or columns of empty cells that never got used or removed.
+       *
+       * @param    {Object}   csv   All value data, sorted by filename
+       * @returns  {Object}   csv   All value data, sorted by filename (without empty data rows)
+       */
       var removeEmptyValueRows = function(csv){
         // Loop over all our value data rows and remove any rows that are empty data placeholders.
         for(var _filename in csv){
@@ -1651,7 +1866,7 @@ var lipdValidator = (function(){
             if(csv[_filename].hasOwnProperty("data")){
               // Start at the end of the values arrays and work backwards. Null rows are at the bottom.
               for(var _i=csv[_filename].data.length-1; _i>0; _i--){
-
+                // Is this a null row?
                 if(rowOfNulls(csv[_filename].data[_i])){
                   csv[_filename].data.pop();
                 }
@@ -1661,116 +1876,22 @@ var lipdValidator = (function(){
             csv[_filename].transposed = misc.transpose(csv[_filename].data);
           }
         }
+        // Return the corrected value data
         return csv;
-
       };
 
-      var calculateInferredColumn = function(table, _values){
-          // Loop over all columns in the table.
-          for(var _i=0; _i<table.columns.length; _i++){
 
-                  // Grab the values for this column.
-                  var _current_values = parseArrFloats(_values[_i]);
-                  try{
-                      // Return an array that shows where all the non-NaN values are in the _values array.
-                      var _cleanValues = _current_values.filter(function(number) {
-                          if (!isNaN(number) && number !== null)
-                              return parseFloat(number);
-                      });
-                      // Only continue if the array has numeric values.
-                      if(_cleanValues.length > 0){
-                          // Place all calculations directly in the column.
-                          table.columns[_i]["hasMean"] = mean(_cleanValues);
-                          table.columns[_i]["hasMedian"] = median(_cleanValues);
-                          table.columns[_i]["hasMax"] = Math.max(..._cleanValues);
-                          table.columns[_i]["hasMin"] = Math.min(..._cleanValues);
-                          // Remove the old inferred data keys if they exist.
-                          table.columns[_i] = removeOldInferredData(table.columns[_i]);
-
-                      } else {
-                          // console.log("Error calculateInferredColumn: No array values. No inferred data.");
-                      }
-                  } catch(err){
-                      console.log("Error calculateInferredColumn: main: ", err);
-                  }
-          }
-          return table;
-
-      };
-
-      var calculateResolution = function(table, _values, age){
-        // Loop over all columns in the table.
-        for(var _i=0; _i<table.columns.length; _i++){
-          // Get the variableName for this column.
-          var _name = table.columns[_i].variableName;
-          // Is this the age column? Skip. Is this not the age column? Keep going.
-          if(_name !== age.variableName){
-            // Grab the values for this column.
-            var _current_values = _values[_i];
-            try{
-                var _isNotNaN = 0;
-                // Return an array that shows where all the non-NaN values are in the _values array.
-                if(typeof _current_values !== "undefined"){
-                    _isNotNaN = _current_values.reduce(function(a, e, i) {
-                        if (!isNaN(e))
-                            a.push(i);
-                        return a;
-                    }, []);
-                }
-
-                // Only continue if the array has numeric values.
-                if(_isNotNaN.length > 0){
-                    // Create an array where we'll store the
-                    var _age2 = [];
-                    // Loop over the good non-NaN indicies that we found.
-                    for(var _p=0; _p<_isNotNaN.length; _p++){
-                        try{
-                            // Use the non-NaN indicies from the _values array, to grab indices from the age array.
-                            var _idx = _isNotNaN[_p];
-                            // Push the age value from N index onto our _age2 array, which is what we'll use to calculate resolution.
-                            _age2.push(age.values[_idx]);
-                        } catch(err){
-                            // In a perfect world, both the age and values array should be the same length.
-                            // But catch the error just in case. Who knows.
-                            console.log("Error calculateResolution: creating age2: ", err);
-                        }
-                    }
-
-                    // Calculate the resolution. This is the diff of the _age2 array.
-                    var _resolution = [];
-                    // Loop until n-1, since our resulting array will be 1 length less than the original.
-                    for(var _n=0;_n<_age2.length-1;_n++){
-                        var _upper = parseFloat(_age2[_n+1]);
-                        var _lower = parseFloat(_age2[_n]);
-                        var _val = Math.abs(_upper-_lower);
-                        if(_val !== null && _val !== "undefined" && !isNaN(_val)){
-                          _resolution.push(Math.abs(_upper-_lower));
-                        }
-                    }
-
-                    var _mmmm = {
-                      "hasMean": mean(_resolution),
-                      "hasMedian": median(_resolution),
-                      "hasMax": Math.max(..._resolution),
-                      "hasMin": Math.min(..._resolution)
-                    };
-
-                    table.columns[_i]["hasResolution"] = _mmmm;
-
-                } else {
-                  // console.log("calculateResolution: No array values. No resolution.");
-                }
-
-            } catch(err){
-              console.log("Error: calculateResolution: main: ", err);
-            }
-          }
-        }
-
-        return table;
-
-      };
-
+      /**
+       *  Inferred data main
+       *
+       *  Use the data table values to calculate inferred data for each column. Where necessary, calculate resolution
+       *  as well.
+       *
+       * @param   {Object}   table  Table metadata
+       * @param   {Object}   csvs   All value data, sorted by filename
+       * @param   {String}   pc     paleo or chron string to indicate how to process this table
+       * @returns {Object}   table  Table metadata (with inferred data)
+       */
       var getInferredDataTable = function(table, csvs, pc) {
           // Placeholder for age data.
           var _age = {"variableName": null, "values": null};
@@ -1802,13 +1923,142 @@ var lipdValidator = (function(){
                   console.log("Table missing columns or filename:" + table.tableName);
               }
           }
+          return table;
+      };
 
+      /**
+       * Inferred data at table / column level
+       *
+       * Use the specific table and table values given to loop over each column and calculate the inferred data.
+       *
+       * @param   {Object}   table    Table metadata
+       * @param   {Object}   _values  The table values that go with this table metadata.
+       * @returns {Object}   table    Table metadata (with inferred data)
+       */
+      var calculateInferredColumn = function(table, _values){
+          // Loop over all columns in the table.
+          for(var _i=0; _i<table.columns.length; _i++){
 
+                  // Grab the values for this column.
+                  var _current_values = parseArrFloats(_values[_i]);
+                  try{
+                      // Return an array that shows where all the non-NaN values are in the _values array.
+                      var _cleanValues = _current_values.filter(function(number) {
+                          if (!isNaN(number) && number !== null)
+                              return parseFloat(number);
+                      });
+                      // Only continue if the array has numeric values.
+                      if(_cleanValues.length > 0){
+                          // Place all calculations directly in the column.
+                          table.columns[_i]["hasMean"] = mean(_cleanValues);
+                          table.columns[_i]["hasMedian"] = median(_cleanValues);
+                          table.columns[_i]["hasMax"] = Math.max(..._cleanValues);
+                          table.columns[_i]["hasMin"] = Math.min(..._cleanValues);
+                          // Remove the old inferred data keys if they exist.
+                          table.columns[_i] = removeOldInferredData(table.columns[_i]);
 
+                      } else {
+                          // console.log("Error calculateInferredColumn: No array values. No inferred data.");
+                      }
+                  } catch(err){
+                      console.log("Error calculateInferredColumn: main: ", err);
+                  }
+          }
+          // Return the table with inferred data
           return table;
 
       };
 
+      /**
+       * Calculate the resolution when:
+       *
+       * 1. There is age data
+       * 2. It's a paleoData table
+       *
+       * Loop over each column that is NOT the age column, and calculate the resolution.
+       *
+       * @param    {Object}  table     Table metadata
+       * @param    {Object}  _values   The table values that go with this table metadata.
+       * @param    {Object}  age       Contains age variableName and age values data
+       * @returns  {Object}  table     Table metadata (with resolution)
+       */
+      var calculateResolution = function(table, _values, age){
+        // Loop over all columns in the table.
+        for(var _i=0; _i<table.columns.length; _i++){
+          // Get the variableName for this column.
+          var _name = table.columns[_i].variableName;
+          // Is this the age column? Skip. Is this not the age column? Keep going.
+          if(_name !== age['variableName']){
+            // Grab the values for this column.
+            var _current_values = _values[_i];
+            try{
+                var _isNotNaN = 0;
+                // Return an array that shows where all the non-NaN values are in the _values array.
+                if(typeof _current_values !== "undefined"){
+                    _isNotNaN = _current_values.reduce(function(a, e, i) {
+                        if (!isNaN(e))
+                            a.push(i);
+                        return a;
+                    }, []);
+                }
+                // Only continue if the array has numeric values.
+                if(_isNotNaN.length > 0){
+                    // Create an array where we'll store the
+                    var _age2 = [];
+                    // Loop over the good non-NaN indicies that we found.
+                    for(var _p=0; _p<_isNotNaN.length; _p++){
+                        try{
+                            // Use the non-NaN indicies from the _values array, to grab indices from the age array.
+                            var _idx = _isNotNaN[_p];
+                            // Push the age value from N index onto our _age2 array, which is what we'll use to calculate resolution.
+                            _age2.push(age['values'][_idx]);
+                        } catch(err){
+                            // In a perfect world, both the age and values array should be the same length.
+                            // But catch the error just in case. Who knows.
+                            console.log("Error calculateResolution: creating age2: ", err);
+                        }
+                    }
+                    // Calculate the resolution. This is the diff of the _age2 array.
+                    var _resolution = [];
+                    // Loop until n-1, since our resulting array will be 1 length less than the original.
+                    for(var _n=0;_n<_age2.length-1;_n++){
+                        var _upper = parseFloat(_age2[_n+1]);
+                        var _lower = parseFloat(_age2[_n]);
+                        var _val = Math.abs(_upper-_lower);
+                        if(_val !== null && _val !== "undefined" && !isNaN(_val)){
+                          _resolution.push(Math.abs(_upper-_lower));
+                        }
+                    }
+                    // Now that we have an array of resolution values, calculate the mean-median-max-min.
+                    var _mmmm = {
+                      "hasMean": mean(_resolution),
+                      "hasMedian": median(_resolution),
+                      "hasMax": Math.max(..._resolution),
+                      "hasMin": Math.min(..._resolution)
+                    };
+                    // Place the mmmm data into the column
+                    table.columns[_i]["hasResolution"] = _mmmm;
+                } else {
+                  // console.log("calculateResolution: No array values. No resolution.");
+                }
+            } catch(err){
+              console.log("Error: calculateResolution: main: ", err);
+            }
+          }
+        }
+        // Return the table data with resolution data added
+        return table;
+      };
+
+
+      /**
+       * Attempt to find an age column. There is not currently a controlled vocabulary, so check different key names and
+       * different casings. If you find one, return the variableName and values.
+       *
+       * @param    {Object}   table   Table metadata
+       * @param    {Object}   values  The table values that go with this table metadata.
+       * @returns  {Object}   _age    Values and variableName of the age column, if found. Null if not.
+       */
       var getAgeColumn = function(table, values){
         var _age = {"variableName": null, "values": null};
         var _target_keys = ["year", "yrbp", "bp", "age"];
