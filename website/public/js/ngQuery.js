@@ -71,7 +71,7 @@ q.controller('QueryCtrl', ['$scope', '$log', '$timeout', '$q', '$http', "$uibMod
     };
 
     $scope.getTooltip = function(section, key){
-      return create.fieldMetadataLibrary(section, key);
+      return create.tooltipLibrary(section, key);
     };
 
     $scope.submitQuery = function(){

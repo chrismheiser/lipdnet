@@ -44,43 +44,112 @@ function SpreadsheetCtrl($scope){
 
   };
 
+  /**
+   * Refresh the spreadsheet view. Even though there is a two-way bind between the spreadsheet view and the 'hot'
+   * object data, the spreadsheet view often lags behind when changes or made. This is a workaround to force the
+   * view to refresh.
+   */
   $scope.refreshRender = function(){
     $scope.hot.render();
     $scope.settings.colHeaders = $scope.updateHeaders($scope.$parent.entry2);
     $scope.hot.updateSettings($scope.settings);
-
   };
 
+  /**
+   * Add a column to the given table.
+   *
+   * @param  {Object}  table   Table metadata
+   * @return none              All data is updated in controller $scope
+   */
   $scope.addColumn = function(table){
+    // The table values data does not exist yet
     if(typeof($scope.$parent.files.csv[table.filename]) === "undefined"){
+      // Create a blank table with a standard 5 rows and 1 column.
       $scope.$parent.files.csv[table.filename] = {data: [[]], rows: 5, cols: 1};
-    } else {
+    }
+    // The table values data exists.
+    else {
+      // Add an empty array to the csv data to represent the new column
       $scope.$parent.files.csv[table.filename].data.push([]);
+      // Increment the column counter in the table metadata
       $scope.$parent.files.csv[table.filename].cols++;
     }
+    // The table metadata does not exist yet
     if(typeof(table.columns) === "undefined") {
+      // Create the columns array with one column in it.
       table.columns = [{"number": 1}];
-    } else {
+    }
+    // The table metadata exists
+    else {
+      // Add a metadata column to the existing columns array
       table.columns.push({"number": table.columns.length + 1});
     }
   };
 
-  $scope.removeColumn = function(table){
-    // Remove this index from each row IF it exists. Blank columns often don't exist in csv data
-    var _rm_idx = table.columns.length;
-    if(typeof(table.columns) !== "undefined"){
-      table.columns.pop();
-      for(var _p=0; _p<$scope.$parent.files.csv[table.filename].data.length; _p++){
-        if($scope.$parent.files.csv[table.filename].data[_p].length === _rm_idx){
-          $scope.$parent.files.csv[table.filename].data[_p].pop();
-        }
+  /**
+   * Remove a column of data from the data table.
+   * This process involves removing the column metadata from the json data, and removing associated column values
+   * from the csv data. Any column
+   *
+   * @param   {Object}  table    Table metadata
+   * @param   {Number}  index    Column index to remove. If null, then remove last column.
+   * @return  none               All data is modified in the controller $scope
+   */
+  $scope.removeColumn = function(table, index){
+      try{
+          // Set a placeholder for index to remove
+          var _rm_idx = null;
+
+          // Target index number is provided
+          if(index !== null){
+              // Set the target index number for the column to delete.
+              _rm_idx = index;
+          }
+          // Target index number not provided
+          else {
+              // By default, remove the last column in the table.
+              _rm_idx = table.columns.length-1 ;
+          }
+          // Since arrays are 0-indexed (ie. _rm_idx), keep a 1-indexed number for later.
+          var _oneidx = _rm_idx + 1;
+
+          // Table columns exist
+          if(typeof(table.columns) !== "undefined"){
+              // If the target index is a real index
+              if (_rm_idx > -1) {
+                  // Remove the column value at the target index.
+                  table.columns.splice(_rm_idx, 1);
+              }
+              // Loop over each row of data in this table
+              for(var _p=0; _p<$scope.$parent.files.csv[table.filename].data.length; _p++){
+                  // If this row of data is as long as the index that needs to be removed, then pop the end of the array.
+                  // Example: if we want to remove index 3, but this row only has index [0,1,2], then we don't need to do anything
+                  // Every row should have an equal number of values, but that's not always true.
+                  try{
+                      // If the column exists in this row of data, keep going.
+                      if($scope.$parent.files.csv[table.filename].data[_p].length >=  _oneidx){
+                          // In the current row, remove the value at the target index.
+                          $scope.$parent.files.csv[table.filename].data[_p].splice(_rm_idx, 1);
+                      }
+                  } catch (err){
+                      console.log("Error removeColumn: ", err);
+                  }
+
+              }
+              // Column count exists
+              if($scope.$parent.files.csv[table.filename].hasOwnProperty("cols")){
+                  // Decrement the column count
+                  $scope.$parent.files.csv[table.filename].cols--;
+              }
+              // Column count does not exist
+              else {
+                  // Get the current column count from the spreadsheet and set that as the current column count.
+                  $scope.$parent.files.csv[table.filename].cols = $scope.hot.countCols();
+              }
+          }
+      } catch (err){
+          console.log(err);
       }
-      if($scope.$parent.files.csv[table.filename].hasOwnProperty("cols")){
-        $scope.$parent.files.csv[table.filename].cols--;
-      } else {
-        $scope.$parent.files.csv[table.filename].cols = $scope.hot.countCols();
-      }
-    }
 
   };
 

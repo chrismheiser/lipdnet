@@ -21,6 +21,229 @@ if(!dev){
 }
 
 // HELPERS
+
+// 12.18.18 :  Snapshot of the Wiki ontology data. Use if our real-time requests aren't working.
+var _ontology_fallback = {
+        "inferredVariableType": [
+            "d18o",
+            "uncertainty temperature",
+            "temperature1",
+            "temperature2",
+            "temperature3",
+            "uncertainty temperature1",
+            "thermocline temperature",
+            "sedimentation rate",
+            "relative sea level",
+            "sea surface salinity",
+            "accumulation rate",
+            "mean accumulation rate",
+            "accumulation rate, total organic carbon",
+            "accumulation rate, calcium carbonate",
+            "sampledata",
+            "subsurface temperature",
+            "Radiocarbon age",
+            "Sea surface temperature",
+            "Carbonate ion concentration",
+            "Year",
+            "Temperature",
+            "Salinity",
+            "Age"
+        ],
+        "archiveType": [
+            "borehole",
+            "bivalve",
+            "documents",
+            "molluskshell",
+            "lake",
+            "Hybrid",
+            "Tree",
+            "Coral",
+            "Marine sediment",
+            "Wood",
+            "Lake sediment",
+            "Sclerosponge",
+            "Glacier ice",
+            "Rock",
+            "Speleothem"
+        ],
+        "proxyObservationType": [
+            "diffusespectralreflectance",
+            "julianday",
+            "d18o",
+            "trw",
+            "dust",
+            "chloride",
+            "sulfate",
+            "nitrate",
+            "depth",
+            "mg",
+            "x-rayfluorescence",
+            "dd",
+            "ghostmeasured",
+            "trsgi",
+            "mg ca",
+            "samplecount",
+            "segment",
+            "ringwidth",
+            "residual",
+            "ars",
+            "corrs",
+            "rbar",
+            "sd",
+            "se",
+            "eps",
+            "core",
+            "uk37prime",
+            "upper95",
+            "lower95",
+            "year old",
+            "thickness",
+            "na",
+            "deltadensity",
+            "blueintensity",
+            "varvethickness",
+            "reconstructed",
+            "agemin",
+            "agemax",
+            "sampleid",
+            "depth top",
+            "depth bottom",
+            "r650 700",
+            "r570 630",
+            "r660 670",
+            "rabd660 670",
+            "watercontent",
+            "c n",
+            "bsi",
+            "mxd",
+            "effectivemoisture",
+            "pollen",
+            "unnamed",
+            "sr ca",
+            "calcification1",
+            "calcification2",
+            "calcification3",
+            "calcificationrate",
+            "composite",
+            "calcification4",
+            "notes1",
+            "calcification5",
+            "calcification",
+            "calcification6",
+            "calcification7",
+            "trsgi1",
+            "trsgi2",
+            "trsgi3",
+            "trsgi4",
+            "iceaccumulation",
+            "f",
+            "cl",
+            "ammonium",
+            "k",
+            "ca",
+            "duration",
+            "hindex",
+            "varveproperty",
+            "x radiograph dark layer",
+            "d18o1",
+            "sedaccumulation",
+            "massacum",
+            "melt",
+            "sampledensity",
+            "37:2alkenoneconcentration",
+            "alkenoneconcentration",
+            "alkenoneabundance",
+            "bit",
+            "238u",
+            "distance",
+            "232th",
+            "230th/232th",
+            "d234u",
+            "230th/238u",
+            "230th age uncorrected",
+            "230th age corrected",
+            "d234u initial",
+            "totalorganiccarbon",
+            "cdgt",
+            "c/n",
+            "caco3",
+            "pollencount",
+            "drybulkdensity",
+            "37:3alkenoneconcentration",
+            "min sample",
+            "max sample",
+            "age uncertainty",
+            "is date used original model",
+            "238u content",
+            "238u uncertainty",
+            "232th content",
+            "232th uncertainty",
+            "230th 232th ratio",
+            "230th 232th ratio uncertainty",
+            "230th 238u activity",
+            "230th 238u activity uncertainty",
+            "decay constants used",
+            "corrected age",
+            "corrected age unceratainty",
+            "modern reference",
+            "al",
+            "s",
+            "ti",
+            "mn",
+            "fe",
+            "rb",
+            "sr",
+            "zr",
+            "ag",
+            "sn",
+            "te",
+            "ba",
+            "numberofobservations",
+            "total organic carbon",
+            "bsio2",
+            "calciumcarbonate",
+            "wetbulkdensity",
+            "Diffuse spectral reflectance",
+            "N",
+            "C",
+            "P",
+            "Mn/Ca",
+            "B/Ca",
+            "notes",
+            "Precipitation",
+            "Reflectance",
+            "Sr/Ca",
+            "d13C",
+            "Ba/Ca",
+            "Density",
+            "Al/Ca",
+            "Floral",
+            "Zn/Ca",
+            "Mg/Ca",
+            "Radiocarbon",
+            "Si",
+            "Uk37",
+            "TEX86",
+            "Age"
+        ],
+        "units": [
+            "ad",
+            "year ce",
+            "year ad",
+            "mm",
+            "kyr bp",
+            "yr",
+            "bp",
+            "kyr",
+            "yrs bp",
+            "kabp",
+            "yrs",
+            "yr bp",
+            "Year"
+        ]
+};
+
+// Wiki ontology data. This variable stores real-time requests (or fallback data). This data is sent to front-end.
 var _ontology_query = {
     "inferredVariableType": [],
     "archiveType": [],
@@ -212,31 +435,42 @@ var _getWikiOntologyField = function(field, query){
         };
         // If we're on the production server, then we need to add in the proxy option
         if (!dev){
+            // This is the cefns nau proxy route.
             options.proxy = "http://rishi.cefns.nau.edu:3128";
         }
         try{
             // Send out the POST request
             request(options, function (err, res, body){
-                if(err){
-                    // There was an error in the response. Don't continue. Return null
-                    console.log("index.js: getWikiOntologyField: err response: " + err);
+                // Error or bad response
+                if (err || typeof body === "undefined") {
+                    // Something went wrong. Fallback to hardcoded data.
+                    console.log("_getWikiOntologyField: Wiki query failed. Fallback to hardcoded data.");
+                    _ontology_query[field] = _ontology_fallback[field];
                 }
-                // Response is ugly xml
-                var parseString = require('xml2js').parseString;
-                // Store the body of the response
-                var _xml = res.body;
-                // Parse the XML into a JSON object
-                parseString(_xml, function (err, result) {
-                    if(err){
-                        console.log("index.js: getWikiOntologyField: parseString: " + err);
-                    } else {
-                        parseWikiQueryOntology(result, function(arr){
-                            if(arr){
-                                _ontology_query[field] = arr;
-                            }
-                        });
-                    }
-                });
+                // The query was successful
+                else {
+                    // Sift through the ugly XML data
+                    var parseString = require('xml2js').parseString;
+                    // Store the body of the response
+                    var _xml = res.body;
+                    // Parse the XML into a JSON object
+                    parseString(_xml, function (err, result) {
+                        // Error or bad response
+                        if (err || typeof result === "undefined"){
+                            // Something went wrong. Fall back to hardcoded data.
+                            console.log("_getWikiOntologyField: parseString: Bad Response");
+                            _ontology_query[field] = _ontology_fallback[field];
+                        } else {
+                            // XML data parsed correctly. Use the results to set the data to our environment.
+                            parseWikiQueryOntology(result, function(arr){
+                                if(arr){
+                                    // Successful responses and parses. This is the ultimate goal. Set the data.
+                                    _ontology_query[field] = arr;
+                                }
+                            });
+                        }
+                    });
+                }
             });
         } catch(err){
             // There was an error before sending out the request.

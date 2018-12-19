@@ -2,28 +2,52 @@ var create = (function(){
 
   return {
 
+    /**
+       * Add an author entry to the author array
+       *
+       * @param   {Array}   The author data array
+       * @return  {Array}   The author data array
+       */
     addAuthor: (function(entry){
+      // The only field within an author entry is "name"
       var _block = {"name": ""};
+      // Add the new author entry to the author data array
       entry.push(_block);
       return entry;
     }),
 
+    /**
+     *
+     * Add an entry to any field that supports multiple entries. Acceptable fields are listed below.
+     *
+     * Block Types: measurement, summary, ensemble, distribution, funding, pub, author, column, geo, onlineResource
+     *
+     * called by : ngContValidate.js > addBlock()
+     *
+     * @param    {Object}  entry      Any type of data block that allows multiple entries.
+     * @param    {String}  blockType  Acceptable blockTypes are listed above.
+     * @param    {String}  pc         Mode: paleo or chron or null
+     * @return   {Object}  entry      Any type of data block that allows multiple entries.
+     */
     addBlock: (function(entry, blockType, pc){
       try{
+        // Is this a data table entry?
         if(pc !== null){
+          // If the table type is measurement or summary, build the crumbs path. For other tables, we'll do it later.
           if(blockType === "measurement"){
             var _crumbs = "";
             _crumbs = pc + "0" + blockType;
           } else if (blockType === "summary"){
             _crumbs = pc + "0model0" + blockType;
           }
-          // measurement tables
+
+          // Measurement tables
           if (blockType === "measurement"){
             entry["measurementTable"] = create.addTable(entry["measurementTable"], _crumbs);
           }
-          // model tables
+          // Model tables
           else if (["summary", "ensemble", "distribution"].indexOf(blockType) !== -1){
-            create.prepModelTable(entry, blockType, function(entry2){
+            create.addModelTable(entry, blockType, function(entry2){
               if (blockType === "summary"){
                 entry2["model"][0]["summaryTable"] = create.addTable(entry2.model[0].summaryTable, _crumbs);
               } else if (blockType === "distribution"){
@@ -35,7 +59,7 @@ var create = (function(){
             });
           }
         } else {
-          // This is a block that doesn't require a "paleo" or "chron" designation
+          // This data is not a data table, so add the data according to the field (blockType)
           if(blockType === "funding"){
             entry = create.addFunding(entry);
           } else if (blockType === "pub"){
@@ -51,12 +75,25 @@ var create = (function(){
           }
 
         }
+        // Return the entry that now has an extra data block.
         return entry;
       } catch (err){
        console.log("Error: create:addBlock: " + err);
       }
     }),
 
+    /**
+       * Add a table to chronData. The chronData structure is not initialized when creating a new file from scratch
+       * because it is not required data. If a user adds chronData, we need to come here to initialize the structure
+       * on the first table. All subsequent tables will not need this step. Also, paleoData tables do NOT have this
+       * process because it is required data and the structure is initialized on page load.
+       *
+       * Block Types : measurement, summary,
+       *
+       * @param  {Object}    entry      LiPD Metadata
+       * @param  {String}    blockType  Acceptable blockTypes are listed above.
+       *
+       */
     addChronData :(function(entry, blockType){
       if(blockType === "measurement"){
         entry.chronData = [
@@ -68,48 +105,69 @@ var create = (function(){
       return entry;
     }),
 
-    // addDataSetName: (function(_dsn, _csv){
-    //   // Check if the datasetname is in the CSV filenames or not.
-    //   for (var _key in _csv){
-    //     if(_csv.hasOwnProperty(_key)){
-    //       // if the datasetname exists in this csv file.
-    //       if(_key.indexOf(_dsn) !== -1){
-    //         // don't need to add a datasetname. We found it.
-    //         return false;
-    //       }
-    //     }
-    //   }
-    //   // no datasetname found. We need to add them throughout the JSON data and _csv names.
-    //   return true;
-    // }),
-
+    /**
+       * Add a funding entry to the funding array
+       *
+       * @param   {Array}   The funding data array
+       * @return  {Array}   The funding data array
+       */
     addFunding: (function(entry){
+        // These are the basic fields for a funding entry.
       var _block = {"agency": "", "grant": "", "investigator": "", "country": ""};
       if (!entry){
         entry = [];
       }
+      // Add the new funding entry to the funding data array
       entry.push(_block);
       return entry;
     }),
 
+    /**
+       * Add an online resource entry to the online resource array
+       *
+       * @param   {Array}   The online resource data array
+       * @return  {Array}   The online resource data array
+       */
     addOnlineResource: (function(entry){
+        // These are the basic fields for an online resource entry
         var _block = {"onlineResource": "", "onlineResourceDescription": ""};
+        // Add the new online resource entry to the online resource array.
         entry.push(_block);
         return entry;
     }),
 
+    /**
+       * Add a publication entry to the publication array.
+       *
+       * @param    {Array}  entry      The publication data array
+       * @return   {Array}  entry      The publication data array (with new entry)
+       */
     addPublication: (function(entry){
+      // These are the basic fields for a publication entry
       var _block = {"identifier": [{ "type": "doi", "id": "", "url": "" }], "title": "", "year":"", "journal": "",
                   "issue":"", "edition": "", "volume":"", "author": [{"name": ""}] };
+      // Add the new publication entry to the publication data array
       entry.push(_block);
       return entry;
     }),
 
+    /**
+     * Add or remove the given field to the metadata entry.
+     *
+     * @param    {Object}  entry      Any type of data block that allows multiple entries.
+     * @param    {Object}  field      The name of the field being added or removed
+     * @return   {Object}  entry      Any type of data block that allows multiple entries.
+     */
     addRmProperty: (function(entry, field){
       try{
+        // Remove the field
         if (entry.hasOwnProperty(field)){
+          //  If the field currently exists, delete the data
           delete entry[field];
-        } else {
+        }
+        // Add the field
+        else {
+          // If the field doesn't exist yet, add the field.
           entry[field] = "";
         }
       } catch(err) {
@@ -118,15 +176,25 @@ var create = (function(){
       return entry;
     }),
 
+    /**
+       *  Add a table to the given data table array.
+       *
+       * @param     {Array}   entry    Data tables
+       * @param     {String}  crumbs   Crumbs that create the path to this table
+       * @return    {Array}   entry    Data tables (with the new data table entry)
+       */
     addTable: (function(entry, crumbs){
       try{
         if(typeof(entry)=== "undefined"){
           entry = [];
         }
-        // Add a full data table to an entry.
-        _tn = crumbs + entry.length;
-        _csv = crumbs + entry.length + ".csv";
+        // Table name = crumbs + table index number
+        var _tn = crumbs + entry.length;
+        // Csv filename = crumbs + table index number + file extension
+        var _csv = crumbs + entry.length + ".csv";
+        // Push the new data table object onto the data table arrays.
         entry.push({"tableName": _tn, "filename": _csv, "columns": []});
+        // Return the table array
         return entry;
       } catch(err){
         console.log("addTable: " + err);
@@ -134,20 +202,29 @@ var create = (function(){
       }
     }),
 
-    addTableColumn: (function(entry){
+    /**
+     * Add a data table column to the columns array.
+     *
+     * @param  {Array}  columns  Data table columns
+     * @return {Array}  columns  Data table columns (with a new column added)
+     */
+    addTableColumn: (function(columns){
       // Our new column number is one higher than the amount of columns we currently have.
-      var _number = entry.length + 1;
-      var _block = {"number": _number,"variableName": "", "description": "", "units": "", "values": ""};
-      entry.push(_block);
-      return entry;
+      var _number = columns.length + 1;
+      // These are the basic fields for a new data column
+      var _column = {"number": _number,"variableName": "", "description": "", "units": "", "values": ""};
+      // Push the new column onto the columns array
+      columns.push(_column);
+      // Return the columns array
+      return columns;
     }),
 
     /**
      * Add the required column keys to each column if they don't exist.
      *
-     * @param {Array} D Metadata
-     * @param {Array} fields Field names (strings) to be added to columns
-     * @return {Array} D Metadata, with new fields added
+     * @param   {Array} D      Metadata
+     * @param   {Array} fields Field names (strings) to be added to columns
+     * @return  {Array} D      Metadata (with new fields added)
      */
     addFieldsToCols: (function(D, fields, cb){
       var _pcs = ["paleoData", "chronData"];
@@ -175,9 +252,9 @@ var create = (function(){
     /**
      * Add the required column keys to each column if they don't exist.
      *
-     * @param {Array} models Metadata
-     * @param {Array} fields Field names (strings) to be added to columns
-     * @return {Array} models Metadata
+     * @param   {Array} models    Metadata
+     * @param   {Array} fields    Field names (strings) to be added to columns
+     * @return  {Array} models    Metadata
      */
     addFieldsToModels: (function(models, fields){
       for(var _p = 0; _p <models.length; _p++){
@@ -196,9 +273,9 @@ var create = (function(){
     /**
      * Add the required column keys to each column if they don't exist.
      *
-     * @param {Array} tables Metadata
-     * @param {Array} fields Field names (strings) to be added to columns
-     * @return {Array} tables Metadata
+     * @param   {Array} tables  Metadata
+     * @param   {Array} fields  Field names (strings) to be added to columns
+     * @return  {Array} tables  Metadata
      */
     addFieldsToTables: (function(tables, fields){
       for(var _t = 0; _t<tables.length; _t++){
@@ -210,9 +287,9 @@ var create = (function(){
     /**
      * Add the required column keys to each column if they don't exist.
      *
-     * @param {Array} tables Metadata
-     * @param {Array} fields Field names (strings) to be added to columns
-     * @return {Array} tables Metadata
+     * @param   {Array} tables   Metadata
+     * @param   {Array} fields   Field names (strings) to be added to columns
+     * @return  {Array} tables   Metadata
      */
     addFieldsToTable: (function(table, fields){
         var _columns = table["columns"];
@@ -227,141 +304,232 @@ var create = (function(){
       return(table);
     }),
 
+    /**
+     * Standardize all csv filenames. Filenames are sometimes changed arbitrarily by users or have names that don't
+     * match the filenames noted in the metadata. This function standardizes all filenames to match the format below.
+     *
+     * Format :  Dataset Name  + crumbs  + file extension
+     * Example:  Smith.paleo0measurement0.csv
+     *
+     * @param   {Object}  _scopeFiles   $scope.files data from the ngContValidate.js > ValidateCtrl controller
+     * @return  {Object}  _scopeFiles   $scope.files data from the ngContValidate.js > ValidateCtrl controller
+     */
     alterFilenames: (function(_scopeFiles){
       var _dsn = _scopeFiles.dataSetName;
+      // Standardize all the filenames in the scope csv data.
       _scopeFiles.csv = create.alterCsvFilenames(_scopeFiles.csv, _dsn);
+      // Standardize all the filenames in the metadata table entries.
       _scopeFiles.json = create.alterJsonFilenames(_scopeFiles.json, _dsn);
       return _scopeFiles;
     }),
 
+    /**
+     * Standardize the filenames within the csv scope data. These filenames will match the respective filenames
+     * listed in the json metadata for each table.
+     *
+     * @param    {Object}  _csv      Csv data sorted by filename
+     * @param    {String}  _dsn      Dataset name
+     * @return   {Object}  _csvCopy  Csv data sorted by filename, using standardized filenames
+     */
     alterCsvFilenames: (function(_csv, _dsn){
+      // Instead of replacing the filenames in place, we'll put the new filenames with the data into a new object.
       var _csvCopy = {};
-      // change all the csv filenames in the csv metadata
+      // Loop for each file (table) in the csv data
       for (var _key in _csv){
         if (_csv.hasOwnProperty(_key)){
+          // No datasetname in this filename. Place the data into csvCopy under the new filename.
           if(_key.indexOf(_dsn) === -1){
+            // Reassign the csv data under the new filename.
             _csvCopy[_dsn + "." + _key]  = _csv[_key];
           } else {
+            // Don't do anything. Place the filename and data into the csvCopy as-is
             _csvCopy[_key] = _csv[_key];
           }
         }
       }
-      return(_csvCopy);
+      // Return the csvCopy, that has standardized filenames.
+      return _csvCopy;
     }),
 
+    /**
+     * Standardize the filenames within the jsonld scope metadata. These filenames will match the respective filenames
+     * listed in the csv scope data.
+     *
+     * Recursive: find any filename entries and prefix it with the dataSetName (dsn)
+     *
+     * @param    {*}       _x        Any data type, metadata
+     * @param    {String}  _dsn      Dataset name
+     * @return   {*}       _x        Any data type, metadata
+     */
     alterJsonFilenames: (function(x, dsn){
-      // Recursive: find any filename entries and append the datasetname to the front of it.
-
-      // loop over this data structure
+      // Loop over each entry in object
       for (var _key in x){
-        // safety check: don't want prototype attributes
+        // Safety check. Make sure data is valid.
         if (x.hasOwnProperty(_key) && x[_key] !== undefined){
-          // found a filename entry. change it.
+          // Found a filename field.
           if(_key === "filename"){
+            // Does the filename have the datasetname in it?
             if(x[_key].indexOf(dsn) === -1) {
+              // Standardize the filename by prefixing the dataset name
               x[_key] = dsn + "." + x[_key];
             }
           } else if (x[_key].constructor === [].constructor && x[_key].length > 0) {
-            // value is an array. iterate over array and recursive call
+            // Data type is an Array and the value is NOT blank or empty. Iterate over array.
             for (var _g=0; _g < x[_key].length; _g++){
-              // process, then return in place.
+              // Dive down with every Array entry.
               x[_key][_g] = create.alterJsonFilenames(x[_key][_g], dsn);
             }
           } else if (x[_key].constructor === {}.constructor && x[_key].length > 0){
+            // Data is an object and the value is NOT blank or empty. Dive down.
             x[_key] = create.alterJsonFilenames(x[_key], dsn);
           }
         }
       }
+      // Bubble up
       return x;
     }),
 
     /**
-     * Wrapper for multiple closing functions before initiating a file download
+     * Make some final touches to the metadata before sending data to the backend for downloading.
      *
-     * For example: removing temporary fields, fixing filenames, and moving data around.
+     * @param   {Object}  _scopeFiles      $scope.files data from the ngContValidate.js > ValidateCtrl controller
+     * @return  {Object}  _scopeFilesCopy  $scope.files data from the ngContValidate.js > ValidateCtrl controller
      *
      */
     closingWorkflow: (function(_scopeFiles){
-      // Remove temporary fields from the JSON data
+      // Create a copy of the object, so we don't affect the original scope data.
       var _scopeFilesCopy = JSON.parse(JSON.stringify(_scopeFiles));
       // TODO copy the archiveType from the root, to each data table column
+      // Remove temporary lipd.net fields from the jsonld metadata
       _scopeFilesCopy.json = create.rmTmpEmptyData(_scopeFilesCopy.json);
 
       return _scopeFilesCopy;
     }),
 
+    /**
+     * Make some final touches to the metadata before sending data to the backend for downloading.
+     *
+     * NOAA: The closing workflow is different for NOAA downloads because we have to prep the csv data in a certain
+     * format so it'll be compatible with the python conversion script.
+     *
+     * @param     {Object}  _scopeFiles      $scope.files data from the ngContValidate.js > ValidateCtrl controller
+     * @param     {String}  _dsn             Dataset name
+     * @param     {Object}  _csv             Csv data, sorted by filename
+     * @callback  {Object}                   $scope.files data  and csv data
+     *
+     */
     closingWorkflowNoaa: (function(_scopeFiles, _dsn, _csv, cb){
+      // Call the normal closing workflow that removes empty and temporary data
       var _newScopeFiles = create.closingWorkflow(_scopeFiles, _dsn, _csv);
+      // Structure the csv data for the python conversion script
       var _newCsv = create.structureCsvForPy(_newScopeFiles.csv);
+      // Callback with the formatted data
       cb({"metadata": _newScopeFiles.json, "csvs": _newCsv});
     }),
 
+    /**
+     * Recursive: Turn off all view toggles (that control the expansion and collapse of different views) found within
+     * the data given. This is done right before expanding a view so that only one view is open at a time
+     *
+     * @param  {*}        _x          Any data type
+     * @param  {String}   toggle_key
+     * @return {*}        _x          Any data type
+     */
     turnOffToggles: (function(_x, toggle_key){
-      // Turn off all Toggles (recursive) beneath the given level.
       try{
         for (var _key in _x) {
-          // safety check: don't want prototype attributes
+          // Safety check, item must be valid
           if (_x.hasOwnProperty(_key)) {
-            // if this key is in the array of items to be removed, then remove it.
+            // Key matches one of the keys that we want to remove
             if (_key === toggle_key) {
-              // remove this key
+              // Remove the key
               _x[_key] = false;
-            } // if key in removables
+            }
+            // Array data type
             else if (_x[_key].constructor === [].constructor) {
-              // value is an array. iterate over array and recursive call
+              // Loop over each item in the array
               for (var _g = 0; _g < _x[_key].length; _g++) {
-                // process, then return in place.
+                // Dive down for this array entry
                 _x[_key][_g] = create.turnOffToggles(_x[_key][_g], toggle_key);
               }
-            } // if array
+            }
+            // Object data type
             else if (_x[_key].constructor === {}.constructor) {
+              // Dive down for this object
               _x[_key] = create.turnOffToggles(_x[_key], toggle_key);
-            } // if object
-          } // hasownproperty
+            }
+          }
         }
       } catch (err){
         console.log(err);
       }
+      // Bubble up
       return _x;
     }),
 
-    getParsedCsvObj: (function(csv_name, csv_objs){
+    /**
+     * Get the csv data matching the given filename. Use the complete csv data from the controller scope, and find
+     * either a csv_name that matches a portion of the filename, or is an exact match to the filename.
+     *
+     * Two cases:
+     * When creating from scratch, the dataset name isn't added to the filename until the closing download workflow.
+     * When a file is uploaded, the dataset name will be present.
+     *
+     * Example csv_name : paleo0measurement0.csv
+     * Example _filename : Smith2018.paleo0measurement0.csv
+     *
+     * Called by : ngContValidate.js  > parseCsv()
+     *
+     * @param    {String}  csv_name    Filename that matches the data that we want
+     * @param    {Object}  _csv        All csv data, sorted by filename
+     * @return   {Object}              The filename and data that matched our search
+     */
+    getParsedCsvObj: (function(csv_name, _csv){
       var _csv_obj = {};
       var _found = false;
 
       // Loop over all the csv filenames
-      for (var _filename in csv_objs){
-        if(csv_objs.hasOwnProperty(_filename)){
+      for (var _filename in _csv){
+        if(_csv.hasOwnProperty(_filename)){
           // Is this csv_name in the current filename?
-          // (ie. is "paleo0measurement0.csv" within "Heiser2018.paleo0measurement0.csv". Yes. )
+          // (ie. is "paleo0measurement0.csv" within "Heiser2018.paleo0measurement0.csv"... In this example, Yes)
           if(_filename.indexOf(csv_name) !== -1){
             // Swap and use the new filename match
             csv_name = _filename;
             // Also get the object for this filename
-            _csv_obj = csv_objs[_filename];
+            _csv_obj = _csv[_filename];
             _found = true;
           }
         }
       }
 
-      // If a sub match wasn't found, then check for an exact match. (We prefer a sub-match)
+      // If a sub match wasn't found, then check for an exact match. (We prefer a sub-match in case the filename isn't
+      // standardized yet)
       if(!_found){
-        if(csv_objs.hasOwnProperty(csv_name)){
-          _csv_obj = csv_objs[csv_name];
+        if(_csv.hasOwnProperty(csv_name)){
+          _csv_obj = _csv[csv_name];
         }
       }
 
+      // Return the requested data and the filename that matches it.
       return {"name": csv_name, "data": _csv_obj};
     }),
 
-
+    /**
+     *
+     * Recursive: Go through all the LiPD metadata and add in the temporary variables that run the page views. Done
+     * for uploaded files.
+     *
+     * Temporary data throughout  the lipd.net playground page:
+     * Table level: {"tmp": {"toggle": bool, "parse": bool, "graphActive": bool}
+     * Model Table Method: {"tmp": {"toggle": bool}}
+     * Column Level: {"tmp": {"toggle": bool}}
+     *
+     * @param    {*}  x   Any data type
+     * @return   {*}  x   Any data type
+     */
     initColumnTmp: (function(x){
-      // Tmp Data throughout page:
-      // Table level: {"tmp": {"toggle": bool, "parse": bool, "graphActive": bool}
-      // Model Table Method: {"tmp": {"toggle": bool}}
-      // Column Level: {"tmp": {"toggle": bool}}
-
-      // when uploading a file, we need to add in the column property booleans for the "Add Properties" section of each
+      // When uploading a file, we need to add in the column property booleans for the "Add Properties" section of each
       // column. That way, an uploaded file that already has properties from our list will trigger the checkbox to be on.
       var _ignore = ["values", "variableName", "units", "number"];
       // loop over this data structure
@@ -415,7 +583,12 @@ var create = (function(){
       return x;
     }),
 
-    // When a LiPD file is uploaded, it needs an Array for these fields. Empty or not. If missing, put in empty arrays. 
+    /**
+     * When a LiPD file is uploaded, it needs an Array for these fields. Empty or not. If missing, put in empty arrays.
+     *
+     * @param   {Object}   x   LiPD metadata  (full)
+     * @return  {Object}   x   LiPD metadata  (full)
+     */
     initMissingArrs: (function(x){
       var currKey = "";
       var keys = ["pub", "funding", "chronData", "paleoData"];
@@ -436,9 +609,47 @@ var create = (function(){
       return x;
     }),
 
+    /**
+     * Add a model table to the given entry. This can be any of the 3 valid table types.
+     *
+     * @param    {Object}    entry       A data entry from paleoData or chronData  (ie. paleoData[1])
+     * @param    {String}    tableType   summary, ensemble, or distribution
+     * @callback {Callback}  cb          Go back to addBlock()
+     */
+    addModelTable: (function(entry, tableType, cb){
+        try{
+            // This data entry does not exist yet. Create the entry to start.
+            if(typeof entry === "undefined"){
+                entry = {};
+            }
+            // This entry does not have a model in it yet. Create one.
+            if(entry.hasOwnProperty("model")){
+                if(typeof entry["model"][0][tableType + "Table"] === "undefined"){
+                    entry["model"][0][tableType] = [];
+                }
+            }
+            // Model entry doesn't exist. Create it.
+            else {
+                // Add a model that includes all the tables, but leave them blank.
+                entry["model"] = [{"summaryTable": [], "ensembleTable": [], "distributionTable": [], "method": {}}];
+            }
+            // Callback with the entry.
+            cb(entry);
+        } catch(err){
+            console.log("Error: create: prepModelTable: " + err);
+            console.log(entry);
+        }
+    }),
+
+    /**
+     * Remove the temporary variables (toggle, column values) that were added when creating the page.
+     * These cannot end up in the final LiPD file because they are clutter and only useful to the LiPD playground view.
+     *
+     * @param  {Object}   x   LiPD metadata
+     * @return {Object}   x   LiPD metadata (without tmp data)
+     */
     rmTmpEmptyData: (function(x){
-      // We add a few temporary variables (toggle, column values) when creating the page.
-      // However, these cannot end up in the final lipd file. remove them.
+      // All fields that should be deleted
       var _removables = ["toggle", "values", "tmp", "showColumn"];
       try{
         for (var _key in x){
@@ -486,9 +697,17 @@ var create = (function(){
       } catch (err){
         console.log(err);
       }
+      // Metadata without tmp data
       return x;
     }),
 
+    /**
+       * Remove the data block at the given index for the given array.
+       *
+       * @param  {Array}  entry   Array that can have multiple entries (ie. pub, funding, authors)
+       * @param  {Number} idx     Index to delete from array
+       * @return {Array}  entry   Array, with the index deleted
+       */
     rmBlock: (function(entry, idx){
       if (idx > -1) {
           entry.splice(idx, 1);
@@ -496,7 +715,15 @@ var create = (function(){
       return entry;
     }),
 
+    /**
+     * Scrape relevant data from the doi.org response object and put it into our publication entry.
+     *
+     * @param  {Object}  res     Data response from the doi.org API request
+     * @param  {Object}  entry   Publication metadata (one entry)
+     * @return {Object}  entry   Publication metadata (one entry, with doi data)
+     */
     sortDoiResponse: (function(res, entry){
+      // Map our publication keys to the doi.org keys.
       var _keys = {
         "citation": "citation",
         "created": "year",
@@ -510,15 +737,19 @@ var create = (function(){
         "page": "pages",
         "abstract": "abstract"
       };
-      //do some stuff and put res data into the entry.
+      // Loop for each key in the mapping
       for (var _key in _keys) {
         try{
+          // Does the response object have this data?
           if (_keys.hasOwnProperty(_key) && res.data.hasOwnProperty(_key)) {
             if (res.data[_key]){
+              // Special case for the created date. It's formatted differently than we want.
               if (_key === "created"){
                 // get the year from the created attribute
                 entry.year = res.data.created["date-parts"][0][0];
-              } else if (_key === "author"){
+              }
+              // Special case for author names. It's separated by 'given' and 'family' names. We don't need that.
+              else if (_key === "author"){
                 // loop over and sort through the author names
                 var _auths = [];
                 var _currAuth = "";
@@ -531,37 +762,63 @@ var create = (function(){
                 }
                 // set the authors array to the entry data
                 entry.author = _auths;
-              } else {
-                // normal case: create new key in entry, and set the value using the respoonse object data.
+              }
+              // Normal case: All other keys
+              else {
+                // Set the data directly using our key name.
                 entry[_keys[_key]] = res.data[_key];
               }
-            } // end if undefined
-          } // end if hasOwnProperty
+            }
+          }
         } catch(err){
           console.log(err);
         }
-      } // end for loop
+      }
+      // Return the publication entry with the doi.org data included.
       return entry;
     }),
 
+    /**
+       * When passing data to our python NOAA conversion process, we need the csv data to be in column format. In the
+       * playground, table values are stored row-by-row. However, in for python we want the "transposed" version of the
+       * data which stores data column-by-column.
+       *
+       * @param   {Object}  _csv        All csv data, sorted by filename
+       * @return  {Object}  _newCsv     Csv data, sorted by filename, but only including the transposed data.
+       */
     structureCsvForPy: (function(_csv){
+      // Create new object
       var _newCsv = {};
+      // Loop for each table
       for(var _filename in _csv){
         if(_csv.hasOwnProperty(_filename)){
+          // Set the transposed data into the object by filename
           _newCsv[_filename] = _csv[_filename]["transposed"];
         }
       }
+      // Return the data.
       return _newCsv;
     }),
 
+    /**
+     * Used to update the csv data in the controller scope when a new column of data is added to an existing data table.
+     * This is only used on the old parser method (NOT the spreadsheet method).
+     *
+     * @param   {Object}  _scope_vals  One table of values, taken from the csv data in the controller scope.
+     * @param   {Object}  _csv         A parsed object using the PapaParse module. One column of values with metadata.
+     * @return  {Object}  _scope_vals  One table of values, taken from the csv data in the controller scope.
+     */
     updateCsvScope: (function(_scope_vals, _csv){
 
+      // Check for an empty object. If empty, then there's no data to update.
       if(Object.keys(_scope_vals).length === 0 && _scope_vals.constructor === Object){
         // No old data to update. The new data can be used as-is.
         return _csv;
-      } else {
-        // Theoretically, these should have the same number of rows, but if for some reason the new data has more rows,
-        // then just use that instead.
+      }
+      // There is new data
+      else {
+        // Theoretically, these should have the same number of rows because all tables should have columns of equal
+        // lengths. If for some reason the new data has more rows, then we will use that since it's the larger number.
         if (_scope_vals.rows <= _csv.rows) {
           _scope_vals.rows = _csv.rows;
         }
@@ -569,9 +826,11 @@ var create = (function(){
         _scope_vals.cols = _scope_vals.cols + _csv.cols;
         _scope_vals.errors = _scope_vals.errors.concat(_csv.errors);
         _scope_vals.meta = _csv.meta;
+        // Delimiter may be the same or different. We'll use the delimiter given on the most recent parse.
         _scope_vals.delimiter = _csv.delimiter;
+        // Transposed data is easy. Concat the new column to the old columns.
         _scope_vals.transposed = _scope_vals.transposed.concat(_csv.transposed);
-        // All data row arrays need to have the new columns concatenated onto the end.
+        // Row data is All data row arrays need to have the new columns concatenated onto the end.
         for(var _i = 0; _i < _scope_vals.data.length; _i++){
           _scope_vals.data[_i] = _scope_vals.data[_i].concat(_csv.data[_i]);
         }
@@ -582,59 +841,279 @@ var create = (function(){
 
     // STORED DATA LISTS -----
 
+    /**
+     *  Archive Type controlled vocabulary. These are the options allowed for the archiveType field.
+     */
     archiveTypeList: (function() {
         return ["coral", "document", "glacier ice", "hybrid", "lake sediment", "marine sediment", "mollusks shells",
             "peat", "rock", "sclerosponge", "speleothem", "wood"];
     }),
 
+    /**
+     *  CreatedBy tracks the origin of the data for development purposes. We want to know where it was created in case
+     *  there are issues with the file structure, keys, etc. This gives us a starting point for debugging.
+     */
     createdByList: (function(){
-      return ["excel", "lipd.net", "wiki", "noaa", "unknown"];
+      return ["excel", "lipd.net", "wiki", "unknown"];
     }),
 
+    /**
+     *  The default column fields are fields that have appear in the auto-complete input when adding fields to a column.
+     *
+     *  Called by : ngContValidate > $scope.dropdowns.columnFields
+     */
     defaultColumnFields: (function(){
       return ["proxy", "measurementMaterial", "method", "sensorSpecies", "sensorGenus", "variableType",
         "proxyObservationType", "notes", "inferredVariableType", "takenAtDepth"];
     }),
 
+    /**
+     * Field list. These are all the fields that
+     *
+     * NOT CURRENTLY IN USE
+     * Called by : ngContValidate > $scope.fields.
+     *
+     */
     fieldsList: (function(){
-      var _og = [
-          { id: 1, name: "calibration"},
-          { id: 2, name: "hasResolution"},
-          { id: 3, name: "inferredVariableType"},
-          { id: 4, name: "interpretation"},
-          { id: 5, name: "measurementMaterial"},
-          { id: 6, name: "method"},
-          { id: 7, name: "notes"},
-          { id: 8, name: "physicalSample"},
-          { id: 9, name: "proxy"},
-          { id: 10, name: "proxyObservationType"},
-          { id: 11, name: "sensorGenus"},
-          { id: 12, name: "sensorSpecies"},
-          { id: 13, name: "takenAtDepth"},
-          { id: 14, name: "variableType"},
+      return [ "calibration", "hasResolution", "inferredVariableType", "interpretation", "measurementMaterial",
+          "method", "notes", "physicalSample", "proxy", "proxyObservationType", "sensorGenus", "sensorSpecies",
+          "takenAtDepth", "variableType"
       ];
-
-      var _new = [
-          "calibration",
-          "hasResolution",
-          "inferredVariableType",
-          "interpretation",
-          "measurementMaterial",
-          "method",
-          "notes",
-          "physicalSample",
-          "proxy",
-          "proxyObservationType",
-          "sensorGenus",
-          "sensorSpecies",
-          "takenAtDepth",
-          "variableType"
-      ];
-
-
-      return _new;
     }),
 
+    /**
+     * Snapshot of the Wiki ontology data. Use if our real-time requests aren't working.
+     * Last updated : 12.18.18
+     *
+     * @return  {Object}    Wiki ontology data
+     */
+      getOntologyBackup:(function(){
+        return {
+            "inferredVariableType": [
+                "d18o",
+                "uncertainty temperature",
+                "temperature1",
+                "temperature2",
+                "temperature3",
+                "uncertainty temperature1",
+                "thermocline temperature",
+                "sedimentation rate",
+                "relative sea level",
+                "sea surface salinity",
+                "accumulation rate",
+                "mean accumulation rate",
+                "accumulation rate, total organic carbon",
+                "accumulation rate, calcium carbonate",
+                "sampledata",
+                "subsurface temperature",
+                "Radiocarbon age",
+                "Sea surface temperature",
+                "Carbonate ion concentration",
+                "Year",
+                "Temperature",
+                "Salinity",
+                "Age"
+            ],
+            "archiveType": [
+                "borehole",
+                "bivalve",
+                "documents",
+                "molluskshell",
+                "lake",
+                "Hybrid",
+                "Tree",
+                "Coral",
+                "Marine sediment",
+                "Wood",
+                "Lake sediment",
+                "Sclerosponge",
+                "Glacier ice",
+                "Rock",
+                "Speleothem"
+            ],
+            "proxyObservationType": [
+                "diffusespectralreflectance",
+                "julianday",
+                "d18o",
+                "trw",
+                "dust",
+                "chloride",
+                "sulfate",
+                "nitrate",
+                "depth",
+                "mg",
+                "x-rayfluorescence",
+                "dd",
+                "ghostmeasured",
+                "trsgi",
+                "mg ca",
+                "samplecount",
+                "segment",
+                "ringwidth",
+                "residual",
+                "ars",
+                "corrs",
+                "rbar",
+                "sd",
+                "se",
+                "eps",
+                "core",
+                "uk37prime",
+                "upper95",
+                "lower95",
+                "year old",
+                "thickness",
+                "na",
+                "deltadensity",
+                "blueintensity",
+                "varvethickness",
+                "reconstructed",
+                "agemin",
+                "agemax",
+                "sampleid",
+                "depth top",
+                "depth bottom",
+                "r650 700",
+                "r570 630",
+                "r660 670",
+                "rabd660 670",
+                "watercontent",
+                "c n",
+                "bsi",
+                "mxd",
+                "effectivemoisture",
+                "pollen",
+                "unnamed",
+                "sr ca",
+                "calcification1",
+                "calcification2",
+                "calcification3",
+                "calcificationrate",
+                "composite",
+                "calcification4",
+                "notes1",
+                "calcification5",
+                "calcification",
+                "calcification6",
+                "calcification7",
+                "trsgi1",
+                "trsgi2",
+                "trsgi3",
+                "trsgi4",
+                "iceaccumulation",
+                "f",
+                "cl",
+                "ammonium",
+                "k",
+                "ca",
+                "duration",
+                "hindex",
+                "varveproperty",
+                "x radiograph dark layer",
+                "d18o1",
+                "sedaccumulation",
+                "massacum",
+                "melt",
+                "sampledensity",
+                "37:2alkenoneconcentration",
+                "alkenoneconcentration",
+                "alkenoneabundance",
+                "bit",
+                "238u",
+                "distance",
+                "232th",
+                "230th/232th",
+                "d234u",
+                "230th/238u",
+                "230th age uncorrected",
+                "230th age corrected",
+                "d234u initial",
+                "totalorganiccarbon",
+                "cdgt",
+                "c/n",
+                "caco3",
+                "pollencount",
+                "drybulkdensity",
+                "37:3alkenoneconcentration",
+                "min sample",
+                "max sample",
+                "age uncertainty",
+                "is date used original model",
+                "238u content",
+                "238u uncertainty",
+                "232th content",
+                "232th uncertainty",
+                "230th 232th ratio",
+                "230th 232th ratio uncertainty",
+                "230th 238u activity",
+                "230th 238u activity uncertainty",
+                "decay constants used",
+                "corrected age",
+                "corrected age unceratainty",
+                "modern reference",
+                "al",
+                "s",
+                "ti",
+                "mn",
+                "fe",
+                "rb",
+                "sr",
+                "zr",
+                "ag",
+                "sn",
+                "te",
+                "ba",
+                "numberofobservations",
+                "total organic carbon",
+                "bsio2",
+                "calciumcarbonate",
+                "wetbulkdensity",
+                "Diffuse spectral reflectance",
+                "N",
+                "C",
+                "P",
+                "Mn/Ca",
+                "B/Ca",
+                "notes",
+                "Precipitation",
+                "Reflectance",
+                "Sr/Ca",
+                "d13C",
+                "Ba/Ca",
+                "Density",
+                "Al/Ca",
+                "Floral",
+                "Zn/Ca",
+                "Mg/Ca",
+                "Radiocarbon",
+                "Si",
+                "Uk37",
+                "TEX86",
+                "Age"
+            ],
+            "units": [
+                "ad",
+                "year ce",
+                "year ad",
+                "mm",
+                "kyr bp",
+                "yr",
+                "bp",
+                "kyr",
+                "yrs bp",
+                "kabp",
+                "yrs",
+                "yr bp",
+                "Year"
+            ]
+        };
+    }),
+
+    /**
+     *  Playground page Tour: these steps are given to the intro.js module to create an step-by-step tour of different
+     *  sections of the playground page. Each step is linked to a portion of the page via an element from the DOM.
+     *  Write a short description about the piece, and then align it to a 'position' if desired.
+     */
     tourSteps: (function(){
       return [
         {
@@ -658,7 +1137,6 @@ var create = (function(){
             element: document.querySelector(".tourgithub"),
             intro: "Help us make your experience better! Let us know what you think is done well, and what we can do better. This link will take you to the LiPD Github page where we track issues and comments about the website.",
         },
-
         {
           // Choose file button
           element: document.querySelector(".step2"),
@@ -806,6 +1284,11 @@ var create = (function(){
       ]
     }),
 
+    /**
+     *  Merge page Tour: these steps are given to the intro.js module to create an step-by-step tour of different
+     *  sections of the merge page. Each step is linked to a portion of the page via an element from the DOM.
+     *  Write a short description about the piece, and then align it to a 'position' if desired.
+     */
     tourStepsMerge: (function(){
         return [
             {
@@ -823,6 +1306,12 @@ var create = (function(){
         ];
     }),
 
+    /**
+     *  NOT CURRENTLY IN USE
+     *  A list of all inferred variable types as noted by the LinkedEarth Wiki. Normally this will not be used because
+     *  we query the Wiki for this data during page load. However, if we get a bad response from our query then we
+     *  will fall back to this hard-coded list.
+     */
     inferredVariableTypeList: (function(){
       return ['Temperature', 'Sea Surface Temperature', 'Bottom Water Temperature', 'Ocean Mixed Layer Temperature',
       'Surface air temperature', 'Carbon dioxide concentration', 'Methane concentration', 'Nitrous oxide concentration',
@@ -832,40 +1321,33 @@ var create = (function(){
       'SAM', 'AAO'];
     }),
 
+    /**
+     * NOT CURRENTLY IN USE
+     */
     interpretationLocalList: (function(){
       return ["local", "far-field"];
     }),
 
+    /**
+     *  NOT CURRENTLY IN USE
+     */
     interpretationDirectionList: (function(){
       return ["positive", "negative"];
     }),
 
+    /**
+     * NOT CURRENTLY IN USE
+     */
     interpretationScopeList: (function(){
       return ["climate", "ecology", "isotope"];
     }),
 
-    prepModelTable: (function(entry, blockType, cb){
-      try{
-
-        if(typeof entry === "undefined"){
-          entry = {};
-        }
-        if(entry.hasOwnProperty("model")){
-          if(typeof entry["model"][0][blockType + "Table"] === "undefined"){
-            entry["model"][0][blockType] = [];
-          }
-        }
-        // model doesnt exist. create it
-        else {
-          entry["model"] = [{"summaryTable": [], "ensembleTable": [], "distributionTable": [], "method": {}}];
-        }
-        cb(entry);
-      } catch(err){
-        console.log("Error: create: prepModelTable: " + err);
-        console.log(entry);
-      }
-    }),
-
+    /**
+       *  NOT CURRENTLY IN USE
+       *  A list of all proxy observation types as noted by the LinkedEarth Wiki. Normally this will not be used because
+       *  we query the Wiki for this data during page load. However, if we get a bad response from our query then we
+       *  will fall back to this hard-coded list.
+       */
     proxyObservationTypeList: (function(){
       return ['Al/Ca', 'Ar-Ar', 'B/Ca', 'Ba/Ca', 'C', 'Clay fraction', 'Color', 'd34S', 'd13C', 'd15N', 'd17O', 'd18O',
       'dD', 'Density', 'Diffuse spectral reflectance', 'Faunal', 'Fe/Ca', 'Floral', 'Grain size', 'Historic',
@@ -875,12 +1357,26 @@ var create = (function(){
       'Uk37', 'X-Ray diffraction', 'X-ray fluorescence', 'Zn/Ca'];
     }),
 
+    /**
+     * Time unit options for dropdown list.
+     * Called by : ngContValidate > $scope.dropdowns.timeUnit
+     * Used in : NOAA field when NOAA switch is turned on.
+     */
     timeUnitList: (function(){
       return ["AD", "BP", "CE"];
     }),
 
-    fieldMetadataLibrary: (function(section, key){
+    /**
+     *  All the tooltips used for each field on the playground page. Sorted by section and field name.
+     *
+     *  @param   {String}  section  The section of the tooltip to retrieve
+     *  @param   {String}  key      The key name (field) to retrieve
+     *  @return  {String}  _tip     The tooltip to display to the user for this specific field
+     */
+    tooltipLibrary: (function(section, key){
+      // The tip that we will show to the user
       var _tip = " ";
+      // Our library of tooltips, sorted by section.
       var _lib = {
         "root": {
           "createdBy": {"tooltip": "Where did this file originate from? How was the LiPD file created?", "label": "Created By", "model": "files.json.createdBy", "disabled": false, "fieldType": "text", "size": 50},
@@ -995,25 +1491,46 @@ var create = (function(){
           "graph": {"tooltip": "Use table data to plot two columns on a simply X,Y graph."}
         }
       };
+      // Attempt to get the tooltip from the library. If you don't find it, send back an empty string instead.
       try{
         _tip = _lib[section][key].tooltip;
       } catch(err){
       }
+      // Return the tooltip
       return _tip;
     }),
 
+    /**
+     * NOT CURRENTLY USED
+     */
     variableTypeList: (function(){
       return ["measured", "inferred"];
     }),
 
+    /**
+     * Create an array of years dating back to 1950 (arbitrary choice)
+     *
+     * Called by : ngContValidate > $scope.dropdowns.years
+     * Used by : Publication for pubYear dropdown field
+     *
+     * @return   {Array}  _years   Array of year integers
+     */
     yearList: (function(){
       var _years = [];
       for(var _n=new Date().getFullYear(); _n>1950; _n--){
         _years.push(_n);
       }
-      return(_years);
+      return _years;
     }),
 
+    /**
+     *  Get the popover (a small dialog box that appears when you hover on certain page elements) from a collection
+     *  of popovers. In this case, these are the preferred and required data from each agency regarding the LiPD file
+     *  completeness.
+     *
+     *  @param   {String}   name    The name of the popover that you want
+     *  @return  {String}           The HTML code that renders as the content in the popover element on the page
+     */
     getPopover: (function(name){
       var _popovers = {
         "lipd": '' +

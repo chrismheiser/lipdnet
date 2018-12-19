@@ -10,7 +10,7 @@ div.btn-row(layout="row")
 
 div(layout="column" ng-repeat='entry3 in entry2.columns track by $index' layout-wrap="")
     md-card(ng-if="entry3.tmp.toggle")
-        md-subheader.md-primary column {{$index}}: {{entry3.variableName}}
+        md-subheader.md-primary Column {{$index}}: {{entry3.variableName}}
         div(layout='row', layout-padding='', layout-sm='column')
             div(flex)
                 md-subheader.md-primary Standard fields
@@ -59,7 +59,7 @@ div(layout="column" ng-repeat='entry3 in entry2.columns track by $index' layout-
             div(flex)
                 md-subheader.md-primary Additional fields
                 div.btn-row(layout="row" style="overflow: scroll;")
-                    div(ng-repeat="(k,v) in entry3" ng-if="isBlock(k)" layout='', layout-padding='', layout-sm='column')
+                    div(ng-repeat="(k,v) in entry3" ng-if="isObject(k)" layout='', layout-padding='', layout-sm='column')
                         button.blue-btn-off(type="button" ng-click="showModalBlock(entry3, false, k, null)") {{k}}
 
                     div(ng-repeat="(k, entry4) in entry3" ng-if="isArr(k)" layout='', layout-padding='', layout-sm='column')
@@ -86,5 +86,5 @@ div(layout="column" ng-repeat='entry3 in entry2.columns track by $index' layout-
 
         .md-toolbar-tools(style="background-color:white;")
             span(flex)
-            button.red-btn-off(type="button" ng-click="removeBlock(entry2.columns, $index)" style="margin: 1.5em; padding: 2px 2px 2px 2px;") Delete Column
+            button.red-btn-off(type="button" ng-click="removeColumn(entry2, $index)" style="margin: 1.5em; padding: 2px 2px 2px 2px;") Delete Column
 

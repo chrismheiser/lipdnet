@@ -7,6 +7,6 @@ div.container
         hot-table(settings="settings" height='400' width='1120' datarows="files.csv[entry2.filename].data")
             hot-column(ng-repeat="col in entry2.columns track by $index")
 
-    button.red-btn-off(style="float:right; margin:1em;" ng-click="removeColumn(entry2)" type="button") Remove Column
+    button.red-btn-off(style="float:right; margin:1em;" ng-click="removeColumn(entry2, null)" type="button") Remove Column
     button.green-btn-off(style="float:right;margin:1em;" ng-click="addColumn(entry2)" type="button") Add Column
     button.green-btn-off(style="float:right;margin:1em;" ng-click="refreshRender()" type="button") Refresh

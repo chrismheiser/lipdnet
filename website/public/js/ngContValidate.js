@@ -2,18 +2,25 @@
 angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Upload', "ImportService", "ExportService", "$uibModal","$sce", "toaster",
   function ($scope, $log, $timeout, $q, $http, Upload, ImportService, ExportService, $uibModal, $sce, toaster) {
 
-    // Disable console logs in production
+    // Disable console logs in production environment
     var dev = location.host === "localhost:3000";
     if(!dev){
         console.log = function(){};
     }
 
-    // Ontology: archiveType, units, inferredVariableType, proxyObservationType
+    // Ontology: archiveType, units, inferredVariableType, proxyObservationType. These fields are pulled from the
+    // LinkedEarth Wiki by index.js and served to us on page load. If the response is bad, we use fall back data.
     $scope.ontology = {};
+
+    // Each popover is displayed when hovering over the feedback "requirements met / not met" boxes in the playground.
+    // The html data is fetched from ng_create and then rendered into the popover box.
     $scope.lipdPopover = $sce.trustAsHtml(create.getPopover("lipd"));
     $scope.wikiPopover = $sce.trustAsHtml(create.getPopover("wiki"));
     $scope.noaaPopover = $sce.trustAsHtml(create.getPopover("noaa"));
+
+    // All dropdown box elements must be bound in the scope.
     $scope.dropdowns = {
+      // 'current' shows the default selection, or the current selection (when a new selection is made by the user)
       "current": {
         "table": { id: 1, name: 'measurement' },
         "delimiter": { id: 1, name: "\t", view: "Tab ( \\t )"},
@@ -21,6 +28,7 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
         "columnField": {id: 4, name: "notes"},
         "dms": {"lat": {id: 1, name: "N"}, "lon": {id: 1, name: "E"}}
       },
+      // Used in the "Add Fields" section of each column.
       "columnFields": create.fieldsList(),
       "tables": [
         { id: 1, name: 'measurement' },
@@ -28,6 +36,7 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
         // { id: 3, name: 'ensemble' },
         // { id: 4, name: "distribution"}
       ],
+      // Old csv data parser: User chooses what delimiter is used by
       "delimiters": [
         { id: 1, name: "\t", view: "Tab ( \\t )"},
         { id: 2, name: ",", view: "Comma ( , )"},
@@ -35,29 +44,41 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
         { id: 4, name: "|", view: "Pipe ( | )"},
         { id: 5, name: " ", view: "Space"},
       ],
+      // Old csv data parser: User chooses what mode to parse their data.
       "parseMode": [
         { id: 1, name: "new", view: "Start New"},
         { id: 2, name: "update", view: "Update Values in All Existing Columns"},
         { id: 3, name: "add", view: "Add New Column(s) to Existing Table" },
       ],
+      // Degrees minutes seconds for Geo section
       "dms": {
         "lat": [{id: 1, name: "N"}, {id: 2, name: "S"}],
         "lon": [{id: 1, name: "E"}, {id: 2, name: "W"}]
       },
 
-      // archiveType, infVarType, and proxyObsType are stored and updated in node (values via LE Wiki query).
-      // We'll call them down and store them here
+      // Ontology: archiveType, units, inferredVariableType, proxyObservationType. These fields are pulled from the
+      // LinkedEarth Wiki by index.js and served to us on page load. Data stored in $scope.ontology
       "archiveType": $scope.ontology.archiveType,
       "infVarType": $scope.ontology.infVarType,
       "proxyObsType": $scope.ontology.proxyObsType,
+      // Time Unit used in NOAA section
       "timeUnit": create.timeUnitList(),
+      // Years list used in Publication section
       "years": create.yearList(),
+      // Created By is used in the Root section
       "createdBy": create.createdByList(),
+      // Countries is used in the Geo section
       "countries" : map.getCountries()
     };
 
-    // Get the ontology from node route.
+
+  /**
+   * Initialize the Ontology data. Get the ontology from the backend.
+   *
+   * Process:  LinkedEarth Wiki > Node > data cleaned up, organized, stored > sent to front end (here)
+   */
     var initOntology = function () {
+        // Get the ontology data from the node backend
         $http.get("/api/ontology")
             .then(function(response) {
               // Success. Set the data to the scope directly
@@ -66,16 +87,19 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
             }, function myError(err) {
                 console.log(err);
                 // Error, use our hardcoded lists as a fallback.
-                $scope.ontology["archiveType"] = create.archiveTypeList;
-                $scope.ontology["inferredVariableType"] = create.inferredVariableTypeList;
-                $scope.ontology["proxyObservationType"] = create.proxyObservationTypeList;
+                $scope.ontology = create.getOntologyBackup();
             });
     };
+    // Call the function during page load
     initOntology();
 
+    // NOT CURRENTLY IN USE
     $scope.fields = create.defaultColumnFields();
-    $scope.fieldMetadata = create.fieldMetadataLibrary();
-    // Compilation of all LiPD file data
+
+    // Tooltip library. All tooltips used for the fields on the Playground page are stored here.
+    $scope.tooltipLibrary = create.tooltipLibrary();
+
+    // Store for all LiPD file data
     $scope.files = {
       "modal": {},
       "lipdFilename": "",
@@ -89,6 +113,8 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
         "paleoData": [{"measurementTable": [{"tableName": "paleo0measurement0", "filename": "paleo0measurement0.csv",
           "columns": []}]}]}
     };
+    // Used by : $scope.showModalEditJson, this is a cache of the json metadata in case the user makes changes to the
+    // json data and then reverts the changes.
     $scope.jsonCache = null;
     // Metadata about the page view, and manipulations
     $scope.pageMeta = {
@@ -110,7 +136,6 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       "wikiReady": false,
       "tourMeta": {},
     };
-
     // All feedback warnings, errors, and messages received from the validator
     $scope.feedback = {
       "lipdVersion": "NA",
@@ -162,32 +187,66 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
     // All files, w/ contents, found in the LiPD archive. Used in "feedback.jade"
     $scope.allFiles = [];
 
+
+  /**
+   * Listen for data merge event to $emit up to us from the MergeCtrl (ngMerge.js) on the Merge page. When this
+   * happens, it means that the user triggered a download and we need to bring the data back here to use the
+   * $scope.downloadZip() function.
+   *
+   * @param  {Event}   event   $emit event from MergeCtrl
+   * @param  {Object}  data    LiPD Metadata
+   * @return none              File download is triggered, nothing returned
+   */
     $scope.$on('mergedData', function(event, data){
       // Place new json data into our scope
       $scope.files.json = data;
-      // Trigger download
-      $scope.downloadZip();
+      // Trigger download, leave empty callback
+      $scope.downloadZip(null);
     });
 
+  /**
+   * Add an entry to any field that supports multiple entries. Acceptable fields are listed below.
+   *
+   * Block Types: measurement, summary, ensemble, distribution, funding, pub, author, column, geo, onlineResource
+   *
+   * @param    {Object}  entry      Any type of metadata block that allows multiple entries.
+   * @param    {String}  blockType  Acceptable blockTypes are listed above.
+   * @param    {String}  pc         Mode: paleo or chron or null
+   * @returns  {Object}  entry      Any type of data block that allows multiple entries.
+   */
     $scope.addBlock = function(entry, blockType, pc){
       toaster.pop('success', "Added a new " + blockType + " entry", "", 4000);
       // Need to initialize the first entry of chronData measurement table, when it doesn't yet exist.
       if (pc === "chron" && typeof(entry) === "undefined"){
         $scope.files.json = create.addChronData($scope.files.json, blockType);
-        return;
       } else {
         // Add a block of data to the JSON. (i.e. funding, paleoData table, publication, etc.)
         entry = create.addBlock(entry, blockType, pc);
+        return entry;
       }
+    };
+
+  /**
+   * Add or remove a property from a given entry. Pass data through to the function in ng_create.js to do the legwork.
+   *
+   * @param    {Object}  entry      Any type of metadata block that allows multiple entries.
+   * @param    {String}  field      The name of the field to add or remove
+   * @return   {Object}  entry     Any type of metadata block (with an added OR removed field)
+   */
+    $scope.addRmProperty = function(entry, field) {
+      entry = create.addRmProperty(entry, field);
       return entry;
     };
 
-    $scope.addRmProperty = function(entry, name) {
-      entry = create.addRmProperty(entry, name);
-      return entry;
-    };
-
+  /**
+   * Add a field to an existing column. This is similar to addRmProperty() because it adds fields to a data block,
+   * but it has a lot of special cases so it needed its own function.
+   *
+   * @param  {Object}   entry   A data table column
+   * @return  none
+   */
     $scope.addColumnField = function(entry){
+      // the 'custom' field stores the name of the field that the user requested to add.
       var _field = entry.tmp.custom;
       // Adding an entry that is a nested array item
       if(["interpretation"].indexOf(_field) !== -1){
@@ -211,6 +270,19 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       entry.tmp.custom = "";
     };
 
+  /**
+   *
+   * Data and settings to change before and after the intro.js tour is run. In order to give a full tour of features,
+   * we need to add in data and turn on switches that show off each section. For example, if the user doesn't have the
+   * NOAA or Wiki switches turned on, then turn them on and add some dummy data into those sections. If they don't have
+   * a publication entry, add one in so that we can explain the DOI auto-fill feature.
+   *
+   * Keep track of what changes we make before the tour, so that we can revert those changes when the tour exits. We
+   * don't want to leave dummy data and unwanted changes on the page!
+   *
+   * @param {String}   mode   'before' or 'after', representing which mode of this function to execute
+   * @param {Function} cb     Callback function
+   */
     $scope.beforeAfterTour = function(mode, cb){
           if(mode === "before"){
               // Keep track of the state of the page BEFORE you start the tour, so you know how to put everything back afterwards
@@ -309,6 +381,12 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
           }
   };
 
+  /**
+   * Check in the browser session storage for a previously saved playground session. If data is found, give the user the
+   * option to load it back into memory, clear it, or ignore it.
+   *
+   * @return  none    The function modifies the controller $scope data.
+   */
     $scope.checkSession = function(){
       var _prevSession = sessionStorage.getItem("lipd");
       // Only ask to restore the session on the /playground route, and if a session exists.
@@ -337,17 +415,36 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       }
     };
 
+  /**
+   * Convert coordinates between Decimal Degrees (DD) and Degrees Minutes Seconds (DMS). LiPD standard is DD, but if
+   * a user is creating a file from scratch, and their source data is in DMS, then we have a switch that allows them
+   * to enter their DMS data. This function will use their DMS data to convert to DD, which will be stored in the LiPD
+   * file.  DMS input is only for user convenience.
+   *
+   * @return none   Data is modified in the controller $scope
+   */
     $scope.convertCoordinates = function(){
+      // If coordinate data is not yet added, then start with 0,0
       if(typeof($scope.files.json.geo.geometry.coordinates) === "undefined"){
         $scope.files.json.geo.geometry.coordinates = [0,0];
       }
+      // Convert the coordinates
       var _vals = misc.convertCoordinates($scope.pageMeta.decimalDegrees, $scope.files.json.geo.geometry.coordinates, $scope.dms);
+      // Add the converted data into the geo $scope data
       $scope.files.json.geo.geometry.coordinates = _vals.dd;
       $scope.dms = _vals.dms;
       $scope.dropdowns.current.dms.lat = _vals.dms.lat.dir;
       $scope.dropdowns.current.dms.lon = _vals.dms.lon.dir;
     };
 
+  /**
+   * Download data as a NOAA txt file
+   * This is the same function as downloadLipd(), with the exception of the closingWorkflowNoaa(). It uses the same
+   * idea, but has some extra steps for NOAA data handling. Overall, you clean up the LiPD data, send it to the backend,
+   * and then initiate a download once you get a good response.
+   *
+   * @return   none      A download is started in the browser window when successful
+   */
     $scope.downloadNoaa = function(){
       $scope.files.dataSetName = $scope.files.json.dataSetName;
       $scope.files.lipdFilename = $scope.files.dataSetName + ".lpd";
@@ -367,9 +464,18 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       });
     };
 
+  /**
+   * Download LiPD File
+   * Complete steps to cleanup and organize data for download. When data is prepped, send it to the backend to be
+   * packaged as a LiPD file, and then come back here to initiate the file download.
+   *
+   * @param   {Function}  cb    (WIP) Callback function, used to provide Wiki API with a file_id to retrieve file. Used
+   *                             to upload file straight to the wiki with the "Upload to Wiki" button.
+   */
     $scope.downloadZip = function(cb){
       $scope.files.dataSetName = $scope.files.json.dataSetName;
       $scope.files.lipdFilename = $scope.files.dataSetName + ".lpd";
+      // If there are still errors present, notify the user that the file may present issues
       if ($scope.feedback.errCt > 0){
         $scope.showModalAlert({"title": "File contains errors", "message": "You are downloading data that still has errors. Be aware that using a file that isn't fully valid may cause issues."});
       }
@@ -379,97 +485,163 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       $scope._myPromiseExport = ExportService.prepForDownload(_newScopeFiles);
       $scope.pageMeta.busyPromise = $scope._myPromiseExport;
       $scope._myPromiseExport.then(function (filesArray) {
-        //upload zip to node backend, then callback and download it afterward.
+        // Upload zip to node backend, then callback and download it afterward.
         console.log("Let me bring this to the backroom.");
         // Set up where to POST the data to in nodejs, and package the payload.
         var _url_route = "/files";
         var _payload = {"filename": $scope.files.lipdFilename, "file": filesArray};
         $scope.uploadToBackend(_url_route, _payload, function(resp){
+            // Initiate the download on the browser window.
             $scope.initiateDownload(resp, "files", cb);
         });
       });
     };
 
+  /**
+   * Expand the view of a data block on the Playground page. Example, 'x' may be an array of funding objects, and
+   * 'entry would be a single funding entry from that 'x' array.
+   *
+   * @param  {Array}    x      An Array of data objects
+   * @param  {Object}   entry  One entry from an array of data objects (x)
+   * @return none              Data is modified in place by two-way binding
+   */
     $scope.expandEntry = function(x, entry){
       // Turn off ALL toggles in the given chunk of metadata
       x = create.turnOffToggles(x, "toggle");
-      // Now turn on the toggle for this specific entry
+      // Ise there a toggle field yet?
       if (typeof entry.tmp === "undefined"){
+        // No, add the full object with the toggle turned on
         entry["tmp"] = {"toggle": true};
       } else{
+        // Turn on the toggle that already exists
         entry.tmp.toggle = true;
       }
     };
 
+  /**
+   * Use the DOI from the publication entry to auto-fill the publication fields with as much data as possible. The DOI
+   * is used with the doi.org API to get data.
+   *
+   * @param   {Object}    entry   One publication entry
+   * @return  {Object}    entry   One publication entry (w/ new doi.org data filled in)
+   */
     $scope.fetchPublication = function(entry){
       console.log(entry);
       console.log(entry.identifier[0].id);
+      // Regex for validating a DOI string.
       var _re = /\b(10[.][0-9]{3,}(?:[.][0-9]+)*\/(?:(?![\"&\'<>,])\S)+)\b/;
+      // Validate the DOI string given against the DOI regex.
       var _match = _re.exec(entry.identifier[0].id);
       console.log(_match);
+      // Is the DOI valid?
       if (_match){
+        // The DOI is valid. Create the doi.org URL for the API request.
         var _url =  "http://dx.doi.org/" + entry.identifier[0].id;
+        // Make the HTTP Get request to doi.org and wait for a response.
         $http({
           "method": "GET",
           "url": _url,
           "headers": {"accept": "application/rdf+xml;q=0.5, application/citeproc+json;q=1.0"}
         })
           .then(function (response) {
+            // We got a successful API response.
             console.log("DOI Response object");
             console.log(response);
+            // Sort the data and use our map to match doi.org keys to our LiPD keys. The data is placed into the
+            // publication entry here.
             entry = create.sortDoiResponse(response, entry);
           }, function(response) {
+            // Something went wrong. There was an error making a GET request to the API
             console.log("Unable to fetch DOI data: ");
             // console.log(response);
             alert("HTTP 404: No data found for that DOI");
           });
+        // Whenever a successful DOI auto-fill is complete, set this warning flag. This flag triggers a banner at the
+        // top of the publication entry that tells the user to verify the data check for mistakes. The auto-fill
+        // process isn't an exact science and sometimes has incomplete, conflicting data, or data mapped to different
+        // keys.
         entry.tmp.doiWarn = true;
       } else {
+        // The DOI string given was not valid. Don't continue
         alert("DOI entered does not match the DOI format");
       }
+      // Return the entry, with or without new publication data.
       return entry;
     };
 
+  /**
+   * Get the tooltip for a specific field from a specific section. Tooltips are retrieved dynamically so that fields
+   * generated in an ngRepeat loop are still able to have tooltips.
+   *
+   * @param   {String}   section    The section that the field resides in
+   * @param   {String}   key        The name of the field to get the tooltip for
+   * @return  {String}              A tooltip string
+   */
     $scope.getTooltip = function(section, key){
-      return create.fieldMetadataLibrary(section, key);
+      return create.tooltipLibrary(section, key);
     };
 
+  /**
+   * Initiate a file download
+   * Once data is prepped and ready in the backend, use the file id that we get in the response to initiate a file
+   * download in the browser.
+   *
+   * @param  {Object}    resp   Backend server response data (status and file id)
+   * @param  {String}    mode   'noaa' or 'files' mode. The backend routes are different for each. ('files' is for lipd)
+   * @param  {Function}  cb     Callback for 'Upload to Wiki' data
+   * @return none
+   */
     $scope.initiateDownload = function(resp, mode, cb){
-          // mode: "noaa" or "files"
-          console.log("Received backend response");
-          console.log(resp);
-          if (resp.status !== 200){
-              window.alert("HTTP " + resp.status + ": Error downloading file\n" + resp.statusText);
+      // mode: "noaa" or "files"
+      console.log("Received backend response");
+      console.log(resp);
+      if (resp.status !== 200){
+          window.alert("HTTP " + resp.status + ": Error downloading file\n" + resp.statusText);
+      } else {
+          console.log("We have liftoff. Here ya go!");
+          // If there is a callback, that means we're doing a wiki upload and need to send the response data in the
+          // callback.
+          // Are we on dev or production? Create the url according to the mode.
+          var _url = "";
+          if(dev){
+              // Dev mode download link
+              _url = "http://localhost:3000/" + mode + "/" + resp.data;
           } else {
-              console.log("We have liftoff. Here ya go!");
-              // If there is a callback, that means we're doing a wiki upload and need to send the response data in the
-              // callback.
-              // Are we on dev or production? Use href accordingly
-              var _url = "";
-              if(dev){
-                  _url = "http://localhost:3000/" + mode + "/" + resp.data;
-              } else {
-                  _url = "http://www.lipd.net/" + mode + "/" + resp.data;
-              }
-
-              if(cb){
-                  // Uses the "files" mode.
-                  cb(resp.data);
-              } else {
-                  window.location.href = _url;
-
-              }
+              // Production mode download link
+              _url = "http://www.lipd.net/" + mode + "/" + resp.data;
           }
-      };
+          // Is there a callback?
+          if(cb){
+              // We're attempting to upload the file to the Wiki, so send the data through the callback.
+              cb(resp.data);
+          } else {
+              // Normal download. Start the download on this window.
+              window.location.href = _url;
+          }
+      }
+    };
 
+  /**
+   * Determine if the data type for the given field is an Array or not.
+   *
+   * @param    {String}  field   Field name
+   * @return   {Boolean}         True for Array, False for other data types
+   */
     $scope.isArr = function(field){
-        // Data is a block if the field is in this list.
+        // Data is an Array if the field is in this list.
         if(["interpretation"].includes(field)){
             return true;
         }
+        // Not an array
         return false;
     };
 
+  /**
+   * Determine if a field should be made as an auto-complete input type.
+   *
+   * @param    {String}    field   Field name
+   * @return   {Boolean}           True for auto-complete, False for other input type
+   */
     $scope.isAutocomplete = function(field){
         // These fields use an autocomplete input box with suggested data from the linked earth wiki ontology.
         if(["proxyObservationType", "inferredVariableType"].includes(field)){
@@ -478,7 +650,13 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
         return false;
     };
 
-    $scope.isBlock = function(field){
+  /**
+   * Determine if a field is an object data type.
+   *
+   * @param    {String}    field   Field name
+   * @return   {Boolean}           True for Object, False for other data types
+   */
+    $scope.isObject = function(field){
           // Data is a block if the field is in this list.
           if(["physicalSample", "hasResolution", "calibration", "measuredOn", "takenAtDepth"].includes(field)){
               return true;
@@ -486,6 +664,13 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
           return false;
       };
 
+  /**
+   * NOT CURRENTLY IN USE
+   * Determine if a field is a column property.
+   *
+   * @param    {String}    field   Field name
+   * @return   {Boolean}           True for Object, False for other data types
+   */
     $scope.isProperty = function(field){
         // Do not show any temporary fields, data, or nested blocks.
         if(["number", "variableName", "units", "toggle", "description", "values", "checked", "tmp", "interpretation", "physicalSample", "hasResolution", "calibration", "takenAtDepth", "measuredOn"].includes(field)){
@@ -494,6 +679,17 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
         return true;
     };
 
+  /**
+   * Make the data NOAA ready
+   * For turning switch on:
+   * Add all the NOAA required fields to the page and add NOAA validation rules to the validation process.
+   *
+   * For turning switch off:
+   * Remove the validation rules. The NOAA section view gets hidden. All data linked to NOAA related fields remain intact.
+   *
+   * @param   {String}   alert   Message to show in alert modal box
+   * @return  none               All modifications made to the controller scope.
+   */
     $scope.makeNoaaReady = function(alert){
         // Alert: True if alerts should be displayed, False if not.
         // Why? Because we don't want the modal alerts to pop up when users take the tour of the page. It prohibits scrolling.
@@ -522,6 +718,16 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       }
     };
 
+  /**
+   * Make the data Wiki ready
+   * For turning switch on:
+   * Add all the Wiki required fields to the page and add Wiki validation rules to the validation process.
+   *
+   * For turning switch off:
+   * Remove the validation rules. All data linked to Wiki related fields remain intact.
+   *
+   * @return  none    All modifications made to the controller scope.
+   */
     $scope.makeWikiReady = function(){
       // The wikiReady boolean is bound to the switch
       if(!$scope.pageMeta.wikiReady){
@@ -539,6 +745,16 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       }
     };
 
+  /**
+   * Parse csv data from the textarea element in the paleoData and chronData sections. This is the original csv parser,
+   * and has since been partially replaced by the
+   *
+   * @param    {Object}  table      Table metadata
+   * @param    {Number}  parentIdx  The index of the parent object. (ie. paleoData[2] or chronData[1])
+   * @param    {Number}  idx        The index of the table object.  (i.e. paleoData[1]measurementTable[1])
+   * @param    {Object}  options    'pc' (paleo, chron) 'and' tt (table type of 'measurement', 'summary')
+   * @return   {Object}  table      Table metadata (with data added or modified)
+   */
     $scope.parseCsv = function(table, parentIdx, idx, options){
       var _parse_mode = $scope.dropdowns.current.parseMode.name;
       var _delimiter = $scope.dropdowns.current.delimiter.name;
@@ -657,23 +873,43 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       return table;
     };
 
+  /**
+   * Remove an entry (object) from an array.
+   *
+   * @param    {Array}   entry   An array of objects. (ex: funding, publication, etc)
+   * @param    {Number}  idx     Object index to remove
+   */
     $scope.removeBlock = function(entry, idx){
       create.rmBlock(entry, idx);
     };
 
-    $scope.resetCsv = function(entry){
+  /**
+   * Reset the parsed csv data each time after data is parsed. We want to keep the textarea element clear for parsing
+   * new data at all times.
+   *
+   * @param    {Object}   table   Table metadata
+   * @return   {Object}   table   Table metadata (w/ temp csv data reset)
+   */
+    $scope.resetCsv = function(table){
       // To reset a parsed CSV table, you need to undo all of the below
-      // entry.values, entry.filename, entry.columns,
+      // table.values, table.filename, entry.columns,
       // $scope.files.csv[_csvname] = _csv;
-      entry.tmp.values = null;
-      entry.tmp.parse = false;
-      $scope.files.csv[entry.filename] = null;
+      table.tmp.values = "";
+      table.tmp.parse = false;
+      $scope.files.csv[table.filename] = null;
       // entry.filename = null;
-      entry.columns = null;
-      entry.tmp.toggle = !entry.tmp.toggle;
-      return entry;
+      table.columns = null;
+      table.tmp.toggle = !table.tmp.toggle;
+      return table;
     };
 
+  /**
+       * Reset all the data for playground page status and view. Reset LiPD file data that was uploaded or created.
+       * This is a complete page reset that is essentially a page refresh without having to refresh the page. Hop right
+       * into your next file.
+       *
+       * @return  none   All data modified in the controller $scope
+       */
     $scope.resetPage = function(){
       // All metadata and data about the page is emptied when the Upload button is clicked. Ready for another file upload.
       $scope.allFiles = [];
@@ -739,15 +975,26 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       $scope.status = "N/A";
     };
 
+  /**
+   *  Remove the FULL paleoData or chronData section. This could potentially be a lot of data, so a modal pops up to
+   *  ask you if you're sure you want to complete the operation.
+   *
+   * @param   {String}  pc    'paleo' or 'chron'. The section to be deleted.
+   * @return  none            All data modified in the controller $scope.
+   */
     $scope.removePaleoChron = function(pc){
+      // Ask the user if they're absolutely sure they want to delete this data.
       $scope.showModalAsk({"title": "Delete ALL data in this section?",
           "message": "Are you sure you want to delete all data from the " + pc + "Data section? I won't be able to bring it back.",
         "button1": "Yes",
         "button2": "No"}, function(truth){
+        // Yes, they want to delete the data.
         if(truth === true){
           if(pc === "chron"){
+            // Remove the chronData by setting it to an empty array.
             $scope.files.json.chronData = [];
           } else if (pc === "paleo"){
+            // Remove the paleoData by setting one table in the array and leaving the data empty.
             $scope.files.json.paleoData = [{"measurementTable": [{"tableName": "", "missingValue": "NaN",
               "filename": "", "columns": []}]}];
           }
@@ -755,16 +1002,27 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       });
     };
 
-    $scope.rmColumnField = function(entry, _field){
-      if(entry.hasOwnProperty(_field)){
+  /**
+   * Remove a field entry from a data column. All fields can be removed except for TSid, which isn't in view on the
+   * page anyways.
+   *
+   * @param   {Object}  column   Column Metadata
+   * @param   {String}  _field   Name of field to remove
+   * @return  none               All data modified in controller $scope
+   */
+    $scope.rmColumnField = function(column, _field){
+      if(column.hasOwnProperty(_field)){
         if (["TSid"].indexOf(_field) !== -1){
           $scope.showModalAlert({"title": "Restricted field", "message": "You may not add, remove, or edit fields that are automatically generated"});
         } else {
-          delete entry[_field];
+          delete column[_field];
         }
       }
     };
 
+  /**
+   *
+   */
     $scope.saveSession = function(){
       try{
         delete $scope.pageMeta.busyPromise;
@@ -1195,7 +1453,10 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       // Edit the JSON data directly through a modal with a large textarea. JSON must be valid to save.
 
       // Push these options through to the modal
-      var _opts = {"initialUpload": false,
+      var _opts = {
+                //
+                "initialUpload": false,
+                // Store original json data in cache in case the user makes edits and abandons the edits.
                   "cached": $scope.jsonCache,
                   "errorTitle": "Exit Without Save",
                   "errorMessage": "No changes saved to metadata",
