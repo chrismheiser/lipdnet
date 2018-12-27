@@ -1021,11 +1021,17 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
     };
 
   /**
+   * The LiPD playground can consume a lot of time if you are working on big data sets or trying to fulfill certain
+   * agency requirements. In a perfect world, we'd auto-save progress to a database and keep snapshots of your work in
+   * case you lost connection, experienced a power outage, or some other unforeseen event. Since that's not feasible
+   * right now, we have a button that will save your work progress to the browser session storage for as long as the
+   * browser remains open.
    *
    */
     $scope.saveSession = function(){
       try{
         delete $scope.pageMeta.busyPromise;
+        // Information to store. It's easier to save and load the data while it's in pieces.
         var _dat = JSON.stringify({
           "allFiles": $scope.allFiles,
           "status": $scope.status,
@@ -1036,73 +1042,119 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
           "files": $scope.files
         });
         console.log("Saving progress: ");
-        // console.log($scope.roughSizeOfObject(_dat));
+        // console.log($scope.roughSizeOfObject(_dat));'
+        // Data gets saved to session storage
         sessionStorage.setItem("lipd", _dat);
+        // A notification shows the user that the data is saved
         toaster.pop('note', "Saving progress...", "Saving your data to the browser session in case something goes wrong", 4000);
       } catch(err){
+        // A notification shows the user that there was a problem saving the data. Sometimes large datasets will not save.
         toaster.pop('error', "Error saving progress", "Unable to save progress. Data may be too large for browser storage", 4000);
       }
     };
 
+  /**
+   * Adding country / properties block to the Geo section.
+   *
+   * @param   {String}  name    Country name
+   * @return  none              All data modified in controller scope.
+   */
     $scope.setCountry = function(name){
-      if (!$scope.files.json.geo.properties.country){
+    // If the Geo section does not have 'properties' data, then we need to add it before you can set the country.
+    if (!$scope.files.json.geo.properties.country){
         $scope.files.json.geo = create.addBlock($scope.files.json.geo, "geo", null);
-      }
+    }
+      // Set the country name to the country field.
       $scope.files.json.geo.properties.country = name;
     };
 
+  /**
+   * Show a modal window for an alert message
+   * msg = {"title": "", "msg": ""}
+   *
+   * @param  {Object}   msg   Message to display to the user
+   * @return none
+   */
     $scope.showModalAlert = function(msg){
-      // FORMAT: msg = {"title": "", "msg": ""}
       $scope.modal = msg;
+      // Use the uib module to open the modal
       var modalInstance = $uibModal.open({
         templateUrl: 'modal-alert',
         controller: 'ModalCtrlAlert',
         size: "md",
         resolve: {
           data: function () {
+            // Pass the message through to the modal controller.
             return $scope.modal;
           }
         }
       });
     };
 
+  /**
+   *  Show a modal window with options that the user can click.
+   * msg = {"title": "", "message": "", "button1": "", "button2": "", "button3": ""}
+   *
+   * @param   {Object}   msg   The message to display to the user.
+   * @param   {Function} cb    Callback function
+   */
     $scope.showModalAsk = function(msg, cb){
-      // FORMAT: msg = {"title": "", "msg": "", "button1": "", "button2": "", "button3": ""}
       $scope.modal = msg;
-      var modalInstance = $uibModal.open({
+        // Use the uib module to open the modal
+        var modalInstance = $uibModal.open({
         templateUrl: 'modal-ask',
         controller: 'ModalCtrlAsk',
         size: "md",
         resolve: {
           data: function () {
+            // Send the data options through to the modal.
             return $scope.modal;
           }
         }
       });
       modalInstance.result.then(function (selected) {
+        // Take the user's answer from the modal and pass it through to the callback
         cb(selected);
       });
     };
 
+  /**
+   * Show a modal window to edit block data. For example, the column fields 'hasResolution' and 'interpretation' have
+   * nested data, which is an array that cannot be edited through a regular input field. We make each object in the
+   * array into a button, and the button activates this modal for editing the contents of the object.
+   *
+   * options = {"data": [] or {}, "create": bool, "key": "", "idx": null or int}
+   *
+   * @param   {Object}   entry    Data column
+   * @param   {Boolean}  _create  If this field does not yet have data, create the object before opening the modal
+   * @param   {String}   _key     Field (key) name
+   * @param   {Number}   idx      The index number of
+   * @return  {Object}   entry    Data column, with the target field data modified
+   */
     $scope.showModalBlock = function(entry, _create, _key, idx){
-      // FORMAT: options = {"data": [] or {}, "create": bool, "key": "", "idx": null or int}
-      // Use idx === null or !== null to determine if this is an array
+      // If an index is given, that means the data belongs to an array
+      // If an index is not given, that means it's an object, so leave arrType null.
       var arrType = idx !== null;
-
-      // Get the data
+      // Get the field data from the column.
       var _data = entry[_key];
-      // If data not initialized or creating from scratch, then make the object
+      // If data not initialized or creating from scratch, and is not an array type, create the object.
       if((typeof _data === 'undefined' || !_data) && !arrType){
         _data = {};
-      } else if ((typeof _data === 'undefined' || !_data) && arrType){
+      }
+      // If data not initialized or creating from scratch, and is an array type, create the array.
+      else if ((typeof _data === 'undefined' || !_data) && arrType){
         _data = [];
       }
+      // Create the data object if true and if field is an array data type.
       if(_create && arrType){
+        // Set new index to last item in the array
         idx = _data.length;
+        // Push empty object onto the array.
         _data.push({});
       }
-      //Set options to pass to modal controller
+      // Set options to pass to modal controller
       $scope.modal = {"data": _data, "create": _create, "key": _key, "idx": idx};
+      // Use the uib module to open the modal
       var modalInstance = $uibModal.open({
         templateUrl: 'modal-block',
         controller: 'ModalCtrlBlock',
@@ -1113,22 +1165,43 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
           }
         }
       });
+      // Receive the data back from the modal when the modal closes
       modalInstance.result.then(function (new_data) {
+        // User chose to delete the data.
         if (new_data === "delete"){
+          // Data is an array
           if(arrType){
+            // Delete the index from the array
             _data.splice(idx, 1);
+            // Set the data back to the field inside the data column
             entry[_key] = _data;
-          } else {
+          }
+          // Data is an object
+          else {
+            // Delete the object from the column data
             delete entry[_key];
           }
-        } else if(new_data !== "cancel"){
+        }
+        // User cancelled the modal window.
+        else if(new_data !== "cancel"){
+          // Take no action to the data. Return as-is.
           entry[_key] = new_data;
         }
+        // Return the data entry, with possible modified data.
         return entry;
       });
+      // Return the entry as-is, if the modal window didn't work for some reasonm.
       return entry;
     };
 
+  /**
+   * Show a modal window that displays the raw contents of the csv, jsonld, or txt files that are within a LiPD archive.
+   * If it's the jsonld file, you can edit the json data in the modal window. For csv and txt files, you may only view.
+   * data = {"data": {}, "options": {"title": "", "initialUpload": boolean}}
+   *
+   * @param   {Object}   data    File data and options for the modal
+   * @return  none               Data modified in controller scope
+   */
     $scope.showModalFileContent = function(data){
 
       // If this is the metadata.jsonld file, we want to open the advancedJsonEdit modal window
@@ -1152,65 +1225,109 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       }
     };
 
+  /**
+   * Start the introjs page tour. Initializes the introjs object and makes the necessary changes to the web page so
+   * that the user can see and interact with all page options. (ie. inserting dummy data, enabling wiki and NOAA
+   * data sections, etc)
+   */
     $scope.startTour = function(){
+      // Init introjs
       var intro = introJs();
+      // Give the tour steps and options to the introjs object
       intro.setOptions({
         steps: create.tourSteps()});
+      // Add in dummy data and make page changes to show off page features.
       $scope.beforeAfterTour("before", function(tourMeta){
         $scope.pageMeta.tourMeta = tourMeta;
+        // Start the tour
         intro.start();
       });
+      // Tour was exited
       intro.onexit(function() {
+        // Remove all dummy data and change the page back to its original state.
         $scope.beforeAfterTour("after", function(tourMeta){
           $scope.pageMeta.tourMeta = tourMeta;
         });
       });
     };
 
+  /**
+   * Toggle the CSV parse box. When table data has been parsed, we no longer need to show the box. If the user wants
+   * to re-parse data or modify the table values in some way, they can press a button to toggle the parse box back into
+   * view.
+   *
+   * @param   {Object}  entry   Table metadata
+   * @return  none
+   */
     $scope.toggleCsvBox = function(entry) {
       entry.tmp.parse=!entry.tmp.parse;
     };
 
+  /**
+   * Update the file list that is in the feedback section of the page.
+   * We use ng-repeat to create file links in the file list in the feedback section. ng-repeat needs an array, and the
+   * CSV data is not stored in an array. Every time we run a validation cycle, update the data for the fileList to be
+   * current.
+   *
+   * @param   {Array}  fileList     List of files in the LiPD archive
+   * @param   {Object} csvs         Csv data sorted by filename
+   * @return  {Array}  _newFileList List of files in the LiPD archive (updated)
+   */
     $scope.updateFilesList = function(fileList, csvs){
-        // We use ng-repeat to create file links in the file list in the feedback section.
-        // ng-repeat needs an array, and the CSV data is not stored in an array.
-        // Every time we run a validation cycle, update the data for the fileList to be current.
+        // Output file list
         var _newFileList = [];
-        // Copy over bagit and jsonld files.
-        // Bagit files are only present if a file was uploaded and NOT created from scratch
+        // Loop for each file in the current file list
+        // Bagit files are only present if a file was uploaded. NOT if it was created from scratch.
         for(var _p=0; _p<fileList.length; _p++){
+          // Copy over the jsonld and txt files
           if(fileList[_p]["type"] !== "csv"){
+            // Push files onto the new file list as-is
             _newFileList.push(fileList[_p]);
           }
         }
-
+        // Loop for each csv file in the scope data
         for(var _filename in csvs){
           if(csvs.hasOwnProperty(_filename)){
+            // Push the csv file onto the new file list
             _newFileList.push({"filenameShort": _filename, "type": "csv", "data": csvs[_filename].data});
           }
         }
+        // Return the new file list.
         return _newFileList;
-
     };
 
+  /**
+   * After a LiPD file is uploaded with the "choose file" button, we need to set the value back to null so that it's
+   * ready in case another file is uploaded later.
+   */
     $scope.uploadBtnClick = function(){
         this.value = null;
     };
 
+  /**
+   * LiPD file upload
+   * When there is an event change on the file upload button, go through the process of uploading the LiPD file into
+   * the page.
+   *
+   * @param  {Object}     event   Data from button event listener.
+   * @param  {Function}   cb      Callback function or null.
+   */
     $scope.uploadBtnChange = function(event, cb){
       var fileInput = event.target;
-      // console.log(fileInput.files);
       // var fileInput = document.getElementById("file-input");
       // if the upload button is clicked && a file is chosen, THEN reset the page and data.
       $scope.resetPage();
       $scope.files.lipdFilename = fileInput.files[0].name;
       $scope.files.dataSetName = fileInput.files[0].name.slice(0, -4);
-      // get a list of file entries inside this zip
+      // Get a list of file entries inside this LiPD upload
       $scope.model.getEntries(fileInput.files[0], function (entries) {
+          // Before we do anything with the LiPD data upload, we need to make sure that the jsonld is valid and usable
+          // If it is not, then either the user needs to manually fix the errors through a dialog box, or we need to
+          // cancel the file upload.
           $scope.validateJsonld(entries, function(entries){
               // If the user cancelled fixing the JSON data, then they cannot continue with the upload.
               if(entries){
-                  // use the service to parse data from the ZipJS entries
+                  // Use the Import service to parse data from the ZipJS entries
                   $scope.pageMeta.busyPromise = ImportService.parseFiles(entries);
                   $scope.pageMeta.busyPromise.then(function (res) {
                       // There will be one undefined entry in this array. Placeholder for the original JSON promise.
@@ -1242,18 +1359,19 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
                       alert("Error parsing JSON-LD file. File cannot be validated");
                   }); // end ImportService
               }
-          }); // end model.getEntries
+          });
       });
-      // console.log(entries);
-
-
-
       // once the change even has triggered, it cannot be triggered again until page refreshes.
       typeof cb === 'function' && cb();
   };
 
+  /**
+   * LiPD file upload button.
+   * Function initializes on window load. When the upload button is used, the
+   */
     $scope.uploadBtnUpload = function(){
-        // Set up zip.js object and its corresponding functions
+        // Set up zip.js object and its corresponding functions. The ZipJS module includes this code as part of the
+        // tutorial on how to get started. This code is minimally modified to fit our code.
         var requestFileSystem = this.webkitRequestFileSystem || this.mozRequestFileSystem || this.requestFileSystem;
         function onerror(message) {
             alert(message);
@@ -1348,22 +1466,29 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
                 getBlob : function(callback) {
                     zipWriter.close(callback);
                 }
-            }; // end return
-        }(); // end var model
+            };
+        }();
         $scope.model.setCreationMethod("Blob");
     };
 
+  /**
+   * Upload playground data directly to the LinkedEarth Wiki via their API. The upload only works if the user is logged
+   * into the wiki. I'm not certain what a successful response looks like. A failed upload does not return an error or
+   * any other info.
+   *
+   * WIP: This function is not working yet. Waiting on Varun to give me answers on how to interface the API. No answers
+   * yet.
+   *
+   * @return    none   Return a good or bad response, depending on the result.
+   */
     $scope.uploadToWiki = function(){
 
+        // Open a smaller popup window that shows the user login page for the LinkedEarth Wiki
         var popupWindow = window.open('http://wiki.linked.earth/Special:UserLogin', '_blank', 'location=yes,height=600,width=800,scrollbars=yes,status=yes');
-        // function parent_disable() {
-        //     if(popupWindow && !popupWindow.closed)
-        //         popupWindow.focus();
-        // }
 
-        // Valid wiki file. continue
+        // If the data is validated and passes wiki standards..
         if($scope.feedback.validWiki === 'PASS'){
-            console.log("Wiki file is valid");
+            // Start the steps needed to upload the data with the wiki API.
             $scope.downloadZip(function(file_id){
                 console.log(file_id);
                 var _payload = {"filename": $scope.files.lipdFilename, "id": file_id};
@@ -1397,7 +1522,7 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
 
             });
         }
-        // Not a valid wiki file. Stop process and correct errors
+        // Not a valid wiki file. Stop process and tell user to correct errors
         else {
             $scope.showModalAlert({"title": "Cannot upload to Wiki", "message": "The data does not meet Wiki " +
                 "standards. Make sure that you have the 'Wiki Ready' switch turned on, and there are no Wiki " +
@@ -1406,8 +1531,16 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
 
     };
 
+  /**
+   * Upload validated LiPD data to the backend. What you do with the data later is up to the backend based on the
+   * url_route provided.
+   *
+   * @param   {String}    url_route   The route where the data should be sent to.  (ex.  '/noaa' or '/files')
+   * @param   {Object}    payload     LiPD data and metadata
+   * @param   {Function}  cb          Callback function. Usually to trigger file download or similar.
+   */
     $scope.uploadToBackend = function (url_route, payload, cb) {
-      // Upload *validated* lipd data to backend
+      // Link the promise to the data upload. A busy spinner will show until the promise is fulfilled.
       $scope.pageMeta.busyPromise = Upload.upload({
         url: url_route,
         data: payload
@@ -1423,18 +1556,32 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       });
     };
 
+  /**
+   * Validate the LiPD data on the page.
+   * This involves fixing data mistakes, structure mistakes, and other errors as much as possible.
+   * Provide feedback that includes warning and error messages. Rules are dependent on page state which modes are
+   * switched on and whether the data was uploaded or created from scratch.
+   *
+   * @return   none    The validation feedback is stored and updated in the controller scope.
+   */
     $scope.validate = function(){
       // Go through all validations steps, and update scope data.
       // rearrange coordinates from dict to array when necessary, and set the map if coordinates exist
       $scope.files = map.fixCoordinates($scope.files);
-      // convert dms coordinates where necessary
+      // Convert DMS coordinates to Decimal Degrees when necessary
       $scope.files.json = misc.checkCoordinatesDms($scope.files.json, $scope.dms, $scope.pageMeta.decimalDegrees);
+      // Use the coordinates to update the pin location on the map.
       $scope.map = map.updateMap($scope.map, $scope.files);
+      // If the LiPD data is not up to the current version, update it.
       versions.update_lipd_version($scope.files, function(_results1){
+          // Receive LiPD data back. It is updated to the most recent version.
           console.log("Updated Versions");
+          // Store the LiPD version into the page metadata, in case it has changed.
           $scope.pageMeta.oldVersion = _results1.version;
+          // Send LiPD data through to the validator.
           lipdValidator.validate(_results1.files, $scope.pageMeta, function(_results){
             try{
+              // Store the validation results in the page metadata.
               $scope.files = _results.files;
               $scope.feedback = _results.feedback;
               $scope.status = _results.status;
@@ -1446,34 +1593,53 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
           });
         }
       );
-
     };
 
+  /**
+   * Advanced JSON edit.
+   * Edit the JSON data directly through a modal with a large textarea. JSON must be valid to save changes. This is
+   * useful for advanced users that want to directly edit the data instead of using the page input fields. Also,
+   * rarely there are structural errors that cannot be fixed except through directly editing the JSON.
+   *
+   * Activated through clicking the 'metadata.jsonld' filename in the feedback section of the page.
+   *
+   * @return  none   Data is modified in the controller scope.
+   */
     $scope.advancedJsonEdit = function(){
-      // Edit the JSON data directly through a modal with a large textarea. JSON must be valid to save.
-
       // Push these options through to the modal
       var _opts = {
-                //
+                // Is this a file upload or an advanced edit?
                 "initialUpload": false,
                 // Store original json data in cache in case the user makes edits and abandons the edits.
-                  "cached": $scope.jsonCache,
-                  "errorTitle": "Exit Without Save",
-                  "errorMessage": "No changes saved to metadata",
-                  "title": "Advanced JSON-LD Editor"
+                "cached": $scope.jsonCache,
+                // Notification title in the event of a cancelled window
+                "errorTitle": "Exit Without Save",
+                // Notification message in the event of a cancelled window
+                "errorMessage": "No changes saved to metadata",
+                // Modal window title
+                "title": "Advanced JSON-LD Editor"
       };
-      // Open the modal editor
+      // Open the modal editor with the json data. Pretty print the object so it's easier to view and edit.
       $scope.showModalEditJson(JSON.stringify($scope.files.json, null, 2), _opts, function(_json){
-        // If json data is returned, continue to set.
+        // If json data is returned, continue to set the data back into the controller scope.
         if(_json){
             // Set the new json back to the scope variable.
             $scope.files.json = _json;
         }
-        // If we get a null return, then that means we keep the existing json data and don't do anything.
-
+        // If we get a null return, then that means we keep the existing json data and don't save anything.
       });
     };
 
+  /**
+   * Show the modal window for editing and fixing JSON metadata. This is used for two different purposes, triggered
+   * by two different pathways.
+   * 1. Fixing JSON metadata if a decoding error is preventing a 'metadata.jsonld' file from being parsed
+   * 2. A manual edit to the JSON metadata for advanced users.
+   *
+   * @param   {Object}    data      LiPD metadata
+   * @param   {Object}    options   initialUpload, cached, errorTitle, errorMessage, and title
+   * @param   {Function}  cb        Callback
+   */
     $scope.showModalEditJson = function(data, options, cb){
         // Edit the JSON data directly through a modal with a large textarea. JSON must be valid to save.
         // This modal is used for:
@@ -1492,19 +1658,33 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
                 }
             }
         });
+        // Actions to take after the modal window closes
         modalInstance.result.then(function(result) {
+            // If a result is returned
             if(result) {
-                // Parse the result and use callback.
+                // Parse the result
                 var _json_parsed = JSON.parse(result);
+                // Send the parsed JSON object through the callback
                 cb(_json_parsed);
-            } else {
-                // Exited without validating the JSON-LD. Can't
+            }
+            // A result was not returned
+            else {
+                // Exited without validating the JSON-LD. Can't cannot continue.
                 toaster.pop('error', options.errorTitle, options.errorMessage, 5000);
+                // No result. Pass null through the callback.
                 cb(null);
             }
         });
     };
 
+  /**
+   * Validate jsonld during LiPD file upload
+   * In order to upload LiPD jsonld file metadata properly, it has to parse without errors. If it does not parse
+   * correctly, then the user must manually fix the errors through this process or abandon the file upload.
+   *
+   * @param {Array}     entries   Files within the LiPD archive. ZipJS turns these to a data entries array.
+   * @param {Function}  cb        LiPD file continues upload and is goes to the ImportService next.
+   */
     $scope.validateJsonld = function(entries, cb){
       for(var _p=0; _p<entries.length; _p++){
         var entry = entries[_p];
@@ -1515,26 +1695,32 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
                   if (entry.filename.indexOf(".jsonld") >= 0 || entry.filename.indexOf(".json") >= 0) {
                       // push the promise to the master list
                       entry.getData(new zip.TextWriter(), function (text) {
-                          // blindly attempt to parse as jsonld file
+                          // Blindly attempt to parse as jsonld file
                           try{
                               var _json_parsed = JSON.parse(text);
                               entries.push({"filename": "metadata.jsonld", "data": _json_parsed, "type": "json"});
                               cb(entries);
                           } catch(err) {
 
-                              // Err here is pretty vague and unhelpful.
-                              // Showing it to the user would only cause more confusion.
+                              // Oops, JSON was unable to be parsed. Often due to errors in decoding certain unicode
+                              // characters. Err here is pretty vague and unhelpful. Showing it to the user would only
+                              // cause more confusion.
 
-                              // Open the JSON editor modal. Send in the options with it.
+                              // Set options for JSON modal window
                               var _opts = {"errorTitle": "File Upload Cancelled",
                                   "errorMessage": "JSON-LD must be fixed to upload the file",
                                   "cached": false,
                                   "initialUpload": true,
                                   "title": "Invalid JSON-LD Data"
                               };
+                              // Open the JSON modal window and give the user a chance to fix the JSON so they can
+                              // continue the upload process.
                               $scope.showModalEditJson(text, _opts, function(_json_parsed){
-                                  entries.push({"filename": "metadata.jsonld", "data": _json_parsed, "type": "json"});
-                                  cb(entries);
+                                  // If the JSON parsed correctly and valid data is returned, continue with the upload.
+                                  if(_json_parsed !== null){
+                                      entries.push({"filename": "metadata.jsonld", "data": _json_parsed, "type": "json"});
+                                      cb(entries);
+                                  }
                               });
                           }
                       });
@@ -1546,8 +1732,11 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
 
 
 
+    // Execute these functions on page load.
     window.onload = (function(){
+      // Check for old, saved session data in the user's browser. Offer to re-load the data if found.
       $scope.checkSession();
+      // Initialize the upload button so that the event listener attaches and waits for a file upload.
       $scope.uploadBtnUpload();
     });
 
