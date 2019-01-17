@@ -1,7 +1,20 @@
-
+/**
+ * Spreadsheet controller
+ *
+ * Each data table has its own spreadsheet instance for entering data. This spreadsheet uses the 'HandsOnTable' module
+ * which is often referred to as 'hot' for short. These hot tables are interactive, can have headers, accept copy/paste
+ * commands, and more. It's as close to a true spreadsheet as I could find for javascript.
+ *
+ * @param $scope
+ * @constructor
+ */
 function SpreadsheetCtrl($scope){
   $scope.options = {};
 
+
+  // Set up the hot table with the given settings. These settings can be changed, but assuming a ~1200x800, somewhat
+  // standard resolution, this fits well. For larger resolutions, it looks better. The context menu is a tricky one.
+  // Not all options in the context menu usually show, or they're greyed out. Seems to be a bug in hot.
   // $scope.headers = [];
   $scope.settings = {
     rowHeaders: false,
@@ -13,10 +26,26 @@ function SpreadsheetCtrl($scope){
     startRows: 10,
     startCols: 0,
     contextMenu: ["row_above", "row_below", "remove_row", "undo", "redo", "copy", "cut"],
+
+  /**
+   * After init
+   * Run once when the hot table is initialized.
+   *
+   * @param index
+   * @param amount
+   */
     afterInit: function(index, amount){
-      // Use this to keep a reference to the hot instance.
+      // Use this as a reference to the hot instance.
       $scope.hot = this;
     },
+
+  /**
+   * After Paste
+   * Run after each time data is pasted into the hot table.
+   *
+   * @param index
+   * @param amount
+   */
     afterPaste: function(index, amount){
       // Use countSourceCols() to determine how many columns are being pasted, and how many to push to the table.cols metadata.
       var _current = $scope.$parent.entry2.columns.length;
@@ -30,36 +59,50 @@ function SpreadsheetCtrl($scope){
           $scope.addColumn($scope.$parent.entry2);
         }
       }
+      // Update the hot instance so new changes are reflected
       $scope.hot.updateSettings($scope.settings);
     },
-    // Every time there is a change, update the hot headers.
+
+  /**
+   * After Change
+   * Run after anything in the hot instance changes. Good for debugging.
+   *
+   * @param index
+   * @param amount
+   */
     afterChange: function (index, amount) {
+      // Check for updates to the column headers
       $scope.settings.colHeaders = $scope.updateHeaders($scope.$parent.entry2);
+      // Refresh the table by running updateSettings.
       this.updateSettings($scope.settings);
       // console.log(this.getData());
       // console.log($scope.$parent.files.csv[$scope.$parent.entry2.filename]);
       // console.log("Spreadsheet change---");
       // console.log($scope.$parent.entry2);
     },
-
   };
 
   /**
    * Refresh the spreadsheet view. Even though there is a two-way bind between the spreadsheet view and the 'hot'
    * object data, the spreadsheet view often lags behind when changes or made. This is a workaround to force the
    * view to refresh.
+   *
+   * @return none              All data is updated in controller $scope
    */
   $scope.refreshRender = function(){
+    // Render the hot instance
     $scope.hot.render();
+    // Update the column headers
     $scope.settings.colHeaders = $scope.updateHeaders($scope.$parent.entry2);
+    // Run update on hot instance
     $scope.hot.updateSettings($scope.settings);
   };
 
   /**
-   * Add a column to the given table.
+   * Add a column to a data table.
    *
    * @param  {Object}  table   Table metadata
-   * @return none              All data is updated in controller $scope
+   * @return none              All data is updated in the controller $scope
    */
   $scope.addColumn = function(table){
     // The table values data does not exist yet
@@ -153,36 +196,42 @@ function SpreadsheetCtrl($scope){
 
   };
 
-  $scope.updateHeadersNull = function (table) {
-    var _headers = [];
-    if (table.hasOwnProperty("columns")) {
-      for (var _m = 0; _m < table.columns.length; _m++) {
-        _headers.push(null);
-      }
-    }
-    return _headers;
-  };
 
+/**
+ * Update the column headers
+ * Each column has a header of "variableName (units)" when data is available. This function looks for that data and
+ * places it in the header array as a str
+ *
+ * @param  {Object}  table     Table metadata
+ * @return {Array}   _headers  Formatted header/unit  names for table columns
+ */
   $scope.updateHeaders = function (table) {
+    // Array to store all the header names
     var _headers = [];
+    // If this table has columns...
     if (table.hasOwnProperty("columns")) {
       for (var _n = 0; _n < table.columns.length; _n++) {
+        // Placeholder variableName and units for each column header, in case data is not available
         var _varName = "variableName";
         var _units = "units";
 
         if(table.columns[_n].hasOwnProperty("variableName")){
           if(typeof table.columns[_n].variableName !== "undefined"){
+            // Get the variableName for this column
             _varName = table.columns[_n].variableName;
           }
         }
         if(table.columns[_n].hasOwnProperty("units")){
           if(typeof table.columns[_n].units !== "undefined"){
+            // Get the units for this column
             _units = table.columns[_n].units;
           }
         }
+        // Add this header name to the array
         _headers.push(_varName + " (" + _units + ") ");
       }
     }
+    // Return the array of formatted header row names
     return _headers;
   };
 

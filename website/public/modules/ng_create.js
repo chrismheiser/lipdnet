@@ -887,7 +887,7 @@ var create = (function(){
      *
      * @return  {Object}    Wiki ontology data
      */
-      getOntologyBackup:(function(){
+    getOntologyBackup:(function(){
         return {
             "inferredVariableType": [
                 "d18o",

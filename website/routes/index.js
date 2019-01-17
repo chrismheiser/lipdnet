@@ -22,7 +22,9 @@ if(!dev){
 
 // HELPERS
 
-// 12.18.18 :  Snapshot of the Wiki ontology data. Use if our real-time requests aren't working.
+/**
+ * 12.18.18 :  Snapshot of the Wiki ontology data. Use if our real-time requests aren't working.
+ */
 var _ontology_fallback = {
         "inferredVariableType": [
             "d18o",
@@ -243,75 +245,116 @@ var _ontology_fallback = {
         ]
 };
 
-// Wiki ontology data. This variable stores real-time requests (or fallback data). This data is sent to front-end.
+/**
+ * Wiki ontology data. This variable stores real-time requests (or fallback data). This data is sent to front-end.
+ */
 var _ontology_query = {
     "inferredVariableType": [],
     "archiveType": [],
     "proxyObservationType": [],
     "units": []
 };
-// All 'labels' imported and processed from the ontology.json file
+
+/**
+ * All 'labels' imported and processed from the ontology.json file
+ */
 var _ontology_json = [];
 
-// Global counter for recursive getOntologyLabels function below
+/**
+ * Global counter for recursive getOntologyLabels function below
+ */
 var count = 0;
+
+/**
+ * Get Wiki ontology labels by sorting through the /data/ontology.json file. Break the file down to just key-value pairs
+ * within a Json object. Recursively collect all the "label" items from within the ontology file.
+ *
+ * @param   {*}    json   Ontology data parsed from the /data/ontology.json file
+ * @param   {*}    cb     Callback function, or null. Next fn goes to cleanOntology()
+ */
 var getOntologyLabels = function(json, cb) {
-    // Recursively collect all the "label" items from within the ontology file
+    // The count keeps track of when we're done iterating and recursively diving. Once back to 1 count, we can callback.
     count++;
+    // If incoming data is a string, bubble up.
     if(typeof(json) === "string") {
     }
+    // Data is an array
     else if (Array.isArray(json)){
+        // Loop for each item in array
         for(var _i=0; _i < json.length; _i++){
+            // Recursive call, no callback.
             getOntologyLabels(json[_i], null);
             count--;
         }
-    } else if(typeof(json) === "object"){
+    }
+    // Data is an object
+    else if(typeof(json) === "object"){
+        // Loop over each key
         for(var _key in json){
             if(json.hasOwnProperty(_key)){
+                // The keys we want are classified as labels
                 if (_key === "rdfs:label"){
+                    // Does this key have a value field?
                     if(json[_key].hasOwnProperty("@value")){
+                        // Yes, push the key - value pair onto the ontology array.
                         _ontology_json.push(json[_key]["@value"]);
                     }
-                } else {
+                }
+                // Key is not a label
+                else {
+                    // Recursive call, no callback
                     getOntologyLabels(json[_key], null);
                     count--;
                 }
             }
         }
     }
+    // If the count is back to 1, and the callback is a function (rather than null), we can use the callback.
     if (count-1 === 0 && cb)
+        // Called within mergeOntologies(). Next step is to cleanOntology()
         cb();
-
 };
 
+/**
+ * Clean the Wiki ontology by removing duplicates or similar entries. We want the vocabulary to be somewhat-controlled
+ * so that we don't have many variations of the same terms. The cleanup follows the list of requirements below to
+ * remove unwanted terms.
+ *
+ * REQUIREMENTS
+ *
+ * 1. remove any words that have "." period equivalents
+ *    ie. 'yr bp' and "yr b.p."
+ * 2. remove any words that have no spacing equivalents
+ *    ie.  "glacier ice" and "GlacierIce"
+ * 3. remove any words that have uppercase equivalents
+ *    ie. "Glacierice" and "glacierice"
+ *
+ * @return  none   Data is updated in global scope
+ */
 var cleanOntology = function(){
-    // REQUIREMENTS
-
-    // 1. remove any words that have "." period equivalents
-    // ie. 'yr bp' and "yr b.p."
-
-    // 2. remove any words that have no spacing equivalents
-    // ie.  "glacier ice" and "GlacierIce"
-
-    // 3. remove any words that have uppercase equivalents
-    // ie. "Glacierice" and "glacierice"
-
-    // lower all items in query, and remove the period characters
+    // Lowercase all items.
+    // Loop for each key in the ontology object
     for(var _key in _ontology_query) {
         if(_ontology_query.hasOwnProperty(_key)) {
+            // Loop over the value in array for this key
             for(var _k = 0; _k < _ontology_query[_key].length; _k++) {
                 try{
+                    // Lowercase all values, and remove the period characters
                     _ontology_query[_key][_k] = _ontology_query[_key][_k].toLowerCase().replace(/\./g, "");
                 } catch(err){
-                    // pass
+                    // Pass, if there's an error we don't care.
                 }
             }
         }
     }
 
+    // Find all the unwanted keys
+    // Loop for each key in the ontology object (again)
     for(var _key2 in _ontology_query) {
         if (_ontology_query.hasOwnProperty(_key2)) {
+            // Array to store unwanted keys
             var _bad = [];
+            // Loop for each value in array for this key
             for (var _k2 = 0; _k2 < _ontology_query[_key2].length; _k2++) {
                 var _word = _ontology_query[_key2][_k2];
                 // Is there a space in this word?
@@ -320,24 +363,29 @@ var cleanOntology = function(){
                     var _nospaceword = _word.replace(" ", "");
                     // Is there a no space equivalent
                     if(_ontology_query[_key2].indexOf(_nospaceword) !== -1){
-                        // We'll remove this word later.
+                        // No space equivalent exists, add it to array for removal.
                         _bad.push(_nospaceword);
                     }
                 }
 
                 // Are there duplicates of this word in the key array? Is the word tracked in the bad array yet?
                 if(countDuplicates(_ontology_query[_key2], _word) > 1 && _bad.indexOf(_word) === -1){
+                    // Duplicate key, add it to array for removal
                     _bad.push(_word);
                 }
             }
 
             // Remove all the words in the bad array that we don't want anymore.
             for(var _p=0; _p<_bad.length; _p++){
+                // Get the current key for removal
                 var _removeword = _bad[_p];
                 // Since there might be multiple instances of bad words, we have to loop to remove all of them.
                 for(var _rm=0; _rm<countDuplicates(_ontology_query[_key2], _removeword); _rm++){
+                    // Find index the array index for this key
                     var _idx = _ontology_query[_key2].indexOf(_removeword);
+                    // Does it exist?
                     if (_idx > -1) {
+                        // Yes, exists. Remove the word from the array.
                         _ontology_query[_key2].splice(_idx, 1);
                     }
                 }
@@ -353,6 +401,7 @@ var cleanOntology = function(){
             if (_ontology_query.hasOwnProperty(_key3)) {
                 // Is the ontology version in here in a lowercase version?
                 var _idx2 = _ontology_query[_key3].indexOf(_word1.toLowerCase());
+                // Does it exist?
                 if (_idx2 > -1) {
                     // Remove the wiki version
                     _ontology_query[_key3].splice(_idx2, 1);
@@ -365,17 +414,34 @@ var cleanOntology = function(){
 
 };
 
+/**
+ * Count how many times a word occurs in an array
+ *
+ * @param  {Array}  arr    Array of words
+ * @param  {String} word   Word to look for in array.
+ * @return {Number} _count The number of times the word occurs in the array.
+ */
 var countDuplicates = function(arr, word){
     var _count = 0;
+    // Loop for each word in array
     for(var i = 0; i < arr.length; i++){
+        // Does it match?
         if(arr[i] === word)
+            // Count it.
             _count++;
     }
+    // Return word count
     return _count;
 };
 
+/**
+ * Read the ontology file that is stored in /data/ontology.json
+ *
+ * @param {Function}  cb  Callback function, goes to getOntologyLabels() next.
+ */
 var readOntologyFile = function(cb){
     try{
+        // Read the file with the file stream module
         fs.readFile('./data/ontology.json', function (err, data) {
             cb(err, data);
         });
@@ -384,15 +450,24 @@ var readOntologyFile = function(cb){
     }
 };
 
+/**
+ * Merge two snapshots of the wiki ontology. One snapshot is a file stored on the server. The second snapshot is
+ * queried and pulled from the LinkedEarth Wiki on load. Preference is given to the query since it is more up-to-date.
+ *
+ * @return   none   Ontology data is updated in the global space.
+ */
 var mergeOntologies = function(){
+    // Read the ontology file from /data/ontology.json into memory
     readOntologyFile(function(err, _data){
         try{
             if (err){
+                // If error don't continue. Not a big deal.
                 console.log("index.js: readOntologyFile: Couldn't read ontology.json: " + err);
             } else {
-                // Flatten the json object into an array of keys ("labels")
+                // Parse the file data as JSON and then reorganize it into an object sorted by keys.
                 getOntologyLabels(JSON.parse(_data), function(){
-                    // Compare and combine the Ontology data with the Wiki query data. Give Ontology priority.
+                    // Compare and combine the file data (constant) with the Wiki query data (up-to-date).
+                    // Give the query data preference, since it's likely newer.
                     cleanOntology();
                     console.log("index.js: cleanOntology: end");
                 });
@@ -403,7 +478,13 @@ var mergeOntologies = function(){
     });
 };
 
-// Sort the results of the LinkedEarth Wiki ontology results. Get all the string values from the XML response.
+
+/**
+ * Sort the results of the LinkedEarth Wiki ontology results. Get all the string values from the XML response.
+ *
+ * @param {Object}   results   LinkedEarth
+ * @param {Function} cb        Callback function. Next step is to set data to global scope
+ */
 var parseWikiQueryOntology = function(results, cb){
     try {
         var _tmp = [];
@@ -415,16 +496,24 @@ var parseWikiQueryOntology = function(results, cb){
             // Push the current data result onto the array
             _tmp.push(_data[_m]["binding"][0]["literal"][0]);
         }
+        // Send the organized data through to the next step.
         cb(_tmp);
     } catch(err) {
         // There was a problem. We don't want to update our ontology if there was an error.
-        // return null instead to show there was a problem.
         console.log("index.js: parseWikiQueryOntology: No Results? : " + err);
+        // Send back an empty array so we don't have partially finished or partially complete data.
         cb([]);
     }
 };
 
-// Send SPARQL request to LinkedEarth Wiki for ONE ontology field.
+
+/**
+ * Send SPARQL request to LinkedEarth Wiki for one ontology field.
+ *
+ * @param   {String}   field   Wiki field to query for. (inferredVariableType, proxyObservationType, units, archiveType)
+ * @param   {String}   query   The query string to add to the end of the URI
+ * @return  none               Data is stored in the global scope
+ */
 var _getWikiOntologyField = function(field, query){
         // Pack up the options that we want to give the Python request
         var options = {
@@ -480,7 +569,13 @@ var _getWikiOntologyField = function(field, query){
 
 };
 
-// Use SPARQL queries to get possible field entries for the specific listed fields. From LinkedEarth Wiki
+
+/**
+ * Use SPARQL queries to get possible field entries for the specific listed fields. Loop over each of the fields
+ * and query them one at a time.
+ *
+ * @return   none    Data is stored in the global scope
+ */
 var getWikiOntology = function(){
     // The prefix to each query is the same.
     var _prefix = "PREFIX core: <http://linked.earth/ontology#>PREFIX wiki: <http://wiki.linked.earth/Special:" +
@@ -503,32 +598,56 @@ var getWikiOntology = function(){
     }
 };
 
+
+/**
+ * Compile ontology by getting the local and remote data, and then merging the data after.
+ *
+ * @return  none    Data is stored in the global scope
+ */
 var compileOntology = function(){
     console.log("index.js: compileOntology: start");
     try{
+        // Retrieve LinkedEarth Wiki ontology data through queries.
         getWikiOntology();
         // Fake a sync function so the query items come back first before continuing
         setTimeout(function(){
+            // Merge the remote ontology and the local ontology
             mergeOntologies();
         }, 4000);
     } catch(err){
+        // Error, no problem. We'll use the local ontology
         console.log("index.js: compileOntology: " + err);
     }
 };
 
+/**
+ * Retrieve and compile ontology on a set interval.
+ */
 try{
     // Run once on initialization. All other updates are done on the timer below.
     compileOntology();
-    // Refresh the LinkedEarth Wiki ontology data every 1 WEEK
+    // Refresh the LinkedEarth Wiki ontology data every 1 WEEK, or once every time node is restarted
     setInterval(compileOntology, 604800000);
 }catch(err){
+    // Error. Use the existing or local ontology instead.
     console.log(err);
 }
 
 // TODO Need to finish this. Batch download button for /query page
+/**
+ * Batch download wiki files is for allows you to download multiple files at once through the results of the /query
+ * page.
+ *
+ * @param  {Array}     dsns   Dataset names of the LiPD files the user wants to download from the Wiki server
+ * @param  {Function}  cb     Callback function. Next step is to zip up all files that were downloaded, so we can
+ *
+ */
 var batchDownloadWiki = function(dsns, cb){
+  // Track number of errors that occur
   var _errCt = 0;
+  // Track which datasets caused errors
   var _errNames = [];
+  // We'll need the request module to do a GET request.
   var request = require('request');
 
   // Options for creating a temp folder
@@ -574,10 +693,20 @@ var batchDownloadWiki = function(dsns, cb){
     // }
   }
 
+  // Go zip up all the files that we retrieved.
   cb()
 };
 
-// Create a zip file of one LiPD file. All lipd directories and file are in one zip.
+
+/**
+ *  Create a zip archive for one LiPD file. All lipd directories and files are in one zip. (json, txt, csv)
+ *
+ * @param   {String}   pathTmp      Path to Temp directory
+ * @param   {String}   pathTmpZip   Path to Zip directory
+ * @param   {String}   pathTmpBag   Path to Bagit directory
+ * @param   {String}   filename     LiPD filename
+ * @param   {String}   cb           Callback
+ */
 var createArchive = function(pathTmp, pathTmpZip, pathTmpBag, filename, cb){
     try{
         logger.info("Creating ZIP/LiPD archive...");
@@ -699,7 +828,7 @@ var createSubdirs = function(master, res){
 
 var createTmpDir = function(master, res){
     try {
-        // create tmp folder at "/tmp/<lipd-xxxxx>"
+        // create tmp folder at "/tmp/<`xxxxx>"
         // logger.info("POST: creating tmp dir...");
         master.pathTmp = misc.makeid(master.pathTmpPrefix, function(_pathTmp){
             // logger.info("POST: created tmp dir str: " + _pathTmp);
@@ -904,6 +1033,103 @@ var writeFiles = function(dat, dst, res, cb){
 
 // PAGE ROUTES
 
+// router.post("/remote", function(req, res){
+//     try{
+//         console.log("Loading file from remote website: ");
+//         console.log(req.body.sourceurl);
+//         // This is the source url for the GET request
+//         var _sourceurl  = req.body.sourceurl;
+//         // This is the end of the source url, that is the filename of the LiPD file we are attempting to GET
+//         var filename = _sourceurl.substring(_sourceurl.lastIndexOf('/')+1);
+//         console.log(filename);
+//         // This is the path to the tmp folder
+//         var pathTop = path.join(process.cwd(), "tmp");
+//         // This is the path to the file folder within tmp, where we will download the LiPD file to.
+//         var pathTmpPrefix = path.join(pathTop, "remote-");
+//         // This creates the tmp file folder with the file ID, and then gives back the full path to the tmp file folder
+//         var pathTmp = misc.makeid(pathTmpPrefix, function(_pathTmp){
+//             // logger.info("POST: created tmp dir str: " + _pathTmp);
+//             try{
+//                 logger.info("mkdir: " + _pathTmp);
+//                 mkdirSync(_pathTmp);
+//             } catch(err){
+//                 logger.info("createTmpDir: Couldn't mkdirs" + err);
+//             }
+//             return _pathTmp;
+//         });
+//         // Full tmp file folder where the file will be stored.
+//         // i.e. ~/website/tmp/remote-3nf3nf/
+//         console.log(pathTmp);
+//         // res.send("Sending remote data to client.");
+//
+//         // Make the GET request, and store the file in its tmp file folder
+//         saveRemoteFile(pathTmp, filename, _sourceurl, res, function(){
+//             // LiPD file has been saved successfully, now unzip it and start sorting the data.
+//             console.log("After pipe. Now do something with the file.");
+//             // Bring in the unzip module, to unzip the LiPD file
+//             var unzip = require('unzip');
+//             // Store the path to the LiPD file (i.e.  /some/path/file.lpd)
+//             var filePath = path.join(pathTmp, filename);
+//             // Unzip the LiPD file into the same tmp directory that it sits in.
+//             var unzip_proc = fs.createReadStream(filePath).pipe(unzip.Extract({ path: pathTmp }));
+//             // Once the unzipping process is done, start processing the LiPD data.
+//             unzip_proc.on("close", function(){
+//                 console.log("Zip is now opened.");
+//                 // Read the jsonld, csv, and txt files.
+//
+//             });
+//
+//             res.status(200).send("Success!");
+//         });
+//     } catch(err){
+//         console.log("overall /remote error: ", err);
+//         res.end();
+//     }
+// });
+//
+// var saveRemoteFile = function(pathTmp, filename, sourceurl, res, cb){
+//     console.log("Sending remote request");
+//     // Pack up the options that we want to give the request module
+//     var options = {
+//         "method": "GET",
+//         "url": sourceurl,
+//         "headers": {'Access-Control-Allow-Origin': "*"}
+//     };
+//     // If we're on the production server, then we need to add in the proxy option
+//     if (!dev){
+//         options.proxy = "http://rishi.cefns.nau.edu:3128";
+//
+//     }
+//
+//     var stream = request(options, function (error, res1, body) {
+//         if(typeof res1 === "undefined") {
+//             console.log("/remote, http get did not work");
+//             res.writeHead(500, "Remote get did not work", {'content-type': 'text/plain'});
+//             res.end();
+//         } else {
+//             try{
+//
+//                 // console.log(res1);
+//                 // console.log(res1.toJSON());
+//                 // var _data = JSON.parse(res1.body);
+//                 // var _data2 = JSON.parse(res1.toJSON().body);
+//                 // console.log(_data);
+//                 // console.log(_data2);
+//                 // console.log(JSON.stringify(res1.body));
+//                 console.log("Success?");
+//             } catch(err) {
+//                 console.log(err);
+//                 res.end();
+//             }
+//         }
+//     }).pipe(fs.createWriteStream(path.join(pathTmp, filename)));
+//     stream.on('finish', function (){
+//         console.log("Stream on finish");
+//         cb();
+//     });
+//
+// };
+
 router.get('/', function(req, res, next) {
   res.render('index', { title: 'LiPD' });
 });
@@ -918,6 +1144,18 @@ router.get("/playground", function(req, res, next){
   res.render('playground', {title: 'Playground'});
 });
 
+/**
+ * Create a LiPD file with the metadata and values data provided. This involves:
+ * 1. Creating separate directories
+ * 2. Writing the txt, csv, and json files
+ * 3. Running bagit (gladstone) on the files
+ * 4. Zipping up the files into one LiPD file
+ *
+ * @param  {Object}   req   Request object
+ * @param  {String}   res   Response string is file ID the
+ * @param  {Function} next  Callback, not in use
+ * @return                  File ID or error string
+ */
 router.post("/files", function(req, res, next){
   // Request data : Client sends LiPD data. Create csv, json, and text files. Zip contents into a LiPD file stored on the server.
   // Response data : A string ID that corresponds to the LiPD file on the server.
@@ -974,17 +1212,29 @@ router.post("/files", function(req, res, next){
   }
 });
 
+/**
+ * Client requests a LiPD file download.
+ *
+ * Request: Client sends a string ID of the LiPD file that they want to download.
+ * Response: Initiate a download of the LiPD file to the client.
+ *
+ * req.params.tmp =  Path to Temp directory
+ *
+ * @param  {Object}   req   Request object
+ * @param  {Object}   res   Response object
+ * @param  {Function} next  Callback, not used
+ * @return none             Download is triggered in response
+ */
 router.get("/files/:tmp", function(req, res, next){
-  // Request: Client sends a string ID of the LiPD file that they want to download.
-  // Response: Initiate a download of the LiPD file to the client.
   try {
-    // Tmp string provided by client
+    // File ID provided by client
     logger.info("/files get");
-    var tmpStr = req.params.tmp;
-    logger.info("/files get: " + tmpStr);
-    // walk(path.join(process.cwd(), "tmp", tmpStr));
+    // Get the file ID from the request object
+    var fileID = req.params.tmp;
+    logger.info("/files get: " + fileID);
+    // walk(path.join(process.cwd(), "tmp", fileID));
     // Path to the zip dir that holds the LiPD file
-    var pathTmpZip = path.join(process.cwd(), "tmp", tmpStr, "zip");
+    var pathTmpZip = path.join(process.cwd(), "tmp", fileID, "zip");
     // Read in all filenames from the dir
     logger.info("/files get: LiPD File: " + pathTmpZip);
     var files = fs.readdirSync(pathTmpZip);
@@ -993,6 +1243,7 @@ router.get("/files/:tmp", function(req, res, next){
       // Get the first lipd file you find (there should only be one)
        if(path.extname(files[i]) === ".lpd") {
          var options = {"path": pathTmpZip, "file": files[i], "content": "application/zip", "message": "/files get: Sending LiPD to client"};
+         // Send response and trigger a file download
          downloadResponse(options, res);
        }
     }
@@ -1002,10 +1253,22 @@ router.get("/files/:tmp", function(req, res, next){
   }
 });
 
+/**
+ * Convert LiPD data to NOAA data
+ *
+ * Request:
+ * Client sends LiPD data. Send it to PythonAnywhere script to convert it to NOAA text file(s).Write NOAA file(s) to
+ * server.
+ *
+ * Response:
+ * A string file ID that corresponds to the NOAA txt file (or zip of multi NOAA files) on the server.
+ *
+ * @param   {Object}   req   Request object
+ * @param   {String}   res   Response string. File ID for created NOAA file
+ * @param   {Function} next  Callback, not in use
+ * @return  none             File ID sent in response
+ */
 router.post("/noaa", function(req, res, next){
-  // Request: Client sends LiPD data. Send it to PythonAnywhere script to convert it to NOAA text(s). Write NOAA texts to server.
-  // Response: A string ID that corresponds to the NOAA file (or zip of multi NOAA files) on the server.
-
   try{
     // Parse the angular request data into a form that we can use
     var master = {};
@@ -1029,7 +1292,6 @@ router.post("/noaa", function(req, res, next){
       // If we're on the production server, then we need to add in the proxy option
       if (!dev){
         options.proxy = "http://rishi.cefns.nau.edu:3128";
-
       }
 
       // Send the request to the NOAA API
@@ -1112,11 +1374,23 @@ router.post("/noaa", function(req, res, next){
   }
 });
 
+/**
+ * Download NOAA
+ * Retrieve and download a NOAA file. This may be a single txt file, or a zip archive that contains several txt files.
+ * The request parameters contain the ID for the NOAA file that we want to retrieve from NodeJS and serve back as a
+ * download.
+ * Ex ID: "noaa-EG31DS"
+ *
+ * @param  {Object}   req    Request object. The req.params.tmp indicates which file to serve.
+ * @param  {String}   res    String error response or file download
+ * @param  {Function} next   Callback, not in use
+ * @return none              Download is triggered in response
+ */
 router.get("/noaa/:tmp", function(req, res, next){
   // Request: Client sends a string ID of the NOAA file that they want to download.
   // Response: Initiate a download of the NOAA file to the client.
   try {
-    logger.info("/noaa get: Ya! Take it away, Ern!");
+    logger.info("/noaa get: Fetch the NOAA file requested");
     // NOAA ID provided by client
     var tmpStr = req.params.tmp;
     logger.info("/noaa get: NOAA ID: " + tmpStr);
@@ -1137,6 +1411,7 @@ router.get("/noaa/:tmp", function(req, res, next){
       // zip up the files into a single download
       createArchiveNoaa(pathTmpNoaa, function(){
         var options = {"path": pathTmpNoaa, "file": "noaa_archive.zip", "content": "application/zip", "message": "/noaa get: Sending NOAA zip to client"};
+        // Completed successfully.
         downloadResponse(options, res);
       });
     } else {
@@ -1384,6 +1659,10 @@ router.get("/api/ontology", function(req, res, next){
     res.status(200).send(JSON.stringify(_ontology_query));
 });
 
+/**
+ *
+ *
+ */
 router.post("/api/validator", function(req, res, next){
   logger.info("------------------------");
   logger.info("enter /api/validator");
@@ -1421,11 +1700,18 @@ router.post("/api/validator", function(req, res, next){
     logger.info("index: Validation failed: " + err);
     res.status(400).send("HTTP 400: Validation failed: " + err);
   }
-
-  // logger.info("exit /api/validator");
+  logger.info("exit /api/validator");
 });
 
-// Use data from a LiPD file to create TSids, register them in the master list, and send data in response
+/**
+ * Create a TSid
+ * Use data from a LiPD file to create TSids, register them in the master list, and send data in response
+ *
+ * @param   {Object}  req    Request object
+ * @return  {String}  res    Response object
+ *                           Success: Stringified json object.
+ *                           Failure: Error string.
+ */
 router.post("/api/tsid/create", function(req, res, next){
   logger.info("/api/tsid/create");
   try {
@@ -1442,14 +1728,12 @@ router.post("/api/tsid/create", function(req, res, next){
     readTSidOnly(function(_tsids){
       // Now we have an array of all the registered TSids
       misc.reconcileTSidCreate(_tsids, _objs, function(_x){
-        // logger.info("At the end!");
-        // logger.info(_x);
-        // append the new TSids to tsid_only.csv
+        // Append the new TSids to tsid_only.csv
         updateTSidOnly(_x);
-        // append the new object data (w/ tsids) to tsid_master.csv
+        // Append the new object data (w/ tsids) to tsid_master.csv
         updateTSidMaster(_x, function(_results){
           logger.info("TSids created successfuly");
-          // since the update was successsful, add the new JSON objects to the response and send.
+          // Since the update was successsful, add the new JSON objects to the response and send.
           res.setHeader('Content-Type', 'application/json');
           res.send(JSON.stringify(_results, null));
         });
@@ -1457,37 +1741,50 @@ router.post("/api/tsid/create", function(req, res, next){
     });
   } catch (err) {
     logger.info(err);
-    logger.info(err);
     res.end();
   }
 });
 
-// Given some TSids from a LiPD file, register its TSids in our master list.
+/**
+ * Register new TSids to our master list.
+ * Receive TSids from LiPD files and check them against our master list. Add TSids to the master list where
+ * necessary
+ *
+ * Current TSid master list is : tsid_master.csv
+ *
+ * req.body.data is an {Array} of objects that holds necessary information to register a TSid.
+ * Ex: req.body.data
+ * {"TSid": "", "dataSetName": "", "variableName": "", "spreadsheetKey": "", "worksheetKey": ""}
+ *
+ *
+ * @param   {Object}  req   Request object
+ * @return  {Object}  res   Response object
+ *                          Success: Success {String}
+ *                          Failure: Error {String}
+ *
+ */
 router.post("/api/tsid/register", function(req, res, next){
   logger.info("/api/tsid/register");
-  // Receive an array of JSON objects. Each with 4 fields:
-  // example = {"TSid", "dataSetName", "variableName", "spreadsheetKey", "worksheetKey"}
   try{
+    // Array of objects, each with 4 fields needed to register TSid
     var _objs = req.body.data;
     readTSidOnly(function(_tsids){
       misc.reconcileTSidRegister(_tsids, _objs, function(_x){
         updateTSidOnly(_x);
-        // append the new object data (w/ tsids) to tsid_master.csv
+        // Append the new object data (w/ tsids) to tsid_master.csv
         updateTSidMaster(_x, function(_results){
-          // since the update was successsful, add the new JSON objects to the response and send.
+          // Since the update was successful, add the new JSON objects to the response and send.
           // res.setHeader('Content-Type', 'application/json');
           // res.send(JSON.stringify(_results, null));
-          logger.info("TSids registered successfuly");
-          res.status(200).send({"response": "Registered TSids successfuly"});
+          logger.info("TSids registered successfully");
+          res.status(200).send({"response": "Registered TSids successfully"});
         });
       });
     });
   } catch(err){
     logger.info(err);
-    logger.info(err);
     res.end();
   }
-
 });
 
 
