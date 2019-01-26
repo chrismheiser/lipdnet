@@ -15,9 +15,9 @@ var bodyParser = require('body-parser');
 var multer = require("multer");
 var sys = require('sys');
 var favicon = require('serve-favicon');
+var app = express();
 var routes = require('./routes/index');
 var users = require('./routes/users');
-var app = express();
 
 
 // Get a list of all the directories in the Tmp folder.
@@ -111,9 +111,12 @@ app.use(multer({ storage: storage, limits:{ fieldSize: 25 * 1024 * 1024 }}).sing
 // 	next();
 // });
 
+
+
 // Attach the router to our app.
 app.use('/', routes);
 app.use('/users', users);
+
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

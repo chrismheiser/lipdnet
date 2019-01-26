@@ -8,7 +8,6 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
         console.log = function(){};
     }
 
-
     // Ontology: archiveType, units, inferredVariableType, proxyObservationType. These fields are pulled from the
     // LinkedEarth Wiki by index.js and served to us on page load. If the response is bad, we use fall back data.
     $scope.ontology = {};
@@ -880,18 +879,16 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
    * Use zip.js to read in a LiPD file from a direct url source.
    *
    *
-   * @param    {String}   source   The source URL that points directly to a LiPD file
-   * @return   none                The LiPD data is pulled from the source and loaded into the controller $scope.
+   * @param    {Object}   resp   The full response object from the LiPD source URL. Forwarded from the backend request.
+   * @return   none             The LiPD data is pulled from the source and loaded into the controller $scope.
    */
-  $scope.remoteFilePull = function(source){
+  $scope.remoteFilePull = function(resp){
       try {
-          zip.createReader(new zip.HttpReader(source), function(reader) {
-              console.log(reader);
+          zip.createReader(new zip.DataReader(resp), function(reader) {
               reader.getEntries(function (entries) {
                   // Before we do anything with the LiPD data upload, we need to make sure that the jsonld is valid and usable
                   // If it is not, then either the user needs to manually fix the errors through a dialog box, or we need to
                   // cancel the file upload.
-                  console.log(entries);
                   $scope.validateJsonld(entries, function(entries){
                       // If the user cancelled fixing the JSON data, then they cannot continue with the upload.
                       if(entries){
@@ -931,17 +928,18 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
               });
           }, function(error) {
               // onerror callback
-              console.log("Error reading remote file, ", error);
-              $scope.showModalAlert({"title": "LiPD Upload via URL failed", "message": "The query in the URL did not work. Unable to load the LiPD file via URL source. Please check that your URL points directly to a LiPD file and the link works."});
+              console.log("remoteFilePull zip.js: Error reading remote file");
+              console.log(error);
+              $scope.showModalAlert({"title": "LiPD Upload via URL failed", "message": "ERROR: " + error + ". The query in the URL did not work. Unable to load the LiPD file via URL source. Please check that your URL points directly to a LiPD file and the link works."});
               });
       } catch(err){
-          console.log("remoteFilePull: ", err);
+          console.log("remoteFilePull: tryCatch: ");
+          console.log(err);
       }
   };
 
 
   /**
-   * DEPRECATED
    *
    * Users may upload an externally hosted LiPD file to the playground via a direct link url to that LiPD file.
    * Example:  www.lipd.net/playground?source=http://www.website.com/somelipdfile.lpd
@@ -957,25 +955,22 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
             var done = JSON.parse('{"' + decodeURI(search).replace(/"/g, '\\"').replace(/&/g, '","').replace(/=/g,'":"') + '"}');
             // Get the remote source url, which should be labeled under 'source' in the query
             var _sourceurl = done.source;
-            console.log(_sourceurl);
-            // Pull data from source, and upload it with zip.js
-            $scope.remoteFilePull(_sourceurl);
-
-            // // Send the source url to the backend, and let node go GET the LiPD file.
-            // console.log("Let me bring this to the backroom.");
-            // var _url_route = "/remote";
-            // var _payload = {"sourceurl": _sourceurl};
-            // $scope.uploadToBackend(_url_route, _payload, function(resp){
-            //     // LiPD data received in JSON object form, now integrate it into the controller scope.
-            //     // Manually place the data or find a way to hook into the file upload process.
-            //     console.log("Remote data received");
-            //     console.log(resp);
-            // });
+            // Send the source url to the backend, and let node go GET the LiPD file.
+            console.log("Let me bring this to the backroom.");
+            var _url_route = "/remote";
+            var _payload = {"source": _sourceurl};
+            $scope.uploadToBackend(_url_route, _payload, function(resp){
+                // LiPD data received in JSON object form, now integrate it into the controller scope.
+                // Manually place the data or find a way to hook into the file upload process.
+                console.log("Remote data received from: ", _sourceurl);
+                console.log(resp);
+                $scope.remoteFilePull(resp);
+            });
 
         } catch(err){
             // Remote source URL not found in url path. Continue as normal.
-            console.log("No remote source url found");
-            // console.log(err);
+            console.log("remoteFileUpload : No remote source url found: ");
+            console.log(err);
         }
     };
 

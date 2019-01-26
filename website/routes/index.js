@@ -14,7 +14,6 @@ var port = process.env.PORT || 3000;
 var dev = port === 3000;
 var router = express.Router();
 
-
 // Disable console logs in production
 if(!dev){
     console.log = function(){};
@@ -1032,6 +1031,54 @@ var writeFiles = function(dat, dst, res, cb){
 
 
 // PAGE ROUTES
+
+router.post("/remote", function(req, res, next){
+    try {
+        // Store the URL for the remote LiPD file to retrieve.
+        var _source = req.body.source;
+        // Bring in the request module to work some magic
+        var request = require('request');
+        // Pack up the options that we want to give the request module
+        var options = {
+            uri: _source,
+            method: 'GET',
+            timeout: 3000,
+            responseType: "blob",
+            encoding: null,
+        };
+
+        // If we're on the production server, then we need to add in the proxy option
+        if (!dev){
+            options.proxy = "http://rishi.cefns.nau.edu:3128";
+        }
+
+        // Send the request to get the remote LiPD file.
+        request(options, function (error, response, body) {
+
+            // If the response is a string, then it is likely an error message.
+            if (typeof body === 'string' || body instanceof String) {
+                // If the response code is a 502, then something is wrong with the server and it needs to be looked at.
+                if (response.statusCode === 502) {
+                    res.writeHead(502, "There was an error getting the requested file.", {'content-type': 'text/plain'});
+                }
+                // The process completed, but we didn't get any NOAA text data back. Which means an error occurred or there wasn't enough data.
+                else {
+                    res.writeHead(204, "The request completed, but the data isn't a LiPD file.", {'content-type': 'text/plain'});
+                }
+            }
+            // Successful response. Send the whole object back to the client side for zip.js to finish unpacking.
+            else {
+                response["responseURL"] = _source;
+                res.status(200).send(response);
+            }
+        });
+    } catch(err){
+        console.log(err);
+        res.writeHead(500, "/remote: Error getting remote data: ", err);
+        res.end();
+    }
+});
+
 
 // router.post("/remote", function(req, res){
 //     try{
