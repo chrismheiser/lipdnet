@@ -120,13 +120,14 @@ function SpreadsheetCtrl($scope){
     // The table metadata does not exist yet
     if(typeof(table.columns) === "undefined") {
       // Create the columns array with one column in it.
-      table.columns = [{"number": 1}];
+      table.columns = [{"number": 1, "proxy": "", "interpretation": [{"variable": "", "direction": "", "scope": ""}]}];
     }
     // The table metadata exists
     else {
       // Add a metadata column to the existing columns array
-      table.columns.push({"number": table.columns.length + 1});
+      table.columns.push({"number": table.columns.length + 1, "proxy": "", "interpretation": [{"variable": "", "direction": "", "scope": ""}]});
     }
+    console.log(table.columns);
   };
 
   /**

@@ -854,7 +854,7 @@ var create = (function(){
      *  there are issues with the file structure, keys, etc. This gives us a starting point for debugging.
      */
     createdByList: (function(){
-      return ["excel", "lipd.net", "wiki", "unknown"];
+      return ["lipd.net", "wiki", "matlab", "python", "unknown"];
     }),
 
     /**

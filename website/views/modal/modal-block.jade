@@ -29,7 +29,11 @@
 
             .col-md-8
                 div(ng-repeat="(k,v) in entry" layout='', layout-padding='', layout-sm='column')
-                    md-input-container(flex='', class="md-input-has-value")
+                    md-input-container(flex="" ng-if="k === 'scope'")
+                        label Scope
+                        input.mdautocomplete(type="text" ng-model="entry[k]"
+                            uib-typeahead="entry for entry in scope | filter:$viewValue" typeahead-min-length="0")
+                    md-input-container(flex='', class="md-input-has-value" ng-if="k !== 'scope'")
                         label {{k}}
                         input(ng-model="entry[k]")
                     div(flex='10' layout='', layout-padding='', layout-sm='column')

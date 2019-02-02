@@ -1032,6 +1032,12 @@ var writeFiles = function(dat, dst, res, cb){
 
 // PAGE ROUTES
 
+router.get("/lipdverse/:fileid", function(req, res, next){
+
+
+
+});
+
 router.post("/remote", function(req, res, next){
     try {
         // Store the URL for the remote LiPD file to retrieve.
@@ -1078,104 +1084,6 @@ router.post("/remote", function(req, res, next){
         res.end();
     }
 });
-
-
-// router.post("/remote", function(req, res){
-//     try{
-//         console.log("Loading file from remote website: ");
-//         console.log(req.body.sourceurl);
-//         // This is the source url for the GET request
-//         var _sourceurl  = req.body.sourceurl;
-//         // This is the end of the source url, that is the filename of the LiPD file we are attempting to GET
-//         var filename = _sourceurl.substring(_sourceurl.lastIndexOf('/')+1);
-//         console.log(filename);
-//         // This is the path to the tmp folder
-//         var pathTop = path.join(process.cwd(), "tmp");
-//         // This is the path to the file folder within tmp, where we will download the LiPD file to.
-//         var pathTmpPrefix = path.join(pathTop, "remote-");
-//         // This creates the tmp file folder with the file ID, and then gives back the full path to the tmp file folder
-//         var pathTmp = misc.makeid(pathTmpPrefix, function(_pathTmp){
-//             // logger.info("POST: created tmp dir str: " + _pathTmp);
-//             try{
-//                 logger.info("mkdir: " + _pathTmp);
-//                 mkdirSync(_pathTmp);
-//             } catch(err){
-//                 logger.info("createTmpDir: Couldn't mkdirs" + err);
-//             }
-//             return _pathTmp;
-//         });
-//         // Full tmp file folder where the file will be stored.
-//         // i.e. ~/website/tmp/remote-3nf3nf/
-//         console.log(pathTmp);
-//         // res.send("Sending remote data to client.");
-//
-//         // Make the GET request, and store the file in its tmp file folder
-//         saveRemoteFile(pathTmp, filename, _sourceurl, res, function(){
-//             // LiPD file has been saved successfully, now unzip it and start sorting the data.
-//             console.log("After pipe. Now do something with the file.");
-//             // Bring in the unzip module, to unzip the LiPD file
-//             var unzip = require('unzip');
-//             // Store the path to the LiPD file (i.e.  /some/path/file.lpd)
-//             var filePath = path.join(pathTmp, filename);
-//             // Unzip the LiPD file into the same tmp directory that it sits in.
-//             var unzip_proc = fs.createReadStream(filePath).pipe(unzip.Extract({ path: pathTmp }));
-//             // Once the unzipping process is done, start processing the LiPD data.
-//             unzip_proc.on("close", function(){
-//                 console.log("Zip is now opened.");
-//                 // Read the jsonld, csv, and txt files.
-//
-//             });
-//
-//             res.status(200).send("Success!");
-//         });
-//     } catch(err){
-//         console.log("overall /remote error: ", err);
-//         res.end();
-//     }
-// });
-//
-// var saveRemoteFile = function(pathTmp, filename, sourceurl, res, cb){
-//     console.log("Sending remote request");
-//     // Pack up the options that we want to give the request module
-//     var options = {
-//         "method": "GET",
-//         "url": sourceurl,
-//         "headers": {'Access-Control-Allow-Origin': "*"}
-//     };
-//     // If we're on the production server, then we need to add in the proxy option
-//     if (!dev){
-//         options.proxy = "http://rishi.cefns.nau.edu:3128";
-//
-//     }
-//
-//     var stream = request(options, function (error, res1, body) {
-//         if(typeof res1 === "undefined") {
-//             console.log("/remote, http get did not work");
-//             res.writeHead(500, "Remote get did not work", {'content-type': 'text/plain'});
-//             res.end();
-//         } else {
-//             try{
-//
-//                 // console.log(res1);
-//                 // console.log(res1.toJSON());
-//                 // var _data = JSON.parse(res1.body);
-//                 // var _data2 = JSON.parse(res1.toJSON().body);
-//                 // console.log(_data);
-//                 // console.log(_data2);
-//                 // console.log(JSON.stringify(res1.body));
-//                 console.log("Success?");
-//             } catch(err) {
-//                 console.log(err);
-//                 res.end();
-//             }
-//         }
-//     }).pipe(fs.createWriteStream(path.join(pathTmp, filename)));
-//     stream.on('finish', function (){
-//         console.log("Stream on finish");
-//         cb();
-//     });
-//
-// };
 
 router.get('/', function(req, res, next) {
   res.render('index', { title: 'LiPD' });
@@ -1426,25 +1334,25 @@ router.post("/noaa", function(req, res, next){
  * Retrieve and download a NOAA file. This may be a single txt file, or a zip archive that contains several txt files.
  * The request parameters contain the ID for the NOAA file that we want to retrieve from NodeJS and serve back as a
  * download.
- * Ex ID: "noaa-EG31DS"
+ * Ex file ID: "noaa-EG31DS"
  *
  * @param  {Object}   req    Request object. The req.params.tmp indicates which file to serve.
  * @param  {String}   res    String error response or file download
  * @param  {Function} next   Callback, not in use
  * @return none              Download is triggered in response
  */
-router.get("/noaa/:tmp", function(req, res, next){
+router.get("/noaa/:fileid", function(req, res, next){
   // Request: Client sends a string ID of the NOAA file that they want to download.
   // Response: Initiate a download of the NOAA file to the client.
   try {
     logger.info("/noaa get: Fetch the NOAA file requested");
     // NOAA ID provided by client
-    var tmpStr = req.params.tmp;
-    logger.info("/noaa get: NOAA ID: " + tmpStr);
+    var fildid = req.params.tmp;
+    logger.info("/noaa get: NOAA ID: " + fileid);
     // walk(path.join(process.cwd(), "tmp", tmpStr));
     // Full path to the zip dir that holds the NOAA file(s)
     // var pathTmp = path.join(process.cwd(), "tmp");
-    var pathTmpNoaa = path.join(process.cwd(), "tmp", tmpStr);
+    var pathTmpNoaa = path.join(process.cwd(), "tmp", fileid);
     // Read in all filenames from the dir
     logger.info("/noaa get: Reading from: " + pathTmpNoaa);
     var files = fs.readdirSync(pathTmpNoaa);
@@ -1584,9 +1492,7 @@ router.get("/query", function(req, res, next){
   res.render('query', {title: 'Query Datasets'});
 });
 
-router.get("/downloadall/:tmp", function(req, res, next){
-  // Render the playground page
-
+router.get("/downloadall/:fileid", function(req, res, next){
 
 });
 

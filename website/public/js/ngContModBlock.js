@@ -11,8 +11,10 @@ angular.module('ngValidate').controller('ModalCtrlBlock', function ($scope, $uib
   $scope.idx = data.idx;
   $scope.key = data.key;
   $scope.arr = [];
+  $scope.scope = ["isotope", "chronology", "climate", "ecology"];
 
-  if($scope.idx !== null){
+
+    if($scope.idx !== null){
     // For array data, we need to turn the entry into the specific index entry that is being created or edited. Not the full array.
     $scope.arr = $scope.entry;
     $scope.entry = $scope.arr[$scope.idx];
