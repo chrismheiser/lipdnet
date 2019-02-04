@@ -117,17 +117,31 @@ function SpreadsheetCtrl($scope){
       // Increment the column counter in the table metadata
       $scope.$parent.files.csv[table.filename].cols++;
     }
+
     // The table metadata does not exist yet
     if(typeof(table.columns) === "undefined") {
+      // Create the column
+      var _col = {"number": 1};
+      // If this is a paleo table, add one interpretation and the proxy field
+      if(table.tableName.indexOf("paleo") !== -1){
+            _col["proxy"] = "";
+            _col["interpretation"] = [{"variable": "", "direction": "", "scope": ""}];
+      }
       // Create the columns array with one column in it.
-      table.columns = [{"number": 1, "proxy": "", "interpretation": [{"variable": "", "direction": "", "scope": ""}]}];
+      table.columns = [_col];
     }
     // The table metadata exists
     else {
+        // Create the column
+        var _col2 = {"number": table.columns.length + 1};
+        // If this is a paleo table, add one interpretation and the proxy field
+        if(table.tableName.indexOf("paleo") !== -1){
+            _col2["proxy"] = "";
+            _col2["interpretation"] = [{"variable": "", "direction": "", "scope": ""}];
+        }
       // Add a metadata column to the existing columns array
-      table.columns.push({"number": table.columns.length + 1, "proxy": "", "interpretation": [{"variable": "", "direction": "", "scope": ""}]});
+      table.columns.push(_col2);
     }
-    console.log(table.columns);
   };
 
   /**
