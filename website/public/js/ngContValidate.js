@@ -71,7 +71,6 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       "countries" : map.getCountries()
     };
 
-
   /**
    * Initialize the Ontology data. Get the ontology from the backend.
    *
@@ -186,7 +185,6 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
     $scope.status = "N/A";
     // All files, w/ contents, found in the LiPD archive. Used in "feedback.jade"
     $scope.allFiles = [];
-
 
   /**
    * Listen for data merge event to $emit up to us from the MergeCtrl (ngMerge.js) on the Merge page. When this
@@ -596,7 +594,7 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       console.log("Received backend response");
       console.log(resp);
       if (resp.status !== 200){
-          window.alert("HTTP " + resp.status + ": Error downloading file\n" + resp.statusText);
+          window.alert("HTTP " + resp.status + ": Error completing request\n" + resp.statusText);
       } else {
           console.log("We have liftoff. Here ya go!");
           // If there is a callback, that means we're doing a wiki upload and need to send the response data in the
@@ -874,7 +872,6 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       return table;
     };
 
-
   /**
    * Use zip.js to read in a LiPD file from a direct url source.
    *
@@ -937,7 +934,6 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
           console.log(err);
       }
   };
-
 
   /**
    *
@@ -1471,6 +1467,58 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       typeof cb === 'function' && cb();
   };
 
+
+  /**
+   * Upload LiPD file to the Lipdverse
+   * Go through the normal process of creating a LiPD file from the form data. Send that LiPD file to our dropbox where
+   * it will be reviewed for upload on the Lipdverse
+   *
+   * @return none  Result is a file uploaded to lipdverse dropbox.
+   */
+    $scope.uploadToLipdverse = function(){
+        $scope.files.dataSetName = $scope.files.json.dataSetName;
+        $scope.files.lipdFilename = $scope.files.dataSetName + ".lpd";
+        // If there are still errors present, notify the user that the file may present issues
+        if ($scope.feedback.errCt > 0){
+            $scope.showModalAlert({"title": "File contains errors", "message": "You are downloading data that still has errors. Be aware that using a file that isn't fully valid may cause issues."});
+        }
+        // Correct the filenames, clean out the empty entries, and make $scope.files data ready for the ExportService
+        var _newScopeFiles = create.closingWorkflow($scope.files);
+        // Go to the export service. Create an array where each object represents one output file. {Filename: Text} data pairs
+        $scope._myPromiseExport = ExportService.prepForDownload(_newScopeFiles);
+        $scope.pageMeta.busyPromise = $scope._myPromiseExport;
+        $scope._myPromiseExport.then(function (filesArray) {
+            // Upload zip to node backend, then callback and download it afterward.
+            console.log("Let me bring this to the backroom.");
+            // Set up where to POST the data to in nodejs, and package the payload.
+            var _url_route = "/files";
+            var _payload = {"filename": $scope.files.lipdFilename, "file": filesArray};
+            $scope.uploadToBackend(_url_route, _payload, function(resp){
+                console.log("Received backend response");
+                console.log(resp);
+                if (resp.status !== 200){
+                    window.alert("HTTP " + resp.status + ": Error completing request\n" + resp.statusText);
+                } else {
+                    // Are we on dev or production? Create the url according to the mode.
+                    // var _url = "";
+                    var _fileID = resp.data;
+                    // if(dev){
+                    //     // Dev mode download link
+                    //     _url = "http://localhost:3000/lipdverse/" + _fileID;
+                    // } else {
+                    //     // Production mode download link
+                    //     _url = "http://www.lipd.net/lipdverse/" + _fileID;
+                    // }
+                    $http.get("/lipdverse/" + _fileID).then(function(){
+                        toaster.pop('success', "File sent to Lipdverse. Pending review.", "", 4000);
+                    }, function error(err){
+                        console.log(err);
+                    });
+                }
+            });
+        });
+    };
+
   /**
    * LiPD file upload button.
    * Function initializes on window load. When the upload button is used, the
@@ -1588,7 +1636,6 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
    * @return    none   Return a good or bad response, depending on the result.
    */
     $scope.uploadToWiki = function(){
-
         // Open a smaller popup window that shows the user login page for the LinkedEarth Wiki
         var popupWindow = window.open('http://wiki.linked.earth/Special:UserLogin', '_blank', 'location=yes,height=600,width=800,scrollbars=yes,status=yes');
 
@@ -1602,7 +1649,6 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
                     console.log("It worked");
                     console.log(resp);
                 });
-
                 // var _local_url = "http://localhost:3000/files/" + file_id;
                 // var _local_url = "http://localhost:3000/tmp/" + file_id + "/zip/" + $scope.files.lipdFilename;
                 // var _wiki_url = "http://wiki.linked.earth/Special:WTLiPD?op=importurl&name=" + $scope.files.lipdFilename + "&url=" + _local_url;
@@ -1624,8 +1670,6 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
                 // } catch(err){
                 //     console.log(err);
                 // }
-
-
             });
         }
         // Not a valid wiki file. Stop process and tell user to correct errors
@@ -1634,7 +1678,6 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
                 "standards. Make sure that you have the 'Wiki Ready' switch turned on, and there are no Wiki " +
                 "errors after validation."});
         }
-
     };
 
   /**
@@ -1835,8 +1878,6 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
           }
       }
     };
-
-
 
     // Execute these functions on page load.
     window.onload = (function(){

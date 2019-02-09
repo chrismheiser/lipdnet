@@ -477,7 +477,6 @@ var mergeOntologies = function(){
     });
 };
 
-
 /**
  * Sort the results of the LinkedEarth Wiki ontology results. Get all the string values from the XML response.
  *
@@ -504,7 +503,6 @@ var parseWikiQueryOntology = function(results, cb){
         cb([]);
     }
 };
-
 
 /**
  * Send SPARQL request to LinkedEarth Wiki for one ontology field.
@@ -568,7 +566,6 @@ var _getWikiOntologyField = function(field, query){
 
 };
 
-
 /**
  * Use SPARQL queries to get possible field entries for the specific listed fields. Loop over each of the fields
  * and query them one at a time.
@@ -596,7 +593,6 @@ var getWikiOntology = function(){
         }
     }
 };
-
 
 /**
  * Compile ontology by getting the local and remote data, and then merging the data after.
@@ -695,7 +691,6 @@ var batchDownloadWiki = function(dsns, cb){
   // Go zip up all the files that we retrieved.
   cb()
 };
-
 
 /**
  *  Create a zip archive for one LiPD file. All lipd directories and files are in one zip. (json, txt, csv)
@@ -984,6 +979,75 @@ var updateTSidOnly = function(_objs){
   }
 };
 
+/**
+ *  Upload a LiPD file to the lipd.manager dropbox
+ *
+ * @param    {String}  filepath
+ * @param    {String}  filename
+ * @return   none
+ */
+var uploadToDropbox = function(filepath, filename, cb){
+    try{
+        console.log("Uploading to Dropbox...");
+        // Filepath doesn't have filename on the end of the path yet. Add it.
+        filepath = path.join(filepath, filename);
+        // read dropbox access token from txt file
+        var access_token = fs.readFileSync("./token.txt").toString('utf-8');
+        //reading the contents
+        var content = fs.readFileSync(filepath);
+        //write your folder name in place of YOUR_PATH_TO_FOLDER
+        // For example if the folder name is njera then we can write it in the following way :
+        // "Dropbox-API-Arg": "{\"path\": \"/njera/"+filename+"\",\"mode\": \"overwrite\",\"autorename\": true,\"mute\": false}"
+        var options = {
+            method: "POST",
+            url: 'https://content.dropboxapi.com/2/files/upload',
+            headers: {
+                "Content-Type": "application/octet-stream",
+                "Authorization": "Bearer " + access_token,
+                "Dropbox-API-Arg": "{\"path\": \"/"+filename+"\",\"mode\": \"overwrite\",\"autorename\": true,\"mute\": false}",
+            },
+            body:content
+        };
+        request(options,function(err, res, body){
+            // if(res.statusCode === 200){
+            //     try{
+            //         console.log("Send e-mail update");
+            //         var nodemailer = require('nodemailer');
+            //
+            //         // create reusable transporter object using the default SMTP transport
+            //         var transporter = nodemailer.createTransport('smtps://user%40gmail.com:pass@smtp.gmail.com');
+            //
+            //         // setup e-mail data with unicode symbols
+            //         var mailOptions = {
+            //             from: "LipdNet <noreply@lipd.net>", // sender address
+            //             to: 'test@test.com', // list of receivers
+            //             subject: 'Hello Test', // Subject line
+            //             text: 'new file upload: ' + filename, // plaintext body
+            //             html: '<b>Hello world ?</b>' // html body
+            //         };
+            //
+            //         // send mail with defined transport object
+            //         transporter.sendMail(mailOptions, function(error, info){
+            //             if(error){
+            //                 return console.log(error);
+            //             }
+            //             console.log('Message sent: ' + info.response);
+            //         });
+            //     } catch(err){
+            //         console.log("uploadToDropbox: nodemailer error: ", err);
+            //     }
+            //
+            // }
+            console.log("Err : " + err);
+            console.log("Res Status: " + res.statusCode);
+            // console.log("body : " + body);
+            cb();
+        });
+    } catch(err){
+        console.log(err);
+    }
+};
+
 var walk = function(directoryName) {
   fs.readdir(directoryName, function(e, files) {
     if (e) {
@@ -1032,10 +1096,35 @@ var writeFiles = function(dat, dst, res, cb){
 
 // PAGE ROUTES
 
+/**
+ * Upload a LiPD file to Dropbox to be reviewed for upload to the LiPD
+ *
+ */
 router.get("/lipdverse/:fileid", function(req, res, next){
-
-
-
+    try {
+        // File ID provided by client
+        logger.info("/lipdverse GET");
+        // Get the file ID from the request object
+        var fileID = req.params.fileid;
+        logger.info("/files get: " + fileID);
+        // Path to the zip dir that holds the LiPD file
+        var pathTmpZip = path.join(process.cwd(), "tmp", fileID, "zip");
+        // Read in all filenames from the dir
+        logger.info("/files get: LiPD File: " + pathTmpZip);
+        var files = fs.readdirSync(pathTmpZip);
+        // Loop over the files found
+        for(var i in files) {
+            // Get the first lipd file you find (there should only be one)
+            if(path.extname(files[i]) === ".lpd") {
+                uploadToDropbox(pathTmpZip, files[i], function(){
+                    res.end();
+                });
+            }
+        }
+    } catch(err) {
+        logger.info(err);
+        res.status(500).send("lipdverse: GET: Error uploading LiPD file to dropbox: " + err);
+    }
 });
 
 router.post("/remote", function(req, res, next){
@@ -1598,7 +1687,6 @@ router.get("/modal-jsonfix", function(req, res, next){
     res.render('modal/modal-jsonfix', {title: ''});
 });
 
-
 router.get("/loading", function(req, res, next){
   res.render("loading", {title: ""});
 });
@@ -1739,6 +1827,5 @@ router.post("/api/tsid/register", function(req, res, next){
     res.end();
   }
 });
-
 
 module.exports = router;
