@@ -265,6 +265,11 @@ var _ontology_json = [];
 var count = 0;
 
 /**
+ * Store filenames of LiPD files that were uploaded to the Lipdverse Dropbox in the past 24 hours.
+ */
+var newLipdverseFiles = [];
+
+/**
  * Get Wiki ontology labels by sorting through the /data/ontology.json file. Break the file down to just key-value pairs
  * within a Json object. Recursively collect all the "label" items from within the ontology file.
  *
@@ -615,19 +620,6 @@ var compileOntology = function(){
     }
 };
 
-/**
- * Retrieve and compile ontology on a set interval.
- */
-try{
-    // Run once on initialization. All other updates are done on the timer below.
-    compileOntology();
-    // Refresh the LinkedEarth Wiki ontology data every 1 WEEK, or once every time node is restarted
-    setInterval(compileOntology, 604800000);
-}catch(err){
-    // Error. Use the existing or local ontology instead.
-    console.log(err);
-}
-
 // TODO Need to finish this. Batch download button for /query page
 /**
  * Batch download wiki files is for allows you to download multiple files at once through the results of the /query
@@ -942,6 +934,50 @@ var readTSidOnly = function(cb){
     }
 };
 
+var sendDigestEmail = function(){
+    try{
+        // Use nodemailer 2.7.2 to dispatch daily e-mail.
+        logger.info("Sending lipdverse e-mail update");
+        var nodemailer = require('nodemailer');
+        var _user = fs.readFileSync("./token.txt").toString('utf-8').split("\n")[1];
+        var _pass = fs.readFileSync("./token.txt").toString('utf-8').split("\n")[2];
+
+        if(newLipdverseFiles.length !== 0){
+            var _body = "New LiPD files uploaded today: \n\nDataset:\t\t\t\t\t\tTime:\n";
+            for(var _i = 0; _i < newLipdverseFiles.length; _i++){
+                _body = _body + newLipdverseFiles[_i]["filename"] + "\t\t" + newLipdverseFiles[_i]["time"] +  "\n";
+            }
+            // create reusable transporter object using the default SMTP transport
+            var transporter = nodemailer.createTransport('smtps://' + _user + ':' + _pass + '@smtp.gmail.com');
+
+            // setup e-mail data with unicode symbols
+            var mailOptions = {
+                from: "Lipd.net <lipd.manager@gmail.com>", // sender address
+                to: 'cheiser22@gmail.com', // list of receivers
+                subject: 'Daily Lipdverse Uploads', // Subject line
+                text: _body, // plaintext body
+                // html: '<b></b>'
+            };
+
+            // send mail with defined transport object
+            transporter.sendMail(mailOptions, function(error, info){
+                if(error){
+                    return console.log(error);
+                }
+                // Empty the Lipdverse files for the next round tomorrow.
+                newLipdverseFiles = [];
+                logger.info('sendDigestEmail: E-mail sent: ' + info.response);
+            });
+        } else {
+            logger.info("sendDigestEmail: No e-mail sent. No new files to report.")
+        }
+
+    } catch(err){
+        logger.info("sendDigestEmail: ", err);
+    }
+
+};
+
 // Use the data in the objects given to update the tsid_master.csv
 var updateTSidMaster = function(_objs, cb){
   logger.info("index: updateTSidMaster");
@@ -982,69 +1018,43 @@ var updateTSidOnly = function(_objs){
 /**
  *  Upload a LiPD file to the lipd.manager dropbox
  *
- * @param    {String}  filepath
- * @param    {String}  filename
- * @return   none
+ * @param    {String}   filepath   File path to the directory storing the LiPD file being uploaded. Local on the server
+ * @param    {String}   filename   Filename of the LiPD file being uploaded.
+ * @param    {Function} cb         Callback that ends the request.
  */
 var uploadToDropbox = function(filepath, filename, cb){
     try{
-        console.log("Uploading to Dropbox...");
+        logger.info("Uploading to Dropbox...");
         // Filepath doesn't have filename on the end of the path yet. Add it.
         filepath = path.join(filepath, filename);
         // read dropbox access token from txt file
-        var access_token = fs.readFileSync("./token.txt").toString('utf-8');
+        var access_token = fs.readFileSync("./token.txt").toString('utf-8').split("\n")[0];
         //reading the contents
         var content = fs.readFileSync(filepath);
-        //write your folder name in place of YOUR_PATH_TO_FOLDER
-        // For example if the folder name is njera then we can write it in the following way :
-        // "Dropbox-API-Arg": "{\"path\": \"/njera/"+filename+"\",\"mode\": \"overwrite\",\"autorename\": true,\"mute\": false}"
         var options = {
             method: "POST",
             url: 'https://content.dropboxapi.com/2/files/upload',
             headers: {
                 "Content-Type": "application/octet-stream",
                 "Authorization": "Bearer " + access_token,
-                "Dropbox-API-Arg": "{\"path\": \"/"+filename+"\",\"mode\": \"overwrite\",\"autorename\": true,\"mute\": false}",
+                "Dropbox-API-Arg": "{\"path\": \"/"+filename+"\",\"mode\": \"add\",\"autorename\": true,\"mute\": false, \"strict_conflict\": false}",
             },
             body:content
         };
         request(options,function(err, res, body){
-            // if(res.statusCode === 200){
-            //     try{
-            //         console.log("Send e-mail update");
-            //         var nodemailer = require('nodemailer');
-            //
-            //         // create reusable transporter object using the default SMTP transport
-            //         var transporter = nodemailer.createTransport('smtps://user%40gmail.com:pass@smtp.gmail.com');
-            //
-            //         // setup e-mail data with unicode symbols
-            //         var mailOptions = {
-            //             from: "LipdNet <noreply@lipd.net>", // sender address
-            //             to: 'test@test.com', // list of receivers
-            //             subject: 'Hello Test', // Subject line
-            //             text: 'new file upload: ' + filename, // plaintext body
-            //             html: '<b>Hello world ?</b>' // html body
-            //         };
-            //
-            //         // send mail with defined transport object
-            //         transporter.sendMail(mailOptions, function(error, info){
-            //             if(error){
-            //                 return console.log(error);
-            //             }
-            //             console.log('Message sent: ' + info.response);
-            //         });
-            //     } catch(err){
-            //         console.log("uploadToDropbox: nodemailer error: ", err);
-            //     }
-            //
-            // }
-            console.log("Err : " + err);
-            console.log("Res Status: " + res.statusCode);
-            // console.log("body : " + body);
+            if(err){
+                logger.info("uploadToDropbox: response: " + res.statusCode + ": " + err);
+            }
+            if(res.statusCode === 200){
+                body = JSON.parse(body);
+                logger.info("File uploaded successfully.");
+                // Add this file to the growing list of Lipdverse filenames. We'll send out a digest e-mail later.
+                newLipdverseFiles.push({"filename": body.name, "time" : body["client_modified"]});
+            }
             cb();
         });
     } catch(err){
-        console.log(err);
+        logger.info("uploadToDropbox: " + err);
     }
 };
 
@@ -1092,6 +1102,24 @@ var writeFiles = function(dat, dst, res, cb){
 
 
 // END HELPERS
+
+
+// Call the cleaning function every 2 minutes
+// setInterval(sendDigestEmail, 86400000);
+setInterval(sendDigestEmail, 9000);
+
+/**
+ * Retrieve and compile ontology on a set interval.
+ */
+try{
+    // Run once on initialization. All other updates are done on the timer below.
+    compileOntology();
+    // Refresh the LinkedEarth Wiki ontology data every 1 WEEK, or once every time node is restarted
+    setInterval(compileOntology, 604800000);
+}catch(err){
+    // Error. Use the existing or local ontology instead.
+    console.log(err);
+}
 
 
 // PAGE ROUTES

@@ -71,7 +71,7 @@ var cleanTmpDir = function(){
 };
 
 // Call the cleaning function every 15 minutes
-setInterval(cleanTmpDir, 900000);
+setInterval(cleanTmpDir, 1800000);
 
 // Multer functions to save uploaded files
 var storage = multer.diskStorage({
