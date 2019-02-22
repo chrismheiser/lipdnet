@@ -97,9 +97,11 @@ div(ng-repeat="entry in files.json.pub track by $index" layout-wrap="")
         md-tooltip {{getTooltip("pub", "author")}}
 
       div(layout='', layout-padding='', layout-sm='column' style="float: right;")
-        button.green-btn-sm(ng-click='addBlock(entry.author, "author", null)' style="margin: 1.5em;" type="button")  +
         button.red-btn-sm-off(ng-click='removeBlock(entry.author, $index)' style="margin: 1.5em;" type="button")  -
-    
+
+    button.green-btn-off(ng-click='addBlock(entry.author, "author", null)' style="margin: 1.5em;" type="button")  + Author
+
+
     .md-toolbar-tools(style="background-color:white;")
       span(flex)
       button.red-btn-off(ng-click='removeBlock(files.json.pub, $index)' style="margin: 1.5em;" type="button") Delete

@@ -722,7 +722,6 @@ var lipdValidator = (function(){
             }
         }
 
-
         try {
           // required table root keys
           for (var _w = 0; _w < keys_base.reqTableKeys.length; _w++) {
@@ -758,46 +757,8 @@ var lipdValidator = (function(){
               requiredColumnsCtMatch(filename, table.columns);
             }
 
-            // Required column keys
-            for (var i = 0; i < table.columns.length; i++) {
+            requiredColumns(crumbs, table.columns);
 
-              // Special Fields: variableType and proxyObservationType / inferredVariableType
-              // if(table.columns[i].hasOwnProperty("variableType")){
-              //   var _varType = table.columns[i].variableType;
-              //   if(_varType === "measured" || _varType === "measuredVariable"){
-              //     if(!table.columns[i].hasOwnProperty("proxyObservationType")){
-              //       logFeedback("err", "Missing: " + crumbs + ".column" + i + ".proxyObservationType", "proxyObservationType");
-              //     }
-              //   } else if(_varType === "inferred"){
-              //     if(!table.columns[i].hasOwnProperty("inferredVariableType")){
-              //       logFeedback("err", "Missing: " + crumbs + ".column" + i + ".inferredVariableType", "inferredVariableType");
-              //     }
-              //   } else {
-              //     logFeedback("err", "Missing: " + crumbs + ".column" + i + ".variableType", "variableType");
-              //   }
-              //
-              // } else {
-              //   logFeedback("err", "Missing: " + crumbs + ".column" + i + ".variableType", "variableType");
-              //   logFeedback("err", "Missing: " + crumbs + ".column" + i + ".proxyObservationType OR inferredVariableType", "proxyObservationType|inferredVariableType");
-              // }
-
-              // Required column keys
-              for (var k in keys_base.reqColumnKeys) {
-                if(keys_base.reqColumnKeys.hasOwnProperty(k)){
-                  // current key
-                  var currKey = keys_base.reqColumnKeys[k];
-                  // current key exists in this column?
-                  if (!table.columns[i].hasOwnProperty(currKey) || !table.columns[i][currKey]) {
-                    if(currKey === "units"){
-                      table.columns[i]["units"] = "unitless";
-                      feedback.missingUnitCt++;
-                    } else {
-                      logFeedback("err", "Missing: " + crumbs + ".column" + i + "." + currKey, currKey);
-                    }
-                  }
-                }
-              } // end table keys
-            } // end columns loop
           } // end 'if columns exist'
 
         } catch(err){
@@ -807,6 +768,55 @@ var lipdValidator = (function(){
       }; // end requiredTable fn
 
       /**
+       *
+       *
+       * @param crumbs
+       * @param table
+       */
+      var requiredColumns = function(crumbs, table){
+          // Required column keys
+          for (var i = 0; i < table.columns.length; i++) {
+
+              // Special Fields: variableType and proxyObservationType / inferredVariableType
+              if(table.columns[i].hasOwnProperty("variableType")){
+                var _varType = table.columns[i].variableType;
+                if(_varType === "measured" || _varType === "measuredVariable"){
+                  if(!table.columns[i].hasOwnProperty("proxyObservationType")){
+                    logFeedback("err", "Missing: " + crumbs + ".column" + i + ".proxyObservationType", "proxyObservationType");
+                  }
+                } else if(_varType === "inferred"){
+                  if(!table.columns[i].hasOwnProperty("inferredVariableType")){
+                    logFeedback("err", "Missing: " + crumbs + ".column" + i + ".inferredVariableType", "inferredVariableType");
+                  }
+                } else {
+                  logFeedback("err", "Missing: " + crumbs + ".column" + i + ".variableType", "variableType");
+                }
+
+              } else {
+                logFeedback("err", "Missing: " + crumbs + ".column" + i + ".variableType", "variableType");
+                logFeedback("err", "Missing: " + crumbs + ".column" + i + ".proxyObservationType OR inferredVariableType", "proxyObservationType|inferredVariableType");
+              }
+
+              // Required column keys
+              for (var k in keys_base.reqColumnKeys) {
+                  if(keys_base.reqColumnKeys.hasOwnProperty(k)){
+                      // current key
+                      var currKey = keys_base.reqColumnKeys[k];
+                      // current key exists in this column?
+                      if (!table.columns[i].hasOwnProperty(currKey) || !table.columns[i][currKey]) {
+                          if(currKey === "units"){
+                              table.columns[i]["units"] = "unitless";
+                              feedback.missingUnitCt++;
+                          } else {
+                              logFeedback("err", "Missing: " + crumbs + ".column" + i + "." + currKey, currKey);
+                          }
+                      }
+                  }
+              } // end table keys
+          } // end columns loop
+      };
+
+        /**
        *
        * Special feedback log
        *

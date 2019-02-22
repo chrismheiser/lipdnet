@@ -82,7 +82,6 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
             .then(function(response) {
               // Success. Set the data to the scope directly
                 $scope.ontology = response.data;
-                // console.log($scope.ontology);
             }, function myError(err) {
                 console.log(err);
                 // Error, use our hardcoded lists as a fallback.
@@ -251,7 +250,7 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
         $scope.showModalBlock(entry, true, _field, 0);
       }
       // Adding an entry that is a nested object item
-      else if (["calibration", "hasResolution", "physicalSample", "takenAtDepth", "measuredOn"].indexOf(_field) !== -1){
+      else if (["calibration", "hasResolution", "physicalSample", "measuredOn"].indexOf(_field) !== -1){
         $scope.showModalBlock(entry, true, _field, null);
       }
       // Adding any regular field
@@ -414,6 +413,35 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
     };
 
   /**
+   * Whenever a variableType is added, also add inferredVariableType or proxyObservationType, depending on the value.
+   *
+   * @param   {Object}  entry  Column Metadata
+   */
+      $scope.checkVarType = function(entry){
+          if(entry.variableType === "measured"){
+              if(!entry.hasOwnProperty("proxyObservationType")){
+                  entry.tmp.custom = "proxyObservationType";
+                  $scope.addColumnField(entry);
+                  toaster.pop('note', "proxyObservationType field added", "Field required for " +
+                      "measured variables", 4000);
+              }
+              if(entry.hasOwnProperty("inferredVariableType")){
+                  delete entry.inferredVariableType;
+              }
+          } else if (entry.variableType === "inferred"){
+              if(!entry.hasOwnProperty("inferredVariableType")){
+                  entry.tmp.custom = "inferredVariableType";
+                  $scope.addColumnField(entry);
+                  toaster.pop('note', "inferredVariableType field added", "Field required for " +
+                      "inferred variables", 4000);
+              }
+              if(entry.hasOwnProperty("proxyObservationType")){
+                  delete entry.proxyObservationType;
+              }
+          }
+      };
+
+  /**
    * Convert coordinates between Decimal Degrees (DD) and Degrees Minutes Seconds (DMS). LiPD standard is DD, but if
    * a user is creating a file from scratch, and their source data is in DMS, then we have a switch that allows them
    * to enter their DMS data. This function will use their DMS data to convert to DD, which will be stored in the LiPD
@@ -568,6 +596,33 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
     };
 
   /**
+   * 'TakenAtDepth' can point to other columns of the same table. It uses the column variableNames as reference. Gather
+   * all the variableNames that are currently in the table, and add them as the options for TakenAtDepth.
+   *
+   * @param   {Object}   entry  Table metadata
+   * @return  none
+   */
+    $scope.gatherVariableNames = function(entry){
+        entry.tmp.varNames = [];
+        if(entry.hasOwnProperty("columns")){
+            for(var _i = 0; _i < entry.columns.length; _i++){
+                if(entry.columns[_i].hasOwnProperty("variableName")){
+                    if(entry.columns[_i].variableName){
+                        var _tsid = entry.columns[_i].TSid || "";
+                        if(!_tsid){
+                            _tsid = misc.generateTSid();
+                            entry.columns[_i].TSid = _tsid;
+                        }
+                        var _value = _tsid + " - " + entry.columns[_i].variableName;
+                        entry.tmp.varNames.push(_value);
+                    }
+                }
+            }
+        }
+        console.log(entry.tmp.varNames);
+    };
+
+  /**
    * Get the tooltip for a specific field from a specific section. Tooltips are retrieved dynamically so that fields
    * generated in an ngRepeat loop are still able to have tooltips.
    *
@@ -621,61 +676,82 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
     };
 
   /**
-   * Determine if the data type for the given field is an Array or not.
+   * Determine if the field is known to be an Array data type.
    *
    * @param    {String}  field   Field name
    * @return   {Boolean}         True for Array, False for other data types
    */
     $scope.isArr = function(field){
         // Data is an Array if the field is in this list.
-        if(["interpretation"].includes(field)){
-            return true;
-        }
-        // Not an array
-        return false;
+        return ["interpretation"].includes(field);
     };
 
   /**
-   * Determine if a field should be made as an auto-complete input type.
+   * Determine if a field is known to be an auto-complete input type.
    *
    * @param    {String}    field   Field name
    * @return   {Boolean}           True for auto-complete, False for other input type
    */
     $scope.isAutocomplete = function(field){
-        // These fields use an autocomplete input box with suggested data from the linked earth wiki ontology.
-        if(["proxyObservationType", "inferredVariableType"].includes(field)){
-            return true;
-        }
-        return false;
+        // These fields use an auto complete input box with suggested data from the linked earth wiki ontology.
+        return ["takenAtDepth", "proxyObservationType", "inferredVariableType", "inferredFrom"].includes(field);
     };
 
   /**
-   * Determine if a field is an object data type.
+   * Determine if a field is an ontology field that relies on a data array of input options from the scope.
+   *
+   * @param    {String}    field   Field name
+   * @return   {Boolean}           True for auto-complete, False for other input type
+   */
+  $scope.isOntology = function(field){
+      // These fields use an auto complete input box with suggested data from the linked earth wiki ontology.
+      return ["proxyObservationType", "inferredVariableType", "variableType"].includes(field);
+  };
+
+  /**
+   * Determine if a field is known to be an object data type.
    *
    * @param    {String}    field   Field name
    * @return   {Boolean}           True for Object, False for other data types
    */
     $scope.isObject = function(field){
           // Data is a block if the field is in this list.
-          if(["physicalSample", "hasResolution", "calibration", "measuredOn", "takenAtDepth"].includes(field)){
-              return true;
-          }
-          return false;
+          return ["physicalSample", "hasResolution", "calibration", "measuredOn"].includes(field);
       };
 
   /**
-   * NOT CURRENTLY IN USE
-   * Determine if a field is a column property.
+   * Determine if a field is one that should be hidden from the "additional fields" section. These are fields that
+   * are temporarily stored to help run the page view, or are already shown elsewhere in the column.
+   *
+   * @param  {String}  field  Field name
+   * @return {Boolean}        True for hidden field, False for normal field
+   */
+    $scope.isHidden = function(field){
+        // Do not show any temporary fields or fields that are static for each column
+        return ["number", "toggle", "tmp", "values", "checked", "units", "TSid", "variableType", "description",
+            "variableName"].includes(field);
+    };
+
+  /**
+   * Determine if a field is one that should reference another column in the same table.
+   *
+   * @param  {String}  field  Field name
+   * @return {Boolean}        True for hidden field, False for normal field
+   */
+      $scope.isLinkColumns = function(field){
+          // Do not show any temporary fields or fields that are static for each column
+          return ["takenAtDepth", "inferredFrom"].includes(field);
+      };
+
+      /**
+   * Determine if a field is a column property that should be shown in the "additional fields" section.
+   * Any field that is not an object, not an array, not a static column field, and not a behind-the-scenes helper field.
    *
    * @param    {String}    field   Field name
-   * @return   {Boolean}           True for Object, False for other data types
+   * @return   {Boolean}           True for field to show, False for field to hide
    */
-    $scope.isProperty = function(field){
-        // Do not show any temporary fields, data, or nested blocks.
-        if(["number", "variableName", "units", "toggle", "description", "values", "checked", "tmp", "interpretation", "physicalSample", "hasResolution", "calibration", "takenAtDepth", "measuredOn"].includes(field)){
-            return false;
-        }
-        return true;
+    $scope.showField = function(field){
+        return !$scope.isHidden(field) && !$scope.isObject(field) && !$scope.isArr(field);
     };
 
   /**
@@ -1413,19 +1489,19 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
    */
     $scope.uploadBtnChange = function(event, cb){
       var fileInput = event.target;
-      console.log(event.target.files);
-      // var fileInput = document.getElementById("file-input");
-      // if the upload button is clicked && a file is chosen, THEN reset the page and data.
+      // console.log(event.target.files);
+      // // var fileInput = document.getElementById("file-input");
+      // // if the upload button is clicked && a file is chosen, THEN reset the page and data.
       $scope.resetPage();
       $scope.files.lipdFilename = fileInput.files[0].name;
       $scope.files.dataSetName = fileInput.files[0].name.slice(0, -4);
       // Get a list of file entries inside this LiPD upload
-        console.log(fileInput.files[0]);
+      // console.log(fileInput.files[0]);
       $scope.model.getEntries(fileInput.files[0], function (entries) {
           // Before we do anything with the LiPD data upload, we need to make sure that the jsonld is valid and usable
           // If it is not, then either the user needs to manually fix the errors through a dialog box, or we need to
           // cancel the file upload.
-          console.log(entries);
+          // console.log(entries);
           $scope.validateJsonld(entries, function(entries){
               // If the user cancelled fixing the JSON data, then they cannot continue with the upload.
               if(entries){

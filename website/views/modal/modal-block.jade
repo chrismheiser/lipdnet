@@ -18,7 +18,7 @@
                                     md-checkbox(ng-checked='exists(key)', ng-click='toggle(key)') {{key}}
                                 h4 REQUIRED
                                 div(layout='row', layout-wrap='' ng-repeat='key in required')
-                                    md-checkbox(ng-checked='true', ng-click='toggle(key)' disabled) {{key}}
+                                    md-checkbox(ng-checked='exists(key)', ng-click='toggle(key)') {{key}}
                                 h4 STANDARD
                                 div(layout='row', layout-wrap='' ng-repeat="key in standard")
                                     md-checkbox(ng-checked='exists(key)', ng-click='toggle(key)') {{key}}

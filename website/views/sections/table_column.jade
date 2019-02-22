@@ -22,10 +22,28 @@ div(layout="column" ng-repeat='entry3 in entry2.columns track by $index' layout-
                         md-tooltip {{getTooltip("paleoData", "variableName")}}
 
                     md-input-container(flex='', class="md-input-has-value")
+                        label TSid
+                        input(ng-model="entry3.TSid" disabled)
+                        md-tooltip {{getTooltip("paleoData", "tsid")}}
+
+
+                div(layout='', layout-padding='', layout-sm='column')
+
+                    md-input-container(flex='', class="md-input-has-value")
+                        label Variable Type
+                        // Use autocomplete - all cases
+                        input.mdautocomplete(type="text" ng-model="entry3.variableType"
+                        uib-typeahead="entry for entry in ontology['variableType'] | filter:$viewValue"
+                        typeahead-min-length="0" ng-blur="checkVarType(entry3)")
+
+                        //input(ng-model="entry3.units")
+                        md-tooltip {{getTooltip("paleoData", "variableType")}}
+
+                    md-input-container(flex='', class="md-input-has-value")
                         label Units *
                         // Use autocomplete - all cases
                         input.mdautocomplete(ng-if="ontology.units" type="text" ng-model="entry3.units"
-                                uib-typeahead="entry for entry in ontology.units | filter:$viewValue | limitTo:8")
+                        uib-typeahead="entry for entry in ontology.units | filter:$viewValue" typeahead-min-length="0")
 
                         //input(ng-model="entry3.units")
                         md-tooltip {{getTooltip("paleoData", "units")}}
@@ -42,7 +60,7 @@ div(layout="column" ng-repeat='entry3 in entry2.columns track by $index' layout-
                 div(layout='', layout-padding='', layout-sm='column')
                     md-input-container(flex="")
                         label Enter Field Name
-                        // Use autocomplete for lists that are >20 items
+                        // Use autocomplete for li`sts that are >20 items
                         input.mdautocomplete(type="text" ng-model="entry3.tmp.custom"
                             uib-typeahead="entry for entry in dropdowns.columnFields | filter:$viewValue" typeahead-min-length="0")
                         // Use dropdown for lists that are <20 items ** Don't want to use this because it disallows custom fields
@@ -59,26 +77,36 @@ div(layout="column" ng-repeat='entry3 in entry2.columns track by $index' layout-
             div(flex)
                 md-subheader.md-primary Additional fields
                 div.btn-row(layout="row" style="overflow: scroll;")
+                    // Button row for fields that hold nested data inside Objects.
                     div(ng-repeat="(k,v) in entry3" ng-if="isObject(k)" layout='', layout-padding='', layout-sm='column')
                         button.blue-btn-off(type="button" ng-click="showModalBlock(entry3, false, k, null)") {{k}}
 
+                    // Button row for fields that hold nested data inside Arrays
                     div(ng-repeat="(k, entry4) in entry3" ng-if="isArr(k)" layout='', layout-padding='', layout-sm='column')
                         button.blue-btn-off(ng-repeat="i in entry4 track by $index" type="button" ng-click="showModalBlock(entry3, false, k, $index)") {{k}} {{$index+1}}
 
                 div(style="overflow: scroll; height: 550px;")
-                    div(ng-repeat="(k,v) in entry3" ng-if="isProperty(k)" layout='', layout-padding='', layout-sm='column')
-                        md-input-container(ng-if="!isAutocomplete(k)" flex='', class="md-input-has-value")
+                    div(ng-repeat="(k,v) in entry3" ng-if="showField(k)" layout='', layout-padding='', layout-sm='column')
+                        // Normal input field for any text field that does not include TSid.
+                        md-input-container(ng-if="!isAutocomplete(k) && !isOntology(k)" flex='', class="md-input-has-value")
                             label {{k}}
-                            input(ng-model="entry3[k]" ng-disabled="k==='TSid'")
+                            input(ng-model="entry3[k]")
                             md-tooltip {{getTooltip("paleoData", k)}}
 
-                        md-input-container(flex="" ng-if="isAutocomplete(k)")
+                        // Autocomplete fields for any field that uses ontology data as sources
+                        md-input-container(flex="" ng-if="isAutocomplete(k) && isOntology(k)", class="md-input-has-value")
                             label {{k}}
-                            // Use autocomplete for lists that are >20 items
-                            input.mdautocomplete(ng-if="ontology[k].length > 20" type="text" ng-model="entry3[k]" uib-typeahead="entry for entry in ontology[k] | filter:$viewValue | limitTo:8")
-                            // Use dropdown for lists that are <20 items
-                            md-select(ng-if="ontology[k].length < 20" ng-model="entry3[k]")
-                                md-option(ng-repeat="entry in ontology[k]" ng-value="entry") {{entry}}
+                            input.mdautocomplete(type="text" ng-model="entry3[k]"
+                            uib-typeahead="entry for entry in ontology[k] | filter:$viewValue"
+                            typeahead-min-length="0")
+                            md-tooltip {{getTooltip("paleoData", k)}}
+
+                        // Autocomplete for takenAtDepth field, or (future) fields that don't use ontology data.
+                        md-input-container(flex="" ng-if="isLinkColumns(k)", class="md-input-has-value")
+                            label {{k}}
+                            input.mdautocomplete(type="text" ng-model="entry3[k]"
+                            uib-typeahead="entry for entry in entry2.tmp.varNames | filter:$viewValue"
+                            typeahead-min-length="0" ng-focus="gatherVariableNames(entry2)")
                             md-tooltip {{getTooltip("paleoData", k)}}
 
                         div(flex='10' layout='', layout-padding='', layout-sm='column')

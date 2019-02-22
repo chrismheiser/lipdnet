@@ -25,6 +25,7 @@ if(!dev){
  * 12.18.18 :  Snapshot of the Wiki ontology data. Use if our real-time requests aren't working.
  */
 var _ontology_fallback = {
+        "variableType": ["measured", "inferred"],
         "inferredVariableType": [
             "d18o",
             "uncertainty temperature",
@@ -241,7 +242,7 @@ var _ontology_fallback = {
             "yrs",
             "yr bp",
             "Year"
-        ]
+        ],
 };
 
 /**
@@ -251,7 +252,9 @@ var _ontology_query = {
     "inferredVariableType": [],
     "archiveType": [],
     "proxyObservationType": [],
-    "units": []
+    "units": [],
+    "variableType": ["measured", "inferred"],
+
 };
 
 /**
@@ -937,41 +940,57 @@ var readTSidOnly = function(cb){
 var sendDigestEmail = function(){
     try{
         // Use nodemailer 2.7.2 to dispatch daily e-mail.
-        logger.info("Sending lipdverse e-mail update");
         var nodemailer = require('nodemailer');
-        var _user = fs.readFileSync("./token.txt").toString('utf-8').split("\n")[1];
-        var _pass = fs.readFileSync("./token.txt").toString('utf-8').split("\n")[2];
-
+        var _user = fs.readFileSync("./token.txt").toString('utf-8').split("\n")[3];
+        var _pass = fs.readFileSync("./token.txt").toString('utf-8').split("\n")[4];
         if(newLipdverseFiles.length !== 0){
             var _body = "New LiPD files uploaded today: \n\nDataset:\t\t\t\t\t\tTime:\n";
             for(var _i = 0; _i < newLipdverseFiles.length; _i++){
                 _body = _body + newLipdverseFiles[_i]["filename"] + "\t\t" + newLipdverseFiles[_i]["time"] +  "\n";
             }
             // create reusable transporter object using the default SMTP transport
-            var transporter = nodemailer.createTransport('smtps://' + _user + ':' + _pass + '@smtp.gmail.com');
+            var _transportConfig = {
+                service: "Gmail",
+                auth: {
+                    user: _user,
+                    pass: _pass
+                }
+            };
+            if(!dev){
+                _transportConfig.proxy =  "http://rishi.cefns.nau.edu:3128";
+            }
+            var transporter = nodemailer.createTransport(_transportConfig);
+            // nodemailer.createTransport('smtps://' + _user + ':' + _pass + '@smtp.gmail.com');
 
             // setup e-mail data with unicode symbols
             var mailOptions = {
                 from: "Lipd.net <lipd.manager@gmail.com>", // sender address
-                to: 'cheiser22@gmail.com', // list of receivers
+                to: 'Chris <cmh553@nau.edu>, Nick McKay <nicholas.mckay@nau.edu>', // list of receivers
                 subject: 'Daily Lipdverse Uploads', // Subject line
                 text: _body, // plaintext body
                 // html: '<b></b>'
             };
 
+            logger.info("Sending lipdverse e-mail update");
             // send mail with defined transport object
-            transporter.sendMail(mailOptions, function(error, info){
-                if(error){
-                    return console.log(error);
-                }
-                // Empty the Lipdverse files for the next round tomorrow.
-                newLipdverseFiles = [];
-                logger.info('sendDigestEmail: E-mail sent: ' + info.response);
-            });
+            try{
+                transporter.sendMail(mailOptions, function(error, info){
+                    if(error){
+                        logger.info(error);
+                    }
+                    // Empty the Lipdverse files for the next round tomorrow.
+                    newLipdverseFiles = [];
+                    logger.info('sendDigestEmail: E-mail sent.');
+                    logger.info(info);
+                });
+            } catch(err){
+                logger.info("Error sending e-mail.");
+                logger.info(err);
+            }
+
         } else {
             logger.info("sendDigestEmail: No e-mail sent. No new files to report.")
         }
-
     } catch(err){
         logger.info("sendDigestEmail: ", err);
     }
@@ -1028,7 +1047,7 @@ var uploadToDropbox = function(filepath, filename, cb){
         // Filepath doesn't have filename on the end of the path yet. Add it.
         filepath = path.join(filepath, filename);
         // read dropbox access token from txt file
-        var access_token = fs.readFileSync("./token.txt").toString('utf-8').split("\n")[0];
+        var access_token = fs.readFileSync("./token.txt").toString('utf-8').split("\n")[1];
         //reading the contents
         var content = fs.readFileSync(filepath);
         var options = {
@@ -1053,6 +1072,8 @@ var uploadToDropbox = function(filepath, filename, cb){
             }
             cb();
         });
+
+
     } catch(err){
         logger.info("uploadToDropbox: " + err);
     }
@@ -1106,7 +1127,8 @@ var writeFiles = function(dat, dst, res, cb){
 
 // Call the cleaning function every 2 minutes
 // setInterval(sendDigestEmail, 86400000);
-setInterval(sendDigestEmail, 9000);
+setInterval(sendDigestEmail, 7200000);
+// setInterval(sendDigestEmail, 300000);
 
 /**
  * Retrieve and compile ontology on a set interval.

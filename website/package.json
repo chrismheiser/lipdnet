@@ -21,6 +21,7 @@
     "json-tree2": "*",
     "kerberos": "0.0.22",
     "mailcomposer": "^4.0.1",
+    "merge-options": "^1.0.1",
     "moment": "^2.10.6",
     "mongodb": "~2.0.33",
     "morgan": "~1.6.1",
