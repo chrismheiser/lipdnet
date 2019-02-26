@@ -90,12 +90,15 @@ function SpreadsheetCtrl($scope){
    * @return none              All data is updated in controller $scope
    */
   $scope.refreshRender = function(){
-    // Render the hot instance
-    $scope.hot.render();
-    // Update the column headers
-    $scope.settings.colHeaders = $scope.updateHeaders($scope.$parent.entry2);
-    // Run update on hot instance
-    $scope.hot.updateSettings($scope.settings);
+    // Don't attempt to refresh if we don't have a hot object yet.
+    if(typeof $scope.hot !== "undefined"){
+        // Render the hot instance
+        $scope.hot.render();
+        // Update the column headers
+        $scope.settings.colHeaders = $scope.updateHeaders($scope.$parent.entry2);
+        // Run update on hot instance
+        $scope.hot.updateSettings($scope.settings);
+    }
   };
 
   /**
@@ -211,8 +214,7 @@ function SpreadsheetCtrl($scope){
 
   };
 
-
-/**
+  /**
  * Update the column headers
  * Each column has a header of "variableName (units)" when data is available. This function looks for that data and
  * places it in the header array as a str
@@ -249,6 +251,15 @@ function SpreadsheetCtrl($scope){
     // Return the array of formatted header row names
     return _headers;
   };
+
+  /**
+     *  Wait for a validate cycle $broadcast event from parent controller ngContValidate. When validation occurs,
+     *  refresh all the spreadsheet tables on the page.
+     *
+     */
+  $scope.$on('refreshSpreadsheets', function(event, data){
+      $scope.refreshRender();
+  });
 
 }
 

@@ -738,12 +738,12 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
    * @param  {String}  field  Field name
    * @return {Boolean}        True for hidden field, False for normal field
    */
-      $scope.isLinkColumns = function(field){
+    $scope.isLinkColumns = function(field){
           // Do not show any temporary fields or fields that are static for each column
           return ["takenAtDepth", "inferredFrom"].includes(field);
       };
 
-      /**
+  /**
    * Determine if a field is a column property that should be shown in the "additional fields" section.
    * Any field that is not an object, not an array, not a static column field, and not a behind-the-scenes helper field.
    *
@@ -955,7 +955,7 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
    * @param    {Object}   resp   The full response object from the LiPD source URL. Forwarded from the backend request.
    * @return   none             The LiPD data is pulled from the source and loaded into the controller $scope.
    */
-  $scope.remoteFilePull = function(resp){
+    $scope.remoteFilePull = function(resp){
       try {
           zip.createReader(new zip.DataReader(resp), function(reader) {
               reader.getEntries(function (entries) {
@@ -1041,8 +1041,8 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
 
         } catch(err){
             // Remote source URL not found in url path. Continue as normal.
-            console.log("remoteFileUpload : No remote source url found: ");
-            console.log(err);
+            // console.log("remoteFileUpload : No remote source url found: ");
+            // console.log(err);
         }
     };
 
@@ -1543,7 +1543,6 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       typeof cb === 'function' && cb();
   };
 
-
   /**
    * Upload LiPD file to the Lipdverse
    * Go through the normal process of creating a LiPD file from the form data. Send that LiPD file to our dropbox where
@@ -1790,6 +1789,7 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
    * @return   none    The validation feedback is stored and updated in the controller scope.
    */
     $scope.validate = function(){
+        $scope.$broadcast('refreshSpreadsheets', null);
       // Go through all validations steps, and update scope data.
       // rearrange coordinates from dict to array when necessary, and set the map if coordinates exist
       $scope.files = map.fixCoordinates($scope.files);

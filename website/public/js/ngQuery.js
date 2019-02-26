@@ -199,7 +199,6 @@ q.controller('QueryCtrl', ['$scope', '$log', '$timeout', '$q', '$http', "$uibMod
       }
     };
 
-
     // Before you do any validation, remove all null, undefined, and empty values. It'll make it much easier to validate.
     $scope.removeEmpties = function(q){
       for (var _key in q){

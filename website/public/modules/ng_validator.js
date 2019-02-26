@@ -643,8 +643,8 @@ var lipdValidator = (function(){
       /**
        * Check dataset root for required keys
        *
-       * @param {object} D Metadata
-       * @param {object} keys Required keys for this LiPD Version
+       * @param {Object}  D      Metadata
+       * @param {Object}  keys   Keys Required keys for this LiPD Version
        */
       var requiredRoot = function (D, keys) {
         try {
@@ -677,14 +677,14 @@ var lipdValidator = (function(){
       /**
        * Check _multiple_ tables for required keys
        *
-       * @param {object} tables Metadata
-       * @param {string} crumbs
-       * @param {object} tnks tableName keys for this version
+       * @param {Object} tables    Metadata
+       * @param {String} crumbs    Crumbs for structure path so far (i.e. paleo1.measurement1.tableName)
+       * @param {Object} tnks      tableName keys for this LiPD version
        */
       var requiredTables = function(tables, crumbs, tnks){
         try{
           if (tables.length === 0){
-            logFeedback("err", "Missing: " + crumbs + "0");
+            logFeedback("err", "Missing: " + crumbs + "0", "");
           } else {
             for (var _w = 0; _w < tables.length; _w++) {
               requiredTable(tables[_w], crumbs + _w, tnks);
@@ -699,9 +699,9 @@ var lipdValidator = (function(){
       /**
        * Check _one_ table for required keys
        *
-       * @param {object} table Metadata
-       * @param {string} crumbs
-       * @param {object} tnks Required keys for this LiPD Version
+       * @param {Object} table     Metadata
+       * @param {String} crumbs    Crumbs for structure path so far (i.e. paleo1.measurement1.tableName)
+       * @param {Object} tnks      tableName keys for this LiPD Version
        */
       var requiredTable = function (table, crumbs, tnks) {
 
@@ -726,14 +726,14 @@ var lipdValidator = (function(){
           // required table root keys
           for (var _w = 0; _w < keys_base.reqTableKeys.length; _w++) {
             // current key
-            currKey = keys_base.reqTableKeys[_w];
+            var currKey = keys_base.reqTableKeys[_w];
             // current key exists in table?
             if (!table.hasOwnProperty(currKey) || !table[currKey]) {
               if (currKey === "missingValue"){
                 table["missingValue"] = "nan";
                 feedback.missingMvCt++;
               } else {
-                logFeedback("err", "Missing: " + crumbs + "." + currKey);
+                logFeedback("err", "Missing: " + crumbs + "." + currKey, currKey);
               }
             }
           } // end columns loop
@@ -768,24 +768,24 @@ var lipdValidator = (function(){
       }; // end requiredTable fn
 
       /**
+       * Check for the required keys at the column level. Loop over an array of columns, and check each one.
        *
-       *
-       * @param crumbs
-       * @param table
+       * @param  {String} crumbs   Crumbs for structure path so far (i.e. paleo1.measurement1.tableName)
+       * @param  {Array}  columns  Metadata columns from one table
        */
-      var requiredColumns = function(crumbs, table){
+      var requiredColumns = function(crumbs, columns){
           // Required column keys
-          for (var i = 0; i < table.columns.length; i++) {
+          for (var i = 0; i < columns.length; i++) {
 
               // Special Fields: variableType and proxyObservationType / inferredVariableType
-              if(table.columns[i].hasOwnProperty("variableType")){
-                var _varType = table.columns[i].variableType;
+              if(columns[i].hasOwnProperty("variableType")){
+                var _varType = columns[i].variableType;
                 if(_varType === "measured" || _varType === "measuredVariable"){
-                  if(!table.columns[i].hasOwnProperty("proxyObservationType")){
+                  if(!columns[i].hasOwnProperty("proxyObservationType")){
                     logFeedback("err", "Missing: " + crumbs + ".column" + i + ".proxyObservationType", "proxyObservationType");
                   }
                 } else if(_varType === "inferred"){
-                  if(!table.columns[i].hasOwnProperty("inferredVariableType")){
+                  if(!columns[i].hasOwnProperty("inferredVariableType")){
                     logFeedback("err", "Missing: " + crumbs + ".column" + i + ".inferredVariableType", "inferredVariableType");
                   }
                 } else {
@@ -794,26 +794,30 @@ var lipdValidator = (function(){
 
               } else {
                 logFeedback("err", "Missing: " + crumbs + ".column" + i + ".variableType", "variableType");
-                logFeedback("err", "Missing: " + crumbs + ".column" + i + ".proxyObservationType OR inferredVariableType", "proxyObservationType|inferredVariableType");
+                // logFeedback("err", "Missing: " + crumbs + ".column" + i + ".proxyObservationType OR inferredVariableType", "proxyObservationType|inferredVariableType");
               }
 
-              // Required column keys
+              // Loop required column keys
               for (var k in keys_base.reqColumnKeys) {
+                  // Safety check
                   if(keys_base.reqColumnKeys.hasOwnProperty(k)){
-                      // current key
+                      // Current key
                       var currKey = keys_base.reqColumnKeys[k];
-                      // current key exists in this column?
-                      if (!table.columns[i].hasOwnProperty(currKey) || !table.columns[i][currKey]) {
+                      // Is the current key in this column?
+                      if (!columns[i].hasOwnProperty(currKey) || !columns[i][currKey]) {
+                          // Is the column missing units?
                           if(currKey === "units"){
-                              table.columns[i]["units"] = "unitless";
+                              // Add the units field and insert "unitless" for now.
+                              columns[i]["units"] = "unitless";
                               feedback.missingUnitCt++;
                           } else {
+                              // Log that we're missing required data.
                               logFeedback("err", "Missing: " + crumbs + ".column" + i + "." + currKey, currKey);
                           }
                       }
                   }
-              } // end table keys
-          } // end columns loop
+              }
+          }
       };
 
         /**
@@ -1182,10 +1186,10 @@ var lipdValidator = (function(){
       /**
        * Error log: Tally the error counts, and log feedback to be relayed to the user.
        *
-       * @param {String} errType  Type of error: warn, pos, err
-       * @param {String} msg      Error or warning message that is displayed
-       * @param {String} key      The key that caused the error
-       * @return None             Feedback is logged to the global scope
+       * @param   {String} errType  Type of error: warn, pos, err
+       * @param   {String} msg      Error or warning message that is displayed
+       * @param   {String} key      The key that caused the error
+       * @return  None              Feedback is logged to the global scope
        */
       var logFeedback = function (errType, msg, key) {
         try{
@@ -1424,7 +1428,7 @@ var lipdValidator = (function(){
        * Check one table for required keys
        *
        * @param  {Object} column   Metadata
-       * @param  {String} crumbs   Crumbs for path so far
+       * @param  {String} crumbs   Crumbs for structure path so far (i.e. paleo1.measurement1.tableName)
        * @param  {String} mode     NOAA or Wiki mode
        * @param  {String} lvl      err or warn log level
        * @param  {Object} keys     Keys to look for
@@ -1497,7 +1501,7 @@ var lipdValidator = (function(){
        *
        * @param  {Number}   count  Error count
        * @param  {Function} cb     Callback
-       * @return None
+       * @return            none
        * */
       var checkPassFail = function(count, cb){
         if(count === 0){

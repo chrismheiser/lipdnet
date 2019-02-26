@@ -1393,12 +1393,19 @@ router.post("/noaa", function(req, res, next){
       // console.log("PORT : ", port);
       // console.log(JSON.stringify(master.dat));
       request(options, function (error, response, body) {
-        console.log("Response Status: ", response.statusCode);
-        console.log("Response error: ");
-        console.log(error);
+        console.log("Received Response");
+        console.log(typeof response);
+
         if(dev){
-          console.log("Response Body: ");
-          console.log(body);
+            if (typeof response !== "undefined"){
+                console.log("Response Status: ", response.statusCode);
+            } else {
+                console.log("No response");
+            }
+            console.log("Response error: ");
+            console.log(error);
+            console.log("Response Body: ");
+            console.log(body);
         }
 
         // If the response is a string, then it is an error message coming from a Python API Exception
@@ -1486,7 +1493,7 @@ router.get("/noaa/:fileid", function(req, res, next){
   try {
     logger.info("/noaa get: Fetch the NOAA file requested");
     // NOAA ID provided by client
-    var fildid = req.params.tmp;
+    var fileid = req.params.fileid;
     logger.info("/noaa get: NOAA ID: " + fileid);
     // walk(path.join(process.cwd(), "tmp", tmpStr));
     // Full path to the zip dir that holds the NOAA file(s)
