@@ -1575,7 +1575,11 @@ var create = (function(){
         '</ul><br><p>Columns:</p><ul>' +
         '<li>description</li>' +
         '<li>dataFormat</li>' +
-        '<li>dataType</li>'
+        '<li>dataType</li>',
+        "progress": ''+
+         '<p>Ideally, all LiPD files are 100% complete with all required information provided. Use this progress bar ' +
+         'to track how close you are to having a complete LiPD dataset. Please note: requirements may change as you ' +
+        'add data, remove data, and switch modes.</p>'
       };
 
       return _popovers[name];

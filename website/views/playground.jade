@@ -58,6 +58,9 @@ block body
 									ol
 										include buttons/action_btns.jade
 										include buttons/noaa_wiki_btns.jade
+										h6 LiPD Completeness
+										uib-progressbar(animate="true" value="feedback.lipdComplete" type="{{feedback.lipdCompleteType}}" uib-popover-html="progressPopover" popover-trigger="'mouseenter'")
+											span(style="color:white !important; white-space:nowrap;") {{feedback.lipdComplete}} %
 										include buttons/feedback.jade
 
 							div(class="span span50")

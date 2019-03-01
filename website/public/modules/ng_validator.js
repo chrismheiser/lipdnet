@@ -295,6 +295,9 @@ var lipdValidator = (function(){
         "missingTsidCt": 0,
         "missingUnitCt": 0,
         "missingMvCt": 0,
+        "lipdCompleteType": null,
+        "lipdComplete": 0,
+        "posCt": 0,
         "wrnCt": 0,
         "errCt": 0,
         "errCtWiki": 0,
@@ -410,6 +413,8 @@ var lipdValidator = (function(){
               valid = true;
             }
           });
+          calculatePercentComplete();
+          console.log(feedback);
           console.log("Validator Report: ");
           console.log("LiPD filename: " + files.lipdFilename);
           console.log("TSids created: " + pageMeta.tsids_generated);
@@ -1208,6 +1213,7 @@ var lipdValidator = (function(){
             feedback.errMsgs.push(msg);
           } else if (errType === "pos") {
             feedback.posMsgs.push(msg);
+            feedback.posCt++;
           }
         } catch(err){
           console.log("logFeedback: " + err);
@@ -1515,6 +1521,22 @@ var lipdValidator = (function(){
 
       // HELPERS
 
+      var calculatePercentComplete = function(){
+        var _totalitems = feedback.posCt + feedback.wrnCt + feedback.errCt + feedback.errCtWiki + feedback.errCtNoaa;
+        var _positiveitems = feedback.posCt;
+        console.log("POSITIVE: " + _positiveitems);
+        console.log("TOTAL: "  + _totalitems);
+        feedback.lipdComplete = Math.floor((_positiveitems / _totalitems)* 100) ;
+        console.log(feedback.lipdComplete);
+          if (feedback.lipdComplete < 25) {
+              feedback.lipdCompleteType = 'danger';
+          } else if (feedback.lipdComplete < 75) {
+              feedback.lipdCompleteType = 'warning';
+          } else {
+              feedback.lipdCompleteType = 'success';
+          }
+      };
+
       /**
        * Simplify the CSV filenames. Remove the dataset name, or other prefixes, from the filename.
        * i.e. Smith.paleo0measurement0.csv  becomes  paleo0measurement0.csv
@@ -1683,19 +1705,19 @@ var lipdValidator = (function(){
           var _arr = [];
           // It's a string, put string into "grant" field
           if(typeof f === "string"){
-            console.log("string");
             // Push the string onto our new array as the "grant" field of a new object
             _arr.push({"grant": f});
           }
           // It's an array of strings, put strings into "grant" field
           else if (Array.isArray(f)){
-            console.log("array");
             // Loop for each item in array
               for(var _b = 0; _b < f.length; _b++){
                 // Is this entry a string?
                   if(typeof f[_b] === "string"){
                     // Push the string onto our new array as the "grant" field of a new object
                     _arr.push({"grant": f[_b]});
+                  } else {
+                    _arr.push(f[_b]);
                   }
               }
           } else {
@@ -1705,7 +1727,6 @@ var lipdValidator = (function(){
           }
           return _arr;
       };
-
 
       /**
        * Get the LiPD verson from the LiPD metadata. Why is the extra footwork necessary? Well, because there are
@@ -1931,7 +1952,6 @@ var lipdValidator = (function(){
         return csv;
       };
 
-
       /**
        *  Inferred data main
        *
@@ -2101,7 +2121,6 @@ var lipdValidator = (function(){
         return table;
       };
 
-
       /**
        * Attempt to find an age column. There is not currently a controlled vocabulary, so check different key names and
        * different casings. If you find one, return the variableName and values.
@@ -2145,7 +2164,6 @@ var lipdValidator = (function(){
         }
         return _age;
       };
-
 
         // Call the local validate function, inside of processData
       cb(validate());

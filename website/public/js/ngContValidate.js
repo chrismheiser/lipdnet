@@ -17,6 +17,7 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
     $scope.lipdPopover = $sce.trustAsHtml(create.getPopover("lipd"));
     $scope.wikiPopover = $sce.trustAsHtml(create.getPopover("wiki"));
     $scope.noaaPopover = $sce.trustAsHtml(create.getPopover("noaa"));
+    $scope.progressPopover = $sce.trustAsHtml(create.getPopover("progress"));
 
     // All dropdown box elements must be bound in the scope.
     $scope.dropdowns = {
@@ -138,6 +139,9 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
     $scope.feedback = {
       "lipdVersion": "NA",
       "missingTsidCt": 0,
+      "posCt": 0,
+      "lipdComplete": 0,
+      "lipdCompleteType": "danger",
       "wrnCt": 0,
       "errCt": 0,
       "validLipd": "NA",
@@ -1089,6 +1093,9 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       $scope.feedback = {
         "lipdVersion": "NA",
         "missingTsidCt": 0,
+        "lipdComplete": 0,
+        "lipdCompleteType": null,
+        "posCt": 0,
         "wrnCt": 0,
         "errCt": 0,
         "validLipd": "NA",
@@ -1806,6 +1813,7 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
           // Send LiPD data through to the validator.
           lipdValidator.validate(_results1.files, $scope.pageMeta, function(_results){
             try{
+                console.log(_results.feedback);
               // Store the validation results in the page metadata.
               $scope.files = _results.files;
               $scope.feedback = _results.feedback;
