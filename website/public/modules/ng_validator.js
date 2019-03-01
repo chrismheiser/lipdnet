@@ -450,7 +450,9 @@ var lipdValidator = (function(){
               } else if (k === "investigators" || k === "investigator") {
                 verifyDataType("any", k, v, true);
               } else if (k=== "funding") {
-                verifyArrObjs(k, v, true);
+                  v = fixFunding(v);
+                  D[k] = v;
+                  var _fundPassed = verifyArrObjs(k, v, true);
               } else if (k === "geo") {
                 // geo must follow GeoJSON standards
                 verifyDataType("object", k, v, true);
@@ -1669,6 +1671,41 @@ var lipdValidator = (function(){
         }
         return p;
       };
+
+      /**
+       *  Fix funding data that is formatted incorrectly. If it's formatted incorrectly, the user can access or edit
+       *  the data on the page.
+       *
+       * @param  {*}      f     Funding data. Could be a string, an array of strings, array of objects, etc.
+       * @return {Array}  _arr  Funding data correctly formatted as an array of objects.
+       */
+      var fixFunding = function(f){
+          var _arr = [];
+          // It's a string, put string into "grant" field
+          if(typeof f === "string"){
+            console.log("string");
+            // Push the string onto our new array as the "grant" field of a new object
+            _arr.push({"grant": f});
+          }
+          // It's an array of strings, put strings into "grant" field
+          else if (Array.isArray(f)){
+            console.log("array");
+            // Loop for each item in array
+              for(var _b = 0; _b < f.length; _b++){
+                // Is this entry a string?
+                  if(typeof f[_b] === "string"){
+                    // Push the string onto our new array as the "grant" field of a new object
+                    _arr.push({"grant": f[_b]});
+                  }
+              }
+          } else {
+            // Don't need to do anything. This data appears to be correctly formatted.
+              console.log("do nothing");
+            _arr = f;
+          }
+          return _arr;
+      };
+
 
       /**
        * Get the LiPD verson from the LiPD metadata. Why is the extra footwork necessary? Well, because there are
