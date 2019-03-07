@@ -30,7 +30,7 @@ div(layout="column" ng-repeat='entry3 in entry2.columns track by $index' layout-
                 div(layout='', layout-padding='', layout-sm='column')
 
                     md-input-container(flex='', class="md-input-has-value")
-                        label Variable Type
+                        label Variable Type *
                         // Use autocomplete - all cases
                         input.mdautocomplete(type="text" ng-model="entry3.variableType"
                         uib-typeahead="entry for entry in ontology['variableType'] | filter:$viewValue"

@@ -107,7 +107,7 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       "bagit": {},
       "csv": {},
       "jsonSimple": {"lipdVersion": 1.3},
-      "json": {"lipdVersion": 1.3, "createdBy": "lipd.net", "pub": [], "funding": [], "dataSetName": "", "geo": {
+      "json": {"lipdVersion": 1.3, "pub": [], "funding": [], "dataSetName": "", "geo": {
         "geometry": {"coordinates": []}},
         "paleoData": [{"measurementTable": [{"tableName": "paleo0measurement0", "filename": "paleo0measurement0.csv",
           "columns": []}]}]}
@@ -1813,7 +1813,6 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
           // Send LiPD data through to the validator.
           lipdValidator.validate(_results1.files, $scope.pageMeta, function(_results){
             try{
-                console.log(_results.feedback);
               // Store the validation results in the page metadata.
               $scope.files = _results.files;
               $scope.feedback = _results.feedback;

@@ -14,17 +14,13 @@ div(layout='', layout-padding='', layout-sm='column')
 div(layout='', layout-padding='', layout-sm='column')
   md-input-container(flex="")
     label Created By *
-    md-select(ng-model="files.json.createdBy")
-      md-option(ng-repeat="method in dropdowns.createdBy" ng-value="method") {{method}}
+    input.mdautocomplete(type="text" ng-model="files.json.createdBy"
+          uib-typeahead="entry for entry in dropdowns.createdBy | filter:$viewValue" typeahead-min-length="0")
     md-tooltip {{getTooltip("root", "createdBy")}}
   md-input-container(flex="")
     label Archive Type *
-    // Use auto-complete field when there are >20 items in the list
-    input.mdautocomplete(ng-if="ontology['archiveType'].length > 20" type="text" ng-model="files.json.archiveType"
+    input.mdautocomplete(type="text" ng-model="files.json.archiveType"
                           uib-typeahead="entry for entry in ontology['archiveType'] | filter:$viewValue" typeahead-min-length="0")
-    // Use dropdown list when there are <20 items in the list
-    md-select(ng-if="ontology['archiveType'].length < 20" ng-model="files.json.archiveType")
-      md-option(ng-repeat="archive in ontology['archiveType']" ng-value="archive") {{archive}}
     md-tooltip {{getTooltip("root", "archiveType")}}
 div(layout='', layout-padding='', layout-sm='column')
   md-input-container(flex='33', ng-class="md-input-has-value")

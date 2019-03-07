@@ -10,8 +10,6 @@
 
 var lipdValidator = (function(){
 
-
-
   // 'use strict';
   return {
 
@@ -321,7 +319,7 @@ var lipdValidator = (function(){
         "reqPubKeys": ["author", "title", "year", "journal"],
         "reqPubDcKeys": ["author", "title"],
         "reqColumnKeys": ["number", "variableName", "TSid", "units"],
-        "reqTableKeys": ["filename", "columns", "missingValue"],
+        "reqTableKeys": ["filename", "missingValue"],
         "reqTableNameKeys": ["chronTableName", "paleoTableName", "paleoDataTableName", "chronDataTableName",
           "chronMeasurementTableName", "paleoMeasurementTableName", "name", "tableName"],
         "reqGeoKeys": ["coordinates"]
@@ -399,6 +397,7 @@ var lipdValidator = (function(){
             structure_1_3(files.json);
             console.log("validate_1_3: LiPD Required Fields");
             requiredBase(files.json);
+            requiredPaleoTable(files);
             required_1_3(files.json);
           }
           console.log("validate: Bagit");
@@ -414,6 +413,7 @@ var lipdValidator = (function(){
             }
           });
           calculatePercentComplete();
+          files.json["lipdComplete"] = feedback.lipdComplete + "%";
           console.log(feedback);
           console.log("Validator Report: ");
           console.log("LiPD filename: " + files.lipdFilename);
@@ -464,7 +464,7 @@ var lipdValidator = (function(){
               } else {
                 // No rules for these keys. Log warning, but allow data.
                 if (keys.indexOf(k) === -1) {
-                  logFeedback("warn", "Oops, we don't recognize this key: '" + k + "'");
+                  // logFeedback("warn", "Oops, we don't recognize this key: '" + k + "'");
                   console.log("verifyBase: No rules for key: " + k);
                 }
               }
@@ -593,15 +593,17 @@ var lipdValidator = (function(){
           // paleoData missing. Require _AT LEAST_ one paleo measurement table
           if (!D.hasOwnProperty(pdData)) {
             if (pc === "paleo") {
-              logFeedback("err", "Missing: " + pdData + "0measurement0");
+              logFeedback("err", "Missing: " + pdData + "0measurement0", "");
+            } else {
+              logFeedback("pos", "", "paleoData");
+
             }
           }
           // paleoData
           else {
-
             // paleoData empty. Require _AT LEAST_ one paleo measurement table
             if (pc === "paleo" && !D[pdData]) {
-              logFeedback("err", "Missing: " + pdData + "0measurement0");
+              logFeedback("err", "Missing: " + pdData + "0measurement0", "");
             } else {
               // paleoData entries
               for (var i = 0; i < D[pdData].length; i++) {
@@ -610,7 +612,7 @@ var lipdValidator = (function(){
 
                 // measurement missing. Require _AT LEAST_ one paleo measurement table
                 if (!section.hasOwnProperty("measurementTable") && pc === "paleo") {
-                  logFeedback("err", "Missing: " + pc + "0measurement0");
+                  logFeedback("err", "Missing: " + pc + "0measurement0", "");
                 }
 
                 // measurement
@@ -673,6 +675,8 @@ var lipdValidator = (function(){
             } else if (!D.hasOwnProperty(key) || !D[key]) {
               // Required key is missing
               logFeedback("err", "Missing: " + key);
+            } else {
+                logFeedback("pos", "", "");
             }
           } // end for
         } catch(err){
@@ -742,6 +746,8 @@ var lipdValidator = (function(){
               } else {
                 logFeedback("err", "Missing: " + crumbs + "." + currKey, currKey);
               }
+            } else {
+              logFeedback("pos", "Required data found: " + currKey, currKey);
             }
           } // end columns loop
 
@@ -755,12 +761,13 @@ var lipdValidator = (function(){
 
           // column count match CSV count
           if(!table.hasOwnProperty("columns") || table.columns.length === 0){
-            logFeedback("err", "Missing: " + crumbs + ".columns");
+            logFeedback("err", "Missing: " + crumbs + ".columns", "");
           } else if (table.hasOwnProperty("columns")) {
             // Required: CSV filename where column values are stored
             if (!filename) {
-              logFeedback("err", "Missing: " + crumbs + ".filename")
+              logFeedback("err", "Missing: " + crumbs + ".filename", "")
             } else {
+              logFeedback("pos", "Required data found: filename", "filename");
               requiredColumnsCtMatch(filename, table.columns);
             }
 
@@ -786,14 +793,19 @@ var lipdValidator = (function(){
 
               // Special Fields: variableType and proxyObservationType / inferredVariableType
               if(columns[i].hasOwnProperty("variableType")){
-                var _varType = columns[i].variableType;
+                  logFeedback("pos", "Required data found: variableType", "");
+                  var _varType = columns[i].variableType;
                 if(_varType === "measured" || _varType === "measuredVariable"){
                   if(!columns[i].hasOwnProperty("proxyObservationType")){
                     logFeedback("err", "Missing: " + crumbs + ".column" + i + ".proxyObservationType", "proxyObservationType");
+                  } else {
+                    logFeedback("pos", "Required data found: proxyObservationType", "");
                   }
                 } else if(_varType === "inferred"){
                   if(!columns[i].hasOwnProperty("inferredVariableType")){
                     logFeedback("err", "Missing: " + crumbs + ".column" + i + ".inferredVariableType", "inferredVariableType");
+                  } else {
+                      logFeedback("pos", "Required data found: inferredVariableType", "");
                   }
                 } else {
                   logFeedback("err", "Missing: " + crumbs + ".column" + i + ".variableType", "variableType");
@@ -821,13 +833,50 @@ var lipdValidator = (function(){
                               // Log that we're missing required data.
                               logFeedback("err", "Missing: " + crumbs + ".column" + i + "." + currKey, currKey);
                           }
+                      } else {
+                          logFeedback("pos", "Required data found: " + currKey, currKey);
                       }
                   }
               }
           }
       };
 
-        /**
+
+      var requiredPaleoTable = function(files){
+        // Required data
+        // table, table values, variableName
+          var _table = null;
+          try{
+            _table = files.json["paleoData"][0]["measurementTable"][0];
+            logFeedback("pos", "paleo0measurement0 provided", "paleo0measurement0");
+          }catch(err){
+            logFeedback("err", "Missing: paleo0measurement0" , "paleo0measurement0");
+          }
+          if(_table){
+              // columns
+              // if(!_table.hasOwnProperty("columns") || _table.columns.length === 0){
+              //   logFeedback("err", "Missing: paleo0measurement0 column metadata", "paleo0measurement0.columns");
+              // } else {
+              //   logFeedback("pos", "Provided paleo0measurement0 column metadata", "paleo0measurement0.columns");
+              // }
+              // table name link to csv values
+              try{
+                console.log(files.csv[_table.filename]);
+                  if(!(_table.filename in files.csv)){
+                      logFeedback("err", "Missing: paleo0measurement0 values", "paleo0measurement0.values");
+                  } else {
+                      logFeedback("pos", "Provided paleo0measurement0 values data", "paleo0measurement0.values");
+                  }
+              } catch(err){
+                  logFeedback("err", "Missing: paleo0measurement0 values", "paleo0measurement0.values");
+              }
+
+
+          }
+
+      };
+
+      /**
        *
        * Special feedback log
        *
@@ -1013,9 +1062,9 @@ var lipdValidator = (function(){
         try{
           // Get the column count for this csv file.
           csvCt = files.csv[filename].cols;
+          logFeedback("pos", "CSV column count for: " + filename, filename);
         } catch(err){
-          logFeedback("err", "CSV filename(s) do not match filenames CSV filenames listed in the metadata", "filename");
-          return;
+          logFeedback("err", "Missing CSV column count for: " + filename, filename);
         }
         try {
           var metaCt = columns.length;
@@ -1028,6 +1077,8 @@ var lipdValidator = (function(){
                 if (csvCt !== metaCt) {
                   // Okay, there is actually an error now. Log it.
                   logFeedback("err", "Mismatched columns: " + filename + " has " + csvCt + ", jsonld has " + metaCt, filename);
+                } else {
+                  logFeedback("pos", "Column counts match", "");
                 }
               }
             }
@@ -1040,6 +1091,8 @@ var lipdValidator = (function(){
                 if (csvCt !== metaCt) {
                   // Okay, there is actually an error now. Log it.
                   logFeedback("err", "Mismatched columns: " + filename + " has " + csvCt + ", jsonld has " + metaCt, filename);
+                } else {
+                  logFeedback("pos", "Column counts match", "");
                 }
               }
               // is column 1 an array of column numbers? (less likely)
@@ -1050,6 +1103,8 @@ var lipdValidator = (function(){
                 if (csvCt !== metaCt) {
                   // Okay, there is actually an error now. Log it.
                   logFeedback("err", "Mismatched columns: " + filename + " has " + csvCt + ", jsonld has " + metaCt, filename);
+                } else {
+                  logFeedback("pos", "Column counts match", "");
                 }
               }
               // We have 2 columns, but neither one represents an array of columns. It's just a coincidence. Normal error.
@@ -1065,7 +1120,6 @@ var lipdValidator = (function(){
         } catch(err){
           console.log("validator: requiredColumnsCtMatch: " + err);
         }
-
       }; // end requiredColumnsCtMatch fn
 
       /**
@@ -1125,11 +1179,12 @@ var lipdValidator = (function(){
             if (key === "identifier"){
               key = "DOI";
             }
-            if (!pub.hasOwnProperty(key)) {
+            if (!pub.hasOwnProperty(key) || !pub[key]) {
               // this pub is missing a required key!
-              logFeedback("err", "Missing: " + crumbs + "." + key);
-            } else if (!pub[key]){
-              logFeedback("err", "Missing: " + crumbs + "." + key);
+              logFeedback("err", "Missing: " + crumbs + "." + key, key);
+            } else {
+              // Key exists. Increment positive counter.
+              logFeedback("pos", "Required data found: " + key, key);
             }
           }
         } catch(err) {
@@ -1160,23 +1215,26 @@ var lipdValidator = (function(){
 
 
             if(lon===0){
-              logFeedback("warn", "Longitude set to 0. Is this intended?", "coordinates");
+              logFeedback("warn", "Longitude set to 0. Is this intentional?", "coordinates");
             }
             if (!lon && lon !== 0){
-              logFeedback("err", "Missing: longitude", "coordinates");
+              logFeedback("err", "Missing: longitude", "longitude");
             } else if (!lonValid) {
               // check if longitude is range
               logFeedback("err", "Longitude out of range: Enter value from -180 to 180", "longitude");
+            } else {
+                logFeedback("pos", "", "longitude");
             }
-
             if (lat === 0){
-              logFeedback("warn", "Latitude set to 0. Is this intended?", "coordinates");
+              logFeedback("warn", "Latitude set to 0. Is this intentional?", "latitude");
             }
             else if (!lat && lat !== 0){
-              logFeedback("err", "Missing: latitude", "coordinates");
+              logFeedback("err", "Missing: latitude", "latitude");
             } else if (!latValid) {
               // check if latitude is in range
               logFeedback("err", "Latitude out of range: Enter value from -90 to 90", "latitude");
+            } else {
+                logFeedback("pos", "", "latitude");
             }
           } else {
             if (!m.geo.geometry.coordinates){
@@ -1521,20 +1579,27 @@ var lipdValidator = (function(){
 
       // HELPERS
 
+      /**
+       * Calculate the completeness of the data in this LiPD dataset. The completeness is determined by
+       * how much of the required data is provided
+       *
+       */
       var calculatePercentComplete = function(){
-        var _totalitems = feedback.posCt + feedback.wrnCt + feedback.errCt + feedback.errCtWiki + feedback.errCtNoaa;
+        // Total number of required items, both errors and positive counts
+        var _totalitems = feedback.posCt + feedback.errCt + feedback.errCtWiki + feedback.errCtNoaa;
+        feedback.lipdCompleteCt = _totalitems;
+        // Total number of positive counts
         var _positiveitems = feedback.posCt;
-        console.log("POSITIVE: " + _positiveitems);
-        console.log("TOTAL: "  + _totalitems);
-        feedback.lipdComplete = Math.floor((_positiveitems / _totalitems)* 100) ;
-        console.log(feedback.lipdComplete);
-          if (feedback.lipdComplete < 25) {
-              feedback.lipdCompleteType = 'danger';
-          } else if (feedback.lipdComplete < 75) {
-              feedback.lipdCompleteType = 'warning';
-          } else {
-              feedback.lipdCompleteType = 'success';
-          }
+        // Get the percentage of required items that are completed
+        feedback.lipdComplete = Math.floor((_positiveitems / _totalitems)* 100);
+        // Depending on the level of completion, set the success level and color of the completion bar.
+        if (feedback.lipdComplete < 25) {
+            feedback.lipdCompleteType = 'danger';
+        } else if (feedback.lipdComplete < 75) {
+            feedback.lipdCompleteType = 'warning';
+        } else {
+            feedback.lipdCompleteType = 'success';
+        }
       };
 
       /**
@@ -1686,6 +1751,8 @@ var lipdValidator = (function(){
                   console.log("validate: fixAuthor: " + err);
                 }
               }
+            } else {
+              p[_e]["author"] = [{"name": ""}];
             } // end if pub had author entry
           } // end for loop author data type
         } catch(err){

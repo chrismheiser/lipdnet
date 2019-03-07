@@ -36,7 +36,7 @@ div(ng-repeat="entry in files.json.pub track by $index" layout-wrap="")
 
     div(layout='', layout-padding='', layout-sm='column')
       md-input-container(flex='', ng-class="md-input-has-value")
-        label Journal
+        label Journal *
         textarea(ng-model='entry.journal', columns='1')
         md-tooltip {{getTooltip("pub", "journal")}}
 
@@ -47,9 +47,10 @@ div(ng-repeat="entry in files.json.pub track by $index" layout-wrap="")
 
     div(layout='', layout-padding='', layout-wrap='', layout-sm='column')
       md-input-container(flex="33")
-        label Year
-        md-select(ng-model="entry.year")
-          md-option(ng-repeat="yr in dropdowns.years" ng-value="yr" ng-model="entry.year") {{yr}}
+        label Year *
+        input(ng-model="entry.year")
+        //md-select(ng-model="entry.year")
+        //  md-option(ng-repeat="yr in dropdowns.years" ng-value="yr" ng-model="entry.year") {{yr}}
         md-tooltip {{getTooltip("pub", "year")}}
 
       md-input-container(flex='', ng-class="md-input-has-value")
