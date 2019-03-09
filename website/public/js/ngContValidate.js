@@ -1024,29 +1024,28 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
    */
     $scope.remoteFileUpload = function(){
         try{
+            console.log("remote file upload");
             // Remote source URL was found in URL path. Parse out the remote source url from the full path.
             // Get the query data that is after the query '?' question mark.
             var search = location.search.substring(1);
             // Turn the substring into a JSON object for easier use.
-            var done = JSON.parse('{"' + decodeURI(search).replace(/"/g, '\\"').replace(/&/g, '","').replace(/=/g,'":"') + '"}');
-            // Get the remote source url, which should be labeled under 'source' in the query
-            var _sourceurl = done.source;
+            var _url = search.split("source=")[1];
             // Send the source url to the backend, and let node go GET the LiPD file.
             console.log("Let me bring this to the backroom.");
             var _url_route = "/remote";
-            var _payload = {"source": _sourceurl};
+            var _payload = {"source": _url};
             $scope.uploadToBackend(_url_route, _payload, function(resp){
                 // LiPD data received in JSON object form, now integrate it into the controller scope.
                 // Manually place the data or find a way to hook into the file upload process.
-                console.log("Remote data received from: ", _sourceurl);
+                console.log("Remote data received from: ", _url);
                 console.log(resp);
                 $scope.remoteFilePull(resp);
             });
 
         } catch(err){
             // Remote source URL not found in url path. Continue as normal.
-            // console.log("remoteFileUpload : No remote source url found: ");
-            // console.log(err);
+            console.log("remoteFileUpload : No remote source url found: ");
+            console.log(err);
         }
     };
 
