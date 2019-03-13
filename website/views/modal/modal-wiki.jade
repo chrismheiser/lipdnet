@@ -1,0 +1,9 @@
+.modal-content
+    .modal-header
+        h3.modal-title Log into Linked Earth Wiki
+    .modal-body
+        p You must login to the Linked Earth Wiki before you can upload a file. If you're already logged in, click 'Upload' to skip the login.
+    .modal-footer
+        button(ng-if="data.button1" class="btn btn-success" data-dismiss="modal" ng-click="login()") Step 1: Log into Wiki
+        button(ng-if="data.button2" class="btn btn-success" data-dismiss="modal" ng-click="upload()") Step 2: Upload LiPD file
+        button(ng-if="data.button3" class="btn btn-primary" data-dismiss="modal" ng-click="close()") Close

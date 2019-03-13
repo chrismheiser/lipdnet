@@ -8,7 +8,6 @@ var fastcsv = require("fast-csv");
 var request = require('request');
 var logger = require("../node_modules_custom/node_log.js");
 var lipdValidator = require("../node_modules_custom/node_validator.js");
-// var ontology = require("../node_modules_custom/node_ontology.js");
 var misc = require("../node_modules_custom/node_misc.js");
 var port = process.env.PORT || 3000;
 var dev = port === 3000;
@@ -941,12 +940,14 @@ var sendDigestEmail = function(){
     try{
         // Use nodemailer 2.7.2 to dispatch daily e-mail.
         var nodemailer = require('nodemailer');
+        var _recipients = "";
         var _user = fs.readFileSync("./token.txt").toString('utf-8').split("\n")[3];
         var _pass = fs.readFileSync("./token.txt").toString('utf-8').split("\n")[4];
         if(newLipdverseFiles.length !== 0){
-            var _body = "New LiPD files uploaded today: \n\nDataset:\t\t\t\t\t\tTime:\n";
+            var _body = "New LiPD files uploaded today: \n\nDataset:\t\t\t\t\t\tTime:\n\n";
             for(var _i = 0; _i < newLipdverseFiles.length; _i++){
-                _body = _body + newLipdverseFiles[_i]["filename"] + "\t\t" + newLipdverseFiles[_i]["time"] +  "\n";
+                _body = _body + newLipdverseFiles[_i].filename + "\t\t" + newLipdverseFiles[_i].time +  "\n" +
+                    newLipdverseFiles[_i].url  + "\n\n";
             }
             // create reusable transporter object using the default SMTP transport
             var _transportConfig = {
@@ -958,6 +959,9 @@ var sendDigestEmail = function(){
             };
             if(!dev){
                 _transportConfig.proxy =  "http://rishi.cefns.nau.edu:3128";
+                _recipients = "Chris <cmh553@nau.edu>";
+            } else {
+                _recipients = 'Chris <cmh553@nau.edu>, Nick McKay <nicholas.mckay@nau.edu>';
             }
             var transporter = nodemailer.createTransport(_transportConfig);
             // nodemailer.createTransport('smtps://' + _user + ':' + _pass + '@smtp.gmail.com');
@@ -965,7 +969,7 @@ var sendDigestEmail = function(){
             // setup e-mail data with unicode symbols
             var mailOptions = {
                 from: "Lipd.net <lipd.manager@gmail.com>", // sender address
-                to: 'Chris <cmh553@nau.edu>, Nick McKay <nicholas.mckay@nau.edu>', // list of receivers
+                to: _recipients, // list of receivers
                 subject: 'Daily Lipdverse Uploads', // Subject line
                 text: _body, // plaintext body
                 // html: '<b></b>'
@@ -1035,49 +1039,91 @@ var updateTSidOnly = function(_objs){
 };
 
 /**
- *  Upload a LiPD file to the lipd.manager dropbox
+ * Upload a local LiPD file to Dropbox, create a public share link, and return the share link (direct link to file)
+ * Dropbox user: lipd.manager
+ *
+ * Uses SDK docs from :  https://dropbox.github.io/dropbox-sdk-js/global.html
  *
  * @param    {String}   filepath   File path to the directory storing the LiPD file being uploaded. Local on the server
  * @param    {String}   filename   Filename of the LiPD file being uploaded.
+ * @param    {String}   mode       Dropbox App to upload to: lipdverse or wiki
  * @param    {Function} cb         Callback that ends the request.
  */
-var uploadToDropbox = function(filepath, filename, cb){
+var uploadToDropbox = function(filepath, filename, mode, cb){
+    logger.info("uploadToDropbox: ", filepath + "/" + filename, " | Mode: ", mode);
+    // Import required modules
+    var fetch = require('isomorphic-fetch'); // or another library of choice.
+    var Dropbox = require('dropbox').Dropbox;
+    var token = "";
+    // Get the correct Dropbox app access token, depending on the mode.
+    if (mode === "lipdverse"){
+        token = fs.readFileSync("./token.txt").toString('utf-8').split("\n")[1];
+    } else if (mode === "wiki"){
+        token = fs.readFileSync("./token.txt").toString('utf-8').split("\n")[6];
+    }
+    // Create Dropbox object
+    var dbx = new Dropbox({ accessToken: token, fetch: fetch });
+    // Read in Lipd file contents
+    var content = fs.readFileSync(path.join(filepath, filename));
+    // Metadata about file uploads. Used to send a daily digest e-mail.
+    var _emailUpdateMetadata = {};
     try{
-        logger.info("Uploading to Dropbox...");
-        // Filepath doesn't have filename on the end of the path yet. Add it.
-        filepath = path.join(filepath, filename);
-        // read dropbox access token from txt file
-        var access_token = fs.readFileSync("./token.txt").toString('utf-8').split("\n")[1];
-        //reading the contents
-        var content = fs.readFileSync(filepath);
-        var options = {
-            method: "POST",
-            url: 'https://content.dropboxapi.com/2/files/upload',
-            headers: {
-                "Content-Type": "application/octet-stream",
-                "Authorization": "Bearer " + access_token,
-                "Dropbox-API-Arg": "{\"path\": \"/"+filename+"\",\"mode\": \"add\",\"autorename\": true,\"mute\": false, \"strict_conflict\": false}",
-            },
-            body:content
-        };
-        request(options,function(err, res, body){
-            if(err){
-                logger.info("uploadToDropbox: response: " + res.statusCode + ": " + err);
-            }
-            if(res.statusCode === 200){
-                body = JSON.parse(body);
-                logger.info("File uploaded successfully.");
-                // Add this file to the growing list of Lipdverse filenames. We'll send out a digest e-mail later.
-                newLipdverseFiles.push({"filename": body.name, "time" : body["client_modified"]});
-            }
-            cb();
+        // Upload the LiPD file to Dropbox
+        dbx.filesUpload({
+            "path": "/" + filename,
+            "mode": "add",
+            "autorename": true,
+            "mute": false,
+            "strict_conflict": false,
+            "contents": content
+        }).then(function(resp){
+            logger.info("Dropbox: Upload success");
+            // File uploaded successfully. Get the path where it was uploaded in Dropbox.
+            // This path will give us the filename with any appended numbers in case it was a duplicate file.
+            var _file = resp.path_display;
+            _emailUpdateMetadata = {
+                "filename": resp.name,
+                "time": resp.client_modified
+            };
+            // Create a shared file link, that we can use to access the file directly via URL
+            dbx.sharingCreateSharedLinkWithSettings({
+                path: _file
+            }).then(function(resp1){
+                logger.info("Dropbox: Create share link success");
+                // Created the share link successfully.
+                // Replace the "?dl=0" into "?dl=1" to make it a direct link to the file.
+                var _direct_url = resp1.url.replace(/.$/,"1");
+                _emailUpdateMetadata["url"] = _direct_url;
+                // Push the metadata for the daily e-mail digest
+                newLipdverseFiles.push(_emailUpdateMetadata);
+                cb(_direct_url);
+            }).catch(function(error) {
+                try{
+                    logger.info("Create share link error");
+                    // Unable to create the share link because one was previously created.
+                    // Not a problem. Get the existing link from the error response.
+                    var _indirect_url = error.error.error.shared_link_already_exists.metadata.url;
+                    var _direct_url = _indirect_url.replace(/.$/,"1");
+                    _emailUpdateMetadata["url"] = _direct_url;
+                    // Push the metadata for the daily e-mail digest
+                    newLipdverseFiles.push(_emailUpdateMetadata);
+                    cb(_direct_url);
+                } catch(err){
+                    logger.info("uploadToDropbox: shared link error");
+                    logger.info(err);
+                }
+            });
+        }).catch(function(error) {
+            logger.info("uploadToDropbox: file upload error");
+            logger.info(error);
+            cb("");
         });
-
-
     } catch(err){
-        logger.info("uploadToDropbox: " + err);
+        logger.info("uploadToDropbox: top error: " + err);
+        cb("");
     }
 };
+
 
 var walk = function(directoryName) {
   fs.readdir(directoryName, function(e, files) {
@@ -1166,7 +1212,7 @@ router.get("/lipdverse/:fileid", function(req, res, next){
         for(var i in files) {
             // Get the first lipd file you find (there should only be one)
             if(path.extname(files[i]) === ".lpd") {
-                uploadToDropbox(pathTmpZip, files[i], function(){
+                uploadToDropbox(pathTmpZip, files[i], "lipdverse", function(){
                     res.end();
                 });
             }
@@ -1667,62 +1713,39 @@ router.get("/merge", function(req, res, next){
 });
 
 router.post("/wiki", function(req, res, next){
-
-    var request = require('request');
-    var _filename = req.body.filename;
-    var _id = req.body.id;
-    var _lipd_path = "";
-    var _pathTmpZip = path.join(process.cwd(), "tmp", _id, "zip");
-
-    var res_options = {"path": pathTmpZip, "file": _filename, "content": "application/zip", "message": "/files get: Sending LiPD to client"};
-    // downloadResponse(options, res);
-    // if(dev){
-    //     // _lipd_path = path.join(process.cwd(), "tmp", _id, "zip", _filename);
-    //     _lipd_path =
-    // } else {
-    //     _lipd_path =
-    // }
-
-    // Pack up the options that we want to give the request module
-    var options = {
-        "method": "POST",
-        "url": "http://wiki.linked.earth/Special:WTLiPD?op=importurl&name=" + _filename + "&url=" + _lipd_path,
-        "headers": {'Access-Control-Allow-Origin': "*"}
-    };
-
-    // If we're on the production server, then we need to add in the proxy option
-    if (!dev){
-        options.proxy = "http://rishi.cefns.nau.edu:3128";
-
-    }
-
-    console.log("Sending upload to Wiki");
-    request(options, function (error, res1, body) {
-        console.log("Got a response");
-        console.log("Response Status: ", res1.statusCode);
-        if(typeof res1 === "undefined"){
-            console.log("wiki: no response");
-            res.writeHead(500, "Wiki upload failed. No response", {'content-type' : 'text/plain'});
-            res.end();
-        } else {
-            if(res1.statusCode === 200){
-                console.log("Successful wiki upload: Status:" + res1.statusCode);
-                res.writeHead(res1.statusCode, "It worked" + res1.statusCode, {'content-type' : 'text/plain'});
-                res.end();
-            } else {
-                console.log("wiki: Wiki upload failed. Bad response. Status:" + res1.statusCode);
-                res.writeHead(res1.statusCode, "Error talking to the Wiki API" + res1.statusCode, {'content-type' : 'text/plain'});
-                res.end();
+    // Send Dropbox link back to client side.
+    logger.info("/wiki POST");
+    try{
+        var _filename = req.body.filename;
+        var _id = req.body.id;
+        var _pathTmpZip = path.join(process.cwd(), "tmp", _id, "zip");
+        var files = fs.readdirSync(_pathTmpZip);
+        // Loop over the files found
+        for(var i in files) {
+            // Get the first lipd file you find (there should only be one)
+            if(path.extname(files[i]) === ".lpd") {
+                // Upload the file to Dropbox, and return the direct url to the LiPD file.
+                uploadToDropbox(_pathTmpZip, files[i], "wiki", function(_url){
+                    logger.info("Uploading file to Wiki via URL: ", _url);
+                    // Send the full Wiki URL upload link with direct LiPD file URL attached.
+                    res.status(200).send("http://wiki.linked.earth/Special:WTLiPD?op=importurl&name=" + _filename + "&url=" + _url);
+                    res.end();
+                });
             }
-
         }
-    });
-
+    } catch(err){
+        console.log(err);
+        res.end();
+    }
 });
 
 // END PAGE ROUTES
 
 // MODALS AND PIECES
+
+router.get("/modal-wiki", function(req, res, next){
+    res.render('modal/modal-wiki', {title: ''});
+});
 
 router.get("/modal-file", function(req, res, next){
   res.render('modal/modal-file', {title: ''});

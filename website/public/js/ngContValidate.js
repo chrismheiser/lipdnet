@@ -1024,24 +1024,25 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
    */
     $scope.remoteFileUpload = function(){
         try{
-            console.log("remote file upload");
             // Remote source URL was found in URL path. Parse out the remote source url from the full path.
             // Get the query data that is after the query '?' question mark.
             var search = location.search.substring(1);
             // Turn the substring into a JSON object for easier use.
             var _url = search.split("source=")[1];
-            // Send the source url to the backend, and let node go GET the LiPD file.
-            console.log("Let me bring this to the backroom.");
-            var _url_route = "/remote";
-            var _payload = {"source": _url};
-            $scope.uploadToBackend(_url_route, _payload, function(resp){
-                // LiPD data received in JSON object form, now integrate it into the controller scope.
-                // Manually place the data or find a way to hook into the file upload process.
-                console.log("Remote data received from: ", _url);
-                console.log(resp);
-                $scope.remoteFilePull(resp);
-            });
-
+            if(_url){
+                console.log("Remote LiPD source found");
+                // Send the source url to the backend, and let node go GET the LiPD file.
+                // console.log("Let me bring this to the backroom.");
+                var _url_route = "/remote";
+                var _payload = {"source": _url};
+                $scope.uploadToBackend(_url_route, _payload, function(resp){
+                    // LiPD data received in JSON object form, now integrate it into the controller scope.
+                    // Manually place the data or find a way to hook into the file upload process.
+                    console.log("Remote data received from: ", _url);
+                    console.log(resp);
+                    $scope.remoteFilePull(resp);
+                });
+            }
         } catch(err){
             // Remote source URL not found in url path. Continue as normal.
             console.log("remoteFileUpload : No remote source url found: ");
@@ -1717,40 +1718,32 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
    * @return    none   Return a good or bad response, depending on the result.
    */
     $scope.uploadToWiki = function(){
-        // Open a smaller popup window that shows the user login page for the LinkedEarth Wiki
-        var popupWindow = window.open('http://wiki.linked.earth/Special:UserLogin', '_blank', 'location=yes,height=600,width=800,scrollbars=yes,status=yes');
-
         // If the data is validated and passes wiki standards..
         if($scope.feedback.validWiki === 'PASS'){
-            // Start the steps needed to upload the data with the wiki API.
-            $scope.downloadZip(function(file_id){
-                console.log(file_id);
-                var _payload = {"filename": $scope.files.lipdFilename, "id": file_id};
-                $scope.uploadToBackend("/wiki", _payload, function(resp){
-                    console.log("It worked");
-                    console.log(resp);
-                });
-                // var _local_url = "http://localhost:3000/files/" + file_id;
-                // var _local_url = "http://localhost:3000/tmp/" + file_id + "/zip/" + $scope.files.lipdFilename;
-                // var _wiki_url = "http://wiki.linked.earth/Special:WTLiPD?op=importurl&name=" + $scope.files.lipdFilename + "&url=" + _local_url;
-                // var _req = {
-                //     "method": "POST",
-                //     "url": _wiki_url,
-                //     "headers": {'Access-Control-Allow-Origin': "http://localhost:3000"}
-                // };
-                // try{
-                //     console.log("sending request");
-                //     console.log(_req);
-                //     $http(_req).then(function successCallback(res){
-                //         console.log("IT WORKED");
-                //         console.log(res);
-                //     }, function errorCallback(err){
-                //         console.log("Something went wrong.");
-                //         console.log(err);
-                //     });
-                // } catch(err){
-                //     console.log(err);
-                // }
+            // Use the uib module to open the modal
+            $uibModal.open({
+                templateUrl: 'modal-wiki',
+                controller: 'ModalCtrlWiki',
+                size: "md",
+                resolve: {
+                    data: function () {
+                        // Pass the message through to the modal controller.
+                        return $scope.modal;
+                    }
+                }
+            }).result.then(function(success){
+                if(success){
+                    // Start the steps needed to upload the data with the wiki API.
+                    $scope.downloadZip(function(file_id){
+                        console.log(file_id);
+                        var _payload = {"filename": $scope.files.lipdFilename, "id": file_id};
+                        $scope.uploadToBackend("/wiki", _payload, function(resp){
+                            console.log("It worked");
+                            console.log(resp.data);
+                            window.open(resp.data);
+                        });
+                    });
+                }
             });
         }
         // Not a valid wiki file. Stop process and tell user to correct errors
