@@ -21,10 +21,10 @@ div(ng-repeat="entry in files.json.pub track by $index" layout-wrap="")
     div.step14(layout='', layout-padding='', layout-sm='column')
       md-input-container(flex='', ng-class="md-input-has-value")
         label DOI
-        input(ng-model='entry.identifier[0].id')
+        input(ng-model='entry.doi')
         md-tooltip(data-html="true") {{getTooltip("pub", "doi")}}
       div
-        button.green-btn-off(type="button" ng-click="fetchPublication(entry)" style="margin:1.5em; float:right;height:auto;" ng-disabled="!entry.identifier[0].id") Autocomplete using DOI
+        button.green-btn-off(type="button" ng-click="fetchPublication(entry)" style="margin:1.5em; float:right;height:auto;" ng-disabled="!entry.doi") Autocomplete using DOI
         md-tooltip {{getTooltip("misc", "fetchDoi")}}
     br
 

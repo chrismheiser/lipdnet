@@ -841,7 +841,6 @@ var lipdValidator = (function(){
           }
       };
 
-
       var requiredPaleoTable = function(files){
         // Required data
         // table, table values, variableName
@@ -915,6 +914,7 @@ var lipdValidator = (function(){
           var _crumbs = "";
           // in case author is formatted wrong, convert it to BibJson format
           pub = fixAuthor(pub);
+          pub = fixDoi(pub);
           // Loop over each publication entry
           for (var _p = 0; _p < pub.length; _p++){
             // One publication entry
@@ -1653,6 +1653,38 @@ var lipdValidator = (function(){
        */
       var numberInRange = function (start, end, val) {
         return val >= start && val <= end
+      };
+
+      var fixDoi = function(pub){
+        // doi keys to look for
+        var _dois = ["DOI", "Doi"];
+        // Loop over publication entries
+        for(var _l = 0; _l <pub.length; _l++){
+          // Does this publication have a DOI stored under 'identifier'?
+          try{
+            // Is there a DOI entry under identifier?
+            if(pub[_l]["identifier"][0]["id"]){
+                // Yes, reassign it to "doi"
+                pub[_l]["doi"] = pub[_l]["identifier"][0]["id"];
+            }
+          }catch(err){
+              //pass
+          }
+            // Does this publication have DOI in the right structure?
+            for(var _u=0; _u<_dois.length; _u++){
+                // Is the doi stored under the wrong key? Reassign it.
+                if(pub[_l].hasOwnProperty(_dois[_u])){
+                    if(pub[_l][_dois[_u]]){
+                        pub[_l]["doi"] = pub[_l][_dois[_u]];
+                    }
+                    delete pub[_l][_dois[_u]];
+                }
+            }
+          if(pub[_l].hasOwnProperty("identifier")){
+              delete pub[_l]["identifier"];
+          }
+        }
+        return pub;
       };
 
       /**
