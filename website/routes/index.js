@@ -1061,8 +1061,13 @@ var uploadToDropbox = function(filepath, filename, mode, cb){
     } else if (mode === "wiki"){
         token = fs.readFileSync("./token.txt").toString('utf-8').split("\n")[6];
     }
-    // Create Dropbox object
-    var dbx = new Dropbox({ accessToken: token, fetch: fetch });
+    // Create Dropbox object. accessToken and fetch are the defaults.
+    var _dbx_init = { accessToken: token, fetch: fetch};
+    if (!dev){
+        // If we're in production mode, add the proxy to the dropbox init object.
+        _dbx_init.proxy = "http://rishi.cefns.nau.edu:3128";
+    }
+    var dbx = new Dropbox(_dbx_init);
     // Read in Lipd file contents
     var content = fs.readFileSync(path.join(filepath, filename));
     // Metadata about file uploads. Used to send a daily digest e-mail.
@@ -1172,8 +1177,8 @@ var writeFiles = function(dat, dst, res, cb){
 
 
 // Call the cleaning function every 2 minutes
-// setInterval(sendDigestEmail, 86400000);
-setInterval(sendDigestEmail, 7200000);
+setInterval(sendDigestEmail, 86400000);
+// setInterval(sendDigestEmail, 7200000);
 // setInterval(sendDigestEmail, 300000);
 
 /**
