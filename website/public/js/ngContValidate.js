@@ -556,17 +556,18 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
    * @return  {Object}    entry   One publication entry (w/ new doi.org data filled in)
    */
     $scope.fetchPublication = function(entry){
+        var _doi = entry.doi;
       console.log(entry);
-      console.log(entry.identifier[0].id);
+      console.log(_doi);
       // Regex for validating a DOI string.
       var _re = /\b(10[.][0-9]{3,}(?:[.][0-9]+)*\/(?:(?![\"&\'<>,])\S)+)\b/;
       // Validate the DOI string given against the DOI regex.
-      var _match = _re.exec(entry.identifier[0].id);
+      var _match = _re.exec(_doi);
       console.log(_match);
       // Is the DOI valid?
       if (_match){
         // The DOI is valid. Create the doi.org URL for the API request.
-        var _url =  "http://dx.doi.org/" + entry.identifier[0].id;
+        var _url =  "http://dx.doi.org/" + _doi;
         // Make the HTTP Get request to doi.org and wait for a response.
         $http({
           "method": "GET",

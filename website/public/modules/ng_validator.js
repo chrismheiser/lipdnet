@@ -791,30 +791,33 @@ var lipdValidator = (function(){
           // Required column keys
           for (var i = 0; i < columns.length; i++) {
 
-              // Special Fields: variableType and proxyObservationType / inferredVariableType
-              if(columns[i].hasOwnProperty("variableType")){
-                  logFeedback("pos", "Required data found: variableType", "");
-                  var _varType = columns[i].variableType;
-                if(_varType === "measured" || _varType === "measuredVariable"){
-                  if(!columns[i].hasOwnProperty("proxyObservationType")){
-                    logFeedback("err", "Missing: " + crumbs + ".column" + i + ".proxyObservationType", "proxyObservationType");
-                  } else {
-                    logFeedback("pos", "Required data found: proxyObservationType", "");
-                  }
-                } else if(_varType === "inferred"){
-                  if(!columns[i].hasOwnProperty("inferredVariableType")){
-                    logFeedback("err", "Missing: " + crumbs + ".column" + i + ".inferredVariableType", "inferredVariableType");
-                  } else {
-                      logFeedback("pos", "Required data found: inferredVariableType", "");
-                  }
-                } else {
-                  logFeedback("err", "Missing: " + crumbs + ".column" + i + ".variableType", "variableType");
-                }
+              // Wiki Ready: Special Fields variableType and proxyObservationType / inferredVariableType
+              if(pageMeta.wikiReady){
+                if(columns[i].hasOwnProperty("variableType")){
+                    logFeedback("pos", "Required data found: variableType", "");
+                    var _varType = columns[i].variableType;
+                    if(_varType === "measured" || _varType === "measuredVariable"){
+                        if(!columns[i].hasOwnProperty("proxyObservationType")){
+                            logFeedback("err", "Missing: " + crumbs + ".column" + i + ".proxyObservationType", "proxyObservationType");
+                        } else {
+                            logFeedback("pos", "Required data found: proxyObservationType", "");
+                        }
+                    } else if(_varType === "inferred"){
+                        if(!columns[i].hasOwnProperty("inferredVariableType")){
+                            logFeedback("err", "Missing: " + crumbs + ".column" + i + ".inferredVariableType", "inferredVariableType");
+                        } else {
+                            logFeedback("pos", "Required data found: inferredVariableType", "");
+                        }
+                    } else {
+                        logFeedback("err", "Missing: " + crumbs + ".column" + i + ".variableType", "variableType");
+                    }
 
-              } else {
-                logFeedback("err", "Missing: " + crumbs + ".column" + i + ".variableType", "variableType");
-                // logFeedback("err", "Missing: " + crumbs + ".column" + i + ".proxyObservationType OR inferredVariableType", "proxyObservationType|inferredVariableType");
-              }
+                } else {
+                    logFeedback("err", "Missing: " + crumbs + ".column" + i + ".variableType", "variableType");
+                    // logFeedback("err", "Missing: " + crumbs + ".column" + i + ".proxyObservationType OR inferredVariableType", "proxyObservationType|inferredVariableType");
+                }
+            }
+
 
               // Loop required column keys
               for (var k in keys_base.reqColumnKeys) {
