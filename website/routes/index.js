@@ -941,13 +941,18 @@ var sendDigestEmail = function(){
         // Use nodemailer 2.7.2 to dispatch daily e-mail.
         var nodemailer = require('nodemailer');
         var _recipients = "";
-        var _user = fs.readFileSync("./token.txt").toString('utf-8').split("\n")[3];
-        var _pass = fs.readFileSync("./token.txt").toString('utf-8').split("\n")[4];
+        var _user = JSON.parse(fs.readFileSync("./tokens.json"))["email"]["user"];
+        var _pass = JSON.parse(fs.readFileSync("./tokens.json"))["email"]["pass"];
         if(newLipdverseFiles.length !== 0){
-            var _body = "New LiPD files uploaded today: \n\nDataset:\t\t\t\t\t\tTime:\n\n";
+            var _body = "Lipd.net activity: " + newLipdverseFiles.length + " new file(s)\n\n";
             for(var _i = 0; _i < newLipdverseFiles.length; _i++){
-                _body = _body + newLipdverseFiles[_i].filename + "\t\t" + newLipdverseFiles[_i].time +  "\n" +
-                    newLipdverseFiles[_i].url  + "\n\n";
+                // Create block of text for this one file
+                var _filetxt = "\nDataset: " + newLipdverseFiles[_i].filename + "\n" +
+                "Time: " + newLipdverseFiles[_i].time + "\n" +
+                "Upload Status: " + newLipdverseFiles[_i].uploadStatus + "\n" +
+                "Link: " +  newLipdverseFiles[_i].url + "\n";
+                // Add block of text to full e-mail body.
+                _body = _body + _filetxt;
             }
             // create reusable transporter object using the default SMTP transport
             var _transportConfig = {
@@ -959,9 +964,9 @@ var sendDigestEmail = function(){
             };
             if(!dev){
                 _transportConfig.proxy =  "http://rishi.cefns.nau.edu:3128";
-                _recipients = "Chris <cmh553@nau.edu>";
-            } else {
                 _recipients = 'Chris <cmh553@nau.edu>, Nick McKay <nicholas.mckay@nau.edu>';
+            } else {
+                _recipients = 'Chris <cmh553@nau.edu>';
             }
             var transporter = nodemailer.createTransport(_transportConfig);
             // nodemailer.createTransport('smtps://' + _user + ':' + _pass + '@smtp.gmail.com');
@@ -1049,86 +1054,178 @@ var updateTSidOnly = function(_objs){
  * @param    {String}   mode       Dropbox App to upload to: lipdverse or wiki
  * @param    {Function} cb         Callback that ends the request.
  */
-var uploadToDropbox = function(filepath, filename, mode, cb){
-    logger.info("uploadToDropbox: ", filepath + "/" + filename, " | Mode: ", mode);
-    // Import required modules
-    var fetch = require('isomorphic-fetch'); // or another library of choice.
-    var Dropbox = require('dropbox').Dropbox;
-    var token = "";
-    // Get the correct Dropbox app access token, depending on the mode.
-    if (mode === "lipdverse"){
-        token = fs.readFileSync("./token.txt").toString('utf-8').split("\n")[1];
-    } else if (mode === "wiki"){
-        token = fs.readFileSync("./token.txt").toString('utf-8').split("\n")[6];
-    }
-    // Create Dropbox object. accessToken and fetch are the defaults.
-    var _dbx_init = { accessToken: token, fetch: fetch};
-    if (!dev){
-        // If we're in production mode, add the proxy to the dropbox init object.
-        _dbx_init.proxy = "http://rishi.cefns.nau.edu:3128";
-    }
-    var dbx = new Dropbox(_dbx_init);
-    // Read in Lipd file contents
-    var content = fs.readFileSync(path.join(filepath, filename));
-    // Metadata about file uploads. Used to send a daily digest e-mail.
-    var _emailUpdateMetadata = {};
-    try{
-        // Upload the LiPD file to Dropbox
-        dbx.filesUpload({
-            "path": "/" + filename,
-            "mode": "add",
-            "autorename": true,
-            "mute": false,
-            "strict_conflict": false,
-            "contents": content
-        }).then(function(resp){
-            logger.info("Dropbox: Upload success");
-            // File uploaded successfully. Get the path where it was uploaded in Dropbox.
-            // This path will give us the filename with any appended numbers in case it was a duplicate file.
-            var _file = resp.path_display;
-            _emailUpdateMetadata = {
-                "filename": resp.name,
-                "time": resp.client_modified
-            };
-            // Create a shared file link, that we can use to access the file directly via URL
-            dbx.sharingCreateSharedLinkWithSettings({
-                path: _file
-            }).then(function(resp1){
-                logger.info("Dropbox: Create share link success");
-                // Created the share link successfully.
-                // Replace the "?dl=0" into "?dl=1" to make it a direct link to the file.
-                var _direct_url = resp1.url.replace(/.$/,"1");
-                _emailUpdateMetadata["url"] = _direct_url;
-                // Push the metadata for the daily e-mail digest
-                newLipdverseFiles.push(_emailUpdateMetadata);
-                cb(_direct_url);
-            }).catch(function(error) {
-                try{
-                    logger.info("Create share link error");
-                    // Unable to create the share link because one was previously created.
-                    // Not a problem. Get the existing link from the error response.
-                    var _indirect_url = error.error.error.shared_link_already_exists.metadata.url;
-                    var _direct_url = _indirect_url.replace(/.$/,"1");
-                    _emailUpdateMetadata["url"] = _direct_url;
-                    // Push the metadata for the daily e-mail digest
-                    newLipdverseFiles.push(_emailUpdateMetadata);
-                    cb(_direct_url);
-                } catch(err){
-                    logger.info("uploadToDropbox: shared link error");
-                    logger.info(err);
+var uploadToAws = function(filepath, filename, mode, cb) {
+    try {
+        var _emailUpdateMetadata = {
+            "filename": filename,
+            "time": new Date(),
+            "uploadStatus": "NA",
+            "url": "NA"
+        };
+        // Load the aws sdk
+        var AWS = require('aws-sdk');
+        var _creds = JSON.parse(fs.readFileSync("./tokens.json"))["aws"];
+        var content = fs.readFileSync(path.join(filepath, filename));
+        // There are two AWS buckets. One for lipdverse, and one for wiki.
+        var bucket = "lipdnet";
+        if (mode === "wiki"){
+            bucket = "linkedearthwiki";
+        }
+        // Set up the creds for the AWS call
+        AWS.config.update({
+            accessKeyId: _creds["access"],
+            secretAccessKey: _creds["secret"],
+            sslEnabled: false,
+            s3ForcePathStyle: true
+        });
+
+        // If we're in production, add in the proxy.
+        if (!dev) {
+            AWS.config.update({
+                httpOptions: {
+                    proxy: "http://rishi.cefns.nau.edu:3128"
                 }
             });
-        }).catch(function(error) {
-            logger.info("uploadToDropbox: file upload error");
-            logger.info(error);
-            cb("");
-        });
-    } catch(err){
-        logger.info("uploadToDropbox: top error: " + err);
+        }
+
+        // Create params for putObject call
+        var objectParams = {
+            Bucket: bucket,
+            Key: filename,
+            Body: content,
+            ACL:'public-read'
+        };
+
+        // Create object upload promise
+        var uploadPromise = new AWS.S3({apiVersion: '2006-03-01'}).putObject(objectParams).promise();
+
+        // After upload success, cb the URL.
+        uploadPromise.then(
+            function (data) {
+                logger.info("Successful AWS Upload: " + bucket + "/" + filename);
+                var _direct_url = "https://s3-us-west-2.amazonaws.com/" + bucket + "/" + filename;
+                logger.info("URL to file: " + _direct_url);
+                _emailUpdateMetadata.uploadStatus = "Success";
+                _emailUpdateMetadata.url = _direct_url;
+                newLipdverseFiles.push(_emailUpdateMetadata);
+                cb(_direct_url)
+            }).catch(
+                function(err){
+                    _emailUpdateMetadata.uploadStatus = "Fail";
+                    newLipdverseFiles.push(_emailUpdateMetadata);
+                    logger.info("Failed AWS Upload: " + err);
+                    cb("");
+            });
+    } catch (err) {
+        _emailUpdateMetadata.uploadStatus = "Fail";
+        newLipdverseFiles.push(_emailUpdateMetadata);
+        logger.info("uploadToAws error: " + err);
         cb("");
     }
 };
 
+
+/**
+ * Upload a local LiPD file to Dropbox, create a public share link, and return the share link (direct link to file)
+ * Dropbox user: lipd.manager
+ *
+ * Uses SDK docs from :  https://dropbox.github.io/dropbox-sdk-js/global.html
+ *
+ * @param    {String}   filepath   File path to the directory storing the LiPD file being uploaded. Local on the server
+ * @param    {String}   filename   Filename of the LiPD file being uploaded.
+ * @param    {String}   mode       Dropbox App to upload to: lipdverse or wiki
+ * @param    {Function} cb         Callback that ends the request.
+ */
+// var uploadToDropbox = function(filepath, filename, mode, cb){
+//
+//     logger.info("uploadToDropbox: ", filepath + "/" + filename, " | Mode: ", mode);
+//     // Import required modules
+//     var fetch = require('isomorphic-fetch'); // or another library of choice.
+//     require("fetch-with-proxy");
+//     var dbx = require('dropbox').Dropbox;
+//     var token = "";
+//     // Get the correct Dropbox app access token, depending on the mode.
+//     if (mode === "lipdverse"){
+//         token = fs.readFileSync("./tokens.json").toString('utf-8').split("\n")[1];
+//     } else if (mode === "wiki"){
+//         token = fs.readFileSync("./tokens.json").toString('utf-8').split("\n")[6];
+//     }
+//     // Create Dropbox object. accessToken and fetch are the defaults.
+//     var _dbx_init = { accessToken: token, fetch: fetch};
+//     if (!dev){
+//         // If we're in production mode, add the proxy to the dropbox init object.
+//         _dbx_init.proxy = "http://rishi.cefns.nau.edu:3128";
+//     }
+//
+//     // Read in Lipd file contents
+//     var content = fs.readFileSync(path.join(filepath, filename));
+//     // Metadata about file uploads. Used to send a daily digest e-mail.
+//     var _emailUpdateMetadata = {"filename": "None", "time": "None", "uploadStatus": "None", "shareLinkStatus": "None", "url": "None"};
+//     try{
+//         // Upload the LiPD file to Dropbox
+//         dbx.filesUpload({
+//             "path": "/" + filename,
+//             "mode": "add",
+//             "autorename": true,
+//             "mute": false,
+//             "strict_conflict": false,
+//             "contents": content
+//         }).then(function(resp){
+//             logger.info("Dropbox: Upload success");
+//             // File uploaded successfully. Get the path where it was uploaded in Dropbox.
+//             // This path will give us the filename with any appended numbers in case it was a duplicate file.
+//             var _file = resp.path_display;
+//             _emailUpdateMetadata = {
+//                 "filename": resp.name,
+//                 "time": resp.client_modified,
+//                 "uploadStatus": "Success"
+//             };
+//             // Create a shared file link, that we can use to access the file directly via URL
+//             dbx.sharingCreateSharedLinkWithSettings({
+//                 path: _file
+//             }).then(function(resp1){
+//                 logger.info("Dropbox: Create share link success");
+//                 // Created the share link successfully.
+//                 // Replace the "?dl=0" into "?dl=1" to make it a direct link to the file.
+//                 var _direct_url = resp1.url.replace(/.$/,"1");
+//                 _emailUpdateMetadata["url"] = _direct_url;
+//                 // Push the metadata for the daily e-mail digest
+//                 newLipdverseFiles.push(_emailUpdateMetadata);
+//                 cb(_direct_url);
+//             }).catch(function(error) {
+//                 try{
+//                     logger.info("Create share link error");
+//                     // Unable to create the share link because one was previously created.
+//                     // Not a problem. Get the existing link from the error response.
+//                     var _indirect_url = error.error.error.shared_link_already_exists.metadata.url;
+//                     var _direct_url = _indirect_url.replace(/.$/,"1");
+//                     _emailUpdateMetadata["url"] = _direct_url;
+//                     // Push the metadata for the daily e-mail digest
+//                     newLipdverseFiles.push(_emailUpdateMetadata);
+//                     cb(_direct_url);
+//                 } catch(err){
+//                     logger.info("uploadToDropbox: shared link error x 2");
+//                     _emailUpdateMetadata["shareLinkStatus"] = "Failed";
+//                     newLipdverseFiles.push(_emailUpdateMetadata);
+//                     logger.info(err);
+//                     cb("");
+//                 }
+//             });
+//         }).catch(function(error) {
+//             logger.info("uploadToDropbox: file upload error");
+//             logger.info(error);
+//             _emailUpdateMetadata["uploadStatus"] = "Failed";
+//             _emailUpdateMetadata["shareLinkStatus"] = "Failed";
+//             newLipdverseFiles.push(_emailUpdateMetadata);
+//             cb("");
+//         });
+//     } catch(err){
+//         logger.info("uploadToDropbox: top error: " + err);
+//         _emailUpdateMetadata.filename = filename;
+//         newLipdverseFiles.push(_emailUpdateMetadata);
+//         cb("");
+//     }
+// };
 
 var walk = function(directoryName) {
   fs.readdir(directoryName, function(e, files) {
@@ -1177,9 +1274,10 @@ var writeFiles = function(dat, dst, res, cb){
 
 
 // Call the cleaning function every 2 minutes
-setInterval(sendDigestEmail, 86400000);
-// setInterval(sendDigestEmail, 7200000);
-// setInterval(sendDigestEmail, 300000);
+setInterval(sendDigestEmail, 86400000); //24 hr
+// setInterval(sendDigestEmail, 7200000); // 2 hr
+// setInterval(sendDigestEmail, 900000); // 15 min
+// setInterval(sendDigestEmail, 30000); // 5 min
 
 /**
  * Retrieve and compile ontology on a set interval.
@@ -1217,7 +1315,7 @@ router.get("/lipdverse/:fileid", function(req, res, next){
         for(var i in files) {
             // Get the first lipd file you find (there should only be one)
             if(path.extname(files[i]) === ".lpd") {
-                uploadToDropbox(pathTmpZip, files[i], "lipdverse", function(){
+                uploadToAws(pathTmpZip, files[i], "lipdverse", function(){
                     res.end();
                 });
             }
@@ -1730,7 +1828,7 @@ router.post("/wiki", function(req, res, next){
             // Get the first lipd file you find (there should only be one)
             if(path.extname(files[i]) === ".lpd") {
                 // Upload the file to Dropbox, and return the direct url to the LiPD file.
-                uploadToDropbox(_pathTmpZip, files[i], "wiki", function(_url){
+                uploadToAws(_pathTmpZip, files[i], "wiki", function(_url){
                     logger.info("Uploading file to Wiki via URL: ", _url);
                     // Send the full Wiki URL upload link with direct LiPD file URL attached.
                     res.status(200).send("http://wiki.linked.earth/Special:WTLiPD?op=importurl&name=" + _filename + "&url=" + _url);
