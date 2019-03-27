@@ -440,23 +440,26 @@ var create = (function(){
         for (var _key in _x) {
           // Safety check, item must be valid
           if (_x.hasOwnProperty(_key)) {
-            // Key matches one of the keys that we want to remove
-            if (_key === toggle_key) {
-              // Remove the key
-              _x[_key] = false;
-            }
-            // Array data type
-            else if (_x[_key].constructor === [].constructor) {
-              // Loop over each item in the array
-              for (var _g = 0; _g < _x[_key].length; _g++) {
-                // Dive down for this array entry
-                _x[_key][_g] = create.turnOffToggles(_x[_key][_g], toggle_key);
-              }
-            }
-            // Object data type
-            else if (_x[_key].constructor === {}.constructor) {
-              // Dive down for this object
-              _x[_key] = create.turnOffToggles(_x[_key], toggle_key);
+            // Skip null values
+            if(_x[_key]){
+                // Key matches one of the keys that we want to remove
+                if (_key === toggle_key) {
+                    // Remove the key
+                    _x[_key] = false;
+                }
+                // Array data type
+                else if (_x[_key].constructor === [].constructor) {
+                    // Loop over each item in the array
+                    for (var _g = 0; _g < _x[_key].length; _g++) {
+                        // Dive down for this array entry
+                        _x[_key][_g] = create.turnOffToggles(_x[_key][_g], toggle_key);
+                    }
+                }
+                // Object data type
+                else if (_x[_key].constructor === {}.constructor) {
+                    // Dive down for this object
+                    _x[_key] = create.turnOffToggles(_x[_key], toggle_key);
+                }
             }
           }
         }

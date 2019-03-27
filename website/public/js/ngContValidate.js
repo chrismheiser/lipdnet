@@ -421,7 +421,7 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
    *
    * @param   {Object}  entry  Column Metadata
    */
-      $scope.checkVarType = function(entry){
+    $scope.checkVarType = function(entry){
           if(entry.variableType === "measured"){
               if(!entry.hasOwnProperty("proxyObservationType")){
                   entry.tmp.custom = "proxyObservationType";
@@ -708,7 +708,7 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
    * @param    {String}    field   Field name
    * @return   {Boolean}           True for auto-complete, False for other input type
    */
-  $scope.isOntology = function(field){
+    $scope.isOntology = function(field){
       // These fields use an auto complete input box with suggested data from the linked earth wiki ontology.
       return ["proxyObservationType", "inferredVariableType", "variableType"].includes(field);
   };
