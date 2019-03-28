@@ -1124,109 +1124,6 @@ var uploadToAws = function(filepath, filename, mode, cb) {
     }
 };
 
-
-/**
- * Upload a local LiPD file to Dropbox, create a public share link, and return the share link (direct link to file)
- * Dropbox user: lipd.manager
- *
- * Uses SDK docs from :  https://dropbox.github.io/dropbox-sdk-js/global.html
- *
- * @param    {String}   filepath   File path to the directory storing the LiPD file being uploaded. Local on the server
- * @param    {String}   filename   Filename of the LiPD file being uploaded.
- * @param    {String}   mode       Dropbox App to upload to: lipdverse or wiki
- * @param    {Function} cb         Callback that ends the request.
- */
-// var uploadToDropbox = function(filepath, filename, mode, cb){
-//
-//     logger.info("uploadToDropbox: ", filepath + "/" + filename, " | Mode: ", mode);
-//     // Import required modules
-//     var fetch = require('isomorphic-fetch'); // or another library of choice.
-//     require("fetch-with-proxy");
-//     var dbx = require('dropbox').Dropbox;
-//     var token = "";
-//     // Get the correct Dropbox app access token, depending on the mode.
-//     if (mode === "lipdverse"){
-//         token = fs.readFileSync("./tokens.json").toString('utf-8').split("\n")[1];
-//     } else if (mode === "wiki"){
-//         token = fs.readFileSync("./tokens.json").toString('utf-8').split("\n")[6];
-//     }
-//     // Create Dropbox object. accessToken and fetch are the defaults.
-//     var _dbx_init = { accessToken: token, fetch: fetch};
-//     if (!dev){
-//         // If we're in production mode, add the proxy to the dropbox init object.
-//         _dbx_init.proxy = "http://rishi.cefns.nau.edu:3128";
-//     }
-//
-//     // Read in Lipd file contents
-//     var content = fs.readFileSync(path.join(filepath, filename));
-//     // Metadata about file uploads. Used to send a daily digest e-mail.
-//     var _emailUpdateMetadata = {"filename": "None", "time": "None", "uploadStatus": "None", "shareLinkStatus": "None", "url": "None"};
-//     try{
-//         // Upload the LiPD file to Dropbox
-//         dbx.filesUpload({
-//             "path": "/" + filename,
-//             "mode": "add",
-//             "autorename": true,
-//             "mute": false,
-//             "strict_conflict": false,
-//             "contents": content
-//         }).then(function(resp){
-//             logger.info("Dropbox: Upload success");
-//             // File uploaded successfully. Get the path where it was uploaded in Dropbox.
-//             // This path will give us the filename with any appended numbers in case it was a duplicate file.
-//             var _file = resp.path_display;
-//             _emailUpdateMetadata = {
-//                 "filename": resp.name,
-//                 "time": resp.client_modified,
-//                 "uploadStatus": "Success"
-//             };
-//             // Create a shared file link, that we can use to access the file directly via URL
-//             dbx.sharingCreateSharedLinkWithSettings({
-//                 path: _file
-//             }).then(function(resp1){
-//                 logger.info("Dropbox: Create share link success");
-//                 // Created the share link successfully.
-//                 // Replace the "?dl=0" into "?dl=1" to make it a direct link to the file.
-//                 var _direct_url = resp1.url.replace(/.$/,"1");
-//                 _emailUpdateMetadata["url"] = _direct_url;
-//                 // Push the metadata for the daily e-mail digest
-//                 newLipdverseFiles.push(_emailUpdateMetadata);
-//                 cb(_direct_url);
-//             }).catch(function(error) {
-//                 try{
-//                     logger.info("Create share link error");
-//                     // Unable to create the share link because one was previously created.
-//                     // Not a problem. Get the existing link from the error response.
-//                     var _indirect_url = error.error.error.shared_link_already_exists.metadata.url;
-//                     var _direct_url = _indirect_url.replace(/.$/,"1");
-//                     _emailUpdateMetadata["url"] = _direct_url;
-//                     // Push the metadata for the daily e-mail digest
-//                     newLipdverseFiles.push(_emailUpdateMetadata);
-//                     cb(_direct_url);
-//                 } catch(err){
-//                     logger.info("uploadToDropbox: shared link error x 2");
-//                     _emailUpdateMetadata["shareLinkStatus"] = "Failed";
-//                     newLipdverseFiles.push(_emailUpdateMetadata);
-//                     logger.info(err);
-//                     cb("");
-//                 }
-//             });
-//         }).catch(function(error) {
-//             logger.info("uploadToDropbox: file upload error");
-//             logger.info(error);
-//             _emailUpdateMetadata["uploadStatus"] = "Failed";
-//             _emailUpdateMetadata["shareLinkStatus"] = "Failed";
-//             newLipdverseFiles.push(_emailUpdateMetadata);
-//             cb("");
-//         });
-//     } catch(err){
-//         logger.info("uploadToDropbox: top error: " + err);
-//         _emailUpdateMetadata.filename = filename;
-//         newLipdverseFiles.push(_emailUpdateMetadata);
-//         cb("");
-//     }
-// };
-
 var walk = function(directoryName) {
   fs.readdir(directoryName, function(e, files) {
     if (e) {
@@ -1250,6 +1147,14 @@ var walk = function(directoryName) {
   });
 };
 
+/**
+ * Write csv, json, and txt data locally as files.
+ *
+ * @param {Object}   dat    File data sorted as {filename: file content} pairs
+ * @param {String}   dst    Location on server where to write the file to.
+ * @param {Object}   res    Response object
+ * @param {Function} cb     Callback function
+ */
 var writeFiles = function(dat, dst, res, cb){
     try{
         // console.log("writeFiles");
@@ -1267,6 +1172,31 @@ var writeFiles = function(dat, dst, res, cb){
         console.log("writeFiles: ", err);
     }
     cb();
+};
+
+/**
+ * Create the side file for a lipdverse LiPD file upload. This text file contains info about the file including:
+ * Filename, User's name, E-mail, If the file is a new file or an updated file, and notes about the changes where
+ * applicable.
+ *
+ * @param {String}  filename    LiPD filename
+ * @param {Object}  dat         User info and info about the upload
+ * @param {String}  dst         Location on server where to write the file to.
+ * @return  None                File is written to server and that's all that's needed.
+ */
+var writeLipdverseText = function(filename, dat, dst){
+    try{
+        // Since this is a side text file, add 'info' to the LiPD name so we know which LiPD file to link it to.
+        var _filename_txt = filename + "-info.txt";
+        // Turn the json data into a text string to write to file.
+        var _content = "Filename: " + filename + "\nName: " + dat.name + "\nE-mail: " + dat.email + "\nNew or Update?: " +
+            dat.updateMsg + "\nNotes: " + dat.notes;
+        logger.info("writing lipdverse file: " + path.join(dst, _filename_txt));
+        // Write text file to server.
+        fs.writeFileSync(path.join(dst, _filename_txt), _content);
+    } catch(err){
+        logger.info("writeLipdverseText error: " + err);
+    }
 };
 
 
@@ -1308,6 +1238,7 @@ router.get("/lipdverse/:fileid", function(req, res, next){
         logger.info("/files get: " + fileID);
         // Path to the zip dir that holds the LiPD file
         var pathTmpZip = path.join(process.cwd(), "tmp", fileID, "zip");
+        var pathTmp = path.join(process.cwd(), "tmp", fileID);
         // Read in all filenames from the dir
         logger.info("/files get: LiPD File: " + pathTmpZip);
         var files = fs.readdirSync(pathTmpZip);
@@ -1315,8 +1246,13 @@ router.get("/lipdverse/:fileid", function(req, res, next){
         for(var i in files) {
             // Get the first lipd file you find (there should only be one)
             if(path.extname(files[i]) === ".lpd") {
+                // Upload the LiPD file to AWS
                 uploadToAws(pathTmpZip, files[i], "lipdverse", function(){
-                    res.end();
+                    // Upload the text file to AWS. This has the metadata about the file.
+                    uploadToAws(pathTmp, files[i] + "-info.txt", "lipdverse", function(){
+                        // Everything is good. End.
+                        res.status(200).send("Success");
+                    });
                 });
             }
         }
@@ -1407,11 +1343,14 @@ router.post("/files", function(req, res, next){
   // Request
   var master = {};
   master = parseRequest(master, req, res);
-  // console.log(master);
   master = createTmpDir(master, res);
-  // console.log(master);
   master = createSubdirs(master, res);
   try{
+      // If this is a LiPD file meant for Lipdverse, then write the metadata text file to go with it.
+      if(typeof req.body.lipdverseText !== "undefined"){
+          writeLipdverseText(req.body.filename, req.body.lipdverseText, master.pathTmp);
+      }
+
     // Use the request data to write csv and jsonld files into "/tmp/<lipd-xxxxx>/files/"
     writeFiles(master.files, master.pathTmpFiles, res, function(){});
 
@@ -1848,6 +1787,10 @@ router.post("/wiki", function(req, res, next){
 
 router.get("/modal-wiki", function(req, res, next){
     res.render('modal/modal-wiki', {title: ''});
+});
+
+router.get("/modal-lipdverse", function(req, res, next){
+    res.render('modal/modal-lipdverse', {title: ''});
 });
 
 router.get("/modal-file", function(req, res, next){

@@ -1,0 +1,29 @@
+.modal-content
+    .modal-header
+        h3.modal-title Upload to Lipdverse
+        h6 Please provide some additional information
+    .modal-body
+        pre(style="background-color:#FEEEB6; border: none;") We highly suggest you download the LiPD file locally in case the upload fails.
+        pre(style="background-color:#FEEEB6; border: none;") Uploaded files are not immediately reflected on Lipdverse. They must be manually approved.
+        pre(ng-repeat="msg in errors" style="background-color:#FEBABB; border: none;") {{msg}}
+
+        div(layout='', layout-padding='', layout-sm='column')
+            md-input-container(flex='', ng-class="md-input-has-value")
+                label Name
+                input(ng-model="info.name" required)
+            md-input-container(flex='', ng-class="md-input-has-value")
+                label E-mail
+                input(ng-model="info.email" required)
+                md-tooltip We'd like to contact you if there is an issue with your LiPD file
+
+        div(layout='', layout-padding='', layout-sm='column')
+            md-switch(ng-model='info.new') Is this a new file?: {{ info.new? "Yes":"No"}}
+        div(layout='', layout-padding='', layout-sm='column')
+            md-input-container(flex='', ng-class="md-input-has-value" ng-if="!info.new")
+                label Describe changes made to the dataset
+                textarea(ng-model="info.notes")
+
+
+    .modal-footer
+        button(class="btn btn-success" data-dismiss="modal" ng-click="upload()") Upload
+        button(class="btn btn-primary" data-dismiss="modal" ng-click="close()") Close

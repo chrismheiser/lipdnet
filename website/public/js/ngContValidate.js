@@ -1559,47 +1559,58 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
    * @return none  Result is a file uploaded to lipdverse dropbox.
    */
     $scope.uploadToLipdverse = function(){
-        $scope.files.dataSetName = $scope.files.json.dataSetName;
-        $scope.files.lipdFilename = $scope.files.dataSetName + ".lpd";
-        // If there are still errors present, notify the user that the file may present issues
-        if ($scope.feedback.errCt > 0){
-            $scope.showModalAlert({"title": "File contains errors", "message": "You are downloading data that still has errors. Be aware that using a file that isn't fully valid may cause issues."});
-        }
-        // Correct the filenames, clean out the empty entries, and make $scope.files data ready for the ExportService
-        var _newScopeFiles = create.closingWorkflow($scope.files);
-        // Go to the export service. Create an array where each object represents one output file. {Filename: Text} data pairs
-        $scope._myPromiseExport = ExportService.prepForDownload(_newScopeFiles);
-        $scope.pageMeta.busyPromise = $scope._myPromiseExport;
-        $scope._myPromiseExport.then(function (filesArray) {
-            // Upload zip to node backend, then callback and download it afterward.
-            console.log("Let me bring this to the backroom.");
-            // Set up where to POST the data to in nodejs, and package the payload.
-            var _url_route = "/files";
-            var _payload = {"filename": $scope.files.lipdFilename, "file": filesArray};
-            $scope.uploadToBackend(_url_route, _payload, function(resp){
-                console.log("Received backend response");
-                console.log(resp);
-                if (resp.status !== 200){
-                    window.alert("HTTP " + resp.status + ": Error completing request\n" + resp.statusText);
-                } else {
-                    // Are we on dev or production? Create the url according to the mode.
-                    // var _url = "";
-                    var _fileID = resp.data;
-                    // if(dev){
-                    //     // Dev mode download link
-                    //     _url = "http://localhost:3000/lipdverse/" + _fileID;
-                    // } else {
-                    //     // Production mode download link
-                    //     _url = "http://www.lipd.net/lipdverse/" + _fileID;
-                    // }
-                    $http.get("/lipdverse/" + _fileID).then(function(){
-                        toaster.pop('success', "File sent to Lipdverse. Pending review.", "", 4000);
-                    }, function error(err){
-                        console.log(err);
-                    });
+        // Use the uib module to open the modal
+        $uibModal.open({
+            templateUrl: 'modal-lipdverse',
+            controller: 'ModalCtrlLipdverse',
+            size: "lg",
+            resolve: {
+                data: function () {
+                    // Pass the message through to the modal controller.
+                    return $scope.modal;
                 }
-            });
+            }
+        }).result.then(function(info){
+            // Information provided by user
+            if(info){
+                // Start the
+                $scope.files.dataSetName = $scope.files.json.dataSetName;
+                $scope.files.lipdFilename = $scope.files.dataSetName + ".lpd";
+                // If there are still errors present, notify the user that the file may present issues
+                if ($scope.feedback.errCt > 0){
+                    $scope.showModalAlert({"title": "File contains errors", "message": "You are downloading data that still has errors. Be aware that using a file that isn't fully valid may cause issues."});
+                }
+                // Correct the filenames, clean out the empty entries, and make $scope.files data ready for the ExportService
+                var _newScopeFiles = create.closingWorkflow($scope.files);
+                // Go to the export service. Create an array where each object represents one output file. {Filename: Text} data pairs
+                $scope._myPromiseExport = ExportService.prepForDownload(_newScopeFiles);
+                $scope.pageMeta.busyPromise = $scope._myPromiseExport;
+                $scope._myPromiseExport.then(function (filesArray) {
+                    // Upload zip to node backend, then callback and download it afterward.
+                    console.log("Let me bring this to the backroom.");
+                    // Set up where to POST the data to in nodejs, and package the payload.
+                    var _url_route = "/files";
+                    var _payload = {"filename": $scope.files.lipdFilename, "file": filesArray, "lipdverseText": info};
+                    $scope.uploadToBackend(_url_route, _payload, function(resp){
+                        console.log("Received backend response");
+                        console.log(resp);
+                        if (resp.status !== 200){
+                            window.alert("HTTP " + resp.status + ": Error completing request\n" + resp.statusText);
+                        } else {
+                            var _fileID = resp.data;
+                            $http.get("/lipdverse/" + _fileID).then(function(res){
+                                toaster.pop('success', "File sent to Lipdverse. Pending review.", "", 4000);
+                            }, function error(err){
+                                toaster.pop('error', "Lipdverse upload failed. Please try again later.", "", 4000);
+                                console.log(err);
+                            });
+                        }
+                    });
+                });
+            }
         });
+
+
     };
 
   /**
