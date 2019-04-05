@@ -4,4 +4,5 @@
     .modal-body
         p {{ data.message }}
     .modal-footer
+        a(class="btn btn-success" data-dismiss="modal" href="{{data.button1.link}}" ng-if="data.button1" target="_blank") {{data.button1.title}}
         button(class="btn btn-primary" data-dismiss="modal" ng-click="close()") Close

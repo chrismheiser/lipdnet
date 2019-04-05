@@ -1753,6 +1753,10 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
                             console.log("It worked");
                             console.log(resp.data);
                             window.open(resp.data);
+                            $scope.showModalAlert({"title": "Confirm upload on Wiki", "message": "Check your Wiki account " +
+                                "'Contributions' to confirm that your file uploaded successfully. If you don't see a recent " +
+                                "upload from your username, there may have been an error during the upload. Please try again. \n " +
+                                "http://wiki.linked.earth/Special:ListFiles/"});
                         });
                     });
                 }
