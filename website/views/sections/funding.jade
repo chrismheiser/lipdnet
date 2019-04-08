@@ -6,14 +6,14 @@ md-toolbar.md-hue-1
 
 div.btn-row( layout="row")
   div(ng-repeat="entry in files.json.funding track by $index")
-    button.blue-btn-on.expandable-off(type="button" ng-if="entry.tmp.toggle" ng-click="entry.tmp.toggle = false;") Funding {{$index+1}}
-    button.blue-btn-off(type="button" ng-if="!entry.tmp.toggle" ng-click="expandEntry(files.json.funding, entry)") Funding {{$index+1}}
-
+    md-divider
+    button.tab-btn-on(type="button" ng-if="entry.tmp.toggle" ng-click="entry.tmp.toggle = false;") Funding {{$index+1}}
+    button.tab-btn-off(type="button" ng-if="!entry.tmp.toggle" ng-click="expandEntry(files.json.funding, entry)") Funding {{$index+1}}
 
 
 div(ng-repeat='entry in files.json.funding track by $index' layout-wrap="")
   md-card(ng-show="entry.tmp.toggle")
-    md-subheader.md-primary funding {{$index+1}}
+    md-subheader.md-primary Funding {{$index+1}}
     div(layout='', layout-padding='', layout-sm='column')
       md-input-container(flex='', ng-class="md-input-has-value")
         label Agency

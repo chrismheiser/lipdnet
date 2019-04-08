@@ -10,13 +10,11 @@ include ./paleo_model.jade
 
 
 div(layout='', layout-padding='', layout-sm='column' style="float: right;")
-	md-input-container
-		md-label Table Type
-		md-select(ng-model='dropdowns.current.table' ng-model-options="{trackBy: '$value.id'}" aria-label="filler")
-			md-option(ng-value="table" ng-repeat="table in dropdowns.tables") {{ table.name }}
-		md-tooltip {{getTooltip("paleoData", "table")}}
-
-	button.green-btn-off.step21(ng-click='addBlock(files.json.paleoData[0], dropdowns.current.table.name, "paleo")' style="margin: 1.5em;" type="button") + Add Table
+	md-input-container(flex="")
+		label Table Type
+		input.mdautocomplete(type="text" ng-model="dropdowns.tabletype"
+		uib-typeahead="table for table in ['summary', 'measurement'] | filter:$viewValue" typeahead-min-length="0")
+	button.green-btn-off.step21(ng-click='addBlock(files.json.paleoData[0], dropdowns.tabletype, "paleo")' style="margin: 1.5em;" type="button") + Add Table
 	button.red-btn-off.step22(ng-if="files.json.paleoData[0]" ng-click="removePaleoChron('paleo')" style="margin: 1.5em; padding: 2px 2px 2px 2px;" type="button") Delete PaleoData
 
 	// END MEASUREMENT TABLE

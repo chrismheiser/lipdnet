@@ -21,7 +21,9 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
 
     // All dropdown box elements must be bound in the scope.
     $scope.dropdowns = {
-      // 'current' shows the default selection, or the current selection (when a new selection is made by the user)
+        "tabletypepaleo": "",
+        "tabletypechron": "",
+        // 'current' shows the default selection, or the current selection (when a new selection is made by the user)
       "current": {
         "table": { id: 1, name: 'measurement' },
         "delimiter": { id: 1, name: "\t", view: "Tab ( \\t )"},
@@ -216,6 +218,7 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
    * @returns  {Object}  entry      Any type of data block that allows multiple entries.
    */
     $scope.addBlock = function(entry, blockType, pc){
+
       toaster.pop('success', "Added a new " + blockType + " entry", "", 4000);
       // Need to initialize the first entry of chronData measurement table, when it doesn't yet exist.
       if (pc === "chron" && typeof(entry) === "undefined"){
@@ -223,7 +226,11 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       } else {
         // Add a block of data to the JSON. (i.e. funding, paleoData table, publication, etc.)
         entry = create.addBlock(entry, blockType, pc);
-        return entry;
+      }
+      console.log(blockType);
+      if(blockType==="measurement" || blockType==="summary"){
+          console.log("removing");
+          $scope.dropdowns.tabletype="";
       }
     };
 
