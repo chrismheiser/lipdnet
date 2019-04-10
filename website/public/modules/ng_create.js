@@ -729,7 +729,7 @@ var create = (function(){
       // Map our publication keys to the doi.org keys.
       var _keys = {
         "citation": "citation",
-        "created": "year",
+        "published-print": "year",
         "container-title": "journal",
         "author": "authors",
         "publisher": "publisher",
@@ -747,9 +747,9 @@ var create = (function(){
           if (_keys.hasOwnProperty(_key) && res.data.hasOwnProperty(_key)) {
             if (res.data[_key]){
               // Special case for the created date. It's formatted differently than we want.
-              if (_key === "created"){
+              if (_key === "published-print"){
                 // get the year from the created attribute
-                entry.year = res.data.created["date-parts"][0][0];
+                entry.year = res.data['published-print']["date-parts"][0][0];
               }
               // Special case for author names. It's separated by 'given' and 'family' names. We don't need that.
               else if (_key === "author"){

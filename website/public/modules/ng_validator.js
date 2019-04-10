@@ -670,11 +670,12 @@ var lipdValidator = (function(){
               }
               // Geo section missing. Required _AT LEAST_ coordinates
               else {
-                logFeedback("err", "Missing: " + "geo.geometry.coordinates");
+                  logFeedback("err", "Missing: " + "latitude", "latitude");
+                  logFeedback("err", "Missing: " + "longitude", "longitude");
               }
             } else if (!D.hasOwnProperty(key) || !D[key]) {
               // Required key is missing
-              logFeedback("err", "Missing: " + key);
+              logFeedback("err", "Missing: " + key, key);
             } else {
                 logFeedback("pos", "", "");
             }
@@ -1216,9 +1217,8 @@ var lipdValidator = (function(){
             var lonValid = numberInRange(-180, 180, lon);
             var latValid = numberInRange(-90, 90, lat);
 
-
             if(lon===0){
-              logFeedback("warn", "Longitude set to 0. Is this intentional?", "coordinates");
+              logFeedback("warn", "Longitude set to 0", "coordinates");
             }
             if (!lon && lon !== 0){
               logFeedback("err", "Missing: longitude", "longitude");
@@ -1229,7 +1229,7 @@ var lipdValidator = (function(){
                 logFeedback("pos", "", "longitude");
             }
             if (lat === 0){
-              logFeedback("warn", "Latitude set to 0. Is this intentional?", "latitude");
+              logFeedback("warn", "Latitude set to 0", "latitude");
             }
             else if (!lat && lat !== 0){
               logFeedback("err", "Missing: latitude", "latitude");
@@ -1240,10 +1240,10 @@ var lipdValidator = (function(){
                 logFeedback("pos", "", "latitude");
             }
           } else {
-            if (!m.geo.geometry.coordinates){
               // there aren't any coordinate values to make the map
-              logFeedback("err", "Missing: " + "coordinates", "coordinates");
-            }
+              logFeedback("err", "Missing: " + "latitude", "latitude");
+              logFeedback("err", "Missing: " + "longitude", "longitude");
+
           }
         } catch (err) {
           logFeedback("warn", "Unable to map location", "geo");
