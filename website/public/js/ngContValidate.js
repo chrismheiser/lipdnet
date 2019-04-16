@@ -534,6 +534,14 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       });
     };
 
+    $scope.duplicateColumn = function(entry, idx){
+        var _dup = JSON.parse(JSON.stringify(entry.columns[idx]));
+        _dup.tmp.toggle = false;
+        _dup.TSid = misc.generateTSid();
+        entry.columns.push(_dup);
+        toaster.pop('success', "Duplicated column", "", 4000);
+    };
+
   /**
    * Expand the view of a data block on the Playground page. Example, 'x' may be an array of funding objects, and
    * 'entry would be a single funding entry from that 'x' array.

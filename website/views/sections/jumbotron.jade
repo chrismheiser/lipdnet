@@ -11,7 +11,7 @@ div
                 md-content
                     div(ng-controller="GraphCtrl as gc")
                         .span.span35
-                            div(style="margin: 30px auto; text-align: center;")
+                            div(style="margin: 30px; text-align: center;")
                                 button.green-btn-off(type="button" ng-click="swapAxis()") Swap Axis
                                 button.red-btn-off(type="button" ng-click="resetGraph(files.json)") Reset
                                 // TABLE BUTTONS
@@ -20,15 +20,17 @@ div
                                     // paleoData[1] : Should only be one entry2. Don't need to loop
                                     div.btn-row(layout="row")
                                         div(ng-repeat='entry2 in entry.measurementTable track by $index')
-                                            button.green-btn-on(type="button" ng-if="entry2.tmp.toggleGraph" ng-click="entry2.tmp.toggleGraph = false;") paleo {{$parent.$index + 1}} measurement {{$index + 1}}
-                                            button.green-btn-off(type="button" ng-if="!entry2.tmp.toggleGraph" ng-click="expandEntryGraph(files.json, entry2)") paleo {{$parent.$index + 1}} measurement {{$index + 1}}
+                                            md-divider
+                                            button.table-tab-btn-on(type="button" ng-if="entry2.tmp.toggleGraph" ng-click="entry2.tmp.toggleGraph = false;") paleo {{$parent.$index}} measurement {{$index}}
+                                            button.table-tab-btn-off(type="button" ng-if="!entry2.tmp.toggleGraph" ng-click="expandEntryGraph(files.json, entry2)") paleo {{$parent.$index}} measurement {{$index}}
 
                                 div(ng-repeat='entry in files.json.chronData track by $index' layout-wrap="")
                                     // chronData[1] : Should only be one entry2. Don't need to loop
                                     div.btn-row(layout="row")
                                         div(ng-repeat='entry2 in entry.measurementTable track by $index')
-                                            button.green-btn-on(type="button" ng-if="entry2.tmp.toggleGraph" ng-click="entry2.tmp.toggleGraph = false;") chron {{$parent.$index + 1}} measurement {{$index + 1}}
-                                            button.green-btn-off(type="button" ng-if="!entry2.tmp.toggleGraph" ng-click="expandEntryGraph(files.json, entry2)") chron {{$parent.$index + 1}} measurement {{$index + 1}}
+                                            md-divider
+                                            button.table-tab-btn-on(type="button" ng-if="entry2.tmp.toggleGraph" ng-click="entry2.tmp.toggleGraph = false;") chron {{$parent.$index}} measurement {{$index}}
+                                            button.table-tab-btn-off(type="button" ng-if="!entry2.tmp.toggleGraph" ng-click="expandEntryGraph(files.json, entry2)") chron {{$parent.$index}} measurement {{$index}}
 
 
 

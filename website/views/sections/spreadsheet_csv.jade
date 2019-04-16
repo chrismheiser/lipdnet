@@ -4,9 +4,5 @@ div.container
     div(ng-if="entry2.columns.length < 1 || !entry2.columns")
         h6(style="font-size: 14px; text-align: center; margin:auto auto; padding: 20px;") Add a column to get started
     div(ng-if="entry2.columns.length > 0" style="margin:1em; padding:1em;")
-        hot-table(settings="settings" height='400' width='1120' datarows="files.csv[entry2.filename].data")
-            hot-column(ng-repeat="col in entry2.columns track by $index")
-
-    button.red-btn-off(style="float:right; margin:1em;" ng-click="removeColumn(entry2, null)" type="button") Remove Column
-    button.green-btn-off(style="float:right;margin:1em;" ng-click="addColumn(entry2)" type="button") Add Column
-    button.green-btn-off(style="float:right;margin:1em;" ng-click="refreshRender()" type="button") Refresh
+        hot-table(settings="settings" height='400' width='1120' datarows="files.csv[entry2.filename].data" style="touch-action: manipulation;")
+            hot-column(ng-repeat="col in entry2.columns track by $index" style="touch-action: manipulation;")

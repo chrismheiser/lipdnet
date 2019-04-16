@@ -1440,6 +1440,7 @@ var create = (function(){
 
         },
         "paleoData": {
+          "tsid": {"tooltip": "Time Series ID. Each column has its own unique TSid to identify it."},
           "paleoData": {"tooltip": "The Data pertaining to past environmental variability"},
           "measurement": {"tooltip": "DataTable that contains the Variables (both measured and inferred)"},
           "model": {"tooltip": "Model used to derive an environmental axis from the PaleoDataModel"},
