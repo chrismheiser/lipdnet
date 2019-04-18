@@ -534,11 +534,23 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       });
     };
 
+  /**
+   * Duplicate an existing column. Useful if you have a lot of columns with shared or similar data/fields.
+   *
+   * @param  {Object}  entry   One data table
+   * @param  {Number}  idx     The index of the target column to duplicate
+   * @return {None}            New column is pushed onto data table.
+   */
     $scope.duplicateColumn = function(entry, idx){
+        // Create a copy of the object, otherwise the two columns will be bound
         var _dup = JSON.parse(JSON.stringify(entry.columns[idx]));
+        // Turn off the toggle, so that the new column doesn't try to open. No two columns open at once!
         _dup.tmp.toggle = false;
+        // Create a new TSid for the new column
         _dup.TSid = misc.generateTSid();
+        // Put the duplicate column in the table
         entry.columns.push(_dup);
+        // Show a notification so the user knows something happened.
         toaster.pop('success', "Duplicated column", "", 4000);
     };
 
@@ -1848,6 +1860,16 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
           });
         }
       );
+    };
+
+
+    $scope.validationRules = function(){
+        // Use the uib module to open the modal
+        var modalInstance = $uibModal.open({
+            templateUrl: 'modal-validationRules',
+            // controller: 'ModalCtrlAlert',
+            size: "lg",
+        });
     };
 
   /**

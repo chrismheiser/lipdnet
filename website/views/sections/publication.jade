@@ -82,7 +82,7 @@ div(ng-repeat="entry in files.json.pub track by $index" layout-wrap="")
     div(layout='', layout-padding='', layout-sm='column' ng-if="pageMeta.noaaReady")
       md-input-container(flex='', ng-class="md-input-has-value")
         label Abstract *
-        textarea(ng-model='entry.abstract', columns='1', maxlength="500")
+        textarea(ng-model='entry.abstract', columns='1')
         md-tooltip {{getTooltip("pub", "abstract")}}
 
     div(layout='', layout-padding='', layout-sm='column' ng-if="pageMeta.noaaReady")

@@ -1813,6 +1813,10 @@ router.get("/modal-jsonfix", function(req, res, next){
     res.render('modal/modal-jsonfix', {title: ''});
 });
 
+router.get("/modal-validationrules", function(req, res, next){
+    res.render('modal/modal-validationrules', {title: ''});
+});
+
 router.get("/loading", function(req, res, next){
   res.render("loading", {title: ""});
 });

@@ -1,0 +1,66 @@
+.modal-content
+    .modal-header
+        h3.modal-title Validation Rules
+    .modal-body
+        h5 Below are the data requirements listed by each organization.
+        table(class="table table-bordered")
+            tbody(class="table table-bordered")
+                tr
+                    td.darkertext LiPD
+                    td.darkertext Linked Earth Wiki
+                    td.darkertext NOAA
+                tr
+                    td
+                        h6 Root:
+                        ul
+                            li dataSetName
+                            li archiveType
+                            li createdBy
+                        h6 Geo:
+                        ul
+                            li coordinates
+                        h6 paleoData:
+                        ul
+                            li measurementTable
+                        h6 Columns:
+                        ul
+                            li variableName
+                            li units ("unitless" if units not applicable)
+                            li values
+
+                    td
+                        h6 In addition to the normal LiPD requirements.
+                        h6 Columns:
+                        ul
+                            li variableType
+                            li takenAtDepth
+                            li inferredVariableType
+                            li proxyObservationType
+
+                    td
+                        h6 In addition to the normal LiPD requirements.
+                        h6 Root:
+                        ul
+                            li investigators
+                        h6 NOAA:
+                        ul
+                            li maxYear
+                            li minYear
+                            li timeUnit
+                            li onlineResource
+                            li onlineResourceDescription
+                            li modifiedDate
+                        h6 Geo:
+                        ul
+                            li siteName
+                            li location
+                            li
+                                a(href="https://gcmdservices.gsfc.nasa.gov/static/kms/locations/" target="_blank") GCMD Keywords 1
+                            li
+                                a(href="https://wiki.earthdata.nasa.gov/display/CMR/GCMD+Keyword+Access" target="_blank") GCMD Keywords 2
+                        h6 Columns:
+                        ul
+                            li description
+                            li dataFormat
+                            li dataType
+

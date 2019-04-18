@@ -1,24 +1,31 @@
 //- File chooser: Select a lipd file
-div
+div(style="margin-top:30px;")
+  div.choosefileheader Upload LiPD File
   li#buttons(style="list-style-type: none;")
     input.step2.choosefile(custom-on-change="uploadBtnChange" ng-click="uploadBtnClick" title="Upload LiPD file for comparison" name='file' type="file" accept=".lpd")
 
 div
   li#buttons(style="list-style-type: none;")
-    button.yellow-btn-off.step3(type="button" ng-click="validate()" ng-disabled="pageMeta.filePicker") Validate
-      md-tooltip LiPD data is validated during upload. If you make any corrections to the file, validate again to show updated results.
-    button.yellow-btn-off.step4(type="button" ng-click="saveSession()") Save Session
-      md-tooltip Save your progress. The data will be stored in your browser for as long as you keep the window open.
+      div.yellow-header Workflow
+      button.btn.yellow-btn-left.step3(ng-click="validate()" ng-disabled="pageMeta.filePicker") Validate
+        md-tooltip LiPD data is validated during upload. If you make any corrections to the file, validate again to show updated results.
+      button.btn.yellow-btn-middle(ng-click="validationRules()") Validation Rules
+        md-tooltip Learn what data each organization requires, and how to make your dataset more complete.
+      button.btn.yellow-btn-right.step4(ng-click="saveSession()") Save Session
+        md-tooltip Save your progress. The data will be stored in your browser for as long as you keep the window open.
 
 div
   li#buttons(style="list-style-type: none;")
-    button.green-btn-off.stepdllipd#download-btn(type="button" ng-click="downloadZip(null)") Download LiPD
+    div.green-header Download as..
+    button.btn.green-btn-left.stepdllipd#download-btn(type="button" ng-click="downloadZip(null)") LiPD
       md-tooltip Download LiPD file when all requirements are met and errors are fixed
-    button.green-btn-off.stepdlnoaa#download-btn(type="button" ng-click="downloadNoaa()" ) Download NOAA (Beta)
+    button.btn.green-btn-right.stepdlnoaa#download-btn(type="button" ng-click="downloadNoaa()" ) NOAA (Beta)
       md-tooltip Download NOAA file when all requirements are met and errors are fixed
-    button.green-btn-off.stepwikiupload#download-btn(type="button" ng-click="uploadToWiki()") Upload to Wiki
+  li#buttons(style="list-style-type: none;")
+    div.green-header Upload to..
+    button.btn.green-btn-left.stepwikiupload#download-btn(type="button" ng-click="uploadToWiki()") Linked Earth Wiki
       md-tooltip Upload data to the Linked Earth Wiki once it successfully conforms to Wiki standards
-    button.green-btn-off.stepwikiupload#download-btn(type="button" ng-click="uploadToLipdverse()" ) Upload to Lipdverse
+    button.btn.green-btn-right.stepwikiupload#download-btn(type="button" ng-click="uploadToLipdverse()" ) Lipdverse
       md-tooltip Upload data to the Lipdverse when all requirements are met and errors are fixed
     //div(vc-recaptcha key="'6LdkZEAUAAAAADoC8AFc8f2DLkIuQ0zmvx0S34jx'" ng-model="gRecaptchaResponse" on-success="checkCaptcha(pageMeta.downloadMode, true)" ng-show="pageMeta.captcha")
     //button(class="g-recaptcha" data-sitekey="6LdkZEAUAAAAADoC8AFc8f2DLkIuQ0zmvx0S34jx" data-callback="ccb(resp)") Submit

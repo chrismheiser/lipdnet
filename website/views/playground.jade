@@ -17,9 +17,9 @@ block css
 block body
 	body.step0(ng-app='validateApp' ng-cloak style="min-height: 100%; background-color:white;")
 		#wrapper
-			div.tourbanner.alert.alert-success.alert-dismissable
-				strong Lipdverse upload bug fixed!
-				p The bug is fixed and you can use the "Upload to Lipdverse" feature again. Thank you for your patience.
+			//div.tourbanner.alert.alert-success.alert-dismissable
+			//	strong Lipdverse upload bug fixed!
+			//	p The bug is fixed and you can use the "Upload to Lipdverse" feature again. Thank you for your patience.
 
 			include ./include/navbar.jade
 			md-toolbar
@@ -46,21 +46,22 @@ block body
 								pre(style="background-color:#DFF1C1; border: none;")
 									p Are you new here? Take the tour to learn more about how to use this page.
 									br
-									button.green-btn-off(type="button" ng-click="startTour()") Take the tour!
+									button.btn.btn-default.green-btn-off(type="button" ng-click="startTour()") Take the tour!
 									a.tourgithub.btn.btn-default.green-btn-off(href="https://github.com/chrismheiser/geoChronR/issues" type="button" style="width:250px") Questions, comments, concerns
 										md-tooltip Use the Github repository to see upcoming changes, fixes, report bugs, and make suggestions
 
 							div(class="span span50" style="padding-right:3em;")
 								md-toolbar.md-hue-1
 									h2.md-toolbar-tools
-										span Load & Validates
+										span Load & Validate
 								div
 									ol
 										include buttons/action_btns.jade
 										include buttons/noaa_wiki_btns.jade
-										h6 LiPD Completion
-										uib-progressbar(animate="true" value="feedback.lipdComplete" type="{{feedback.lipdCompleteType}}" uib-popover-html="progressPopover" popover-trigger="'mouseenter'")
-											span(style="color:white !important; white-space:nowrap;") {{feedback.lipdComplete}} %  |  {{feedback.posCt}} / {{feedback.lipdCompleteCt}}
+										div.long-header(style="text-align:center; margin-top:30px;")
+											div(style="display:inline-block;") LiPD Completion
+										uib-progressbar.progressbarextra(animate="true" value="feedback.lipdComplete" type="{{feedback.lipdCompleteType}}" uib-popover-html="progressPopover" popover-trigger="'mouseenter'")
+											span(style="white-space:nowrap; color: white !important;") {{feedback.lipdComplete}} %  |  {{feedback.posCt}} / {{feedback.lipdCompleteCt}}
 										include buttons/feedback.jade
 
 							div(class="span span50")

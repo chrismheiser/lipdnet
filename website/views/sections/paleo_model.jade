@@ -28,7 +28,7 @@ div(ng-repeat='entry in files.json.paleoData track by $index' layout-wrap="" ng-
                 button.green-btn-off(type="button" ng-click="addColumn(entry2)" style="padding-right: 2px;") Add Column
                 button.red-btn-off(type="button" ng-click="removeColumn(entry2, null)"  style="padding-right: 2px;") Remove Column
                 button.red-btn-off(type="button" ng-click="removeBlock(entry.model[0].summaryTable, $index)" style="padding-right: 2px;") Delete Table
-                
+
     div(ng-repeat="entry2 in entry.model[0].ensembleTable track by $index" )
         md-card(ng-if="entry2.tmp.toggle")
             //md-subheader.md-primary paleo {{parentIdx+1}} > model 1 > ensemble {{$index+1}}

@@ -1435,7 +1435,7 @@ var create = (function(){
           "siteName": {"tooltip": "NA"},
           "location": {"tooltip": "NA"},
           "country" : {"tooltip": "ISO 3166 standard country list"},
-          "gcmdLocation": {"tooltip": "Use the GCMD Keyword Valids from https://wiki.earthdata.nasa.gov/display/CMR/GCMD+Keyword+Access , " +
+          "gcmdLocation": {"tooltip": "Use GCMD links found in 'Validation Rules', " +
               "Example: OCEAN>ATLANTIC OCEAN>NORTH ATLANTIC OCEAN>BALTIC SEA"},
 
         },
@@ -1538,7 +1538,7 @@ var create = (function(){
     getPopover: (function(name){
       var _popovers = {
         "lipd": '' +
-        '<h5>LiPD Requirements</h5><br>' +
+        '<h5>LiPD Requirements</h5>' +
         '<p>Root:</p><ul>' +
         '<li>dataSetName</li>' +
         '<li>archiveType</li>' +
@@ -1553,7 +1553,7 @@ var create = (function(){
         '<li>values</li>' +
         '</ul>',
         "wiki": '' +
-        '<h5>Linked Earth Wiki Requirements</h5><br>' +
+        '<h5>Linked Earth Wiki Requirements</h5>' +
         '<p>In addition to the normal LiPD Requirements: </p>' +
         '</ul><br><p>Columns:</p><ul>' +
         '<li>proxyObservationType</li>' +
@@ -1562,7 +1562,7 @@ var create = (function(){
         '<li>inferredVariableType</li>' +
         '</ul>',
         "noaa": '' +
-        '<h5>NOAA Requirements</h5><br>' +
+        '<h5>NOAA Requirements</h5>' +
         '<p>In addition to the normal LiPD Requirements: </p>' +
         '</ul><br><p>NOAA specific:</p><ul>' +
         '<li>maxYear</li>' +
@@ -1576,6 +1576,7 @@ var create = (function(){
         '</ul><br><p>Geo:</p><ul>' +
         '<li>siteName</li>' +
         '<li>location</li>' +
+        '<p> * Use GCMD locations link found in "Validation Rules"'  +
         '</ul><br><p>Columns:</p><ul>' +
         '<li>description</li>' +
         '<li>dataFormat</li>' +

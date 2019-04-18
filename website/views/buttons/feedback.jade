@@ -1,11 +1,11 @@
 // When a LPD file is chosen, all the files inside are listed here.
 
 li.step8(style="list-style-type: none;")
-  pre(ng-class="feedback.errCt>0 ? 'on' : 'off'" style="background-color:#FEBABB; border: none;" uib-popover="Errors are caused by missing required data or malformed data structures" popover-trigger="'mouseenter'") {{ feedback.errCt}} errors
+  pre.predanger(ng-class="feedback.errCt>0 ? 'on' : 'off'" uib-popover="Errors are caused by missing required data or malformed data structures" popover-trigger="'mouseenter'") {{ feedback.errCt}} errors
     ul
       li(ng-repeat="err in feedback.errMsgs track by $index") {{err}}
 
-  pre(ng-class="feedback.wrnCt>0 ? 'on' : 'off'" style="background-color:#FEEEB6; border: none;" uib-popover="Warnings are highly suggested fixes, but not required. A file may still be valid with warnings present" popover-trigger="'mouseenter'") {{ feedback.wrnCt }} warnings
+  pre.prewarning(ng-class="feedback.wrnCt>0 ? 'on' : 'off'" uib-popover="Warnings are highly suggested fixes, but not required. A file may still be valid with warnings present" popover-trigger="'mouseenter'") {{ feedback.wrnCt }} warnings
     ul
       li(ng-repeat="wrn in feedback.wrnMsgs track by $index") {{wrn}}
       
@@ -14,19 +14,19 @@ li.step8(style="list-style-type: none;")
   //- 		li(ng-repeat="pos in feedback.posMsgs track by $index") {{pos}}
 
 div.step9
-  pre(ng-hide="feedback.validLipd == 'PASS'" style="background-color:#FEBABB; border: none;" uib-popover-html="lipdPopover" popover-trigger="'mouseenter'") Invalid LiPD file
-  pre(ng-show="feedback.validLipd == 'PASS'" style="background-color:#DFF1C1; border: none;" uib-popover-html="lipdPopover" popover-trigger="'mouseenter'") Valid LiPD file
-  pre(ng-hide="feedback.validWiki == 'PASS'" style="background-color:#FEBABB; border: none;" uib-popover-html="wikiPopover" popover-trigger="'mouseenter'") Wiki requirements not met
-  pre(ng-show="feedback.validWiki == 'PASS'" style="background-color:#DFF1C1; border: none;" uib-popover-html="wikiPopover" popover-trigger="'mouseenter'") Wiki requirements met
-  pre(ng-hide="feedback.validNoaa == 'PASS'" style="background-color:#FEBABB; border: none;" uib-popover-html="noaaPopover" popover-trigger="'mouseenter'") NOAA requirements not met
-  pre(ng-show="feedback.validNoaa == 'PASS'" style="background-color:#DFF1C1; border: none;" uib-popover-html="noaaPopover" popover-trigger="'mouseenter'") NOAA requirements met
+  pre.predanger(ng-hide="feedback.validLipd == 'PASS'" uib-popover-html="lipdPopover" popover-trigger="'mouseenter'") Invalid LiPD file
+  pre.presuccess(ng-show="feedback.validLipd == 'PASS'" uib-popover-html="lipdPopover" popover-trigger="'mouseenter'") Valid LiPD file
+  pre.predanger(ng-hide="feedback.validWiki == 'PASS'" uib-popover-html="wikiPopover" popover-trigger="'mouseenter'") Wiki requirements not met
+  pre.presuccess(ng-show="feedback.validWiki == 'PASS'" uib-popover-html="wikiPopover" popover-trigger="'mouseenter'") Wiki requirements met
+  pre.predanger(ng-hide="feedback.validNoaa == 'PASS'" uib-popover-html="noaaPopover" popover-trigger="'mouseenter'") NOAA requirements not met
+  pre.presuccess(ng-show="feedback.validNoaa == 'PASS'" uib-popover-html="noaaPopover" popover-trigger="'mouseenter'") NOAA requirements met
 
   // DEV MODE: Put metadata in pre box, so we can see the metadata behind the json-tree 	
   //- pre#metaPretty(ng-model="files.json")
   //- pre#csvPretty
   
 li.step10(style="list-style-type: none;")
-  pre.on(style="background-color:#eee; border: none;" uib-popover="Click any filename to view the data within that specific file" popover-trigger="'mouseenter'") {{files.fileCt}} files in LiPD
+  pre.on.pregray(uib-popover="Click any filename to view the data within that specific file" popover-trigger="'mouseenter'") {{files.fileCt}} files in LiPD
     ul
       // The metadata.jsonld will always have a two-way bind to the json.
       li(ng-click="showModalFileContent({data: files.json, type: 'json', filenameShort: 'metadata.jsonld'})") metadata.jsonld

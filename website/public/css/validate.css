@@ -1,6 +1,29 @@
 /* upload.css */
 
 
+/*
+
+strong color scheme
+red: #d9534f
+yellow: #e2b41d
+green: #8FA864
+blue: #337AB7
+gray: #848484
+
+
+Light color scheme
+red: #FEBABB
+yellow: #FEEEB6
+green: #DEF1C0
+blue: #AADAFF
+gray: #808080
+
+
+ */
+
+
+
+
 /* BASIC STYLINGS
 ============================================================================= */
 body                            { padding-top:20px;}
@@ -243,6 +266,7 @@ input[type=number]::-webkit-outer-spin-button {
   input[type=file] {
   	color: transparent;
   	font-size: 12pt;
+    border-radius: 0 0 5px 5px;
   }
 
   input[type=file]::-webkit-file-upload-button {
@@ -252,7 +276,7 @@ input[type=number]::-webkit-outer-spin-button {
   	width: 150px !important;
   	max-width: 150px;
   	height: 31px;
-  	border-radius: 5px;
+  	border-radius: 0 0 5px 5px;
   	box-sizing:border-box;
   	background-color: white;
   }
@@ -264,7 +288,7 @@ input[type=number]::-webkit-outer-spin-button {
   	width: 150px !important;
   	max-width: 150px;
   	height: 31px;
-  	border-radius: 5px;
+    border-radius: 0 0 5px 5px;
   	box-sizing:border-box;
   	background-color: white;
   }
@@ -556,6 +580,7 @@ progress {
 }
 
 
+
 .table-blue-btn-on{
     width: 120px;
     height:50px;
@@ -588,12 +613,7 @@ progress {
     color: #8FA864;
 }
 
-.choosefile {
-    max-width:200px;
-    width:175px;
-    padding:4px;
-    display:inline;
-}
+
 
 
 /* Always show scroll bars! */
@@ -667,6 +687,20 @@ progress {
     background-color: #8FA864;
 }
 
+.progress-bar-warning {
+    background-color: #E2B31B !important;
+}
+
+.progress-bar-success {
+    background-color: #8FA864;
+
+}
+
+.progress-bar-danger {
+    background-color: #D9534F;
+
+}
+
 /* Used on the Merge page */
 .compareitem {
     margin-left: 20px;
@@ -738,3 +772,172 @@ input[type=text], select {
     /*background-color: #fcfcfc;*/
     border: 1px dotted #AAAAAA;
 }
+
+.yellow-header {
+    color: white;
+    padding-left: 20px;
+    border-radius: 5px 5px 0px 0px;
+    border: solid 1px #e2b41d;
+    background-color: #e2b41d;
+    font-weight: 400;
+    width: 450px;
+}
+
+.yellow-btn-left{
+    font-size: 10pt;
+    background-color: white;
+    font-family: RobotoDraft,Roboto,'Helvetica Neue',sans-serif;
+    width: 150px;
+    height: 31px;
+    border-radius: 0px 0px 0px 5px;
+    color: #e2b41d;
+    border: solid 1px #e2b41d;
+    font-weight: 400;
+
+}
+
+.yellow-btn-middle{
+    font-size: 10pt;
+    background-color: white;
+    font-family: RobotoDraft,Roboto,'Helvetica Neue',sans-serif;
+    width: 150px;
+    height: 31px;
+    color: #e2b41d;
+    border-radius: 0;
+    border: solid 1px #e2b41d;
+    font-weight: 400;
+
+}
+
+.yellow-btn-right{
+    font-size: 10pt;
+    background-color: white;
+    font-family: RobotoDraft,Roboto,'Helvetica Neue',sans-serif;
+    width: 150px;
+    height: 31px;
+    border-radius: 0px 0px 5px 0px;
+    color: #e2b41d;
+    border: solid 1px #e2b41d;
+    font-weight: 400;
+
+}
+
+.choosefileheader {
+    color: white;
+    padding-left: 20px;
+    border: solid 1px #848484;
+    background-color: #848484;
+    font-weight: 400;
+    width: 150px;
+    border-radius: 5px 5px 0 0;
+
+}
+.choosefile {
+    max-width:200px;
+    width:175px;
+    display:inline;
+    border-radius: 5px 5px 0 0;
+    font-weight: 400;
+}
+
+
+.green-header {
+    color: white;
+    padding-left: 20px;
+    border-radius: 5px 5px 0 0;
+    border: solid 1px #8FA864;
+    background-color: #8FA864;
+    font-weight: 400;
+    width: 300px;
+}
+
+.green-btn-left{
+    font-size: 10pt;
+    background-color: white;
+    font-family: RobotoDraft,Roboto,'Helvetica Neue',sans-serif;
+    width: 150px;
+    height: 31px;
+    border-radius: 0 0 0 5px;
+    color: #8FA864;
+    border: solid 1px #8FA864;
+    font-weight: 400;
+
+}
+
+.green-btn-right{
+    font-size: 10pt;
+    background-color: white;
+    font-family: RobotoDraft,Roboto,'Helvetica Neue',sans-serif;
+    width: 150px;
+    height: 31px;
+    border-radius: 0 0 5px 0;
+    color: #8FA864;
+    border: solid 1px #8FA864;
+    font-weight: 400;
+
+}
+
+
+.long-header {
+    color: white;
+    border-radius: 5px 5px 0 0;
+    border: solid 1px #848484;
+    background-color: #848484;
+    font-weight: 400;
+}
+
+.progress {
+    border-radius:0 0 5px 5px;
+    -webkit-box-shadow:none !important;
+    box-shadow:none !important;
+    background-color:#fafafa;
+    color: black;
+}
+
+.progress {
+    background-color: #fafafa;
+    box-shadow: none;
+    -webkit-box-shadow: none;
+    color: black;
+
+}
+
+table .progress {
+    box-shadow: none;
+    -webkit-box-shadow: none;
+    color: black;
+
+}
+
+.progress-bar {
+    box-shadow: none;
+    -webkit-box-shadow: none;
+    color: black;
+
+}
+
+
+.presuccess {
+    background-color:#DEF1C0;
+    border: none;
+    /*color:white;*/
+}
+
+.predanger {
+    background-color:#FEBABB;
+    border: none;
+    /*color:white;*/
+}
+
+.prewarning {
+    background-color:#FEEEB6;
+    border: none;
+    /*color:white;*/
+}
+
+.pregray {
+    background-color:#eee;
+    border: none;
+    /*color:white;*/
+}
+
