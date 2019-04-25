@@ -1112,6 +1112,29 @@ var create = (function(){
         };
     }),
 
+    noaaDataTypeList: (function(){
+      return ["Borehole",
+          "Climate Forcing",
+          "Climate Reconstructions",
+          "Corals and Sclerosponges",
+          "Fauna",
+          "Fire History",
+          "Historical",
+          "Ice Cores",
+          "Insect",
+          "Instrumental",
+          "Lake Levels",
+          "Loess",
+          "Paleoceanography",
+          "Paleoclimatic Modeling",
+          "Paleolimnology",
+          "Plant Macrofossils",
+          "Pollen",
+          "Speleothems",
+          "Tree Ring",
+          "Other Collections"];
+    }),
+
     /**
      *  Playground page Tour: these steps are given to the intro.js module to create an step-by-step tour of different
      *  sections of the playground page. Each step is linked to a portion of the page via an element from the DOM.
@@ -1366,7 +1389,16 @@ var create = (function(){
      * Used in : NOAA field when NOAA switch is turned on.
      */
     timeUnitList: (function(){
-      return ["AD", "BP", "CE"];
+      // return ["AD", "BP", "CE"];
+      return [
+          "year Common Era",
+          "calendar year before present",
+          "radio carbon year before present",
+          "billion years ago",
+          "calendar kiloyear before present",
+          "radiocarbon kiloyear before present",
+          "calendar kiloyear before present"
+      ];
     }),
 
     /**
@@ -1399,17 +1431,21 @@ var create = (function(){
 
         },
         "noaa": {
-          "earliestYear" : {"tooltip": "NA"},
-          "mostRecentYear" : {"tooltip": "NA"},
-          "timeUnit": {"tooltip": "NA"},
-          "onlineResource": {"tooltip": "NA"},
-          "onlineResourceDescription": {"tooltip": "NA"},
-          "originalSourceUrl": {"tooltip": "NA"},
-          "originalSourceUrlDescription": {"tooltip": ""},
-          "modifiedDate": {"tooltip": "NA"},
-          "datasetDOI": {"tooltip": "What is the digital object identifier associated with the dataset? Example: 10.1000/sample123"},
-          "NOAAdataType": {"tooltip": "NA"},
-          "NOAAstudyName": {"tooltip": "NA"}
+          "earliestYear" : {"tooltip": "Oldest year in the 'timeUnit' specified."},
+          "mostRecentYear" : {"tooltip": "Latest year in the 'timeUnit' specified."},
+          "timeUnit": {"tooltip": "A unit which is a standard measure of the dimension in which events occur in sequence" +
+              " (where applicable, 1950 CE is present)."},
+          "onlineResource": {"tooltip": "For details request the NOAA LiPD Guide via email paleo@noaa.gov."},
+          "onlineResourceDescription": {"tooltip": "For details request the NOAA LiPD Guide via email paleo@noaa.gov."},
+          "originalSourceUrl": {"tooltip": "For details request the NOAA LiPD Guide via email paleo@noaa.gov."},
+          "originalSourceUrlDescription": {"tooltip": "For details request the NOAA LiPD Guide via email paleo@noaa.gov."},
+          "modifiedDate": {"tooltip": "Defines the date this dataset was last modified, entered as YYY-MM-DD."},
+          "datasetDOI": {"tooltip": "Enter the Digital Object Identifier associated with this dataset, if one " +
+              "exists. Example: 10.1000/sample123"},
+          "NOAAdataType": {"tooltip": "Controlled values are required. Request the NOAA LiPD Guide via email " +
+              "paleo@noaa.gov."},
+          "NOAAstudyName": {"tooltip": "Describe Where, When and What - e.g. Fort Stanton Cave, New Mexico 55-11kY " +
+              "Speleothem d18O Data."}
         },
         "pub": {
           "publication": {"tooltip": "A document that serves as reference for a Dataset or its components"},
@@ -1446,8 +1482,11 @@ var create = (function(){
           "model": {"tooltip": "Model used to derive an environmental axis from the PaleoDataModel"},
           "table": {"tooltip": "DataTable containing PaleoData Variables"},
           "values": {"tooltip": "What are the numerical values of the Variable, Uncertainty, and Model outputs?"},
-          "variableName": {"tooltip": "NA"},
-          "units": {"tooltip": "In what unit of measure is (are) the Variable(s) expressed?"},
+          "variableName": {"tooltip": "Description of what was measured. Controlled values are required for NOAA. Request " +
+              "the NOAA LiPD Guide via email paleo@noaa.gov."},
+          "units": {"tooltip": "In what unit of measure is (are) the Variable(s) expressed? Controlled values are " +
+              "required for NOAA. Request the NOAA " +
+              "LiPD Guide via email paleo@noaa.gov."},
           "description": {"tooltip": "What additional details would you give about the resource?"},
           "calibration": {"tooltip": "NA"},
           "hasResolution": {"tooltip": "What is the Resolution of the Variable?"},
@@ -1456,14 +1495,19 @@ var create = (function(){
           "hasMeanValue": {"tooltip": "What is the mean value of the Variable?"},
           "hasMedianValue": {"tooltip": "What is the median value of the Variable?"},
           "inferredVariableType": {"tooltip": "What type of InferredVariable does the InferredVariable belongs to?"},
-          "interpretation": {"tooltip": "A suite of metadata that describes which phenomena drove variability in this Variable (e.g. environmental drivers)."},
-          "direction": {"tooltip": "Is the InferredVariable value increasing or decreasing as the value of the MeasuredVariable is increasing?"},
+          "interpretation": {"tooltip": "A suite of metadata that describes which phenomena drove variability in this " +
+              "Variable (e.g. environmental drivers)."},
+          "direction": {"tooltip": "Is the InferredVariable value increasing or decreasing as the value of the" +
+              " MeasuredVariable is increasing?"},
           "method": {"tooltip": "How is the information obtained from the resource?"},
           "missingValue": {"tooltip": "How are the missing values of the Variable identified in the DataTable?"},
           "notes": {"tooltip": "Use to add information that does not fit elsewhere in the dataset"},
-          "physicalSample": {"tooltip": "The actual sample on which the measurements are made. For instance, the lake core analyzed in the lab is the physical sample."},
+          "physicalSample": {"tooltip": "The actual sample on which the measurements are made. For instance, the lake " +
+              "core analyzed in the lab is the physical sample."},
           "proxy": {"tooltip": "NA"},
-          "proxyObservationType": {"tooltip": "What type of ProxyObservation does the MeasuredVariable or Proxy System belong to? For example, the measured value of 5.63 mmol/mol is of type Mg/Ca, or the proxy observation of the current prpoxy system is Mg/Ca"},
+          "proxyObservationType": {"tooltip": "What type of ProxyObservation does the MeasuredVariable or Proxy System" +
+              " belong to? For example, the measured value of 5.63 mmol/mol is of type Mg/Ca, or the proxy observation " +
+              "of the current prpoxy system is Mg/Ca"},
           "sensorGenus": {"tooltip": "What is the Genus of the Organic ProxySensor?"},
           "sensorSpecies": {"tooltip": "What is the species of the Organic ProxySensor?"},
           "takenAtDepth": {"tooltip": "At which depth in the ProxyArchive is the Variable measured or inferred?"},
@@ -1471,13 +1515,25 @@ var create = (function(){
           "name": {"tooltip": "NA"},
           "runCommand": {"tooltip": "NA"},
           "runEnv": {"tooltip": "NA"},
-          "error" : {"tooltip" :"NA"},
-          "NOAAseasonality": {"tooltip": "NA"},
-          "NOAAdataType": {"tooltip": "NA"},
-          "NOAAdataFormat": {"tooltip": ""},
-          "detail" : {"tooltip": "NA"},
-          "measurementMaterial": {"tooltip": "NA"},
-          "measurementMethod": {"tooltip" : "NA"},
+          "error" : {"tooltip" :"Use ONLY for data series that are measurements of uncertainty or error;" +
+              "Controlled values are required. Request the NOAA LiPD Guide via email" +
+              "paleo@noaa.gov."},
+          "NOAAseasonality": {"tooltip": "The specific part of the annual cycle explicitly reconstructed from raw" +
+              "values; Controlled values are required. Request the NOAA LiPD Guide via" +
+              "email paleo@noaa.gov."},
+          "NOAAdataType": {"tooltip": "Controlled values are required. Request the NOAA LiPD Guide via email" +
+              "paleo@noaa.gov."},
+          "NOAAdataFormat": {"tooltip": "Enter the character 'N' if data are numeric or 'C' if data are" +
+              "character-based."},
+          "detail" : {"tooltip": "Information about alterations or transformations made to the raw data;" +
+              "Controlled values are required. Request the NOAA LiPD Guide via email" +
+              "paleo@noaa.gov."},
+          "measurementMaterial": {"tooltip": "Material(s) on which measurements were made or from which reconstructions" +
+              "were created; Controlled values are required by NOAA. Request the NOAA LiPD Guide" +
+              "via email paleo@noaa.gov."},
+          "measurementMethod": {"tooltip" : "Provide techniques, methods, procedures, or strategies for collection or" +
+              "analysis of scientific information; Controlled values are required. Request" +
+              "the NOAA LiPD Guide via email paleo@noaa.gov."},
 
         },
         "chronData": {

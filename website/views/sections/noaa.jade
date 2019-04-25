@@ -5,20 +5,21 @@ div(ng-if="pageMeta.noaaReady")
             md-tooltip Please refer to NOAA for term definitions
 div(ng-if="pageMeta.noaaReady")
     div(layout='', layout-padding='', layout-sm='column')
-        md-input-container(flex="33")
+        md-input-container(flex="")
             label Earliest Year *
             input(ng-model='files.json.earliestYear')
             md-tooltip {{getTooltip("noaa", "earliestYear")}}
 
-        md-input-container(flex="33")
+        md-input-container(flex="")
             label Most Recent Year *
             input(ng-model='files.json.mostRecentYear')
             md-tooltip {{getTooltip("noaa", "mostRecentYear")}}
 
-        md-input-container(flex="33")
+    div(layout='', layout-padding='', layout-sm='column')
+        md-input-container(flex="")
             label Time Unit *
-            md-select(ng-model="files.json.timeUnit")
-                md-option(ng-repeat="tu in dropdowns.timeUnit" ng-value="tu") {{tu}}
+            input.mdautocomplete(type="text" ng-model="files.json.timeUnit"
+            uib-typeahead="entry as entry for entry in dropdowns.timeUnit | filter:$viewValue" typeahead-min-length="0")
             md-tooltip {{getTooltip("noaa", "timeUnit")}}
 
     div(layout='', layout-padding='', layout-sm='column')
@@ -35,7 +36,8 @@ div(ng-if="pageMeta.noaaReady")
     div(layout='', layout-padding='', layout-sm='column')
         md-input-container(flex='50', ng-class="md-input-has-value")
             label Data Type *
-            input(ng-model='files.json.NOAAdataType')
+            input.mdautocomplete(type="text" ng-model="files.json.NOAAdataType"
+            uib-typeahead="entry for entry in dropdowns.NOAAdataType | filter:$viewValue" typeahead-min-length="0")
             md-tooltip {{getTooltip("noaa", "NOAAdataType")}}
         md-input-container(flex='50', ng-class="md-input-has-value")
             label Study Name *

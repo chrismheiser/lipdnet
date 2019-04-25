@@ -21,9 +21,9 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
 
     // All dropdown box elements must be bound in the scope.
     $scope.dropdowns = {
-        "tabletypepaleo": "",
-        "tabletypechron": "",
-        // 'current' shows the default selection, or the current selection (when a new selection is made by the user)
+      "tabletypepaleo": "",
+      "tabletypechron": "",
+      // 'current' shows the default selection, or the current selection (when a new selection is made by the user)
       "current": {
         "table": { id: 1, name: 'measurement' },
         "delimiter": { id: 1, name: "\t", view: "Tab ( \\t )"},
@@ -61,6 +61,7 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
 
       // Ontology: archiveType, units, inferredVariableType, proxyObservationType. These fields are pulled from the
       // LinkedEarth Wiki by index.js and served to us on page load. Data stored in $scope.ontology
+      "NOAAdataType": create.noaaDataTypeList(),
       "archiveType": $scope.ontology.archiveType,
       "infVarType": $scope.ontology.infVarType,
       "proxyObsType": $scope.ontology.proxyObsType,
