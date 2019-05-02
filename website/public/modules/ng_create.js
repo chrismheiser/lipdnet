@@ -97,10 +97,16 @@ var create = (function(){
     addChronData :(function(entry, blockType){
       if(blockType === "measurement"){
         entry.chronData = [
-          {"measurementTable": [{"tableName": "chron0measurement0", "filename": "chron0measurement0.csv"}]}];
+          {"measurementTable": [{"tableName": "chron0measurement0",
+                  "filename": "chron0measurement0.csv"
+                  }]}];
       } else if (blockType === "summary"){
         entry.chronData = [
-          {"model": [{"summaryTable": [{"tableName": "chron0model0summary0", "filename": "chron0model0summary0.csv"}], "method":{}}]}];
+          {"model": [{"summaryTable": [{
+            "tableName": "chron0model0summary0",
+            "filename": "chron0model0summary0.csv"
+            }],
+                  "method":{}}]}];
       }
       return entry;
     }),
@@ -1432,7 +1438,7 @@ var create = (function(){
         },
         "noaa": {
           "earliestYear" : {"tooltip": "Oldest year in the 'timeUnit' specified."},
-          "mostRecentYear" : {"tooltip": "Latest year in the 'timeUnit' specified."},
+          "mostRecentYear" : {"tooltip": "Youngest year in the 'timeUnit' specified."},
           "timeUnit": {"tooltip": "A unit which is a standard measure of the dimension in which events occur in sequence" +
               " (where applicable, 1950 CE is present)."},
           "onlineResource": {"tooltip": "For details request the NOAA LiPD Guide via email paleo@noaa.gov."},

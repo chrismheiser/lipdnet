@@ -226,11 +226,9 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
         $scope.files.json = create.addChronData($scope.files.json, blockType);
       } else {
         // Add a block of data to the JSON. (i.e. funding, paleoData table, publication, etc.)
-        entry = create.addBlock(entry, blockType, pc);
+        create.addBlock(entry, blockType, pc);
       }
-      console.log(blockType);
       if(blockType==="measurement" || blockType==="summary"){
-          console.log("removing");
           $scope.dropdowns.tabletype="";
       }
     };
@@ -1862,7 +1860,6 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
         }
       );
     };
-
 
     $scope.validationRules = function(){
         // Use the uib module to open the modal
