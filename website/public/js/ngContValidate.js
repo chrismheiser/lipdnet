@@ -310,12 +310,10 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
                 // create and/or open pub 1
                 // does pub 1 exist?
                 if(typeof $scope.files.json.pub === "undefined"){
-                    console.log("add pub");
                     $scope.files.json.pub = [];
                 }
                 if(typeof $scope.files.json.pub[0] === "undefined"){
                     // no, add block and expand
-                    console.log($scope.files.json);
                     $scope.files.json.pub = create.addBlock($scope.files.json.pub, "pub", null);
                     $scope.files.json.pub[0].tmp = {"toggle": false};
                     beforeSettings.pub.added = true;
@@ -1448,8 +1446,7 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
    * data sections, etc)
    */
     $scope.startTour = function(){
-        console.log($scope.files.json);
-        // Init introjs
+      // Init introjs
       var intro = introJs();
       // Give the tour steps and options to the introjs object
       intro.setOptions({
@@ -1458,9 +1455,7 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       $scope.beforeAfterTour("before", function(tourMeta){
         $scope.pageMeta.tourMeta = tourMeta;
         // Start the tour
-          console.log($scope.files.json)
         intro.start();
-          console.log($scope.files.json)
 
       });
       // Tour was exited
