@@ -23,16 +23,20 @@ div(layout='', layout-padding='', layout-sm='column')
                           uib-typeahead="entry for entry in ontology['archiveType'] | filter:$viewValue" typeahead-min-length="0")
     md-tooltip {{getTooltip("root", "archiveType")}}
 div(layout='', layout-padding='', layout-sm='column')
-  md-input-container(flex='33', ng-class="md-input-has-value")
-    label(ng-if="pageMeta.noaaReady") Collection Name *
-    label(ng-if="!pageMeta.noaaReady") Collection Name
-    input(ng-model='files.json.collectionName' aria-label="Collection Name")
-    md-tooltip {{getTooltip("root", "collectionName")}}
   md-input-container(flex='66', ng-class="md-input-has-value")
     label(ng-if="pageMeta.noaaReady") Investigators *
     label(ng-if="!pageMeta.noaaReady") Investigators
     input(ng-model='files.json.investigators' aria-label="Investigators")
     md-tooltip {{getTooltip("root", "investigators")}}
+
+  //  md-input-container(flex='33', ng-class="md-input-has-value")
+  //    label(ng-if="pageMeta.noaaReady") Collection Name *
+  //    label(ng-if="!pageMeta.noaaReady") Collection Name
+  //    input(ng-model='files.json.collectionName' aria-label="Collection Name")
+  //    md-tooltip {{getTooltip("root", "collectionName")}}
+
+
+
 div(layout='', layout-padding='', layout-sm='column')
   md-input-container(flex='', ng-class="md-input-has-value")
     label Notes

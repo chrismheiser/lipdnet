@@ -63,6 +63,7 @@ var create = (function(){
           if(blockType === "funding"){
             entry = create.addFunding(entry);
           } else if (blockType === "pub"){
+            console.log(entry);
             entry = create.addPublication(entry);
           } else if (blockType === "author"){
             entry = create.addAuthor(entry);
@@ -76,6 +77,7 @@ var create = (function(){
 
         }
         // Return the entry that now has an extra data block.
+          console.log(entry);
         return entry;
       } catch (err){
        console.log("Error: create:addBlock: " + err);
@@ -154,6 +156,7 @@ var create = (function(){
                   "issue":"", "edition": "", "volume":"", "author": [{"name": ""}] };
       // Add the new publication entry to the publication data array
       entry.push(_block);
+      console.log(entry);
       return entry;
     }),
 
@@ -1425,7 +1428,8 @@ var create = (function(){
           "dataSetName": {"tooltip": "Please use the format 'Name.Location.Year' for your dataset name", "label": "Dataset Name *", "model": "files.json.dataSetName", "disabled": false, "fieldType": "text", "size": 50},
           "collectionName": {"tooltip": "NA", "label": "Collection Name", "model": "files.json.collectionName", "disabled": false, "fieldType": "text", "size": 33, },
           "investigators": {"tooltip": "Use the format: LastName, FirstName; LastName, FirstName; ...", "label": "Investigators", "model": "files.json.investigators", "disabled": false, "fieldType": "text", "size": 66, },
-          "notes": {"tooltip": "Use to add information that does not fit elsewhere in the dataset", "label": "Notes", "model": "files.json.notes", "disabled": false, "fieldType": "text", "size": 100},
+          "notes": {"tooltip": "Anything that you would like the user to know about this dataset, including\n" +
+              "keywords. Anything you cannot fit somewhere else and want to document.", "label": "Notes", "model": "files.json.notes", "disabled": false, "fieldType": "text", "size": 100},
           "archiveType": { "tooltip": "Which ProxyArchive underlies this ProxySystem?", "label": "Archive Type", "model": "files.json.archiveType", "disabled": false, "size": 50},
 
         },

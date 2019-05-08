@@ -91,7 +91,7 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
                 // Error, use our hardcoded lists as a fallback.
                 $scope.ontology = create.getOntologyBackup();
             });
-    };
+  };
     // Call the function during page load
     initOntology();
 
@@ -109,7 +109,7 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       "fileCt": 1,
       "bagit": {},
       "csv": {},
-      "jsonSimple": {"lipdVersion": 1.3},
+      // "jsonSimple": {"lipdVersion": 1.3},
       "json": {"lipdVersion": 1.3, "pub": [], "funding": [], "dataSetName": "", "geo": {
         "geometry": {"coordinates": []}},
         "paleoData": [{"measurementTable": [{"tableName": "paleo0measurement0", "filename": "paleo0measurement0.csv",
@@ -291,101 +291,111 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
    * @param {Function} cb     Callback function
    */
     $scope.beforeAfterTour = function(mode, cb){
-          if(mode === "before"){
-              // Keep track of the state of the page BEFORE you start the tour, so you know how to put everything back afterwards
-              var beforeSettings = {"noaaReady": false,
-                  "pub": {"added": false, "expanded": false},
-                  "funding": {"added": false, "expanded": false},
-                  "paleo": {"expanded": false, "values": false, "header": false},
-                  "column": {"expanded": false, "added": false}
-              };
-              // Turn on NOAA switch
-              if (!$scope.pageMeta.noaaReady){
-                  $scope.makeNoaaReady(false);
-                  $scope.pageMeta.noaaReady = true;
-                  beforeSettings.noaaReady = false;
-              }
+        try{
+            if(mode === "before"){
+                // Keep track of the state of the page BEFORE you start the tour, so you know how to put everything back afterwards
+                var beforeSettings = {"noaaReady": false,
+                    "pub": {"added": false, "expanded": false},
+                    "funding": {"added": false, "expanded": false},
+                    "paleo": {"expanded": false, "values": false, "header": false},
+                    "column": {"expanded": false, "added": false}
+                };
+                // Turn on NOAA switch
+                if (!$scope.pageMeta.noaaReady){
+                    $scope.makeNoaaReady(false);
+                    $scope.pageMeta.noaaReady = true;
+                    beforeSettings.noaaReady = false;
+                }
 
-              // create and/or open pub 1
-              // does pub 1 exist?
-              if(typeof $scope.files.json.pub[0] === "undefined"){
-                  // no, add block and expand
-                  $scope.files.json.pub = $scope.addBlock($scope.files.json.pub, "pub", null);
-                  $scope.files.json.pub[0].tmp = {"toggle": false};
-                  beforeSettings.pub.added = true;
-              }
-              if(!$scope.files.json.pub[0].hasOwnProperty("tmp")){
-                  $scope.files.json.pub[0].tmp = {"toggle": true};
-              }
-              // is it expanded?
-              if(!$scope.files.json.pub[0].tmp.toggle){
-                  // no, expand it.
-                  $scope.files.json.pub[0].tmp.toggle = true;
-                  beforeSettings.pub.expanded = true;
-              }
+                // create and/or open pub 1
+                // does pub 1 exist?
+                if(typeof $scope.files.json.pub === "undefined"){
+                    console.log("add pub");
+                    $scope.files.json.pub = [];
+                }
+                if(typeof $scope.files.json.pub[0] === "undefined"){
+                    // no, add block and expand
+                    console.log($scope.files.json);
+                    $scope.files.json.pub = create.addBlock($scope.files.json.pub, "pub", null);
+                    $scope.files.json.pub[0].tmp = {"toggle": false};
+                    beforeSettings.pub.added = true;
+                }
+                if(!$scope.files.json.pub[0].hasOwnProperty("tmp")){
+                    $scope.files.json.pub[0].tmp = {"toggle": true};
+                }
+                // is it expanded?
+                if(!$scope.files.json.pub[0].tmp.toggle){
+                    // no, expand it.
+                    $scope.files.json.pub[0].tmp.toggle = true;
+                    beforeSettings.pub.expanded = true;
+                }
 
-              // create and/or open funding 1
-              // does funding 1 exist?
-              if(typeof $scope.files.json.funding[0] === "undefined"){
-                  // no, add block and expand
-                  $scope.files.json.funding = $scope.addBlock($scope.files.json.funding, "funding", null);
-                  $scope.files.json.funding[0].tmp = {"toggle": false};
-                  beforeSettings.funding.added = true;
-              }
-              // is it expanded?
-              if(!$scope.files.json.funding[0].tmp.toggle){
-                  // no, expand it.
-                  $scope.files.json.funding[0].tmp.toggle = true;
-                  beforeSettings.funding.expanded = true;
-              }
-              // open paleo 1 meas 1
-              var pdt = $scope.files.json.paleoData[0].measurementTable[0];
-              if (typeof pdt.tmp === "undefined"){
-                  pdt.tmp = {"toggle": false, "values": ""};
-              }
-              if (typeof pdt.tmp.toggle === "undefined"){
-                  pdt.tmp.toggle = true;
-                  beforeSettings.paleo.expanded = false;
-              }
-              if (!pdt.tmp.toggle){
-                  pdt.tmp.toggle = true;
-                  beforeSettings.paleo.expanded = false;
-              }
-              if(!pdt.columns[0]){
-                  // $scope.$broadcast("tourAdd", pdt);
-                  // pdt.columns[0]["tmp"] = {"toggle": true};
-                  pdt.columns.push({"number":1, "variableName": "Depth", "units": "cm", "variableType": "measured", "tmp":{"toggle": true}});
-                  beforeSettings.column.added = true;
-              }
-              if(typeof pdt.columns[0].tmp === "undefined"){
-                  pdt.columns[0].tmp = {"toggle": true};
-                  beforeSettings.column.expanded = false;
-              }
-              if (!pdt.tmp.toggle){
-                  pdt.columns[0].tmp.toggle = true;
-                  beforeSettings.column.expanded = false;
-              }
-              cb(beforeSettings);
-          } else if(mode === "after"){
-              $scope.pageMeta.noaaReady = $scope.pageMeta.tourMeta.noaaReady;
-              $scope.files.json.pub[0].tmp.toggle = $scope.pageMeta.tourMeta.pub.expanded;
-              $scope.files.json.funding[0].tmp.toggle = $scope.pageMeta.tourMeta.funding.expanded;
-              $scope.files.json.paleoData[0].measurementTable[0].tmp.toggle = $scope.pageMeta.tourMeta.paleo.expanded;
-              $scope.pageMeta.header = $scope.pageMeta.tourMeta.paleo.header;
-              $scope.files.json.paleoData[0].measurementTable[0].columns[0].tmp.toggle = false;
+                // create and/or open funding 1
+                // does funding 1 exist?
+                if(typeof $scope.files.json.funding[0] === "undefined"){
+                    // no, add block and expand
+                    $scope.files.json.funding = create.addBlock($scope.files.json.funding, "funding", null);
+                    $scope.files.json.funding[0].tmp = {"toggle": false};
+                    beforeSettings.funding.added = true;
+                }
+                // is it expanded?
+                if(!$scope.files.json.funding[0].tmp.toggle){
+                    // no, expand it.
+                    $scope.files.json.funding[0].tmp.toggle = true;
+                    beforeSettings.funding.expanded = true;
+                }
+                // open paleo 1 meas 1
+                var pdt = $scope.files.json.paleoData[0].measurementTable[0];
+                if (typeof pdt.tmp === "undefined"){
+                    pdt.tmp = {"toggle": false, "values": ""};
+                }
+                if (typeof pdt.tmp.toggle === "undefined"){
+                    pdt.tmp.toggle = true;
+                    beforeSettings.paleo.expanded = false;
+                }
+                if (!pdt.tmp.toggle){
+                    pdt.tmp.toggle = true;
+                    beforeSettings.paleo.expanded = false;
+                }
+                if(!pdt.columns[0]){
+                    // $scope.$broadcast("tourAdd", pdt);
+                    // pdt.columns[0]["tmp"] = {"toggle": true};
+                    pdt.columns.push({"number":1, "variableName": "Depth", "units": "cm", "variableType": "measured", "tmp":{"toggle": true}});
+                    beforeSettings.column.added = true;
+                }
+                if(typeof pdt.columns[0].tmp === "undefined"){
+                    pdt.columns[0].tmp = {"toggle": true};
+                    beforeSettings.column.expanded = false;
+                }
+                if (!pdt.tmp.toggle){
+                    pdt.columns[0].tmp.toggle = true;
+                    beforeSettings.column.expanded = false;
+                }
+                cb(beforeSettings);
+            } else if(mode === "after"){
+                $scope.pageMeta.noaaReady = $scope.pageMeta.tourMeta.noaaReady;
+                $scope.files.json.pub[0].tmp.toggle = $scope.pageMeta.tourMeta.pub.expanded;
+                $scope.files.json.funding[0].tmp.toggle = $scope.pageMeta.tourMeta.funding.expanded;
+                $scope.files.json.paleoData[0].measurementTable[0].tmp.toggle = $scope.pageMeta.tourMeta.paleo.expanded;
+                $scope.pageMeta.header = $scope.pageMeta.tourMeta.paleo.header;
+                $scope.files.json.paleoData[0].measurementTable[0].columns[0].tmp.toggle = false;
 
 
-              if($scope.pageMeta.tourMeta.pub.added){
-                  $scope.files.json.pub.splice(0,1);
-              }
-              if($scope.pageMeta.tourMeta.funding.added){
-                  $scope.files.json.funding.splice(0,1);
-              }
-              if($scope.pageMeta.tourMeta.column.added){
-                  $scope.files.json.paleoData[0].measurementTable[0].columns = [];
-              }
-              cb({});
-          }
+                if($scope.pageMeta.tourMeta.pub.added){
+                    $scope.files.json.pub.splice(0,1);
+                }
+                if($scope.pageMeta.tourMeta.funding.added){
+                    $scope.files.json.funding.splice(0,1);
+                }
+                if($scope.pageMeta.tourMeta.column.added){
+                    $scope.files.json.paleoData[0].measurementTable[0].columns = [];
+                }
+                cb({});
+            }
+        } catch(err){
+            console.log(err);
+        }
+
   };
 
   /**
@@ -1438,7 +1448,8 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
    * data sections, etc)
    */
     $scope.startTour = function(){
-      // Init introjs
+        console.log($scope.files.json);
+        // Init introjs
       var intro = introJs();
       // Give the tour steps and options to the introjs object
       intro.setOptions({
@@ -1447,7 +1458,10 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       $scope.beforeAfterTour("before", function(tourMeta){
         $scope.pageMeta.tourMeta = tourMeta;
         // Start the tour
+          console.log($scope.files.json)
         intro.start();
+          console.log($scope.files.json)
+
       });
       // Tour was exited
       intro.onexit(function() {
