@@ -8,6 +8,29 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
         console.log = function(){};
     }
 
+
+  //
+  //     // The DOI is valid. Create the doi.org URL for the API request.
+  //     var _url =  "http://dx.doi.org/10.1126/science.1143791";
+  //     // Make the HTTP Get request to doi.org and wait for a response.
+  //     $http({
+  //       "method": "GET",
+  //       "url": _url,
+  //       "headers": {"accept": "application/rdf+xml;q=0.5, application/citeproc+json;q=1.0"}
+  //     })
+  // .then(function (response) {
+  //         // We got a successful API response.
+  //         console.log("DOI Response object");
+  //         console.log(response);
+  //         // publication entry here.
+  //     }, function(response) {
+  //         // Something went wrong. There was an error making a GET request to the API
+  //         console.log("Unable to fetch DOI data: ");
+  //         // console.log(response);
+  //         alert("HTTP 404: No data found for that DOI");
+  //     });
+
+
     // Ontology: archiveType, units, inferredVariableType, proxyObservationType. These fields are pulled from the
     // LinkedEarth Wiki by index.js and served to us on page load. If the response is bad, we use fall back data.
     $scope.ontology = {};
@@ -91,7 +114,7 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
                 // Error, use our hardcoded lists as a fallback.
                 $scope.ontology = create.getOntologyBackup();
             });
-  };
+    };
     // Call the function during page load
     initOntology();
 
@@ -602,12 +625,13 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       if (_match){
         // The DOI is valid. Create the doi.org URL for the API request.
         var _url =  "http://dx.doi.org/" + _doi;
+        console.log(_url);
         // Make the HTTP Get request to doi.org and wait for a response.
-        $http({
-          "method": "GET",
-          "url": _url,
-          "headers": {"accept": "application/rdf+xml;q=0.5, application/citeproc+json;q=1.0"}
-        })
+        $http.post("/api/doi", {"url": _url})
+            // $http({
+            //           "method": "GET",
+            //           "url": _url,
+            //           "headers": {"accept": "application/rdf+xml;q=0.5, application/citeproc+json;q=1.0"}
           .then(function (response) {
             // We got a successful API response.
             console.log("DOI Response object");

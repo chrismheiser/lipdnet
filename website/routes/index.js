@@ -18,6 +18,7 @@ if(!dev){
     console.log = function(){};
 }
 
+
 // HELPERS
 
 /**
@@ -1956,6 +1957,56 @@ router.post("/api/tsid/register", function(req, res, next){
     logger.info(err);
     res.end();
   }
+});
+
+/**
+ * Use a DOI url to retrieve data from doi.org API.
+ *
+ * Ex:
+ * req.body.url = http://dx.doi.org/10.1126/science.1143791
+ *
+ * @param   {Object}  req   Request object
+ * @return  {Object}  res   Response object
+ *                          Success: Publication data {Object}
+ *                          Failure: Error {String}
+ */
+router.post("/api/doi", function(req, res, next){
+    try {
+        // Pack up the options that we want to give the request module
+        var url = req.body.url;
+        logger.info("Retreiving DOI : " + url);
+        var options = {
+            uri:     url,
+            method: 'GET',
+            timeout: 3000,
+            headers: {"accept": "application/rdf+xml;q=0.5, application/citeproc+json;q=1.0"}
+        };
+
+        // If we're on the production server, then we need to add in the proxy option
+        if (!dev){
+            options.proxy = "http://rishi.cefns.nau.edu:3128";
+        }
+
+        request(options, function (error, response, body) {
+
+            // Did the process complete and respond with data?
+            if (response.statusCode === 200) {
+                logger.info("Success");
+                res.status(200).send(response.body);
+            } else{
+                logger.info("Error: Status " + response.statusCode);
+                res.status(404).send("Error: 404");
+                res.end();
+
+            }
+
+        });
+    } catch(err){
+        logger.info("/api/doi exception: " + err);
+        res.status(500).send("Error: Exception");
+        res.end();
+    }
+
 });
 
 module.exports = router;
