@@ -89,5 +89,5 @@ div(layout='', layout-padding='', layout-sm='column')
 div(layout='', layout-padding='', layout-sm='column' ng-if="pageMeta.noaaReady")
 	md-input-container(flex='', ng-class="md-input-has-value")
 		label NASA GCMD Location *
-		input(ng-model='files.json.geo.properties.gcmdLocation')
+		input(ng-model='files.json.geo.gcmdLocation')
 		md-tooltip {{getTooltip("geo", "gcmdLocation")}}

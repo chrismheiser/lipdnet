@@ -207,6 +207,16 @@ function SpreadsheetCtrl($scope){
                   // Get the current column count from the spreadsheet and set that as the current column count.
                   $scope.$parent.files.csv[table.filename].cols = $scope.hot.countCols();
               }
+
+              // 03.07.20 - issue #77
+              // Deleting a column leaves a gap in the column "number" fields.
+              // i.e. If there are 3 columns and we delete column 2, we now have column numbers "1" and "3"
+              // We need to re-index  the "number" field on each column so there are no gaps.
+              for(var _n = 0; _n < table.columns.length; _n++ ){
+                  // adjust index since "number" field is 1-indexed.
+                  table.columns[_n]["number"] = _n + 1;
+              }
+
           }
       } catch (err){
           console.log(err);
