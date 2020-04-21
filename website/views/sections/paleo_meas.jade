@@ -18,6 +18,7 @@ div(ng-repeat='entry in files.json.paleoData track by $index' layout-wrap="" ng-
                             include ./spreadsheet_csv.jade
                     .md-toolbar-tools(style="background-color:white;")
                         span(flex)
+                        button.green-btn-off(type="button" ng-click="duplicateTable(entry.measurementTable, $index)"  style="padding-right: 2px;") Duplicate Table
                         button.green-btn-off(type="button" ng-click="refreshRender()"  style="padding-right: 2px;") Refresh Spreadsheet
                         button.green-btn-off(type="button" ng-click="addColumn(entry2)" style="padding-right: 2px;") Add Column
                         button.red-btn-off(type="button" ng-click="removeColumn(entry2, null)"  style="padding-right: 2px;") Remove Column

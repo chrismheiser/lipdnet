@@ -8,7 +8,7 @@
  * @param $scope
  * @constructor
  */
-function SpreadsheetCtrl($scope){
+function SpreadsheetCtrl($scope, toaster){
   $scope.options = {};
 
 
@@ -101,7 +101,38 @@ function SpreadsheetCtrl($scope){
     }
   };
 
-  /**
+
+
+
+
+    /**
+     * Duplicate an existing table.
+     *
+     * @param  {Object}  tables   One data table
+     * @param  {Number}  source_idx     The index of the target column to duplicate
+     * @return {None}            New column is pushed onto data table.
+     */
+    $scope.duplicateTable = function(tables, source_idx){
+        // Create a copy of the object, otherwise the two columns will be bound
+        var _dup = JSON.parse(JSON.stringify(tables[source_idx]));
+        // Turn off the toggle, so that the new column doesn't try to open. No two columns open at once!
+        _dup.tmp.toggle = false;
+        tables[source_idx].tmp.toggle = false;
+        // Create a new TSid for the new column
+        for (var _i = 0; _i < _dup.columns.length; _i++){
+            _dup.columns[_i].TSid = misc.generateTSid();
+        }
+        // Put the duplicate column in the table
+        tables.push(_dup);
+        // Show a notification so the user knows something happened.
+        toaster.pop('success', "Duplicated table", "", 4000);
+    };
+
+
+
+
+
+    /**
    * Add a column to a data table.
    *
    * @param  {Object}  table   Table metadata
