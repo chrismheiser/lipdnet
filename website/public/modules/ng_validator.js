@@ -246,7 +246,7 @@ var lipdValidator = (function(){
         return {"files": files, "tsids_generated": _generated_count};
       };
 
-      // Revalidate to remove TSid errors
+      // Re-validate to remove TSid errors
       // console.log(_files);
       cb(populateTSids1(_files));
     }),
@@ -1074,6 +1074,8 @@ var lipdValidator = (function(){
           var metaCt = columns.length;
           // edge case: ensemble table that has "two" columns, but actual column 2 is a list of columns.
           if (csvCt !== metaCt) {
+            console.log(filename);
+            console.log(columns);
             // column counts don't match. Do we have two columns? Might be an ensemble table
             if (columns.length === 1){
               if (Array.isArray(columns[0].number)){
@@ -1265,7 +1267,7 @@ var lipdValidator = (function(){
           if (errType === "warn") {
             feedback.wrnCt++;
             feedback.wrnMsgs.push(msg);
-          } else if (key === "TSid") {
+          } else if (key === "TSid" && errType === "err") {
             // TSid errors are tallied into a counter, because we want to consolidate into one error message.
             feedback.missingTsidCt++;
             feedback.tsidMsgs.push(msg);
