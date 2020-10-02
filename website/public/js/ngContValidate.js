@@ -725,7 +725,7 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
               _url = "http://localhost:3000/" + mode + "/" + _fileID;
           } else {
               // Production mode download link
-              _url = "http://www.lipd.net/" + mode + "/" + _fileID;
+              _url = "https://lipd.net/" + mode + "/" + _fileID;
           }
           // Is there a callback?
           if(cb){
