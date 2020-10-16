@@ -16,16 +16,6 @@
                                     md-tooltip Don't see the key you want? Type in the box and press enter
                                 div(layout='row', layout-wrap='' ng-repeat='key in custom')
                                     md-checkbox(ng-checked='exists(key)', ng-click='toggle(key)') {{key}}
-                                h4(ng-if="required") REQUIRED
-                                div(layout='row', layout-wrap='' ng-repeat='key in required')
-                                    md-checkbox(ng-checked='exists(key)', ng-click='toggle(key)') {{key}}
-                                h4(ng-if="standard") STANDARD
-                                div(layout='row', layout-wrap='' ng-repeat="key in standard")
-                                    md-checkbox(ng-checked='exists(key)', ng-click='toggle(key)') {{key}}
-
-                                h4(ng-if="optional") OPTIONAL
-                                div(layout='row', layout-wrap='' ng-repeat='key in optional')
-                                    md-checkbox(ng-checked='exists(key)', ng-click='toggle(key)') {{key}}
 
             .col-md-8
                 div(ng-repeat="(k,v) in entry" layout='', layout-padding='', layout-sm='column')

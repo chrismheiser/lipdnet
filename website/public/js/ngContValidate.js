@@ -279,7 +279,7 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       // the 'custom' field stores the name of the field that the user requested to add.
       var _field = entry.tmp.custom;
       // Adding an entry that is a nested array item
-      if(["interpretation"].indexOf(_field) !== -1){
+      if(["interpretation", "inCompilation"].indexOf(_field) !== -1){
         $scope.showModalBlock(entry, true, _field, 0);
       }
       // Adding an entry that is a nested object item
@@ -1371,6 +1371,10 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
    * @return  {Object}   entry    Data column, with the target field data modified
    */
     $scope.showModalBlock = function(entry, _create, _key, idx){
+
+      // Determine which modal template to use. 
+      var templateUrl = _key === "inCompilation"? "modal-block-nested" : "modal-block"
+      
       // If an index is given, that means the data belongs to an array
       // If an index is not given, that means it's an object, so leave arrType null.
       var arrType = idx !== null;
@@ -1391,11 +1395,12 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
         // Push empty object onto the array.
         _data.push({});
       }
+
       // Set options to pass to modal controller
       $scope.modal = {"data": _data, "create": _create, "key": _key, "idx": idx};
       // Use the uib module to open the modal
       var modalInstance = $uibModal.open({
-        templateUrl: 'modal-block',
+        templateUrl: templateUrl,
         controller: 'ModalCtrlBlock',
         size: "lg",
         resolve: {

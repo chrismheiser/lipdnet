@@ -614,6 +614,15 @@ img.pull-right, .align-right {
 media
 ============================= */
 
+@media (max-width: 1160px){
+	/* collapse from two column to single column */
+	.span50 {
+		display: block !important;
+		width: 100% !important ;
+	}
+
+}
+
 @media (min-width: 768px) and (max-width: 979px) {
 
 	a.detail{
@@ -700,6 +709,7 @@ media
 		margin-bottom:20px;
   }
 
+
 }
 
 @media (max-width: 480px) {
@@ -716,6 +726,7 @@ media
 		margin:0 auto;
 		text-align:center;
 	}
+
 }
 
 @media (max-width: 360px) {
@@ -725,6 +736,7 @@ media
   .navbar-brand{
     color: #111
   }
+
 }
 
 
