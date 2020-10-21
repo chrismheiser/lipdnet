@@ -746,7 +746,7 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
    */
     $scope.isArr = function(field){
         // Data is an Array if the field is in this list.
-        return ["interpretation"].includes(field);
+        return ["interpretation", "inCompilation"].includes(field);
     };
 
   /**
@@ -1373,8 +1373,8 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
     $scope.showModalBlock = function(entry, _create, _key, idx){
 
       // Determine which modal template to use. 
-      var templateUrl = _key === "inCompilation"? "modal-block-nested" : "modal-block"
-      
+      var templateUrl = "modal-block";
+
       // If an index is given, that means the data belongs to an array
       // If an index is not given, that means it's an object, so leave arrType null.
       var arrType = idx !== null;

@@ -9,8 +9,8 @@
                     .md-padding
                         div(layout='row', layout-wrap='')
                             div(flex='25', flex-gt-sm='50', layout='column')
-                                h4 CUSTOM
-                                md-input-container(flex="")
+                                h4(ng-if="custom") CUSTOM
+                                md-input-container(flex="" ng-if="custom")
                                     label Add custom
                                     input(ng-model="customField" ng-keydown="$event.keyCode == 13 && toggle(null)")
                                     md-tooltip Don't see the key you want? Type in the box and press enter
