@@ -532,8 +532,8 @@ input[type=number]::-webkit-outer-spin-button {
 scroll bars.
  */
 ::-webkit-scrollbar {
-    height: 4px;              /* height of horizontal scrollbar ← You're missing this */
-    width: 4px;               /* width of vertical scrollbar */
+    height: 7px;              /* height of horizontal scrollbar ← You're missing this */
+    width: 5px;               /* width of vertical scrollbar */
 }
 
 

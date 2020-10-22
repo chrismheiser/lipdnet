@@ -746,7 +746,7 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
    */
     $scope.isArr = function(field){
         // Data is an Array if the field is in this list.
-        return ["interpretation", "inCompilation"].includes(field);
+        return ["interpretation", "inCompilationBeta"].includes(field);
     };
 
   /**
@@ -766,7 +766,7 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
    * @param    {String}    field   Field name
    * @return   {Boolean}           True for auto-complete, False for other input type
    */
-    $scope.isOntology = function(field){
+    $scope.isOntology = function(entry){
       // These fields use an auto complete input box with suggested data from the linked earth wiki ontology.
       return ["proxyObservationType", "inferredVariableType", "variableType"].includes(field);
   };

@@ -40,7 +40,7 @@ angular.module('ngValidate').controller('ModalCtrlBlock', function ($scope, $uib
       "integrationTimeUnits", "mathematicalRelation", "integrationTimeUncertaintyType"];
     $scope.selected = ["variable", "direction", "scope", "variableDetail", "seasonality", "rank"];
     $scope.initial = ["variable", "direction", "scope", "variableDetail", "seasonality", "rank"];
-  } else if (data.key === "inCompilation"){
+  } else if (data.key === "inCompilationBeta"){
     $scope.required = ["compilationName", "compilationVersion"];
     $scope.custom = false; // don't allow any custom fields. disable custom. 
   } else {
@@ -60,7 +60,7 @@ angular.module('ngValidate').controller('ModalCtrlBlock', function ($scope, $uib
   // Add a new entry to the given array
   $scope.addObjtoArr = function(arr){
     var newObj = {};
-    if($scope.key === "inCompilation"){
+    if($scope.key === "inCompilationBeta"){
       for(var name in $scope.inCompilation){
         newObj[name] = "";
       }

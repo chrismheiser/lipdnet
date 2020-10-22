@@ -9,7 +9,7 @@ div.btn-row(layout="row")
         button.table-tab-btn-off(type="button" ng-if="!column.tmp.toggle" ng-click="expandEntry(entry2.columns, column)") Column {{$index}}:<br />{{column.variableName}}
 
 div(layout="column" ng-repeat='entry3 in entry2.columns track by $index' layout-wrap="")
-    md-card(ng-if="entry3.tmp.toggle")
+    md-card(ng-if="entry3.tmp.toggle" style="width:99%;")
         md-subheader.md-primary Column {{$index}}: {{entry3.variableName}}
         div(layout='row', layout-padding='', layout-sm='column')
             div(flex)
@@ -74,11 +74,11 @@ div(layout="column" ng-repeat='entry3 in entry2.columns track by $index' layout-
                 md-subheader.md-primary Additional fields
                 div.btn-row(layout="row" style="overflow: scroll;")
                     // Button row for fields that hold nested data inside Objects.
-                    div(ng-repeat="(k,v) in entry3" ng-if="isObject(k)" layout='', layout-padding='', layout-sm='column' style="padding: 0px 2px 2px 2px !important;")
+                    div(ng-repeat="(k,v) in entry3" ng-if="isObject(k)" layout='', layout-padding='', layout-sm='row' style="padding: 0px 2px 2px 2px !important;")
                         button.table-tab-btn-off(type="button" ng-click="showModalBlock(entry3, false, k, null)") {{k}}
 
                     // Button row for fields that hold nested data inside Arrays
-                    div(ng-repeat="(k, entry4) in entry3" ng-if="isArr(k)" layout='', layout-padding='', layout-sm='column' style="padding: 0px 2px 2px 2px !important;")
+                    div(ng-repeat="(k, entry4) in entry3" ng-if="isArr(k)" layout='', layout-padding='', layout-sm='row' style="padding: 0px 2px 2px 2px !important;")
                         button.table-tab-btn-off(ng-repeat="i in entry4 track by $index" type="button" ng-click="showModalBlock(entry3, false, k, $index)") {{k}} {{$index+1}}
 
                 div(style="overflow: scroll; height: 550px;")
