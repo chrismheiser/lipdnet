@@ -766,7 +766,7 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
    * @param    {String}    field   Field name
    * @return   {Boolean}           True for auto-complete, False for other input type
    */
-    $scope.isOntology = function(entry){
+    $scope.isOntology = function(field){
       // These fields use an auto complete input box with suggested data from the linked earth wiki ontology.
       return ["proxyObservationType", "inferredVariableType", "variableType"].includes(field);
   };

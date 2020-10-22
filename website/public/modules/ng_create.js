@@ -886,7 +886,7 @@ var create = (function(){
     fieldsList: (function(){
       return [ "calibration", "hasResolution", "inferredVariableType", "interpretation", "measurementMaterial",
           "method", "notes", "physicalSample", "proxy", "proxyObservationType", "sensorGenus", "sensorSpecies",
-          "takenAtDepth", "variableType", "inCompilation"
+          "takenAtDepth", "variableType", "inCompilationBeta"
       ];
     }),
 
