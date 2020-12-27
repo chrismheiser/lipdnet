@@ -1276,16 +1276,16 @@ router.post("/remote", function(req, res, next){
             timeout: 3000,
             responseType: "blob",
             encoding: null,
+            followAllRedirects: true,
+            rejectUnauthorized: false
         };
 
         // If we're on the production server, then we need to add in the proxy option
         if (!dev){
             options.proxy = "http://rishi.cefns.nau.edu:3128";
         }
-
         // Send the request to get the remote LiPD file.
         request(options, function (error, response, body) {
-
             // If the response is a string, then it is likely an error message.
             if (typeof body === 'string' || body instanceof String) {
                 // If the response code is a 502, then something is wrong with the server and it needs to be looked at.
