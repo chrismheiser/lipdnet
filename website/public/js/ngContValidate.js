@@ -578,6 +578,8 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
         _dup.tmp.toggle = false;
         // Create a new TSid for the new column
         _dup.TSid = misc.generateTSid();
+        // Give the column a new number. 
+        _dup.number = entry.columns.length + 1
         // Put the duplicate column in the table
         entry.columns.push(_dup);
         // Show a notification so the user knows something happened.
@@ -1600,6 +1602,7 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
                               $scope.validate();
                               $scope.files.json = create.initColumnTmp($scope.files.json);
                               $scope.files.json = create.initMissingArrs($scope.files.json);
+                              $scope.files.json = create.minorUpdates($scope.files.json);
                               $scope.$broadcast('newUpload', $scope.files);
                           }
                       }); // end sortBeforeValidate

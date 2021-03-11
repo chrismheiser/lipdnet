@@ -71,7 +71,7 @@ div(layout='', layout-padding='', layout-sm='column')
 	md-input-container(flex='', ng-class="md-input-has-value")
 		label(ng-if="pageMeta.noaaReady") Site Name *
 		label(ng-if="!pageMeta.noaaReady") Site Name
-		input(ng-model='files.json.geo.properties.siteName' aria-label="Site Name")
+		input(ng-model='files.json.geo.siteName' aria-label="Site Name")
 		md-tooltip {{getTooltip("geo", "siteName")}}
 
 	md-input-container(flex='', ng-class="md-input-has-value")

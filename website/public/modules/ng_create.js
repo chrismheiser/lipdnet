@@ -1654,6 +1654,17 @@ var create = (function(){
 
     }),
 
+    minorUpdates: (function(jsn){
+      try{
+        if("siteName" in jsn.geo.properties){
+          jsn.geo.siteName = jsn.geo.properties.siteName;
+          delete jsn.geo.properties.siteName;
+        }
+      } catch(err){}
+      
+      return(jsn);
+    })
+
   }; // end return
 
 }());
