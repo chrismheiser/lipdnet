@@ -3,6 +3,11 @@ md-toolbar.md-hue-1
     span Root
 
 div(layout='', layout-padding='', layout-sm='column')
+
+
+  div(layout='', layout-padding='', layout-sm='column' style="float: right;")
+  button.green-btn-off(ng-click='testAPI()' style="margin: 1.5em;" type="button") Test API
+
   md-input-container(flex="")
     label LiPD Version *
     input(ng-model='files.json.lipdVersion' disabled)

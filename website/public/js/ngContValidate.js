@@ -231,6 +231,20 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       $scope.downloadZip(null);
     });
 
+    $scope.testAPI = function(){
+      _params = "inputstr=Wood&variableType=measured";
+      console.log(_params);
+      $http.get("/api/predictNextValue/" + _params)
+        .then(function (response) {
+          // We got a successful API response.
+          console.log("/predictNextValue ctrl res: ");
+          console.log(response);
+        }, function(response) {
+          console.log("/predictNextValue response error");
+          alert("/predictNextValue: API Response error");
+        });
+    };
+
   /**
    * Add an entry to any field that supports multiple entries. Acceptable fields are listed below.
    *

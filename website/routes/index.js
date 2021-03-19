@@ -2009,4 +2009,85 @@ router.post("/api/doi", function(req, res, next){
 
 });
 
+
+/**
+ * PaleoRec Predict Next Value. Hosted on PythonAnywhere Flask API
+ *
+ * @param   {Object}   req   Request object
+ * @param   {String}   res   Response string
+ * @param   {Function} next  Callback, not in use
+ * @return  none             List of items for next recommendation
+ */
+router.get("/api/predictNextValue/:url", function(req, res, next){
+    try{
+      var params = req.params.url;
+      console.log(params);
+      console.log("Sending /predictNextValue request: " + params)
+
+      try {
+        // Bring in the request module to work some magic
+        var request = require('request');
+        // Pack up the options that we want to give the request module
+        var options = {
+          uri: "http://cheiser.pythonanywhere.com/predictNextValue?" + params,
+          method: 'GET',
+          timeout: 3000
+        };
+        // If we're on the production server, then we need to add in the proxy option
+        if (!dev){
+          options.proxy = "http://rishi.cefns.nau.edu:3128";
+        }
+        // Send the request to the NOAA API
+        console.log("Sending request /api/predictNextValue");
+        request(options, function (error, response, body) {
+          console.log("PythonAnywhere API: Response received");
+          console.log(typeof response);
+          if(dev){
+              if (typeof response !== "undefined"){
+                  console.log("Response Status: ", response.statusCode);
+              } else {
+                  console.log("No response");
+              }
+              console.log("Response error: ");
+              console.log(error);
+
+              //{"result":{"0":["ARS","Core","Trsgi","Rbar","SE"]}}
+              console.log("Response Body: ");
+              console.log(body);
+          }
+
+            // Did the process complete and respond with data?
+            if (!error && response.statusCode === 200) {
+              // 200, good response
+              try {
+                // Write the NOAA data to the tmp folder as text files
+                console.log("200 response");
+                console.log(body)
+                res.status(200).send(body);
+              } catch(err){
+                // Something went wrong while trying to process the API response.
+                console.log("200 response, /predictNextValue error: ", err);
+                res.writeHead(500, "API Error: Invalid response", {'content-type' : 'text/plain'});
+                res.end();
+              }
+            } else{
+              // Something went wrong in the Python process and the API gave us a bad response.
+              console.log("API Error: Invalid response code", error);
+              res.writeHead(403, "API Error: Invalid response", {'content-type' : 'text/plain'});
+              res.end();
+            }
+        });
+      } catch(err){
+        console.log("/predictNextValue: catchall error");
+        res.writeHead(500, "/predictNextValue: catchall error", {'content-type' : 'text/plain'});
+        res.end();
+      }
+    } catch(err){
+      console.log("/predictNextValue: catchall error");
+      res.writeHead(500, "/predictNextValue: catchall error", {'content-type' : 'text/plain'});
+      res.end();
+    }
+  });
+  
+
 module.exports = router;
