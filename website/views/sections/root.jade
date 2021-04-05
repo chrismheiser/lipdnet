@@ -5,8 +5,52 @@ md-toolbar.md-hue-1
 div(layout='', layout-padding='', layout-sm='column')
 
 
-  div(layout='', layout-padding='', layout-sm='column' style="float: right;")
-  button.green-btn-off(ng-click='testAPI()' style="margin: 1.5em;" type="button") Test API
+  md-input-container(flex="")
+
+    div(layout='', layout-padding='', layout-sm='column' style="float: right;")
+    button.green-btn-off(ng-click='testAPI()' style="margin: 1.5em;" type="button") Test API
+
+div(layout='', layout-padding='', layout-sm='column')
+
+  md-input-container(flex="")
+
+    label variable type
+    input.mdautocomplete(type="text" list="variableType" ng-model="files.json.variableType" ng-model-options="{debounce:1000}" 
+      ng-change="predictNextValue('variableType', files.json.variableType)")              
+    datalist(id="variableType")
+      option(ng-repeat="entry in ['measured', 'inferred']" value="{{entry}}")  
+
+
+div(layout='', layout-padding='', layout-sm='column')
+
+  md-input-container(flex="")
+
+    label archive type
+    input.mdautocomplete(type="text" list="archiveType" ng-model="files.json.archiveType" ng-model-options="{debounce:1000}" ng-change="predictNextValue('archiveType', files.json.archiveType)")
+    datalist(id="archiveType")
+      option(ng-repeat="entry in ontology['archiveType']" value="{{entry}}")
+
+         
+div(layout='', layout-padding='', layout-sm='column' ng-show="files.json.archiveType")
+
+  md-input-container(flex="" )
+  
+    label  proxy obs type
+    input.mdautocomplete(type="text" list="proxyObsType" ng-model="files.json.proxyObservationType" ng-change="predictNextValue('proxyObservationType',files.json.proxyObservationType)")
+    datalist(id="proxyObsType")
+      option(ng-repeat="entry in paleorec['proxyObservationType']" value="{{entry}}")
+
+div(layout='', layout-padding='', layout-sm='column' ng-show="files.json.proxyObservationType" )
+
+  md-input-container(flex="")
+  
+    label  units
+    input.mdautocomplete(type="text" list="units" ng-model="files.json.units" ng-change="predictNextValue('units', files.json.units)")
+    datalist(id="units")
+      option(ng-repeat="entry in paleorec['units']" value="{{entry}}")
+
+
+div(layout='', layout-padding='', layout-sm='column')
 
   md-input-container(flex="")
     label LiPD Version *

@@ -215,6 +215,8 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
     // All files, w/ contents, found in the LiPD archive. Used in "feedback.jade"
     $scope.allFiles = [];
 
+
+
   /**
    * Listen for data merge event to $emit up to us from the MergeCtrl (ngMerge.js) on the Merge page. When this
    * happens, it means that the user triggered a download and we need to bring the data back here to use the
@@ -231,6 +233,8 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       $scope.downloadZip(null);
     });
 
+
+
     $scope.testAPI = function(){
       _params = "inputstr=Wood&variableType=measured";
       console.log(_params);
@@ -238,11 +242,120 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
         .then(function (response) {
           // We got a successful API response.
           console.log("/predictNextValue ctrl res: ");
-          console.log(response);
+          console.log(response.data.result);
         }, function(response) {
           console.log("/predictNextValue response error");
           alert("/predictNextValue: API Response error");
         });
+    };
+
+    $scope.paleorec = {};
+
+    $scope.predictNextValue = function(key, value){
+      // 1. archiveType -> proxyObservationType -> units
+      // 2. archiveType -> proxyObservationType -> interpretation/variable -> interpretation/VariableDetail -> 
+      //               -> inferredVariable -> inferredVariableUnits
+      var _flows = {
+        "archiveType": "proxyObservationType",
+        "proxyObservationType": "units",
+        "interpretationVariable": "interpretationVariableDetail",
+        "interpretationVariableDetail": "inferredVariable",
+        "inferredVariable": "inferredVariableUnits"
+      }
+      console.log("PREDICT NEXT VALUE");
+      console.log($scope.pr);
+      var _query = "inputstr=";
+
+      if($scope.files.json.archiveType){
+        _query += $scope.files.json.archiveType;
+      }
+      console.log("proxy Obs Type ");
+      console.log($scope.files.json.proxyObservationType);
+      if($scope.files.json.proxyObservationType){
+        _query = _query + "," + $scope.files.json.proxyObservationType;
+      }
+      console.log("Units: ")
+      console.log($scope.files.json.units);
+      if($scope.files.json.units && key === "units"){
+        _query = _query + "," + $scope.files.json.units;
+
+      } 
+
+      // else if ($scope.files.interpretationVariable && key === "interpretationVariable"){
+
+      // }
+
+      console.log("variable type: ");
+      console.log($scope.files.json.variableType);
+      if($scope.files.json.variableType){
+        _query += "&variableType=" + $scope.files.json.variableType;
+      }
+
+
+      console.log("QUERY");
+      console.log(_query);
+
+
+      // if(value !== "inferred" && value !== "measured"){
+      //   $scope.pr.push(value);
+      // }
+      // if(key === "archiveType"){
+      //   $scope.pr = [value, null, null, null, null, null]
+      // } else if (key === "proxyObservationType"){
+      //   $scope.pr = [$scope.pr[0], value, null, null, null, null]
+      // } else if (key === "units" || key === "interpretationVariable"){
+      //   $scope.pr = [$scope.pr[0], $scope.pr[1], value, null, null, null]
+      // } 
+      
+      // else if (key === "interpretationVariableDetail"){
+
+      // } else if (key === "inferredVariable"){
+
+      // } else if (key === "inferredVariableUnits"){
+
+      // }
+
+
+
+      if ($scope.files.json.archiveType){
+        // if($scope.files.json.variableType !== undefined){
+        //   _query += "&variableType=" + $scope.files.json.variableType;
+        // }
+        $http.get("/api/predictNextValue/" + _query)
+          .then(function (response) {
+            // We got a successful API response.
+            
+            console.log("/predictNextValue Response: ");
+            console.log(response.data.result[0]);
+            // Combine all the response results into a single array (where necessary)
+            let _all = [];
+            for(var _k in response.data.result){
+              console.log(_k);
+              console.log(response.data.result[_k]);
+              // _all.concat(response.data.result[_k]);
+              _all.push(...response.data.result[_k]);
+              console.log(_all);
+            }
+            _all = [...new Set(_all)]
+            console.log(_all);
+            if(key === "proxyObservationType"){
+              $scope.paleorec["units"] = _all;
+              $scope.paleorec["interpretationVariable"] = _all;
+            } else{
+              // use the current key to find the next key in the flow
+              // put the response data into the field for the next key. 
+              $scope.paleorec[_flows[key]] = _all;
+            }
+            console.log("PALEO REC CURRENT");
+            console.log($scope.paleorec);
+          }, function(response) {
+            console.log("/predictNextValue response error");
+            alert("/predictNextValue: API Response error");
+          });
+
+      }
+
+
     };
 
   /**
