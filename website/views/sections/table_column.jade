@@ -26,27 +26,61 @@ div(layout="column" ng-repeat='entry3 in entry2.columns track by $index' layout-
                         input(ng-model="entry3.TSid" disabled)
                         md-tooltip {{getTooltip("paleoData", "tsid")}}
 
+                div(layout='', layout-padding='', layout-sm='column')
+                    md-input-container(flex="")
+                        label Variable Type 
+                        input.mdautocomplete(type="text" list="variableType" ng-model="entry3.variableType" ng-change="predictNextValue('variableType', entry3)")              
+                        datalist(id="variableType")
+                            option(ng-repeat="entry in ['measured', 'inferred']" value="{{entry}}")  
 
                 div(layout='', layout-padding='', layout-sm='column')
+                    md-input-container(flex="")
+                        label Archive Type
+                        input.mdautocomplete(type="text" list="archiveType" ng-model="files.json.archiveType" ng-change="predictNextValue('archiveType', entry3)")
+                        datalist(id="archiveType")
+                            option(ng-repeat="entry in paleorec['archiveType']" value="{{entry}}")
 
-                    md-input-container(flex='', class="md-input-has-value")
-                        label Variable Type *
-                        // Use autocomplete - all cases
-                        input.mdautocomplete(type="text" ng-model="entry3.variableType"
-                        uib-typeahead="entry for entry in ontology['variableType'] | filter:$viewValue"
-                        typeahead-min-length="0" ng-blur="checkVarType(entry3)")
+                div(layout='', layout-padding='', layout-sm='column' ng-show="files.json.archiveType")
+                    md-input-container(flex="" )
+                        label  Proxy Observation Type
+                        input.mdautocomplete(type="text" list="proxyObsType" ng-model="entry3.proxyObservationType" ng-change="predictNextValue('proxyObservationType', entry3)")
+                        datalist(id="proxyObsType")
+                            option(ng-repeat="entry in entry3.tmp.paleorec['proxyObservationType']" value="{{entry}}")
 
-                        //input(ng-model="entry3.units")
-                        md-tooltip {{getTooltip("paleoData", "variableType")}}
+                div(layout='', layout-padding='', layout-sm='column' ng-show="entry3.proxyObservationType" )
+                    md-input-container(flex="")
+                        label  Units
+                        input.mdautocomplete(type="text" list="units" ng-model="entry3.units")
+                        datalist(id="units")
+                            option(ng-repeat="entry in entry3.tmp.paleorec['units']" value="{{entry}}")
+                
+                div(layout='', layout-padding='', layout-sm='column' ng-show="entry3.proxyObservationType")
+                    md-input-container(flex="")
+                        label  Interpretation Variable
+                        input.mdautocomplete(type="text" list="interpretationVariable" ng-model="entry3.interpretationVariable" ng-change="predictNextValue('interpretationVariable', entry3)")
+                        datalist(id="interpretationVariable")
+                            option(ng-repeat="entry in entry3.tmp.paleorec['interpretationVariable']" value="{{entry}}")
+                        
+                div(layout='', layout-padding='', layout-sm='column' ng-show="entry3.interpretationVariable" )
+                    md-input-container(flex="")
+                        label  Interpretation Variable Detail
+                        input.mdautocomplete(type="text" list="interpretationVariableDetail" ng-model="entry3.interpretationVariableDetail" ng-change="predictNextValue('interpretationVariableDetail', entry3)")
+                        datalist(id="interpretationVariableDetail")
+                            option(ng-repeat="entry in entry3.tmp.paleorec['interpretationVariableDetail']" value="{{entry}}")
 
-                    md-input-container(flex='', class="md-input-has-value")
-                        label Units *
-                        // Use autocomplete - all cases
-                        input.mdautocomplete(ng-if="ontology.units" type="text" ng-model="entry3.units"
-                        uib-typeahead="entry for entry in ontology.units | filter:$viewValue" typeahead-min-length="0")
-
-                        //input(ng-model="entry3.units")
-                        md-tooltip {{getTooltip("paleoData", "units")}}
+                div(layout='', layout-padding='', layout-sm='column' ng-show="entry3.interpretationVariableDetail" )
+                    md-input-container(flex="")
+                        label  Inferred Variable
+                        input.mdautocomplete(type="text" list="inferredVariable" ng-model="entry3.inferredVariable" ng-change="predictNextValue('inferredVariable', entry3)")
+                        datalist(id="inferredVariable")
+                            option(ng-repeat="entry in entry3.tmp.paleorec['inferredVariable']" value="{{entry}}")
+                
+                div(layout='', layout-padding='', layout-sm='column' ng-show="entry3.inferredVariable" )
+                    md-input-container(flex="")
+                        label  Inferred Variable Units
+                        input.mdautocomplete(type="text" list="inferredVariableUnits" ng-model="entry3.inferredVariableUnits")
+                        datalist(id="inferredVariableUnits")
+                            option(ng-repeat="entry in entry3.tmp.paleorec['inferredVariableUnits']" value="{{entry}}")
 
                 div(layout='', layout-padding='', layout-sm='column')
                     md-input-container(flex='', class="md-input-has-value")

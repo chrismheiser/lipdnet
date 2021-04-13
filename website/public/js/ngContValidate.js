@@ -31,9 +31,19 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
   //     });
 
 
-    // Ontology: archiveType, units, inferredVariableType, proxyObservationType. These fields are pulled from the
+    // Ontology: archiveType, proxyObservationType, units, inferredVariableType,  These fields are pulled from the
     // LinkedEarth Wiki by index.js and served to us on page load. If the response is bad, we use fall back data.
-    $scope.ontology = {};
+    $scope.paleorec = {};
+
+    var getArchiveTypes = (function(atl){
+      $http.get("/api/archiveTypes")
+        .then(function (response) {
+          // We got a successful API response.
+          $scope.paleorec['archiveType'] = response.data.result[0];
+        }, function(response) {
+          console.log("/api/archiveTypes response error");
+        });
+    })();
 
     // Each popover is displayed when hovering over the feedback "requirements met / not met" boxes in the playground.
     // The html data is fetched from ng_create and then rendered into the popover box.
@@ -85,9 +95,9 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       // Ontology: archiveType, units, inferredVariableType, proxyObservationType. These fields are pulled from the
       // LinkedEarth Wiki by index.js and served to us on page load. Data stored in $scope.ontology
       "NOAAdataType": create.noaaDataTypeList(),
-      "archiveType": $scope.ontology.archiveType,
-      "infVarType": $scope.ontology.infVarType,
-      "proxyObsType": $scope.ontology.proxyObsType,
+      // "archiveType": $scope.ontology.archiveType,
+      // "infVarType": $scope.ontology.infVarType,
+      // "proxyObsType": $scope.ontology.proxyObsType,
       // Time Unit used in NOAA section
       "timeUnit": create.timeUnitList(),
       // Years list used in Publication section
@@ -103,20 +113,20 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
    *
    * Process:  LinkedEarth Wiki > Node > data cleaned up, organized, stored > sent to front end (here)
    */
-    var initOntology = function () {
-        // Get the ontology data from the node backend
-        $http.get("/api/ontology")
-            .then(function(response) {
-              // Success. Set the data to the scope directly
-                $scope.ontology = response.data;
-            }, function myError(err) {
-                console.log(err);
-                // Error, use our hardcoded lists as a fallback.
-                $scope.ontology = create.getOntologyBackup();
-            });
-    };
-    // Call the function during page load
-    initOntology();
+    // var initOntology = function () {
+    //     // Get the ontology data from the node backend
+    //     $http.get("/api/ontology")
+    //         .then(function(response) {
+    //           // Success. Set the data to the scope directly
+    //             $scope.ontology = response.data;
+    //         }, function myError(err) {
+    //             console.log(err);
+    //             // Error, use our hardcoded lists as a fallback.
+    //             $scope.ontology = create.getOntologyBackup();
+    //         });
+    // };
+    // // Call the function during page load
+    // initOntology();
 
     // NOT CURRENTLY IN USE
     $scope.fields = create.defaultColumnFields();
@@ -234,27 +244,14 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
     });
 
 
-
-    $scope.testAPI = function(){
-      _params = "inputstr=Wood&variableType=measured";
-      console.log(_params);
-      $http.get("/api/predictNextValue/" + _params)
-        .then(function (response) {
-          // We got a successful API response.
-          console.log("/predictNextValue ctrl res: ");
-          console.log(response.data.result);
-        }, function(response) {
-          console.log("/predictNextValue response error");
-          alert("/predictNextValue: API Response error");
-        });
-    };
-
-    $scope.paleorec = {};
-
-    $scope.predictNextValue = function(key, value){
-      // 1. archiveType -> proxyObservationType -> units
-      // 2. archiveType -> proxyObservationType -> interpretation/variable -> interpretation/VariableDetail -> 
-      //               -> inferredVariable -> inferredVariableUnits
+    $scope.predictNextValue = function(key, entry){
+      // Flow 1
+      // archiveType -> proxyObservationType -> units
+      //
+      // Flow 2
+      // archiveType -> proxyObservationType -> interpretation/variable -> 
+      //    interpretation/VariableDetail -> inferredVariable -> inferredVariableUnits
+      //
       var _flows = {
         "archiveType": "proxyObservationType",
         "proxyObservationType": "units",
@@ -262,100 +259,113 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
         "interpretationVariableDetail": "inferredVariable",
         "inferredVariable": "inferredVariableUnits"
       }
-      console.log("PREDICT NEXT VALUE");
-      console.log($scope.pr);
+      var _rm_chain = {
+        "archiveType": ["proxyObservationType", "units", "interpretationVariable", "interpretationVariableDetail", "inferredVariable", "inferredVariableUnits"],
+        "proxyObservationType": ["units", "interpretationVariable", "interpretationVariableDetail", "inferredVariable", "inferredVariableUnits"],
+        "units": ["interpretationVariable", "interpretationVariableDetail", "inferredVariable", "inferredVariableUnits"],
+        "interpretationVariable": ["interpretationVariableDetail", "inferredVariable", "inferredVariableUnits"],
+        "interpretationVariableDetial": ["inferredVariable", "inferredVariableUnits"],
+        "inferredVariable": ["inferredVariableUnits"],
+        "inferredVariableUnits": []
+      };
+
+      // If the user moves backwards in the chain process (makes a different selection on a previous field), 
+      // remove the subsequent fields in the chain
+      // for (var _key in _rm_chain){
+      //   if(key === _key){
+      //     entry[key] = null;
+      //   }
+      // };
+
+      // Start the Query string, and build on it with whatever data is available.
       var _query = "inputstr=";
 
-      if($scope.files.json.archiveType){
-        _query += $scope.files.json.archiveType;
-      }
-      console.log("proxy Obs Type ");
-      console.log($scope.files.json.proxyObservationType);
-      if($scope.files.json.proxyObservationType){
-        _query = _query + "," + $scope.files.json.proxyObservationType;
-      }
-      console.log("Units: ")
-      console.log($scope.files.json.units);
-      if($scope.files.json.units && key === "units"){
-        _query = _query + "," + $scope.files.json.units;
+      // console.log("PaleoRec: BEFORE");
+      // console.log(entry);
+      // if (entry){
+      //   console.log(entry.tmp.paleorec);
+      // }else {
+      //   console.log($scope.paleorec);
+      // }
 
+      // Do this if you're at the root level doing ArchiveType
+      if (key === "archiveType" && entry === null){
+        _query += $scope.files.json.archiveType;
       } 
 
-      // else if ($scope.files.interpretationVariable && key === "interpretationVariable"){
+      // Do this if you're at the column level
+      else {
 
-      // }
+        // Reset the paleorec if we're choosing a new archiveType
+        if (key === "archiveType"){
+          entry.tmp.paleorec = {};
+          entry.tmp.paleorec.archiveType = $scope.files.json.archiveType;
+        }
 
-      console.log("variable type: ");
-      console.log($scope.files.json.variableType);
-      if($scope.files.json.variableType){
-        _query += "&variableType=" + $scope.files.json.variableType;
+        if($scope.files.json.archiveType){
+          _query += $scope.files.json.archiveType;
+        }
+        if(entry.proxyObservationType){
+          _query = _query + "," + entry.proxyObservationType;
+        }
+        if (entry.interpretationVariable){
+          _query = _query + "," + entry.interpretationVariable;
+        }
+        if (entry.interpretationVariableDetail){
+          _query = _query + "," + entry.interpretationVariableDetail;
+        }
+        if (entry.inferredVariable){
+          _query = _query + "," + entry.inferredVariable;
+        }
+        if (entry.inferredVariableUnits){
+          _query = _query + "," + entry.inferredVariableUnits;
+        }
+  
+        // Save the VariableType for last, since this is an optional piece.
+        if(entry.variableType){
+          _query += "&variableType=" + entry.variableType;
+        }
+
       }
 
+      // console.log("QUERY");
+      // console.log(_query);
 
-      console.log("QUERY");
-      console.log(_query);
-
-
-      // if(value !== "inferred" && value !== "measured"){
-      //   $scope.pr.push(value);
-      // }
-      // if(key === "archiveType"){
-      //   $scope.pr = [value, null, null, null, null, null]
-      // } else if (key === "proxyObservationType"){
-      //   $scope.pr = [$scope.pr[0], value, null, null, null, null]
-      // } else if (key === "units" || key === "interpretationVariable"){
-      //   $scope.pr = [$scope.pr[0], $scope.pr[1], value, null, null, null]
-      // } 
-      
-      // else if (key === "interpretationVariableDetail"){
-
-      // } else if (key === "inferredVariable"){
-
-      // } else if (key === "inferredVariableUnits"){
-
-      // }
-
-
-
+      // Is there an ArchiveType? Then call the API. This is the minimum item we need to start API calls. 
       if ($scope.files.json.archiveType){
-        // if($scope.files.json.variableType !== undefined){
-        //   _query += "&variableType=" + $scope.files.json.variableType;
-        // }
+        // Add the query to the URL GET request. (This goes to the backend nodejs, before sending out to the API)
         $http.get("/api/predictNextValue/" + _query)
           .then(function (response) {
-            // We got a successful API response.
-            
+            // Successful response.
             console.log("/predictNextValue Response: ");
-            console.log(response.data.result[0]);
-            // Combine all the response results into a single array (where necessary)
-            let _all = [];
-            for(var _k in response.data.result){
-              console.log(_k);
-              console.log(response.data.result[_k]);
-              // _all.concat(response.data.result[_k]);
-              _all.push(...response.data.result[_k]);
-              console.log(_all);
-            }
-            _all = [...new Set(_all)]
-            console.log(_all);
+            console.log(response);
+
+            // Two result arrays : Place results in units and interpretation variable
             if(key === "proxyObservationType"){
-              $scope.paleorec["units"] = _all;
-              $scope.paleorec["interpretationVariable"] = _all;
-            } else{
+              entry.tmp.paleorec["units"] = response.data.result[0];
+              entry.tmp.paleorec["interpretationVariable"] = response.data.result[1];
+            } else {
               // use the current key to find the next key in the flow
               // put the response data into the field for the next key. 
-              $scope.paleorec[_flows[key]] = _all;
+              if (entry === null){
+                $scope.paleorec[_flows[key]] = response.data.result[0];
+              } else {
+                entry.tmp.paleorec[_flows[key]] = response.data.result[0];
+              }
             }
-            console.log("PALEO REC CURRENT");
-            console.log($scope.paleorec);
+
+            // console.log("PALEOREC AFTER");
+            // console.log(entry);
+            // if (!entry){
+            //   console.log($scope.paleorec);
+            // }else {
+            //   console.log(entry.tmp.paleorec);
+            // }
           }, function(response) {
             console.log("/predictNextValue response error");
             alert("/predictNextValue: API Response error");
           });
-
       }
-
-
     };
 
   /**
@@ -405,26 +415,39 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
     $scope.addColumnField = function(entry){
       // the 'custom' field stores the name of the field that the user requested to add.
       var _field = entry.tmp.custom;
-      // Adding an entry that is a nested array item
-      if(["interpretation", "inCompilation"].indexOf(_field) !== -1){
-        $scope.showModalBlock(entry, true, _field, 0);
-      }
-      // Adding an entry that is a nested object item
-      else if (["calibration", "hasResolution", "physicalSample", "measuredOn"].indexOf(_field) !== -1){
-        $scope.showModalBlock(entry, true, _field, null);
-      }
-      // Adding any regular field
-      else if(!entry.hasOwnProperty(_field)){
-        if(_field.toLowerCase() === "tsid"){
-            $scope.showModalAlert({"title": "Automated field", "message": "You may not add, remove, or edit fields that are automatically generated"});
-        } else {
-            entry[_field] = "";
+      try{
+        let _field_lower_no_space = _field.replace(/\s+/g,'').toLowerCase();
+      } catch{};
+
+      // Items that are added via paleorec in a specific order. Dont allow to be added manually
+      if(["archivetype", "proxyobservationtype", "units", "inferredvariableunits", "inferredvariable", "interpretationvariable", "interpretationvariabledetail"].indexOf(_field_lower_no_space) !== -1){
+        $scope.showModalAlert({"title": "Cannot add that field manually", "message": "This field is added via an automated flows. \
+         Please complete one of the two flows below to get to your field.  \
+         1. archiveType -> proxyObservationType -> units \
+         2. archiveType -> proxyObservationType -> interpretation/variable -> interpretation/VariableDetail -> inferredVariable -> inferredVariableUnits"});
+      } else {
+        // Adding an entry that is a nested array item
+        if(["proxyobservationtype", "incompilation"].indexOf(_field_lower_no_space) !== -1){
+          $scope.showModalBlock(entry, true, _field, 0);
         }
-      } else if(entry.hasOwnProperty(_field)){
-          $scope.showModalAlert({"title": "Duplicate entry", "message": "That field already exists in this column."});
+        // Adding an entry that is a nested object item
+        else if (["calibration", "hasresolution", "physicalsample", "measuredon"].indexOf(_field_lower_no_space) !== -1){
+          $scope.showModalBlock(entry, true, _field, null);
+        }
+        // Adding any regular field
+        else if(!entry.hasOwnProperty(_field)){
+          if(_field.toLowerCase() === "tsid"){
+              $scope.showModalAlert({"title": "Automated field", "message": "You may not add, remove, or edit fields that are automatically generated"});
+          } else {
+              entry[_field] = "";
+          }
+        } else if(entry.hasOwnProperty(_field)){
+            $scope.showModalAlert({"title": "Duplicate entry", "message": "That field already exists in this column."});
+        }
+        // Wipe the field input box to be ready for another use.
+        entry.tmp.custom = "";
       }
-      // Wipe the field input box to be ready for another use.
-      entry.tmp.custom = "";
+
     };
 
   /**
@@ -886,7 +909,7 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
    */
     $scope.isAutocomplete = function(field){
         // These fields use an auto complete input box with suggested data from the linked earth wiki ontology.
-        return ["takenAtDepth", "proxyObservationType", "inferredVariableType", "inferredFrom"].includes(field);
+        return ["takenAtDepth", "inferredVariableType", "inferredFrom"].includes(field);
     };
 
   /**
