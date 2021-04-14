@@ -941,11 +941,3 @@ table .progress {
     /*color:white;*/
 }
 
-
-.md-input-container .label:not(.md-container-ignore) {
-    bottom: 85% !important;
-}
-
-.md-input-container {
-    margin: 0px !important;
-}

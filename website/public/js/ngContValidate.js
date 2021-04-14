@@ -244,6 +244,28 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
     });
 
 
+    $scope.paleoRecShow = function(entry, prev_steps){
+      // Only show the given field, if the preceding fields are also showing
+      // prev_steps is an int of how many levels should be filled in before showing this current field. 
+      var _steps = ["archiveType", "proxyObservationType", "interpretationVariable", "interpretationVariableDetail",
+              "inferredVariable", "inferredVariableUnits"]
+      for (var _i=0; _i<prev_steps;_i++){
+        var _field = _steps[_i];
+        // archiveType is at root level. Check there for it. 
+        if (_field === "archiveType" && !$scope.files.json.hasOwnProperty("archiveType") || $scope.files.json.archiveType=== ""){
+          return false;
+        } else {
+          // Everything else is at column level. Check there for it.
+          if (!entry.hasOwnProperty(_field) || entry[_field] === ""){
+            return false;
+          }
+        }
+      }
+      // Everything is here, show the field.
+      return true;
+    };
+
+
     $scope.predictNextValue = function(key, entry){
       // Flow 1
       // archiveType -> proxyObservationType -> units
@@ -271,22 +293,15 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
 
       // If the user moves backwards in the chain process (makes a different selection on a previous field), 
       // remove the subsequent fields in the chain
-      // for (var _key in _rm_chain){
-      //   if(key === _key){
-      //     entry[key] = null;
-      //   }
-      // };
+      for (var _i in _rm_chain[key]){
+        try{
+          _field = _rm_chain[key][_i];
+          delete entry[_field];
+        }catch(err){}
+      };
 
       // Start the Query string, and build on it with whatever data is available.
       var _query = "inputstr=";
-
-      // console.log("PaleoRec: BEFORE");
-      // console.log(entry);
-      // if (entry){
-      //   console.log(entry.tmp.paleorec);
-      // }else {
-      //   console.log($scope.paleorec);
-      // }
 
       // Do this if you're at the root level doing ArchiveType
       if (key === "archiveType" && entry === null){
@@ -328,9 +343,6 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
 
       }
 
-      // console.log("QUERY");
-      // console.log(_query);
-
       // Is there an ArchiveType? Then call the API. This is the minimum item we need to start API calls. 
       if ($scope.files.json.archiveType){
         // Add the query to the URL GET request. (This goes to the backend nodejs, before sending out to the API)
@@ -353,17 +365,10 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
                 entry.tmp.paleorec[_flows[key]] = response.data.result[0];
               }
             }
-
-            // console.log("PALEOREC AFTER");
-            // console.log(entry);
-            // if (!entry){
-            //   console.log($scope.paleorec);
-            // }else {
-            //   console.log(entry.tmp.paleorec);
-            // }
+            
           }, function(response) {
-            console.log("/predictNextValue response error");
-            alert("/predictNextValue: API Response error");
+            console.log("API Request error: /predictNextValue/" + _query);
+            //alert("/predictNextValue: API Response error");
           });
       }
     };
@@ -415,8 +420,9 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
     $scope.addColumnField = function(entry){
       // the 'custom' field stores the name of the field that the user requested to add.
       var _field = entry.tmp.custom;
+      var _field_lower_no_space = ""
       try{
-        let _field_lower_no_space = _field.replace(/\s+/g,'').toLowerCase();
+        _field_lower_no_space = _field.replace(/\s+/g,'').toLowerCase();
       } catch{};
 
       // Items that are added via paleorec in a specific order. Dont allow to be added manually
@@ -920,7 +926,7 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
    */
     $scope.isOntology = function(field){
       // These fields use an auto complete input box with suggested data from the linked earth wiki ontology.
-      return ["proxyObservationType", "inferredVariableType", "variableType"].includes(field);
+      return ["inferredVariableType"].includes(field);
   };
 
   /**
@@ -944,7 +950,8 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
     $scope.isHidden = function(field){
         // Do not show any temporary fields or fields that are static for each column
         return ["number", "toggle", "tmp", "values", "checked", "units", "TSid", "variableType", "description",
-            "variableName"].includes(field);
+            "variableName", "archiveType", "interpretationVariable", "interpretationVariableDetail", 
+          "inferredVariable", "inferredVariableUnits", "proxyObservationType"].includes(field);
     };
 
   /**
