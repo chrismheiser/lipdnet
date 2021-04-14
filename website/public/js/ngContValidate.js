@@ -31,9 +31,19 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
   //     });
 
 
-    // Ontology: archiveType, units, inferredVariableType, proxyObservationType. These fields are pulled from the
+    // Ontology: archiveType, proxyObservationType, units, inferredVariableType,  These fields are pulled from the
     // LinkedEarth Wiki by index.js and served to us on page load. If the response is bad, we use fall back data.
-    $scope.ontology = {};
+    $scope.paleorec = {};
+
+    var getArchiveTypes = (function(atl){
+      $http.get("/api/archiveTypes")
+        .then(function (response) {
+          // We got a successful API response.
+          $scope.paleorec['archiveType'] = response.data.result[0];
+        }, function(response) {
+          console.log("/api/archiveTypes response error");
+        });
+    })();
 
     // Each popover is displayed when hovering over the feedback "requirements met / not met" boxes in the playground.
     // The html data is fetched from ng_create and then rendered into the popover box.
@@ -85,9 +95,9 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       // Ontology: archiveType, units, inferredVariableType, proxyObservationType. These fields are pulled from the
       // LinkedEarth Wiki by index.js and served to us on page load. Data stored in $scope.ontology
       "NOAAdataType": create.noaaDataTypeList(),
-      "archiveType": $scope.ontology.archiveType,
-      "infVarType": $scope.ontology.infVarType,
-      "proxyObsType": $scope.ontology.proxyObsType,
+      // "archiveType": $scope.ontology.archiveType,
+      // "infVarType": $scope.ontology.infVarType,
+      // "proxyObsType": $scope.ontology.proxyObsType,
       // Time Unit used in NOAA section
       "timeUnit": create.timeUnitList(),
       // Years list used in Publication section
@@ -103,20 +113,20 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
    *
    * Process:  LinkedEarth Wiki > Node > data cleaned up, organized, stored > sent to front end (here)
    */
-    var initOntology = function () {
-        // Get the ontology data from the node backend
-        $http.get("/api/ontology")
-            .then(function(response) {
-              // Success. Set the data to the scope directly
-                $scope.ontology = response.data;
-            }, function myError(err) {
-                console.log(err);
-                // Error, use our hardcoded lists as a fallback.
-                $scope.ontology = create.getOntologyBackup();
-            });
-    };
-    // Call the function during page load
-    initOntology();
+    // var initOntology = function () {
+    //     // Get the ontology data from the node backend
+    //     $http.get("/api/ontology")
+    //         .then(function(response) {
+    //           // Success. Set the data to the scope directly
+    //             $scope.ontology = response.data;
+    //         }, function myError(err) {
+    //             console.log(err);
+    //             // Error, use our hardcoded lists as a fallback.
+    //             $scope.ontology = create.getOntologyBackup();
+    //         });
+    // };
+    // // Call the function during page load
+    // initOntology();
 
     // NOT CURRENTLY IN USE
     $scope.fields = create.defaultColumnFields();
@@ -215,6 +225,8 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
     // All files, w/ contents, found in the LiPD archive. Used in "feedback.jade"
     $scope.allFiles = [];
 
+
+
   /**
    * Listen for data merge event to $emit up to us from the MergeCtrl (ngMerge.js) on the Merge page. When this
    * happens, it means that the user triggered a download and we need to bring the data back here to use the
@@ -230,6 +242,136 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       // Trigger download, leave empty callback
       $scope.downloadZip(null);
     });
+
+
+    $scope.paleoRecShow = function(entry, prev_steps){
+      // Only show the given field, if the preceding fields are also showing
+      // prev_steps is an int of how many levels should be filled in before showing this current field. 
+      var _steps = ["archiveType", "proxyObservationType", "interpretationVariable", "interpretationVariableDetail",
+              "inferredVariable", "inferredVariableUnits"]
+      for (var _i=0; _i<prev_steps;_i++){
+        var _field = _steps[_i];
+        // archiveType is at root level. Check there for it. 
+        if (_field === "archiveType" && !$scope.files.json.hasOwnProperty("archiveType") || $scope.files.json.archiveType=== ""){
+          return false;
+        } else {
+          // Everything else is at column level. Check there for it.
+          if (!entry.hasOwnProperty(_field) || entry[_field] === ""){
+            return false;
+          }
+        }
+      }
+      // Everything is here, show the field.
+      return true;
+    };
+
+
+    $scope.predictNextValue = function(key, entry){
+      // Flow 1
+      // archiveType -> proxyObservationType -> units
+      //
+      // Flow 2
+      // archiveType -> proxyObservationType -> interpretation/variable -> 
+      //    interpretation/VariableDetail -> inferredVariable -> inferredVariableUnits
+      //
+      var _flows = {
+        "archiveType": "proxyObservationType",
+        "proxyObservationType": "units",
+        "interpretationVariable": "interpretationVariableDetail",
+        "interpretationVariableDetail": "inferredVariable",
+        "inferredVariable": "inferredVariableUnits"
+      }
+      var _rm_chain = {
+        "archiveType": ["proxyObservationType", "units", "interpretationVariable", "interpretationVariableDetail", "inferredVariable", "inferredVariableUnits"],
+        "proxyObservationType": ["units", "interpretationVariable", "interpretationVariableDetail", "inferredVariable", "inferredVariableUnits"],
+        "units": ["interpretationVariable", "interpretationVariableDetail", "inferredVariable", "inferredVariableUnits"],
+        "interpretationVariable": ["interpretationVariableDetail", "inferredVariable", "inferredVariableUnits"],
+        "interpretationVariableDetial": ["inferredVariable", "inferredVariableUnits"],
+        "inferredVariable": ["inferredVariableUnits"],
+        "inferredVariableUnits": []
+      };
+
+      // If the user moves backwards in the chain process (makes a different selection on a previous field), 
+      // remove the subsequent fields in the chain
+      for (var _i in _rm_chain[key]){
+        try{
+          _field = _rm_chain[key][_i];
+          delete entry[_field];
+        }catch(err){}
+      };
+
+      // Start the Query string, and build on it with whatever data is available.
+      var _query = "inputstr=";
+
+      // Do this if you're at the root level doing ArchiveType
+      if (key === "archiveType" && entry === null){
+        _query += $scope.files.json.archiveType;
+      } 
+
+      // Do this if you're at the column level
+      else {
+
+        // Reset the paleorec if we're choosing a new archiveType
+        if (key === "archiveType"){
+          entry.tmp.paleorec = {};
+          entry.tmp.paleorec.archiveType = $scope.files.json.archiveType;
+        }
+
+        if($scope.files.json.archiveType){
+          _query += $scope.files.json.archiveType;
+        }
+        if(entry.proxyObservationType){
+          _query = _query + "," + entry.proxyObservationType;
+        }
+        if (entry.interpretationVariable){
+          _query = _query + "," + entry.interpretationVariable;
+        }
+        if (entry.interpretationVariableDetail){
+          _query = _query + "," + entry.interpretationVariableDetail;
+        }
+        if (entry.inferredVariable){
+          _query = _query + "," + entry.inferredVariable;
+        }
+        if (entry.inferredVariableUnits){
+          _query = _query + "," + entry.inferredVariableUnits;
+        }
+  
+        // Save the VariableType for last, since this is an optional piece.
+        if(entry.variableType){
+          _query += "&variableType=" + entry.variableType;
+        }
+
+      }
+
+      // Is there an ArchiveType? Then call the API. This is the minimum item we need to start API calls. 
+      if ($scope.files.json.archiveType){
+        // Add the query to the URL GET request. (This goes to the backend nodejs, before sending out to the API)
+        $http.get("/api/predictNextValue/" + _query)
+          .then(function (response) {
+            // Successful response.
+            console.log("/predictNextValue Response: ");
+            console.log(response);
+
+            // Two result arrays : Place results in units and interpretation variable
+            if(key === "proxyObservationType"){
+              entry.tmp.paleorec["units"] = response.data.result[0];
+              entry.tmp.paleorec["interpretationVariable"] = response.data.result[1];
+            } else {
+              // use the current key to find the next key in the flow
+              // put the response data into the field for the next key. 
+              if (entry === null){
+                $scope.paleorec[_flows[key]] = response.data.result[0];
+              } else {
+                entry.tmp.paleorec[_flows[key]] = response.data.result[0];
+              }
+            }
+            
+          }, function(response) {
+            console.log("API Request error: /predictNextValue/" + _query);
+            //alert("/predictNextValue: API Response error");
+          });
+      }
+    };
 
   /**
    * Add an entry to any field that supports multiple entries. Acceptable fields are listed below.
@@ -278,26 +420,40 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
     $scope.addColumnField = function(entry){
       // the 'custom' field stores the name of the field that the user requested to add.
       var _field = entry.tmp.custom;
-      // Adding an entry that is a nested array item
-      if(["interpretation", "inCompilation"].indexOf(_field) !== -1){
-        $scope.showModalBlock(entry, true, _field, 0);
-      }
-      // Adding an entry that is a nested object item
-      else if (["calibration", "hasResolution", "physicalSample", "measuredOn"].indexOf(_field) !== -1){
-        $scope.showModalBlock(entry, true, _field, null);
-      }
-      // Adding any regular field
-      else if(!entry.hasOwnProperty(_field)){
-        if(_field.toLowerCase() === "tsid"){
-            $scope.showModalAlert({"title": "Automated field", "message": "You may not add, remove, or edit fields that are automatically generated"});
-        } else {
-            entry[_field] = "";
+      var _field_lower_no_space = ""
+      try{
+        _field_lower_no_space = _field.replace(/\s+/g,'').toLowerCase();
+      } catch{};
+
+      // Items that are added via paleorec in a specific order. Dont allow to be added manually
+      if(["archivetype", "proxyobservationtype", "units", "inferredvariableunits", "inferredvariable", "interpretationvariable", "interpretationvariabledetail"].indexOf(_field_lower_no_space) !== -1){
+        $scope.showModalAlert({"title": "Cannot add that field manually", "message": "This field is added via an automated flows. \
+         Please complete one of the two flows below to get to your field.  \
+         1. archiveType -> proxyObservationType -> units \
+         2. archiveType -> proxyObservationType -> interpretation/variable -> interpretation/VariableDetail -> inferredVariable -> inferredVariableUnits"});
+      } else {
+        // Adding an entry that is a nested array item
+        if(["proxyobservationtype", "incompilation"].indexOf(_field_lower_no_space) !== -1){
+          $scope.showModalBlock(entry, true, _field, 0);
         }
-      } else if(entry.hasOwnProperty(_field)){
-          $scope.showModalAlert({"title": "Duplicate entry", "message": "That field already exists in this column."});
+        // Adding an entry that is a nested object item
+        else if (["calibration", "hasresolution", "physicalsample", "measuredon"].indexOf(_field_lower_no_space) !== -1){
+          $scope.showModalBlock(entry, true, _field, null);
+        }
+        // Adding any regular field
+        else if(!entry.hasOwnProperty(_field)){
+          if(_field.toLowerCase() === "tsid"){
+              $scope.showModalAlert({"title": "Automated field", "message": "You may not add, remove, or edit fields that are automatically generated"});
+          } else {
+              entry[_field] = "";
+          }
+        } else if(entry.hasOwnProperty(_field)){
+            $scope.showModalAlert({"title": "Duplicate entry", "message": "That field already exists in this column."});
+        }
+        // Wipe the field input box to be ready for another use.
+        entry.tmp.custom = "";
       }
-      // Wipe the field input box to be ready for another use.
-      entry.tmp.custom = "";
+
     };
 
   /**
@@ -759,7 +915,7 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
    */
     $scope.isAutocomplete = function(field){
         // These fields use an auto complete input box with suggested data from the linked earth wiki ontology.
-        return ["takenAtDepth", "proxyObservationType", "inferredVariableType", "inferredFrom"].includes(field);
+        return ["takenAtDepth", "inferredVariableType", "inferredFrom"].includes(field);
     };
 
   /**
@@ -770,7 +926,7 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
    */
     $scope.isOntology = function(field){
       // These fields use an auto complete input box with suggested data from the linked earth wiki ontology.
-      return ["proxyObservationType", "inferredVariableType", "variableType"].includes(field);
+      return ["inferredVariableType"].includes(field);
   };
 
   /**
@@ -794,7 +950,8 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
     $scope.isHidden = function(field){
         // Do not show any temporary fields or fields that are static for each column
         return ["number", "toggle", "tmp", "values", "checked", "units", "TSid", "variableType", "description",
-            "variableName"].includes(field);
+            "variableName", "archiveType", "interpretationVariable", "interpretationVariableDetail", 
+          "inferredVariable", "inferredVariableUnits", "proxyObservationType"].includes(field);
     };
 
   /**

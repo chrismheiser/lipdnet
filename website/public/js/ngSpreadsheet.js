@@ -160,6 +160,8 @@ function SpreadsheetCtrl($scope, toaster){
       if(table.tableName.indexOf("paleo") !== -1){
             _col["proxy"] = "";
             _col["interpretation"] = [{"variable": "", "direction": "", "scope": ""}];
+            _col["archiveType"] = $scope.files.json;
+            _col["tmp"] = {"paleorec": $scope.paleorec};
       }
       // Create the columns array with one column in it.
       table.columns = [_col];
@@ -172,6 +174,9 @@ function SpreadsheetCtrl($scope, toaster){
         if(table.tableName.indexOf("paleo") !== -1){
             _col2["proxy"] = "";
             _col2["interpretation"] = [{"variable": "", "direction": "", "scope": ""}];
+            _col2["archiveType"] = $scope.files.json.archiveType;
+            _col2["tmp"] = {"paleorec": $scope.paleorec};
+
         }
       // Add a metadata column to the existing columns array
       table.columns.push(_col2);

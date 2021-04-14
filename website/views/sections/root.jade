@@ -2,7 +2,17 @@ md-toolbar.md-hue-1
   h2.md-toolbar-tools
     span Root
 
+//- div(layout='', layout-padding='', layout-sm='column')
+
+//-   md-input-container(flex="")
+
+//-     label archive type
+//-     input.mdautocomplete(type="text" list="archiveType" ng-model="files.json.archiveType" ng-change="predictNextValue('archiveType', files.json.archiveType)")
+//-     datalist(id="archiveType")
+//-       option(ng-repeat="entry in ontology['archiveType']" value="{{entry}}")
+
 div(layout='', layout-padding='', layout-sm='column')
+
   md-input-container(flex="")
     label LiPD Version *
     input(ng-model='files.json.lipdVersion' disabled)
@@ -11,17 +21,21 @@ div(layout='', layout-padding='', layout-sm='column')
     label Dataset Name *
     input(ng-model='files.json.dataSetName' ng-change="getSet(files.json.dataSetName)")
     md-tooltip {{getTooltip("root", "dataSetName")}}
+
 div(layout='', layout-padding='', layout-sm='column')
   md-input-container(flex="")
     label Created By *
     input.mdautocomplete(type="text" ng-model="files.json.createdBy"
           uib-typeahead="entry for entry in dropdowns.createdBy | filter:$viewValue" typeahead-min-length="0")
     md-tooltip {{getTooltip("root", "createdBy")}}
+
   md-input-container(flex="")
     label Archive Type *
-    input.mdautocomplete(type="text" ng-model="files.json.archiveType"
-                          uib-typeahead="entry for entry in ontology['archiveType'] | filter:$viewValue" typeahead-min-length="0")
+    input.mdautocomplete(type="text" list="archiveType" ng-model="files.json.archiveType" ng-change="predictNextValue('archiveType', null)")
+    datalist(id="archiveType")
+        option(ng-repeat="entry in paleorec['archiveType']" value="{{entry}}")
     md-tooltip {{getTooltip("root", "archiveType")}}
+
 div(layout='', layout-padding='', layout-sm='column')
   md-input-container(flex='66', ng-class="md-input-has-value")
     label(ng-if="pageMeta.noaaReady") Investigators *
