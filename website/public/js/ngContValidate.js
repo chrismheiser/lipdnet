@@ -375,7 +375,7 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       // Is there an ArchiveType? Then call the API. This is the minimum item we need to start API calls. 
       if ($scope.files.json.archiveType){
         // Add the query to the URL GET request. (This goes to the backend nodejs, before sending out to the API)
-        $http.get("/api/predictNextValue/" + _query)
+        $http.get("/api/predictNextValue/" + encodeURIComponent(_query))
           .then(function (response) {
             // Successful response.
             console.log("/predictNextValue Response: ");
