@@ -244,24 +244,38 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
     });
 
 
-    $scope.paleoRecShow = function(entry, prev_steps){
+    $scope.paleoRecShow = function(entry, prev_steps, field){
       // Only show the given field, if the preceding fields are also showing
       // prev_steps is an int of how many levels should be filled in before showing this current field. 
       var _steps = ["archiveType", "proxyObservationType", "interpretationVariable", "interpretationVariableDetail",
               "inferredVariable", "inferredVariableUnits"]
-      for (var _i=0; _i<prev_steps;_i++){
-        var _field = _steps[_i];
-        // archiveType is at root level. Check there for it. 
-        if (_field === "archiveType" && !$scope.files.json.hasOwnProperty("archiveType") || $scope.files.json.archiveType=== ""){
-          return false;
-        } else {
-          // Everything else is at column level. Check there for it.
-          if (!entry.hasOwnProperty(_field) || entry[_field] === ""){
+      var _inferred =["inferredVariable", "archiveType", "variableType"];
+      console.log("========= " + field + " ======= " + entry.variableType);
+
+      if(_inferred.indexOf(field) !== -1 && entry.variableType === "inferred"){
+        console.log("Show Field 1: " + field);
+        return true;
+      } else if (_inferred.indexOf(field) === -1 && entry.variableType === "inferred"){
+        console.log("Hide field 1: " + field);
+        return false;
+      } else {
+        for (var _i=0; _i<prev_steps;_i++){
+          var _field = _steps[_i];
+          // archiveType is at root level. Check there for it. 
+          if (_field === "archiveType" && !$scope.files.json.hasOwnProperty("archiveType") || $scope.files.json.archiveType=== ""){
+            console.log("Hide field 2: " + field);
             return false;
+          } else {
+            // Everything else is at column level. Check there for it.
+            if (!entry.hasOwnProperty(_field) || entry[_field] === ""){
+              console.log("Hide Field 3: " + field);
+              return false;
+            }
           }
         }
       }
       // Everything is here, show the field.
+      console.log("Show field 2: " + field);
       return true;
     };
 
@@ -288,17 +302,32 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
         "interpretationVariable": ["interpretationVariableDetail", "inferredVariable", "inferredVariableUnits"],
         "interpretationVariableDetial": ["inferredVariable", "inferredVariableUnits"],
         "inferredVariable": ["inferredVariableUnits"],
-        "inferredVariableUnits": []
+        "inferredVariableUnits": [],
+        "variableType": ["proxyObservationType", "units", "interpretationVariable", "interpretationVariableDetail", "inferredVariableUnits"]
       };
+
+      console.log("predictNextValue: " + key);
 
       // If the user moves backwards in the chain process (makes a different selection on a previous field), 
       // remove the subsequent fields in the chain
-      for (var _i in _rm_chain[key]){
-        try{
-          _field = _rm_chain[key][_i];
-          delete entry[_field];
-        }catch(err){}
-      };
+      if (key === "variableType" && entry.variableType === "inferred"){
+        for (var _i in _rm_chain[key]){
+          try{
+            _field = _rm_chain[key][_i];
+            delete entry[_field];
+            console.log("Removing data 1: " + _field);
+          }catch(err){}
+        };
+      } else {
+        for (var _i in _rm_chain[key]){
+          try{
+            _field = _rm_chain[key][_i];
+            delete entry[_field];
+            console.log("Removing data 2: " + _field);
+          }catch(err){}
+        };
+      }
+
 
       // Start the Query string, and build on it with whatever data is available.
       var _query = "inputstr=";

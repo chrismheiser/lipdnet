@@ -16,6 +16,62 @@ div(layout="column" ng-repeat='entry3 in entry2.columns track by $index' layout-
                 md-subheader.md-primary Standard fields
 
                 div(layout='', layout-padding='', layout-sm='column')
+                    md-input-container(flex="")
+                        label Variable Type 
+                        input.mdautocomplete(type="text" list="variableType" ng-model="entry3.variableType" ng-change="predictNextValue('variableType', entry3)")              
+                        datalist(id="variableType")
+                            option(ng-repeat="entry in ['measured', 'inferred', 'time', 'depth']" value="{{entry}}")  
+
+                div(layout='', layout-padding='', layout-sm='column')
+                    md-input-container(flex="")
+                        label Archive Type
+                        input.mdautocomplete(type="text" list="archiveType" ng-model="files.json.archiveType" ng-change="predictNextValue('archiveType', entry3)")
+                        datalist(id="archiveType")
+                            option(ng-repeat="entry in paleorec['archiveType']" value="{{entry}}")
+
+                div(layout='', layout-padding='', layout-sm='column' ng-show="paleoRecShow(entry3, 1, 'proxyObservationType')")
+                    md-input-container(flex="" )
+                        label  Proxy Observation Type
+                        input.mdautocomplete(type="text" list="proxyObsType" ng-model="entry3.proxyObservationType" ng-change="predictNextValue('proxyObservationType', entry3)")
+                        datalist(id="proxyObsType")
+                            option(ng-repeat="entry in entry3.tmp.paleorec['proxyObservationType']" value="{{entry}}")
+
+                div(layout='', layout-padding='', layout-sm='column' ng-show="paleoRecShow(entry3, 2, 'units')" )
+                    md-input-container(flex="")
+                        label  Units
+                        input.mdautocomplete(type="text" list="units" ng-model="entry3.units")
+                        datalist(id="units")
+                            option(ng-repeat="entry in entry3.tmp.paleorec['units']" value="{{entry}}")
+                
+                div(layout='', layout-padding='', layout-sm='column' ng-show="paleoRecShow(entry3, 2, 'interpretationVariable')")
+                    md-input-container(flex="")
+                        label  Interpretation Variable
+                        input.mdautocomplete(type="text" list="interpretationVariable" ng-model="entry3.interpretationVariable" ng-change="predictNextValue('interpretationVariable', entry3)")
+                        datalist(id="interpretationVariable")
+                            option(ng-repeat="entry in entry3.tmp.paleorec['interpretationVariable']" value="{{entry}}")
+                        
+                div(layout='', layout-padding='', layout-sm='column' ng-show="paleoRecShow(entry3, 3, 'interpretationVariableDetail')")
+                    md-input-container(flex="")
+                        label  Interpretation Variable Detail
+                        input.mdautocomplete(type="text" list="interpretationVariableDetail" ng-model="entry3.interpretationVariableDetail" ng-change="predictNextValue('interpretationVariableDetail', entry3)")
+                        datalist(id="interpretationVariableDetail")
+                            option(ng-repeat="entry in entry3.tmp.paleorec['interpretationVariableDetail']" value="{{entry}}")
+
+                div(layout='', layout-padding='', layout-sm='column' ng-show="paleoRecShow(entry3, 4, 'inferredVariable')")
+                    md-input-container(flex="")
+                        label  Inferred Variable
+                        input.mdautocomplete(type="text" list="inferredVariable" ng-model="entry3.inferredVariable" ng-change="predictNextValue('inferredVariable', entry3)")
+                        datalist(id="inferredVariable")
+                            option(ng-repeat="entry in entry3.tmp.paleorec['inferredVariable']" value="{{entry}}")
+                
+                div(layout='', layout-padding='', layout-sm='column' ng-show="paleoRecShow(entry3, 5, 'inferredVariableUnits')")
+                    md-input-container(flex="")
+                        label  Inferred Variable Units
+                        input.mdautocomplete(type="text" list="inferredVariableUnits" ng-model="entry3.inferredVariableUnits")
+                        datalist(id="inferredVariableUnits")
+                            option(ng-repeat="entry in entry3.tmp.paleorec['inferredVariableUnits']" value="{{entry}}")
+
+                div(layout='', layout-padding='', layout-sm='column')
                     md-input-container(flex='', class="md-input-has-value")
                         label Variable Name *
                         input(ng-model="entry3.variableName" ng-change="sc.updateHeaders(entry2)")
@@ -25,62 +81,6 @@ div(layout="column" ng-repeat='entry3 in entry2.columns track by $index' layout-
                         label TSid
                         input(ng-model="entry3.TSid" disabled)
                         md-tooltip {{getTooltip("paleoData", "tsid")}}
-
-                div(layout='', layout-padding='', layout-sm='column')
-                    md-input-container(flex="")
-                        label Variable Type 
-                        input.mdautocomplete(type="text" list="variableType" ng-model="entry3.variableType" ng-change="predictNextValue('variableType', entry3)")              
-                        datalist(id="variableType")
-                            option(ng-repeat="entry in ['measured', 'inferred']" value="{{entry}}")  
-
-                div(layout='', layout-padding='', layout-sm='column')
-                    md-input-container(flex="")
-                        label Archive Type
-                        input.mdautocomplete(type="text" list="archiveType" ng-model="files.json.archiveType" ng-change="predictNextValue('archiveType', entry3)")
-                        datalist(id="archiveType")
-                            option(ng-repeat="entry in paleorec['archiveType']" value="{{entry}}")
-
-                div(layout='', layout-padding='', layout-sm='column' ng-show="paleoRecShow(files.json, 1)")
-                    md-input-container(flex="" )
-                        label  Proxy Observation Type
-                        input.mdautocomplete(type="text" list="proxyObsType" ng-model="entry3.proxyObservationType" ng-change="predictNextValue('proxyObservationType', entry3)")
-                        datalist(id="proxyObsType")
-                            option(ng-repeat="entry in entry3.tmp.paleorec['proxyObservationType']" value="{{entry}}")
-
-                div(layout='', layout-padding='', layout-sm='column' ng-show="paleoRecShow(entry3, 2)" )
-                    md-input-container(flex="")
-                        label  Units
-                        input.mdautocomplete(type="text" list="units" ng-model="entry3.units")
-                        datalist(id="units")
-                            option(ng-repeat="entry in entry3.tmp.paleorec['units']" value="{{entry}}")
-                
-                div(layout='', layout-padding='', layout-sm='column' ng-show="paleoRecShow(entry3, 2)")
-                    md-input-container(flex="")
-                        label  Interpretation Variable
-                        input.mdautocomplete(type="text" list="interpretationVariable" ng-model="entry3.interpretationVariable" ng-change="predictNextValue('interpretationVariable', entry3)")
-                        datalist(id="interpretationVariable")
-                            option(ng-repeat="entry in entry3.tmp.paleorec['interpretationVariable']" value="{{entry}}")
-                        
-                div(layout='', layout-padding='', layout-sm='column' ng-show="paleoRecShow(entry3, 3)")
-                    md-input-container(flex="")
-                        label  Interpretation Variable Detail
-                        input.mdautocomplete(type="text" list="interpretationVariableDetail" ng-model="entry3.interpretationVariableDetail" ng-change="predictNextValue('interpretationVariableDetail', entry3)")
-                        datalist(id="interpretationVariableDetail")
-                            option(ng-repeat="entry in entry3.tmp.paleorec['interpretationVariableDetail']" value="{{entry}}")
-
-                div(layout='', layout-padding='', layout-sm='column' ng-show="paleoRecShow(entry3, 4)")
-                    md-input-container(flex="")
-                        label  Inferred Variable
-                        input.mdautocomplete(type="text" list="inferredVariable" ng-model="entry3.inferredVariable" ng-change="predictNextValue('inferredVariable', entry3)")
-                        datalist(id="inferredVariable")
-                            option(ng-repeat="entry in entry3.tmp.paleorec['inferredVariable']" value="{{entry}}")
-                
-                div(layout='', layout-padding='', layout-sm='column' ng-show="paleoRecShow(entry3, 5)")
-                    md-input-container(flex="")
-                        label  Inferred Variable Units
-                        input.mdautocomplete(type="text" list="inferredVariableUnits" ng-model="entry3.inferredVariableUnits")
-                        datalist(id="inferredVariableUnits")
-                            option(ng-repeat="entry in entry3.tmp.paleorec['inferredVariableUnits']" value="{{entry}}")
 
                 div(layout='', layout-padding='', layout-sm='column')
                     md-input-container(flex='', class="md-input-has-value")
