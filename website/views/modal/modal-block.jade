@@ -30,10 +30,26 @@
             .col-md-8
                 div(ng-repeat="(k,v) in entry" layout='', layout-padding='', layout-sm='column')
                     md-input-container(flex="" ng-if="k === 'scope'")
-                        label Scope
+                        label scope
                         input.mdautocomplete(type="text" ng-model="entry[k]"
                             uib-typeahead="entry for entry in scope | filter:$viewValue" typeahead-min-length="0")
-                    md-input-container(flex='', class="md-input-has-value" ng-if="k !== 'scope'")
+                                    div(layout='', layout-padding='', layout-sm='column' ng-show="paleoRecShow(entry3, 2)")
+                    
+                    md-input-container(flex="" ng-if="k === 'variable'"))
+                        label.pr-label variable &#8224;
+                        input.mdautocomplete(type="text" list="interpretationVariable" ng-model="entry.variable" ng-change="predictNextValue('interpretationVariable', entry)")
+                        datalist(id="interpretationVariable")
+                            option(ng-repeat="val in entry3.tmp.paleorec['interpretationVariable']" value="{{val}}")
+                        
+                    div(layout='', layout-padding='', layout-sm='column' ng-if="k === 'variableDetail'")
+                        md-input-container(flex="")
+                            label.pr-label variableDetail &#8224;
+                            input.mdautocomplete(type="text" list="interpretationVariableDetail" ng-model="entry.variableDetail" ng-change="predictNextValue('interpretationVariableDetail', entry3)")
+                            datalist(id="interpretationVariableDetail")
+                                option(ng-repeat="entry in entry3.tmp.paleorec['interpretationVariableDetail']" value="{{entry}}")
+
+
+                    md-input-container(flex='', class="md-input-has-value" ng-if="k !== 'scope' && k !== 'variable' && k !== 'variableDetail'")
                         label {{k}}
                         input(ng-model="entry[k]")
                     div(flex='10' layout='', layout-padding='', layout-sm='column')

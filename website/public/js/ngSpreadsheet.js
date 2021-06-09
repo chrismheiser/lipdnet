@@ -173,7 +173,7 @@ function SpreadsheetCtrl($scope, toaster){
         // If this is a paleo table, add one interpretation and the proxy field
         if(table.tableName.indexOf("paleo") !== -1){
             _col2["proxy"] = "";
-            _col2["interpretation"] = [{"variable": "", "direction": "", "scope": ""}];
+            _col2["interpretation"] = [{"variable": "", "variableDetail": "", "direction": "", "scope": ""}];
             _col2["archiveType"] = $scope.files.json.archiveType;
             _col2["tmp"] = {"paleorec": $scope.paleorec};
 

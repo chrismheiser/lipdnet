@@ -248,15 +248,22 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       // Only show the given field, if the preceding fields are also showing
       // prev_steps is an int of how many levels should be filled in before showing this current field. 
       var _steps = ["archiveType", "proxyObservationType", "interpretationVariable", "interpretationVariableDetail",
-              "inferredVariable", "inferredVariableUnits"]
-      for (var _i=0; _i<prev_steps;_i++){
-        var _field = _steps[_i];
-        // archiveType is at root level. Check there for it. 
-        if (_field === "archiveType" && !$scope.files.json.hasOwnProperty("archiveType") || $scope.files.json.archiveType=== ""){
-          return false;
-        } else {
-          // Everything else is at column level. Check there for it.
-          if (!entry.hasOwnProperty(_field) || entry[_field] === ""){
+              "inferredVariable", "inferredVarUnits"]
+      var _inferred =["inferredVariable", "archiveType", "variableType"];
+      console.log("========= " + field + " ======= " + entry.variableType);
+
+      if(_inferred.indexOf(field) !== -1 && entry.variableType === "inferred"){
+        console.log("Show Field 1: " + field);
+        return true;
+      } else if (_inferred.indexOf(field) === -1 && entry.variableType === "inferred"){
+        console.log("Hide field 1: " + field);
+        return false;
+      } else {
+        for (var _i=0; _i<prev_steps;_i++){
+          var _field = _steps[_i];
+          // archiveType is at root level. Check there for it. 
+          if (_field === "archiveType" && !$scope.files.json.hasOwnProperty("archiveType") || $scope.files.json.archiveType=== ""){
+            console.log("Hide field 2: " + field);
             return false;
           }
         }
@@ -265,31 +272,81 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       return true;
     };
 
+    $scope.ifPath = function(col, paths){
+      /**
+       * Use on input fields to determine whether to show/hide that particular field 
+       *
+       * @param  {Object}   col    Column data
+       * @param  {Array}  paths    List of ints. Allowed paths for this field to show
+       * @return bool              
+       */
+      var _path = -1;
+      var _vt = col.variableType;
+      
+      // Flow 1 : Measured
+      if (_vt == "measured"){
+        _path = 1;
+      }
+      // Flow 2 : Inferred 
+      else if (_vt == "inferred"){
+        _path = 2;
+      }
+      // Flow 3 : Time
+      else if (_vt == "time"){
+        _path = 3;
+      }
+      // Flow 4 : Depth
+      else if (_vt == "depth"){
+        _path = 4;
+      }
+
+      // is the current path in one of the allowed paths? 
+      if(paths.indexOf(_path) !== -1) {
+        return true;
+      }
+      return false;
+
+    };
+
 
     $scope.predictNextValue = function(key, entry){
-      // Flow 1
+      // PaleoRec Chain 1
       // archiveType -> proxyObservationType -> units
       //
-      // Flow 2
+      // PaleoRec Chain 2
       // archiveType -> proxyObservationType -> interpretation/variable -> 
-      //    interpretation/VariableDetail -> inferredVariable -> inferredVariableUnits
+      //    interpretation/VariableDetail -> inferredVariable -> inferredVarUnits
       //
-      var _flows = {
-        "archiveType": "proxyObservationType",
-        "proxyObservationType": "units",
-        "interpretationVariable": "interpretationVariableDetail",
-        "interpretationVariableDetail": "inferredVariable",
-        "inferredVariable": "inferredVariableUnits"
-      }
-      var _rm_chain = {
-        "archiveType": ["proxyObservationType", "units", "interpretationVariable", "interpretationVariableDetail", "inferredVariable", "inferredVariableUnits"],
-        "proxyObservationType": ["units", "interpretationVariable", "interpretationVariableDetail", "inferredVariable", "inferredVariableUnits"],
-        "units": ["interpretationVariable", "interpretationVariableDetail", "inferredVariable", "inferredVariableUnits"],
-        "interpretationVariable": ["interpretationVariableDetail", "inferredVariable", "inferredVariableUnits"],
-        "interpretationVariableDetial": ["inferredVariable", "inferredVariableUnits"],
-        "inferredVariable": ["inferredVariableUnits"],
-        "inferredVariableUnits": []
-      };
+      // var _flows = {
+      //   "archiveType": "proxyObservationType",
+      //   "proxyObservationType": "units",
+      //   "interpretationVariable": "interpretationVariableDetail",
+      //   "interpretationVariableDetail": "inferredVariable",
+      //   "inferredVariable": "inferredVarUnits"
+      // }
+      // var _rm_chain = {
+      //   "archiveType": ["proxyObservationType", "units", "interpretationVariable", "interpretationVariableDetail", "inferredVariable", "inferredVarUnits"],
+      //   "proxyObservationType": ["units", "interpretationVariable", "interpretationVariableDetail", "inferredVariable", "inferredVarUnits"],
+      //   "units": ["interpretationVariable", "interpretationVariableDetail", "inferredVariable", "inferredVareUnits"],
+      //   "interpretationVariable": ["interpretationVariableDetail", "inferredVariable", "inferredVarUnits"],
+      //   "interpretationVariableDetial": ["inferredVariable", "inferredVarUnits"],
+      //   "inferredVariable": ["inferredVarUnits"],
+      //   "inferredVarUnits": [],
+      //   "variableType": ["proxyObservationType", "units", "interpretationVariable", "interpretationVariableDetail", "inferredVarUnits"]
+      // };
+
+      console.log("predictNextValue: " + key);
+
+
+      // Start the Query string, and build on it with whatever data is available.
+      var _query = "inputstr=";
+      var _variable_type = entry.variableType;
+      var _variable_name = entry.variableName;
+      var _archive_type = $scope.files.json.archiveType;
+      var _units = entry.units;
+      var _proxyObservationType = entry.proxyObservationType;
+      var _inferred_variable = entry.inferredVariable
+      var _inferred_variable_units = entry.inferredVarUnits
 
       // If the user moves backwards in the chain process (makes a different selection on a previous field), 
       // remove the subsequent fields in the chain
@@ -300,8 +357,25 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
         }catch(err){}
       };
 
-      // Start the Query string, and build on it with whatever data is available.
-      var _query = "inputstr=";
+      // Find out which path we're on. 
+      if (col.variableType == "measured"){
+
+      }
+      // Flow 2 : Inferred 
+      else if (vt == "inferred"){
+
+      }
+      // Flow 3 : Time
+      else if (vt == "time"){
+
+      }
+      // Flow 4 : Depth
+      else if (vt == "depth"){
+
+      }
+
+
+
 
       // Do this if you're at the root level doing ArchiveType
       if (key === "archiveType" && entry === null){
@@ -332,8 +406,8 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
         if (entry.inferredVariable){
           _query = _query + "," + entry.inferredVariable;
         }
-        if (entry.inferredVariableUnits){
-          _query = _query + "," + entry.inferredVariableUnits;
+        if (entry.inferredVarUnits){
+          _query = _query + "," + entry.inferredVarUnits;
         }
   
         // Save the VariableType for last, since this is an optional piece.
@@ -426,14 +500,14 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       } catch{};
 
       // Items that are added via paleorec in a specific order. Dont allow to be added manually
-      if(["archivetype", "proxyobservationtype", "units", "inferredvariableunits", "inferredvariable", "interpretationvariable", "interpretationvariabledetail"].indexOf(_field_lower_no_space) !== -1){
+      if(["archivetype", "proxyobservationtype", "units", "inferredVarUnits", "inferredvariable", "interpretationvariable", "interpretationvariabledetail"].indexOf(_field_lower_no_space) !== -1){
         $scope.showModalAlert({"title": "Cannot add that field manually", "message": "This field is added via an automated flows. \
          Please complete one of the two flows below to get to your field.  \
          1. archiveType -> proxyObservationType -> units \
-         2. archiveType -> proxyObservationType -> interpretation/variable -> interpretation/VariableDetail -> inferredVariable -> inferredVariableUnits"});
+         2. archiveType -> proxyObservationType -> interpretation/variable -> interpretation/VariableDetail -> inferredVariable -> inferredVarUnits"});
       } else {
         // Adding an entry that is a nested array item
-        if(["proxyobservationtype", "incompilation"].indexOf(_field_lower_no_space) !== -1){
+        if(["proxyobservationtype", "incompilation", "interpretation"].indexOf(_field_lower_no_space) !== -1){
           $scope.showModalBlock(entry, true, _field, 0);
         }
         // Adding an entry that is a nested object item
@@ -951,7 +1025,7 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
         // Do not show any temporary fields or fields that are static for each column
         return ["number", "toggle", "tmp", "values", "checked", "units", "TSid", "variableType", "description",
             "variableName", "archiveType", "interpretationVariable", "interpretationVariableDetail", 
-          "inferredVariable", "inferredVariableUnits", "proxyObservationType"].includes(field);
+          "inferredVariable", "inferredVarUnits", "proxyObservationType"].includes(field);
     };
 
   /**

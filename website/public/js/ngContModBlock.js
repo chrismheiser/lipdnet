@@ -33,13 +33,13 @@ angular.module('ngValidate').controller('ModalCtrlBlock', function ($scope, $uib
     $scope.initial = ["hasMedianValue", "hasMeanValue", "hasMaxValue", "hasMinValue"];
 
   } else if (data.key === "interpretation") {
-    $scope.required = ["variable", "direction", "scope"];
-    $scope.standard = ["variableDetail", "seasonality", "rank"];
+    $scope.required = ["variable", "variableDetail", "direction", "scope"];
+    $scope.standard = ["seasonality", "rank"];
     $scope.optional = ["basis", "coefficient", "equilibriumEvidence", "fraction", "inferredMaterial",
       "integrationTime", "integrationTimeBasis", "integrationTimeUncertainty",
       "integrationTimeUnits", "mathematicalRelation", "integrationTimeUncertaintyType"];
-    $scope.selected = ["variable", "direction", "scope", "variableDetail", "seasonality", "rank"];
-    $scope.initial = ["variable", "direction", "scope", "variableDetail", "seasonality", "rank"];
+    $scope.selected = ["variable",  "variableDetail", "direction", "scope"];
+    $scope.initial = ["variable",  "variableDetail", "direction", "scope"];
   } else if (data.key === "inCompilationBeta"){
     $scope.required = ["compilationName", "compilationVersion"];
     $scope.custom = false; // don't allow any custom fields. disable custom. 
