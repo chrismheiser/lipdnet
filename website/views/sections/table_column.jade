@@ -38,15 +38,15 @@ div(layout="column" ng-repeat='entry3 in entry2.columns track by $index' layout-
                             option(ng-repeat="entry in entry3.tmp.paleorec['variableName']" value="{{entry}}")  
                         md-tooltip {{getTooltip("paleoData", "variableName")}}
 
-                div(layout='', layout-padding='', layout-sm='column' ng-show="ifPath(entry3, [1, 3, 4] && entry3.variableName")
+                div(layout='', layout-padding='', layout-sm='column' ng-show="ifPath(entry3, [1, 3, 4]) && entry3.variableName")
                     md-input-container(flex="")
                         label.pr-label Units &#8224;
                         input.mdautocomplete(type="text" list="units" ng-model="entry3.units")
                         datalist(id="units")
                             option(ng-repeat="entry in entry3.tmp.paleorec['units']" value="{{entry}}")
                 
-                div(ng-if="ifPath(entry3, [1] && entry3.units" layout='', layout-padding='', layout-sm='row' style="padding: 0px 2px 2px 2px !important;")
-                    button.table-tab-btn-off( type="button" ng-click="showModalBlock(entry3, false, 'interpretation, 0)") Go to interpretation
+                div(ng-if="ifPath(entry3, [1]) && entry3.units" layout='', layout-padding='', layout-sm='row' style="padding: 0px 2px 2px 2px !important;")
+                    button.table-tab-btn-off( type="button" ng-click="showModalBlock(entry3, false, 'interpretation', 0)") Go to interpretation
 
                 div(layout='', layout-padding='', layout-sm='column')
                     md-input-container(flex='', class="md-input-has-value")

@@ -1,6 +1,14 @@
 // Controller - Validate Form
-angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Upload', "ImportService", "ExportService", "$uibModal","$sce", "toaster",
-  function ($scope, $log, $timeout, $q, $http, Upload, ImportService, ExportService, $uibModal, $sce, toaster) {
+angular.module("ngValidate").controller('ValidateCtrl', ['$scope','$rootScope', '$log', '$timeout', '$q', '$http', 'Upload', "ImportService", "ExportService", "$uibModal","$sce", "toaster",
+  function ($scope, $rootScope, $log, $timeout, $q, $http, Upload, ImportService, ExportService, $uibModal, $sce, toaster) {
+
+    $scope.$on("call_predictNextValue", function(event, data){
+      console.log("PARENT HERE");
+      console.log(data);
+      var _key = data.key;
+      var _entry = data.entry;
+      $scope.predictNextValue(_key, _entry);
+   });
 
     // Disable console logs in production environment
     var dev = location.host === "localhost:3000";
@@ -314,9 +322,12 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
 
       console.log(_path);
       // is the current path in one of the allowed paths? 
-      if(paths.indexOf(_path) !== -1) {
-        return true;
+      if(paths){
+        if(paths.indexOf(_path) !== -1) {
+          return true;
+        }
       }
+
       return false;
 
     };
@@ -393,20 +404,31 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       if (_variable_type == "measured"){
         if(key == "variableType"){
           _query = "inputstr=" + _archive_type + "&variableType=" + _variable_type;
-          _res = $scope.call_paleorec_api(_query);
-          entry.tmp.paleorec["variableName"] = _res.data.result[0];
+          $scope.call_paleorec_api(_query, function(_res){
+            entry.tmp.paleorec["variableName"] = _res.data.result[0];
+          });
         }
         else if(key === "variableName"){
           _query = "inputstr=" + _archive_type + "," + _variable_name + "&variableType=" + _variable_type;
-          _res = $scope.call_paleorec_api(_query);
-          entry.tmp.paleorec["units"] = _res.data.result[0];
-          entry.tmp.paleorec["interpretationVariable"] = _res.data.result[1];
+          $scope.call_paleorec_api(_query, function(_res){
+            entry.tmp.paleorec["units"] = _res.data.result[0];
+            entry.tmp.paleorec["interpretationVariable"] = _res.data.result[1];
+          });
         } 
         else if (key === "interpretationVariable"){
           _query = "inputstr=" + _archive_type + "," + _variable_name + "," + _interpretation_variable + "&variableType=" + _variable_type;
           _res = $scope.call_paleorec_api(_query);
-          entry.tmp.paleorec["interpretationVariableDetail"] = _res.data.result[0];
+          $scope.call_paleorec_api(_query, function(_res){
+            entry.tmp.paleorec["interpretationVariableDetail"] = _res.data.result[0];
+          });
         }
+        // else if (key === "interpretationVariableDetail"){
+        //   _query = "inputstr=" + _archive_type + "," + _variable_name + "," + _interpretation_variable + "&variableType=" + _variable_type;
+        //   _res = $scope.call_paleorec_api(_query);
+        //   $scope.call_paleorec_api(_query, function(_res){
+        //     entry.tmp.paleorec["interpretationVariableDetail"] = _res.data.result[0];
+        //   });
+        // }
       }
       // Flow 2 : Inferred 
       else if (_variable_type == "inferred"){
@@ -414,7 +436,7 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       }
       // Flow 3 : Time
       else if (_variable_type == "time" || _variable_type == "depth"){
-        if(key == "variableType"){
+        if(key == "variableType"){``
           _query = "inputstr=&variableType=" + _variable_type;
           $scope.call_paleorec_api(_query, function(_res){
             entry.tmp.paleorec["variableName"] = _res.data.result[0];
@@ -496,8 +518,9 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
 
     $scope.call_paleorec_api = function(query, cb){
         console.log("Sending Query: " + query);
+        console.log("Encoded: " + encodeURIComponent(query));
         // Add the query to the URL GET request. (This goes to the backend nodejs, before sending out to the API)
-        $http.get("/api/predictNextValue/" + query)
+        $http.get("/api/predictNextValue/" + encodeURIComponent(query))
           .then(function (response) {
             // Successful response.
             console.log("/predictNextValue Response: ");
@@ -1708,7 +1731,7 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       }
 
       // Set options to pass to modal controller
-      $scope.modal = {"data": _data, "create": _create, "key": _key, "idx": idx};
+      $scope.modal = {"data": _data, "create": _create, "key": _key, "idx": idx, "column": entry};
       // Use the uib module to open the modal
       var modalInstance = $uibModal.open({
         templateUrl: templateUrl,

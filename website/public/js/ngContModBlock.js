@@ -1,4 +1,4 @@
-angular.module('ngValidate').controller('ModalCtrlBlock', function ($scope, $uibModalInstance, data) {
+angular.module('ngValidate').controller('ModalCtrlBlock', function ($scope, $rootScope, $uibModalInstance, data) {
   $scope.customField = "";
   $scope.editMode = false;
   $scope.custom = [];
@@ -6,6 +6,9 @@ angular.module('ngValidate').controller('ModalCtrlBlock', function ($scope, $uib
   $scope.standard = [];
   $scope.optional = [];
   $scope.initial = [];
+  $scope.column = data.column; // the full column data
+  console.log("COLUMN IN BLOCK SCOPE");
+  console.log($scope.column);
   $scope.create = data.create; // bool, creating new entry or modifying existing.
   $scope.entry = data.data; // data 
   $scope.idx = data.idx; // index of entry, if working on an array item. 
@@ -55,6 +58,12 @@ angular.module('ngValidate').controller('ModalCtrlBlock', function ($scope, $uib
         $scope.entry[_key] = "";
       }
     }
+  }
+
+  console.log("before predict next val in controller");
+  $scope.call_predictNextValueParent = function(key, column) {
+    console.log("BEFORE EMIT");
+    $scope.$emit("call_predictNextValue", {"key": key, "column": column});
   }
 
   // Add a new entry to the given array
