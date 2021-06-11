@@ -33,7 +33,7 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
 
     // Ontology: archiveType, proxyObservationType, units, inferredVariableType,  These fields are pulled from the
     // LinkedEarth Wiki by index.js and served to us on page load. If the response is bad, we use fall back data.
-    $scope.paleorec = {};
+
 
     var getArchiveTypes = (function(atl){
       $http.get("/api/archiveTypes")
@@ -244,6 +244,18 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
     });
 
 
+    $scope.paleorec = {
+
+    };
+
+    // "archiveType": "",
+    // "variableType": "",
+    // "variableName": "",
+    // "units": "",
+    // "interpretationVariable": "",
+    // "interpretationVariableDetail": "",
+    // "inferredFrom": ""
+
     $scope.paleoRecShow = function(entry, prev_steps){
       // Only show the given field, if the preceding fields are also showing
       // prev_steps is an int of how many levels should be filled in before showing this current field. 
@@ -300,6 +312,7 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
         _path = 4;
       }
 
+      console.log(_path);
       // is the current path in one of the allowed paths? 
       if(paths.indexOf(_path) !== -1) {
         return true;
@@ -307,7 +320,6 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       return false;
 
     };
-
 
     $scope.predictNextValue = function(key, entry){
       // PaleoRec Chain 1
@@ -335,6 +347,15 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       //   "variableType": ["proxyObservationType", "units", "interpretationVariable", "interpretationVariableDetail", "inferredVarUnits"]
       // };
 
+      // Use for deleting all data from the fields if the variableType changes. 
+      var _clear_data = ["units", "variableName", "inferredVariable", "inferredVariableUnits", "inferredFrom"];
+
+      // _path_3 = {
+      //   "archiveType": "variableType",
+      //   "variableType": "variableName",
+      //   "variableName": "units"
+      // }
+
       console.log("predictNextValue: " + key);
 
 
@@ -345,106 +366,163 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       var _archive_type = $scope.files.json.archiveType;
       var _units = entry.units;
       var _proxyObservationType = entry.proxyObservationType;
-      var _inferred_variable = entry.inferredVariable
-      var _inferred_variable_units = entry.inferredVarUnits
+      var _interpretation_variable = entry.interpretation[0].variable;
+      var _interpretation_variable_detail = entry.interpretation[0].variableDetail;
+
+      var _res = null; 
 
       // If the user moves backwards in the chain process (makes a different selection on a previous field), 
       // remove the subsequent fields in the chain
-      for (var _i in _rm_chain[key]){
-        try{
-          _field = _rm_chain[key][_i];
-          delete entry[_field];
-        }catch(err){}
-      };
+      // for (var _i in _rm_chain[key]){
+      //   try{
+      //     _field = _rm_chain[key][_i];
+      //     delete entry[_field];
+      //   }catch(err){}
+      // };
+
+
+      // if variabletype changes, delete everything after it in the chain. 
+      // if (key === "variableType") {
+      //   for(var _k in _clear_data){
+      //     delete entry[_field];
+      //     delete entry.tmp.paleorec[_field];
+      //   }
+      // }
 
       // Find out which path we're on. 
-      if (col.variableType == "measured"){
-
+      if (_variable_type == "measured"){
+        if(key == "variableType"){
+          _query = "inputstr=" + _archive_type + "&variableType=" + _variable_type;
+          _res = $scope.call_paleorec_api(_query);
+          entry.tmp.paleorec["variableName"] = _res.data.result[0];
+        }
+        else if(key === "variableName"){
+          _query = "inputstr=" + _archive_type + "," + _variable_name + "&variableType=" + _variable_type;
+          _res = $scope.call_paleorec_api(_query);
+          entry.tmp.paleorec["units"] = _res.data.result[0];
+          entry.tmp.paleorec["interpretationVariable"] = _res.data.result[1];
+        } 
+        else if (key === "interpretationVariable"){
+          _query = "inputstr=" + _archive_type + "," + _variable_name + "," + _interpretation_variable + "&variableType=" + _variable_type;
+          _res = $scope.call_paleorec_api(_query);
+          entry.tmp.paleorec["interpretationVariableDetail"] = _res.data.result[0];
+        }
       }
       // Flow 2 : Inferred 
-      else if (vt == "inferred"){
+      else if (_variable_type == "inferred"){
 
       }
       // Flow 3 : Time
-      else if (vt == "time"){
-
+      else if (_variable_type == "time" || _variable_type == "depth"){
+        if(key == "variableType"){
+          _query = "inputstr=&variableType=" + _variable_type;
+          $scope.call_paleorec_api(_query, function(_res){
+            entry.tmp.paleorec["variableName"] = _res.data.result[0];
+          });
+        }
+        else if(key === "variableName"){
+          _query = "inputstr=" + _variable_name + "&variableType=" + _variable_type;
+          $scope.call_paleorec_api(_query, function(_res){
+            entry.tmp.paleorec["units"] = _res.data.result[0];
+          });
+        }
       }
-      // Flow 4 : Depth
-      else if (vt == "depth"){
+      // // Flow 4 : Depth
+      // else if (_variable_type == "depth"){
+      //   if(key == "variableType"){
+      //     _query = "inputstr=" + _archive_type + "&variableType=" + _variable_type;
+      //     $scope.call_paleorec_api(_query, function(_res){
+      //       entry.tmp.paleorec["variableName"] = _res.data.result[0];
+      //     });
+      //   }
+      //   else if(key === "variableName"){
+      //     _query = "inputstr=" + _archive_type + "," + _variable_name + "&variableType=" + _variable_type;
+      //     _res = $scope.call_paleorec_api(_query);
+      //     $scope.call_paleorec_api(_query, function(_res){
+      //       entry.tmp.paleorec["units"] = _res.data.result[0];
+      //     });
+      //   }
+      // }
 
-      }
+      console.log("PaleoRec Data");
+      console.log(entry.tmp.paleorec);
 
 
+      // // Do this if you're at the root level doing ArchiveType
+      // if (key === "archiveType" && entry === null){
+      //   _query += $scope.files.json.archiveType;
+      // } 
 
+      // // Do this if you're at the column level
+      // else {
 
-      // Do this if you're at the root level doing ArchiveType
-      if (key === "archiveType" && entry === null){
-        _query += $scope.files.json.archiveType;
-      } 
+      //   // Reset the paleorec if we're choosing a new archiveType
+      //   if (key === "archiveType"){
+      //     entry.tmp.paleorec = {};
+      //     entry.tmp.paleorec.archiveType = $scope.files.json.archiveType;
+      //   }
 
-      // Do this if you're at the column level
-      else {
-
-        // Reset the paleorec if we're choosing a new archiveType
-        if (key === "archiveType"){
-          entry.tmp.paleorec = {};
-          entry.tmp.paleorec.archiveType = $scope.files.json.archiveType;
-        }
-
-        if($scope.files.json.archiveType){
-          _query += $scope.files.json.archiveType;
-        }
-        if(entry.proxyObservationType){
-          _query = _query + "," + entry.proxyObservationType;
-        }
-        if (entry.interpretationVariable){
-          _query = _query + "," + entry.interpretationVariable;
-        }
-        if (entry.interpretationVariableDetail){
-          _query = _query + "," + entry.interpretationVariableDetail;
-        }
-        if (entry.inferredVariable){
-          _query = _query + "," + entry.inferredVariable;
-        }
-        if (entry.inferredVarUnits){
-          _query = _query + "," + entry.inferredVarUnits;
-        }
+      //   if($scope.files.json.archiveType){
+      //     _query += $scope.files.json.archiveType;
+      //   }
+      //   if(entry.proxyObservationType){
+      //     _query = _query + "," + entry.proxyObservationType;
+      //   }
+      //   if (entry.interpretationVariable){
+      //     _query = _query + "," + entry.interpretationVariable;
+      //   }
+      //   if (entry.interpretationVariableDetail){
+      //     _query = _query + "," + entry.interpretationVariableDetail;
+      //   }
+      //   if (entry.inferredVariable){
+      //     _query = _query + "," + entry.inferredVariable;
+      //   }
+      //   if (entry.inferredVarUnits){
+      //     _query = _query + "," + entry.inferredVarUnits;
+      //   }
   
-        // Save the VariableType for last, since this is an optional piece.
-        if(entry.variableType){
-          _query += "&variableType=" + entry.variableType;
-        }
+      //   // Save the VariableType for last, since this is an optional piece.
+      //   if(entry.variableType){
+      //     _query += "&variableType=" + entry.variableType;
+      //   }
 
-      }
+      // }
 
       // Is there an ArchiveType? Then call the API. This is the minimum item we need to start API calls. 
-      if ($scope.files.json.archiveType){
+      // if ($scope.files.json.archiveType){
+      //   $scope.call_paleorec_api(_query);
+      // }
+    };
+
+    $scope.call_paleorec_api = function(query, cb){
+        console.log("Sending Query: " + query);
         // Add the query to the URL GET request. (This goes to the backend nodejs, before sending out to the API)
-        $http.get("/api/predictNextValue/" + _query)
+        $http.get("/api/predictNextValue/" + query)
           .then(function (response) {
             // Successful response.
             console.log("/predictNextValue Response: ");
             console.log(response);
+            cb(response);
 
-            // Two result arrays : Place results in units and interpretation variable
-            if(key === "proxyObservationType"){
-              entry.tmp.paleorec["units"] = response.data.result[0];
-              entry.tmp.paleorec["interpretationVariable"] = response.data.result[1];
-            } else {
-              // use the current key to find the next key in the flow
-              // put the response data into the field for the next key. 
-              if (entry === null){
-                $scope.paleorec[_flows[key]] = response.data.result[0];
-              } else {
-                entry.tmp.paleorec[_flows[key]] = response.data.result[0];
-              }
-            }
+            // // Two result arrays : Place results in units and interpretation variable
+            // if(key === "proxyObservationType"){
+            //   entry.tmp.paleorec["units"] = response.data.result[0];
+            //   entry.tmp.paleorec["interpretationVariable"] = response.data.result[1];
+            // } else {
+            //   // use the current key to find the next key in the flow
+            //   // put the response data into the field for the next key. 
+            //   if (entry === null){
+            //     $scope.paleorec[_flows[key]] = response.data.result[0];
+            //   } else {
+            //     entry.tmp.paleorec[_flows[key]] = response.data.result[0];
+            //   }
+            // }
             
           }, function(response) {
-            console.log("API Request error: /predictNextValue/" + _query);
+            console.log("API Request error: /predictNextValue/" + query);
             //alert("/predictNextValue: API Response error");
+            cb({});
           });
-      }
     };
 
   /**
