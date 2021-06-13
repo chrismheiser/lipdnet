@@ -46,7 +46,7 @@ div(layout="column" ng-repeat='entry3 in entry2.columns track by $index' layout-
                             option(ng-repeat="entry in entry3.tmp.paleorec['units']" value="{{entry}}")
                 
                 div(ng-if="ifPath(entry3, [1]) && entry3.units" layout='', layout-padding='', layout-sm='row' style="padding: 0px 2px 2px 2px !important;")
-                    button.table-tab-btn-off( type="button" ng-click="showModalBlock(entry3, false, 'interpretation', 0)") Go to interpretation
+                    button.btn.btn-default.blue-btn-off(style="width:400px;" type="button" ng-click="showModalBlock(entry3, false, 'interpretation', 0)") Continue Recommendations: Go to interpretation 1 &#8224;
 
                 div(layout='', layout-padding='', layout-sm='column')
                     md-input-container(flex='', class="md-input-has-value")
@@ -84,7 +84,8 @@ div(layout="column" ng-repeat='entry3 in entry2.columns track by $index' layout-
 
                     // Button row for fields that hold nested data inside Arrays
                     div(ng-repeat="(k, entry4) in entry3" ng-if="isArr(k)" layout='', layout-padding='', layout-sm='row' style="padding: 0px 2px 2px 2px !important;")
-                        button.table-tab-btn-off(ng-repeat="i in entry4 track by $index" type="button" ng-click="showModalBlock(entry3, false, k, $index)") {{k}} {{$index+1}}
+                        button.table-tab-btn-off(ng-if="k === 'interpretation' && $index === 0" ng-repeat="i in entry4 track by $index" type="button" ng-click="showModalBlock(entry3, false, k, $index)") {{k}} {{$index+1}} &#8224;
+                        button.table-tab-btn-off(ng-if="k !== 'interpretation' && $index !== 0" ng-repeat="i in entry4 track by $index" type="button" ng-click="showModalBlock(entry3, false, k, $index)") {{k}} {{$index+1}}
 
                 div(style="overflow: scroll; height:300px;")
                     div(ng-repeat="(k,v) in entry3" ng-if="showField(k)" layout='', layout-padding='', layout-sm='column')
