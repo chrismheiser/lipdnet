@@ -2,12 +2,9 @@
 angular.module("ngValidate").controller('ValidateCtrl', ['$scope','$rootScope', '$log', '$timeout', '$q', '$http', 'Upload', "ImportService", "ExportService", "$uibModal","$sce", "toaster",
   function ($scope, $rootScope, $log, $timeout, $q, $http, Upload, ImportService, ExportService, $uibModal, $sce, toaster) {
 
-    $scope.$on("call_predictNextValue", function(event, data){
-      console.log("PARENT HERE");
-      console.log(data);
-      var _key = data.key;
-      var _entry = data.entry;
-      $scope.predictNextValue(_key, _entry);
+    $rootScope.$on("call_predictNextValue", function(event, data){
+      // Special call from ModalCtrlBlock to ValidateCtrl for $scope.predictNextValue with interpretation data.
+      $scope.predictNextValue(data.key, data.column);
    });
 
     // Disable console logs in production environment
@@ -368,6 +365,7 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope','$rootScope', 
       // }
 
       console.log("predictNextValue: " + key);
+      console.log(entry);
 
 
       // Start the Query string, and build on it with whatever data is available.
@@ -417,24 +415,16 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope','$rootScope', 
         } 
         else if (key === "interpretationVariable"){
           _query = "inputstr=" + _archive_type + "," + _variable_name + "," + _interpretation_variable + "&variableType=" + _variable_type;
-          _res = $scope.call_paleorec_api(_query);
-          $scope.call_paleorec_api(_query, function(_res){
+          _res = $scope.call_paleorec_api(_query, function(_res){
             entry.tmp.paleorec["interpretationVariableDetail"] = _res.data.result[0];
           });
         }
-        // else if (key === "interpretationVariableDetail"){
-        //   _query = "inputstr=" + _archive_type + "," + _variable_name + "," + _interpretation_variable + "&variableType=" + _variable_type;
-        //   _res = $scope.call_paleorec_api(_query);
-        //   $scope.call_paleorec_api(_query, function(_res){
-        //     entry.tmp.paleorec["interpretationVariableDetail"] = _res.data.result[0];
-        //   });
-        // }
       }
       // Flow 2 : Inferred 
       else if (_variable_type == "inferred"){
 
       }
-      // Flow 3 : Time
+      // Flow 3 : Time + depth
       else if (_variable_type == "time" || _variable_type == "depth"){
         if(key == "variableType"){``
           _query = "inputstr=&variableType=" + _variable_type;
@@ -449,71 +439,10 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope','$rootScope', 
           });
         }
       }
-      // // Flow 4 : Depth
-      // else if (_variable_type == "depth"){
-      //   if(key == "variableType"){
-      //     _query = "inputstr=" + _archive_type + "&variableType=" + _variable_type;
-      //     $scope.call_paleorec_api(_query, function(_res){
-      //       entry.tmp.paleorec["variableName"] = _res.data.result[0];
-      //     });
-      //   }
-      //   else if(key === "variableName"){
-      //     _query = "inputstr=" + _archive_type + "," + _variable_name + "&variableType=" + _variable_type;
-      //     _res = $scope.call_paleorec_api(_query);
-      //     $scope.call_paleorec_api(_query, function(_res){
-      //       entry.tmp.paleorec["units"] = _res.data.result[0];
-      //     });
-      //   }
-      // }
 
       console.log("PaleoRec Data");
       console.log(entry.tmp.paleorec);
 
-
-      // // Do this if you're at the root level doing ArchiveType
-      // if (key === "archiveType" && entry === null){
-      //   _query += $scope.files.json.archiveType;
-      // } 
-
-      // // Do this if you're at the column level
-      // else {
-
-      //   // Reset the paleorec if we're choosing a new archiveType
-      //   if (key === "archiveType"){
-      //     entry.tmp.paleorec = {};
-      //     entry.tmp.paleorec.archiveType = $scope.files.json.archiveType;
-      //   }
-
-      //   if($scope.files.json.archiveType){
-      //     _query += $scope.files.json.archiveType;
-      //   }
-      //   if(entry.proxyObservationType){
-      //     _query = _query + "," + entry.proxyObservationType;
-      //   }
-      //   if (entry.interpretationVariable){
-      //     _query = _query + "," + entry.interpretationVariable;
-      //   }
-      //   if (entry.interpretationVariableDetail){
-      //     _query = _query + "," + entry.interpretationVariableDetail;
-      //   }
-      //   if (entry.inferredVariable){
-      //     _query = _query + "," + entry.inferredVariable;
-      //   }
-      //   if (entry.inferredVarUnits){
-      //     _query = _query + "," + entry.inferredVarUnits;
-      //   }
-  
-      //   // Save the VariableType for last, since this is an optional piece.
-      //   if(entry.variableType){
-      //     _query += "&variableType=" + entry.variableType;
-      //   }
-
-      // }
-
-      // Is there an ArchiveType? Then call the API. This is the minimum item we need to start API calls. 
-      // if ($scope.files.json.archiveType){
-      //   $scope.call_paleorec_api(_query);
-      // }
     };
 
     $scope.call_paleorec_api = function(query, cb){
@@ -526,25 +455,11 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope','$rootScope', 
             console.log("/predictNextValue Response: ");
             console.log(response);
             cb(response);
-
-            // // Two result arrays : Place results in units and interpretation variable
-            // if(key === "proxyObservationType"){
-            //   entry.tmp.paleorec["units"] = response.data.result[0];
-            //   entry.tmp.paleorec["interpretationVariable"] = response.data.result[1];
-            // } else {
-            //   // use the current key to find the next key in the flow
-            //   // put the response data into the field for the next key. 
-            //   if (entry === null){
-            //     $scope.paleorec[_flows[key]] = response.data.result[0];
-            //   } else {
-            //     entry.tmp.paleorec[_flows[key]] = response.data.result[0];
-            //   }
-            // }
             
           }, function(response) {
             console.log("API Request error: /predictNextValue/" + query);
             //alert("/predictNextValue: API Response error");
-            cb({});
+            cb({"data": {"result": [""]}});
           });
     };
 
