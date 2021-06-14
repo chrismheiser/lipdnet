@@ -395,6 +395,61 @@ var create = (function(){
       return x;
     }),
 
+        /**
+     *
+     * Recursive
+     *
+     *  If variableType === measured, copy variableName to proxyObservationType
+     *  If variableType === inferred, copy variableName to inferredVariableType
+     *  If variableType === depth, switch variableType to measured, copy variableName to proxyObservationType
+     *  If variableType === time, switch variableType to inferred, copy variableName to inferredVariableType
+     * 
+     * @param    {*}  x   Any data type
+     * @return   {*}  x   Any data type
+     */
+    correctVariableNamesAndTypes: (function(x){
+      // When uploading a file, we need to add in the column property booleans for the "Add Properties" section of each
+      // column. That way, an uploaded file that already has properties from our list will trigger the checkbox to be on.
+      var _ignore = ["values", "variableName", "units", "number"];
+      // loop over this data structure
+      try{
+        // Loop for n amount of unknown keys
+        for (var _key in x){
+          if (x.hasOwnProperty(_key) && x[_key] !== undefined){
+
+            // Are we at table level? We'll know based on if columns are present.
+            if(_key === "columns"){
+              // loop for each column
+              for (var _v = 0; _v < x.columns.length; _v++){
+                var _col = x.columns[_v];
+                
+                // TODO do all the swapping and copying HERE 
+
+                // console.log(_col);
+              }
+              // console.log(_x);
+            }
+
+            if(x[_key]){
+              // Check if this is a nested structure and we need to process deeper.
+              if (x[_key].constructor === [].constructor && x[_key].length > 0) {
+                // value is an array. iterate over array and recursive call
+                for (var _g=0; _g < x[_key].length; _g++){
+                  // process, then return in place.
+                  x[_key][_g] = create.initColumnTmp(x[_key][_g]);
+                }
+              } else if (x[_key].constructor === {}.constructor && x[_key].length > 0){
+                x[_key] = create.initColumnTmp(x[_key]);
+              }
+            }
+          }
+        }
+      } catch (err){
+        console.log(err);
+      }
+      return x;
+    }),
+
     /**
      * Make some final touches to the metadata before sending data to the backend for downloading.
      *
@@ -408,7 +463,7 @@ var create = (function(){
       // TODO copy the archiveType from the root, to each data table column
       // Remove temporary lipd.net fields from the jsonld metadata
       _scopeFilesCopy.json = create.rmTmpEmptyData(_scopeFilesCopy.json);
-
+      _scopeFilesCopy.json = create.correctVariableNamesAndTypes(_scopeFilesCopy.json);
       return _scopeFilesCopy;
     }),
 
