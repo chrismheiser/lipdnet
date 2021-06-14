@@ -375,37 +375,49 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope','$rootScope', 
       }
     };
 
+    $scope.clear_paleorec = function(key, entry){
+      // if variabletype changes, delete everything after it in the chain. 
+      var _clear_data = ["units", "variableName", "inferredFrom"];
+      var _clear_inferred = ["proxyObservationType"];
+      var _rm_key = null;
+
+      // if this is a measured chain, remove the interpretation data
+      if(key === "measured"){
+        try{
+          entry.interpretation.variable = null;
+        }catch(err){}
+        try{
+          entry.interpretation.variableDetail = null;
+        }catch(err){}
+      }
+
+      if(key === "inferred" && entry.inferredFrom){
+        for(var _j=0; _j<_clear_inferred.length; _j++){
+          _rm_key = _clear_inferred[_k];
+          if(entry.hasOwnProperty(_rm_key)){
+            delete entry[_j];
+          }
+        }
+        try{
+          delete entry.interpretation.variable;
+        }catch(err){}
+        try{
+          delete entry.interpretation.variableDetail;
+        }catch(err){}
+      }
+
+      for(var _k=0; _k < _clear_data.length; _k++){
+        _rm_key = _clear_data[_k];
+        if(entry.hasOwnProperty(_rm_key)){
+          delete entry[_rm_key];
+        }
+        if(entry.hasOwnProperty(_rm_key)){
+          delete entry.tmp.paleorec[_rm_key];
+        }
+      }
+    };
+
     $scope.predictNextValue = function(key, entry, table){
-      // PaleoRec Chain 1
-      // archiveType -> proxyObservationType -> units
-      //
-      // PaleoRec Chain 2
-      // archiveType -> proxyObservationType -> interpretation/variable -> 
-      //    interpretation/VariableDetail -> inferredVariable -> inferredVarUnits
-      //
-      // var _flows = {
-      //   "archiveType": "proxyObservationType",
-      //   "proxyObservationType": "units",
-      //   "interpretationVariable": "interpretationVariableDetail",
-      //   "interpretationVariableDetail": "inferredVariable",
-      //   "inferredVariable": "inferredVarUnits"
-      // }
-      // var _rm_chain = {
-      //   "archiveType": ["proxyObservationType", "units", "interpretationVariable", "interpretationVariableDetail", "inferredVariable", "inferredVarUnits"],
-      //   "proxyObservationType": ["units", "interpretationVariable", "interpretationVariableDetail", "inferredVariable", "inferredVarUnits"],
-      //   "units": ["interpretationVariable", "interpretationVariableDetail", "inferredVariable", "inferredVareUnits"],
-      //   "interpretationVariable": ["interpretationVariableDetail", "inferredVariable", "inferredVarUnits"],
-      //   "interpretationVariableDetial": ["inferredVariable", "inferredVarUnits"],
-      //   "inferredVariable": ["inferredVarUnits"],
-      //   "inferredVarUnits": [],
-      //   "variableType": ["proxyObservationType", "units", "interpretationVariable", "interpretationVariableDetail", "inferredVarUnits"]
-      // };
-
-      // Use for deleting all data from the fields if the variableType changes. 
-      var _clear_data = ["units", "variableName", "inferredVariable", "inferredVariableUnits", "inferredFrom"];
-
-      console.log("predictNextValue: " + key);
-      console.log(entry);
 
       // Start the Query string, and build on it with whatever data is available.
       var _query = "inputstr=";
@@ -417,23 +429,10 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope','$rootScope', 
       var _interp_var_detail = entry.interpretation[0].variableDetail;
       var _res = null; 
 
-      // If the user moves backwards in the chain process (makes a different selection on a previous field), 
-      // remove the subsequent fields in the chain
-      // for (var _i in _rm_chain[key]){
-      //   try{
-      //     _field = _rm_chain[key][_i];
-      //     delete entry[_field];
-      //   }catch(err){}
-      // };
-
-
-      // if variabletype changes, delete everything after it in the chain. 
-      // if (key === "variableType") {
-      //   for(var _k in _clear_data){
-      //     delete entry[_field];
-      //     delete entry.tmp.paleorec[_field];
-      //   }
-      // }
+      // If variabletype changes, clear out data.
+      if (key === "variableType") {
+        $scope.clear_paleorec(key, entry);
+      }
 
       // Find out which path we're on. 
       if (_variable_type == "measured"){
@@ -479,6 +478,7 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope','$rootScope', 
             _proxy_obs_type = entry.proxyObservationType;
             _interp_var = entry.interpretation[0].variable;
             _interp_var_detail = entry.interpretation[0].variableDetail;
+            // If you have all the inferredFrom data, make the API call. Otherwise, do nothing.
             if(_proxy_obs_type && _interp_var && _interp_var_detail){
               _query = "inputstr=" + _archive_type + "," + _proxy_obs_type + "," + _interp_var + 
               "," + _interp_var_detail + "&variableType=" + _variable_type;
@@ -523,9 +523,6 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope','$rootScope', 
           });
         }
       }
-
-      console.log("PaleoRec Data");
-      console.log(entry.tmp.paleorec);
 
     };
 
