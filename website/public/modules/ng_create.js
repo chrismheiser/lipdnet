@@ -1501,6 +1501,7 @@ var create = (function(){
           "hasMaxValue": {"tooltip": "What is the maximum value of the Variable?"},
           "hasMeanValue": {"tooltip": "What is the mean value of the Variable?"},
           "hasMedianValue": {"tooltip": "What is the median value of the Variable?"},
+          "inferredFrom": {"tooltip": "Which measured column is this inferred from?"},
           "inferredVariableType": {"tooltip": "What type of InferredVariable does the InferredVariable belongs to?"},
           "interpretation": {"tooltip": "A suite of metadata that describes which phenomena drove variability in this " +
               "Variable (e.g. environmental drivers)."},
