@@ -25,7 +25,7 @@ div(layout="column" ng-repeat='entry3 in entry2.columns track by $index' layout-
                 div(layout='', layout-padding='', layout-sm='column')
                     md-input-container(flex="")
                         label.pr-label Variable Type &#8224;
-                        input.mdautocomplete(type="text" list="variableType" ng-model="entry3.variableType" ng-change="predictNextValue('variableType', entry3, entry2)")              
+                        input.mdautocomplete(type="text" list="variableType" ng-model="entry3.variableType" ng-click="predictNextValue('archiveType', entry3, entry2);" ng-change="predictNextValue('variableType', entry3, entry2)")              
                         datalist(id="variableType")
                             option(ng-repeat="entry in ['measured', 'inferred', 'time', 'depth']" value="{{entry}}")  
 
@@ -33,7 +33,7 @@ div(layout="column" ng-repeat='entry3 in entry2.columns track by $index' layout-
                 div(layout='', layout-padding='', layout-sm='column' ng-show="ifPath(entry3, [2]) && entry3.variableType")
                     md-input-container(flex='', class="md-input-has-value")
                         label.pr-label Inferred From &#8224;
-                        input(ng-model="entry3.inferredFrom" ng-change="predictNextValue('inferredFrom', entry3, entry2);" list="inferredFrom")
+                        input(ng-model="entry3.inferredFrom" ng-click="getMeasuredColumns(entry2, entry3);predictNextValue('variableType', entry3, entry2);" ng-change="predictNextValue('inferredFrom', entry3, entry2);" list="inferredFrom")
                         datalist(id="inferredFrom")
                             option(ng-repeat="entry in entry3.tmp.inferredFrom.variableNames" value="{{entry}}")  
                         md-tooltip {{getTooltip("paleoData", "inferredFrom")}}

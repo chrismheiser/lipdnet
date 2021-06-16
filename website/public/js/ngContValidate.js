@@ -230,27 +230,23 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope','$rootScope', 
     // All files, w/ contents, found in the LiPD archive. Used in "feedback.jade"
     $scope.allFiles = [];
 
-
-
-  /**
-   * Listen for data merge event to $emit up to us from the MergeCtrl (ngMerge.js) on the Merge page. When this
-   * happens, it means that the user triggered a download and we need to bring the data back here to use the
-   * $scope.downloadZip() function.
-   *
-   * @param  {Event}   event   $emit event from MergeCtrl
-   * @param  {Object}  data    LiPD Metadata
-   * @return none              File download is triggered, nothing returned
-   */
     $scope.$on('mergedData', function(event, data){
+    /**
+     * Listen for data merge event to $emit up to us from the MergeCtrl (ngMerge.js) on the Merge page. When this
+     * happens, it means that the user triggered a download and we need to bring the data back here to use the
+     * $scope.downloadZip() function.
+     *
+     * @param  {Event}   event   $emit event from MergeCtrl
+     * @param  {Object}  data    LiPD Metadata
+     * @return none              File download is triggered, nothing returned
+     */
       // Place new json data into our scope
       $scope.files.json = data;
       // Trigger download, leave empty callback
       $scope.downloadZip(null);
     });
 
-
     $scope.paleorec = {
-
     };
 
     // "archiveType": "",
@@ -260,34 +256,6 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope','$rootScope', 
     // "interpretationVariable": "",
     // "interpretationVariableDetail": "",
     // "inferredFrom": ""
-
-    $scope.paleoRecShow = function(entry, prev_steps){
-      // Only show the given field, if the preceding fields are also showing
-      // prev_steps is an int of how many levels should be filled in before showing this current field. 
-      var _steps = ["archiveType", "proxyObservationType", "interpretationVariable", "interpretationVariableDetail",
-              "inferredVariable", "inferredVarUnits"]
-      var _inferred =["inferredVariable", "archiveType", "variableType"];
-      console.log("========= " + field + " ======= " + entry.variableType);
-
-      if(_inferred.indexOf(field) !== -1 && entry.variableType === "inferred"){
-        console.log("Show Field 1: " + field);
-        return true;
-      } else if (_inferred.indexOf(field) === -1 && entry.variableType === "inferred"){
-        console.log("Hide field 1: " + field);
-        return false;
-      } else {
-        for (var _i=0; _i<prev_steps;_i++){
-          var _field = _steps[_i];
-          // archiveType is at root level. Check there for it. 
-          if (_field === "archiveType" && !$scope.files.json.hasOwnProperty("archiveType") || $scope.files.json.archiveType=== ""){
-            console.log("Hide field 2: " + field);
-            return false;
-          }
-        }
-      }
-      // Everything is here, show the field.
-      return true;
-    };
 
     $scope.ifPath = function(col, paths){
       /**
@@ -341,20 +309,15 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope','$rootScope', 
         "variableNames": [],
         "columns": {}
       };
-      console.log("Loop columns");
       if(table.hasOwnProperty("columns")){
           // Loop for all columns in the table 
           for(var _i = 0; _i < table.columns.length; _i++){
-              console.log("Checking column");
-              console.log(table.columns[_i]);
               if(table.columns[_i].hasOwnProperty("variableType")){
                   // Check for the variableType, we're only looking for 'measured' VT's
-                  console.log("Check variableType");
                   if(table.columns[_i].variableType){
                       // Check that VT is measured
                       var _vt = table.columns[_i].variableType;
                       if(_vt === "measured"){
-                        console.log("variableType === measured");
                         try {
                           var _vn = table.columns[_i].variableName;
                           var _iv = table.columns[_i].interpretation[0].variable;
@@ -365,8 +328,6 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope','$rootScope', 
                             "interpretationVariable": _iv, 
                             "interpretationVariableDetail": _ivd
                           };
-                          console.log("Column Inferred Data added");
-                          console.log(entry.tmp.inferredFrom);
                         } catch(err){}
                       }
                   }
@@ -417,8 +378,36 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope','$rootScope', 
       }
     };
 
-    $scope.predictNextValue = function(key, entry, table){
+    $scope.setupTmpPaleoRec = function(entry){
+      try{
+        if (!entry.tmp.paleorec){
+          entry.tmp["paleorec"] = {};
+        }
+        else if (!entry.tmp){
+          entry["tmp"] = {"paleorec": {}, "toggle": true};
+        }
+      } catch(err){
+        try{
+          entry.tmp["paleorec"]= {};
+        } catch(err){
+          entry["tmp"] = {"paleorec": {}, "toggle": true};
+        }
+      }
+      return entry;
+    };
 
+    $scope.setupInterpretation = function(entry){
+      try{
+        var _interp_var = entry.interpretation[0].variable;
+      } catch(err){
+        entry['interpretation'] = [{"variable": "", "variableDetail": "", "scope": "", "direction": ""}];
+      }
+      return entry;
+    };
+
+    $scope.predictNextValue = function(key, entry, table){
+      entry = $scope.setupTmpPaleoRec(entry);
+      entry = $scope.setupInterpretation(entry);
       // Start the Query string, and build on it with whatever data is available.
       var _query = "inputstr=";
       var _variable_type = entry.variableType;
@@ -472,9 +461,9 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope','$rootScope', 
           if(entry.inferredFrom){
             // Use the variableName chosen in 'inferredFrom' to get the measured column data.
             var _sourceColumn = entry.tmp.inferredFrom.columns[entry.inferredFrom];
-            entry.proxyObservationType = _sourceColumn.variableName;
-            entry.interpretation[0].variable = _sourceColumn.interpretationVariable;
-            entry.interpretation[0].variableDetail = _sourceColumn.interpretationVariableDetail;
+            entry.proxyObservationType = _sourceColumn.variableName || null;
+            entry.interpretation[0].variable = _sourceColumn.interpretationVariable || null;
+            entry.interpretation[0].variableDetail = _sourceColumn.interpretationVariableDetail || null;
             _proxy_obs_type = entry.proxyObservationType;
             _interp_var = entry.interpretation[0].variable;
             _interp_var_detail = entry.interpretation[0].variableDetail;
@@ -494,7 +483,7 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope','$rootScope', 
           // Call this query if you have all the inferredFrom data. 
           if(_proxy_obs_type && _interp_var && _interp_var_detail){
             _query = "inputstr=" + _archive_type + "," + _proxy_obs_type + "," + _interp_var + 
-            "," + _interp_var_detail + "&variableType=" + _variable_type;
+            "," + _interp_var_detail + "," + _variable_name +  "&variableType=" + _variable_type;
             $scope.call_paleorec_api(_query, function(_res){
               entry.tmp.paleorec["units"] = _res.data.result[0];
             });
