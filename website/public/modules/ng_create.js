@@ -408,24 +408,37 @@ var create = (function(){
      * @return   {*}  x   Any data type
      */
     correctVariableNamesAndTypes: (function(x){
-      // When uploading a file, we need to add in the column property booleans for the "Add Properties" section of each
-      // column. That way, an uploaded file that already has properties from our list will trigger the checkbox to be on.
-      var _ignore = ["values", "variableName", "units", "number"];
-      // loop over this data structure
       try{
         // Loop for n amount of unknown keys
         for (var _key in x){
           if (x.hasOwnProperty(_key) && x[_key] !== undefined){
-
             // Are we at table level? We'll know based on if columns are present.
             if(_key === "columns"){
               // loop for each column
               for (var _v = 0; _v < x.columns.length; _v++){
                 var _col = x.columns[_v];
-                
-                // TODO do all the swapping and copying HERE 
+                if(_col.hasOwnProperty("variableType")){
+                  if(_col.variableType === "measured"){
+                    _col.proxyObservationType = _col.variableName
+                    console.log("Swapping Variable Type Data");
+                  }
+                  else if(_col.variableType == "inferred"){
+                    _col.inferredVariableType = _col.variableName;
+                    console.log("Swapping Variable Type Data");
+                  }
+                  else if (_col.variableType == "time"){
+                    _col.variableType = "inferred";
+                    _col.inferredVariableType = _col.variableName;
+                    console.log("Swapping Variable Type Data");
+                  }
+                  else if (_col.variableType == "depth"){
+                    _col.variableType = "measured";
+                    _col.proxyObservationType = _col.variableName
+                    console.log("Swapping Variable Type Data");
+                  }
+                  console.log(_col);
+                }
 
-                // console.log(_col);
               }
               // console.log(_x);
             }
@@ -436,10 +449,10 @@ var create = (function(){
                 // value is an array. iterate over array and recursive call
                 for (var _g=0; _g < x[_key].length; _g++){
                   // process, then return in place.
-                  x[_key][_g] = create.initColumnTmp(x[_key][_g]);
+                  x[_key][_g] = create.correctVariableNamesAndTypes(x[_key][_g]);
                 }
               } else if (x[_key].constructor === {}.constructor && x[_key].length > 0){
-                x[_key] = create.initColumnTmp(x[_key]);
+                x[_key] = create.correctVariableNamesAndTypes(x[_key]);
               }
             }
           }
@@ -458,12 +471,16 @@ var create = (function(){
      *
      */
     closingWorkflow: (function(_scopeFiles){
+      console.log("CLOSING WORKFLOW");
       // Create a copy of the object, so we don't affect the original scope data.
       var _scopeFilesCopy = JSON.parse(JSON.stringify(_scopeFiles));
       // TODO copy the archiveType from the root, to each data table column
       // Remove temporary lipd.net fields from the jsonld metadata
+      console.log("Rm temp empty data");
       _scopeFilesCopy.json = create.rmTmpEmptyData(_scopeFilesCopy.json);
+      console.log("Correct variable names ");
       _scopeFilesCopy.json = create.correctVariableNamesAndTypes(_scopeFilesCopy.json);
+      console.log("FINISH");
       return _scopeFilesCopy;
     }),
 
