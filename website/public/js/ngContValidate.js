@@ -423,7 +423,7 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope','$rootScope', 
         $scope.clear_paleorec(key, entry);
       }
 
-      // Find out which path we're on. 
+      // Flow 1: Measured
       if (_variable_type == "measured"){
         if(key == "variableType"){
           _query = "inputstr=" + _archive_type + "&variableType=" + _variable_type;
@@ -1199,6 +1199,15 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope','$rootScope', 
         // Don't remove fields. just alert
         $scope.showModalAlert({"title": "Fields may be ignored", "message": "Validation is no longer using Wiki rules."});
       }
+    };
+
+    $scope.openInterpretation = function(entry, _create, _key, idx, table){
+      // If interpretation 0 doesn't exist, create it. 
+      entry = $scope.setupInterpretation(entry);
+      // Call predict to fill in the options list. 
+      $scope.predictNextValue("variableName", entry, table);
+      // open interpretation 0
+      $scope.showModalBlock(entry, _create, _key, idx);
     };
 
   /**

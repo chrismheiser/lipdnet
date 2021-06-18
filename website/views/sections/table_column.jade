@@ -72,7 +72,7 @@ div(layout="column" ng-repeat='entry3 in entry2.columns track by $index' layout-
                             option(ng-repeat="entry in entry3.tmp.paleorec['units']" value="{{entry}}")
                 
                 div(ng-if="ifPath(entry3, [1]) && entry3.units" layout='', layout-padding='', layout-sm='row' style="padding: 0px 2px 2px 2px !important;")
-                    button.btn.btn-default.blue-btn-off(style="width:400px;" type="button" ng-click="showModalBlock(entry3, false, 'interpretation', 0)") Continue Recommendations: Go to interpretation 1 &#8224;
+                    button.btn.btn-default.blue-btn-off(style="width:400px;" type="button" ng-click="openInterpretation(entry3, false, 'interpretation', 0, entry2)") Continue Recommendations: Go to interpretation 1 &#8224;
 
                 //- PATH 1 END 
 

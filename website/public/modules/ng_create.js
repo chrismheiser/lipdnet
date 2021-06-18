@@ -420,23 +420,18 @@ var create = (function(){
                 if(_col.hasOwnProperty("variableType")){
                   if(_col.variableType === "measured"){
                     _col.proxyObservationType = _col.variableName
-                    console.log("Swapping Variable Type Data");
                   }
                   else if(_col.variableType == "inferred"){
                     _col.inferredVariableType = _col.variableName;
-                    console.log("Swapping Variable Type Data");
                   }
                   else if (_col.variableType == "time"){
                     _col.variableType = "inferred";
                     _col.inferredVariableType = _col.variableName;
-                    console.log("Swapping Variable Type Data");
                   }
                   else if (_col.variableType == "depth"){
                     _col.variableType = "measured";
                     _col.proxyObservationType = _col.variableName
-                    console.log("Swapping Variable Type Data");
                   }
-                  console.log(_col);
                 }
 
               }
@@ -471,16 +466,12 @@ var create = (function(){
      *
      */
     closingWorkflow: (function(_scopeFiles){
-      console.log("CLOSING WORKFLOW");
       // Create a copy of the object, so we don't affect the original scope data.
       var _scopeFilesCopy = JSON.parse(JSON.stringify(_scopeFiles));
       // TODO copy the archiveType from the root, to each data table column
       // Remove temporary lipd.net fields from the jsonld metadata
-      console.log("Rm temp empty data");
       _scopeFilesCopy.json = create.rmTmpEmptyData(_scopeFilesCopy.json);
-      console.log("Correct variable names ");
       _scopeFilesCopy.json = create.correctVariableNamesAndTypes(_scopeFilesCopy.json);
-      console.log("FINISH");
       return _scopeFilesCopy;
     }),
 
