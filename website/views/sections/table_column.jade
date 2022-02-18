@@ -84,6 +84,17 @@ div(layout="column" ng-repeat='entry3 in entry2.columns track by $index' layout-
 
                 div(layout='', layout-padding='', layout-sm='column')
                     md-input-container(flex='', class="md-input-has-value")
+                        label Variable Name *
+                        input(ng-model="entry3.variableName" ng-change="sc.updateHeaders(entry2)")
+                        md-tooltip {{getTooltip("paleoData", "variableName")}}
+
+                    md-input-container(flex='', class="md-input-has-value")
+                        label TSid
+                        input(ng-model="entry3.TSid" disabled)
+                        md-tooltip {{getTooltip("paleoData", "tsid")}}
+
+                div(layout='', layout-padding='', layout-sm='column')
+                    md-input-container(flex='', class="md-input-has-value")
                         label(ng-if="pageMeta.noaaReady") Description *
                         label(ng-if="!pageMeta.noaaReady") Description
                         textarea(ng-model='entry3.description', columns='1', md-maxlength='500')
