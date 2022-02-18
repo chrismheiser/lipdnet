@@ -1,6 +1,11 @@
 // Controller - Validate Form
-angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$timeout', '$q', '$http', 'Upload', "ImportService", "ExportService", "$uibModal","$sce", "toaster",
-  function ($scope, $log, $timeout, $q, $http, Upload, ImportService, ExportService, $uibModal, $sce, toaster) {
+angular.module("ngValidate").controller('ValidateCtrl', ['$scope','$rootScope', '$log', '$timeout', '$q', '$http', 'Upload', "ImportService", "ExportService", "$uibModal","$sce", "toaster",
+  function ($scope, $rootScope, $log, $timeout, $q, $http, Upload, ImportService, ExportService, $uibModal, $sce, toaster) {
+
+    $rootScope.$on("call_predictNextValue", function(event, data){
+      // Special call from ModalCtrlBlock to ValidateCtrl for $scope.predictNextValue with interpretation data.
+      $scope.predictNextValue(data.key, data.column);
+   });
 
     // Disable console logs in production environment
     var dev = location.host === "localhost:3000";
@@ -33,7 +38,7 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
 
     // Ontology: archiveType, proxyObservationType, units, inferredVariableType,  These fields are pulled from the
     // LinkedEarth Wiki by index.js and served to us on page load. If the response is bad, we use fall back data.
-    $scope.paleorec = {};
+
 
     var getArchiveTypes = (function(atl){
       $http.get("/api/archiveTypes")
@@ -225,181 +230,306 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
     // All files, w/ contents, found in the LiPD archive. Used in "feedback.jade"
     $scope.allFiles = [];
 
-
-
-  /**
-   * Listen for data merge event to $emit up to us from the MergeCtrl (ngMerge.js) on the Merge page. When this
-   * happens, it means that the user triggered a download and we need to bring the data back here to use the
-   * $scope.downloadZip() function.
-   *
-   * @param  {Event}   event   $emit event from MergeCtrl
-   * @param  {Object}  data    LiPD Metadata
-   * @return none              File download is triggered, nothing returned
-   */
     $scope.$on('mergedData', function(event, data){
+    /**
+     * Listen for data merge event to $emit up to us from the MergeCtrl (ngMerge.js) on the Merge page. When this
+     * happens, it means that the user triggered a download and we need to bring the data back here to use the
+     * $scope.downloadZip() function.
+     *
+     * @param  {Event}   event   $emit event from MergeCtrl
+     * @param  {Object}  data    LiPD Metadata
+     * @return none              File download is triggered, nothing returned
+     */
       // Place new json data into our scope
       $scope.files.json = data;
       // Trigger download, leave empty callback
       $scope.downloadZip(null);
     });
 
+    $scope.paleorec = {
+    };
 
-    $scope.paleoRecShow = function(entry, prev_steps, field){
-      // Only show the given field, if the preceding fields are also showing
-      // prev_steps is an int of how many levels should be filled in before showing this current field. 
-      var _steps = ["archiveType", "proxyObservationType", "interpretationVariable", "interpretationVariableDetail",
-              "inferredVariable", "inferredVariableUnits"]
-      var _inferred =["inferredVariable", "archiveType", "variableType"];
-      console.log("========= " + field + " ======= " + entry.variableType);
+    // "archiveType": "",
+    // "variableType": "",
+    // "variableName": "",
+    // "units": "",
+    // "interpretationVariable": "",
+    // "interpretationVariableDetail": "",
+    // "inferredFrom": ""
 
-      if(_inferred.indexOf(field) !== -1 && entry.variableType === "inferred"){
-        console.log("Show Field 1: " + field);
-        return true;
-      } else if (_inferred.indexOf(field) === -1 && entry.variableType === "inferred"){
-        console.log("Hide field 1: " + field);
-        return false;
-      } else {
-        for (var _i=0; _i<prev_steps;_i++){
-          var _field = _steps[_i];
-          // archiveType is at root level. Check there for it. 
-          if (_field === "archiveType" && !$scope.files.json.hasOwnProperty("archiveType") || $scope.files.json.archiveType=== ""){
-            console.log("Hide field 2: " + field);
-            return false;
-          } else {
-            // Everything else is at column level. Check there for it.
-            if (!entry.hasOwnProperty(_field) || entry[_field] === ""){
-              console.log("Hide Field 3: " + field);
-              return false;
+    $scope.ifPath = function(col, paths){
+      /**
+       * Use on input fields to determine whether to show/hide that particular field 
+       *
+       * @param  {Object}   col    Column data
+       * @param  {Array}  paths    List of ints. Allowed paths for this field to show
+       * @return bool              
+       */
+      var _path = -1;
+      var _vt = col.variableType;
+      
+      // Flow 1 : Measured
+      if (_vt == "measured"){
+        _path = 1;
+      }
+      // Flow 2 : Inferred 
+      else if (_vt == "inferred"){
+        _path = 2;
+      }
+      // Flow 3 : Time
+      else if (_vt == "time"){
+        _path = 3;
+      }
+      // Flow 4 : Depth
+      else if (_vt == "depth"){
+        _path = 4;
+      }
+
+      // is the current path in one of the allowed paths? 
+      if(paths){
+        if(paths.indexOf(_path) !== -1) {
+          return true;
+        }
+      }
+
+      return false;
+
+    };
+
+    $scope.setHasInferred = function(entry){
+      entry.tmp.hasInferred = false;
+      // Set the hasInferred flag
+      if(entry.tmp.inferredFrom.variableNames.length > 0){
+        entry.tmp.hasInferred = true;
+      }
+    };
+
+    $scope.getMeasuredColumns = function(table, entry){
+      entry.tmp.inferredFrom = {
+        "variableNames": [],
+        "columns": {}
+      };
+      if(table.hasOwnProperty("columns")){
+          // Loop for all columns in the table 
+          for(var _i = 0; _i < table.columns.length; _i++){
+              if(table.columns[_i].hasOwnProperty("variableType")){
+                  // Check for the variableType, we're only looking for 'measured' VT's
+                  if(table.columns[_i].variableType){
+                      // Check that VT is measured
+                      var _vt = table.columns[_i].variableType;
+                      if(_vt === "measured"){
+                        try {
+                          var _vn = table.columns[_i].variableName;
+                          var _iv = table.columns[_i].interpretation[0].variable;
+                          var _ivd = table.columns[_i].interpretation[0].variableDetail;
+                          entry.tmp.inferredFrom.variableNames.push(_vn);
+                          entry.tmp.inferredFrom.columns[_vn] = {
+                            "variableName": _vn, 
+                            "interpretationVariable": _iv, 
+                            "interpretationVariableDetail": _ivd
+                          };
+                        } catch(err){}
+                      }
+                  }
+              }
+          }
+      }
+    };
+
+    $scope.clear_paleorec = function(key, entry){
+      // if variabletype changes, delete everything after it in the chain. 
+      var _clear_data = ["units", "variableName", "inferredFrom"];
+      var _clear_inferred = ["proxyObservationType"];
+      var _rm_key = null;
+
+      // if this is a measured chain, remove the interpretation data
+      if(key === "measured"){
+        try{
+          entry.interpretation.variable = null;
+        }catch(err){}
+        try{
+          entry.interpretation.variableDetail = null;
+        }catch(err){}
+      }
+
+      if(key === "inferred" && entry.inferredFrom){
+        for(var _j=0; _j<_clear_inferred.length; _j++){
+          _rm_key = _clear_inferred[_k];
+          if(entry.hasOwnProperty(_rm_key)){
+            delete entry[_j];
+          }
+        }
+        try{
+          delete entry.interpretation.variable;
+        }catch(err){}
+        try{
+          delete entry.interpretation.variableDetail;
+        }catch(err){}
+      }
+
+      for(var _k=0; _k < _clear_data.length; _k++){
+        _rm_key = _clear_data[_k];
+        if(entry.hasOwnProperty(_rm_key)){
+          delete entry[_rm_key];
+        }
+        if(entry.hasOwnProperty(_rm_key)){
+          delete entry.tmp.paleorec[_rm_key];
+        }
+      }
+    };
+
+    $scope.setupTmpPaleoRec = function(entry){
+      try{
+        if (!entry.tmp.paleorec){
+          entry.tmp["paleorec"] = {};
+        }
+        else if (!entry.tmp){
+          entry["tmp"] = {"paleorec": {}, "toggle": true};
+        }
+      } catch(err){
+        try{
+          entry.tmp["paleorec"]= {};
+        } catch(err){
+          entry["tmp"] = {"paleorec": {}, "toggle": true};
+        }
+      }
+      return entry;
+    };
+
+    $scope.setupInterpretation = function(entry){
+      try{
+        var _interp_var = entry.interpretation[0].variable;
+      } catch(err){
+        entry['interpretation'] = [{"variable": "", "variableDetail": "", "scope": "", "direction": ""}];
+      }
+      return entry;
+    };
+
+    $scope.predictNextValue = function(key, entry, table){
+      entry = $scope.setupTmpPaleoRec(entry);
+      entry = $scope.setupInterpretation(entry);
+      // Start the Query string, and build on it with whatever data is available.
+      var _query = "inputstr=";
+      var _variable_type = entry.variableType;
+      var _variable_name = entry.variableName;
+      var _archive_type = $scope.files.json.archiveType;
+      var _proxy_obs_type = entry.proxyObservationType;
+      var _interp_var = entry.interpretation[0].variable;
+      var _interp_var_detail = entry.interpretation[0].variableDetail;
+      var _res = null; 
+
+      // If variabletype changes, clear out data.
+      if (key === "variableType") {
+        $scope.clear_paleorec(key, entry);
+      }
+
+      // Flow 1: Measured
+      if (_variable_type == "measured"){
+        if(key == "variableType"){
+          _query = "inputstr=" + _archive_type + "&variableType=" + _variable_type;
+          $scope.call_paleorec_api(_query, function(_res){
+            entry.tmp.paleorec["variableName"] = _res.data.result[0];
+          });
+        }
+        else if(key === "variableName"){
+          _query = "inputstr=" + _archive_type + "," + _variable_name + "&variableType=" + _variable_type;
+          $scope.call_paleorec_api(_query, function(_res){
+            entry.tmp.paleorec["units"] = _res.data.result[0];
+            entry.tmp.paleorec["interpretationVariable"] = _res.data.result[1];
+          });
+        } 
+        else if (key === "interpretationVariable"){
+          _query = "inputstr=" + _archive_type + "," + _variable_name + "," + _interp_var + "&variableType=" + _variable_type;
+          _res = $scope.call_paleorec_api(_query, function(_res){
+            entry.tmp.paleorec["interpretationVariableDetail"] = _res.data.result[0];
+          });
+        }
+      }
+      // Flow 2 : Inferred 
+      else if (_variable_type == "inferred"){
+        if(key === "variableType"){
+          // Get a list of all the measured columns in this table
+          $scope.getMeasuredColumns(table, entry);
+          // Call the paleorec API and fill in the variableName field with results. These will be the fallback results.
+          _query = "inputstr=" + _archive_type + "&variableType=" + _variable_type;
+          $scope.call_paleorec_api(_query, function(_res){
+            entry.tmp.paleorec["variableName"] = _res.data.result[0];
+          });
+        } 
+        else if (key === "inferredFrom") {
+          // If inferredFrom from has a value, and all the values are available the make a paleoRec API call, then do that. 
+          if(entry.inferredFrom){
+            // Use the variableName chosen in 'inferredFrom' to get the measured column data.
+            var _sourceColumn = entry.tmp.inferredFrom.columns[entry.inferredFrom];
+            entry.proxyObservationType = _sourceColumn.variableName || null;
+            entry.interpretation[0].variable = _sourceColumn.interpretationVariable || null;
+            entry.interpretation[0].variableDetail = _sourceColumn.interpretationVariableDetail || null;
+            _proxy_obs_type = entry.proxyObservationType;
+            _interp_var = entry.interpretation[0].variable;
+            _interp_var_detail = entry.interpretation[0].variableDetail;
+            // If you have all the inferredFrom data, make the API call. Otherwise, do nothing.
+            if(_proxy_obs_type && _interp_var && _interp_var_detail){
+              _query = "inputstr=" + _archive_type + "," + _proxy_obs_type + "," + _interp_var + 
+              "," + _interp_var_detail + "&variableType=" + _variable_type;
+              $scope.call_paleorec_api(_query, function(_res){
+                entry.tmp.paleorec["variableName"] = _res.data.result[0];
+              });
             }
+          }
+          // There's no need to do anything if you do not have the inferredFrom data, because we already made the 'best guess' 
+          // API call after the variableType field was chosen. 
+        }
+        else if (key === "variableName"){
+          // Call this query if you have all the inferredFrom data. 
+          if(_proxy_obs_type && _interp_var && _interp_var_detail){
+            _query = "inputstr=" + _archive_type + "," + _proxy_obs_type + "," + _interp_var + 
+            "," + _interp_var_detail + "," + _variable_name +  "&variableType=" + _variable_type;
+            $scope.call_paleorec_api(_query, function(_res){
+              entry.tmp.paleorec["units"] = _res.data.result[0];
+            });
+          } 
+          // Call this query if you do not have inferredFrom data, and are doing the API call to get the "best guess" 
+          else {
+            _query = "inputstr=" + _archive_type + "," + _variable_name + "&variableType=" + _variable_type;
+            $scope.call_paleorec_api(_query, function(_res){
+              entry.tmp.paleorec["units"] = _res.data.result[0];
+            });
           }
         }
       }
-      // Everything is here, show the field.
-      console.log("Show field 2: " + field);
-      return true;
+      // Flow 3 : Time + depth
+      else if (_variable_type == "time" || _variable_type == "depth"){
+        if(key == "variableType"){``
+          _query = "inputstr=&variableType=" + _variable_type;
+          $scope.call_paleorec_api(_query, function(_res){
+            entry.tmp.paleorec["variableName"] = _res.data.result[0];
+          });
+        }
+        else if(key === "variableName"){
+          _query = "inputstr=" + _variable_name + "&variableType=" + _variable_type;
+          $scope.call_paleorec_api(_query, function(_res){
+            entry.tmp.paleorec["units"] = _res.data.result[0];
+          });
+        }
+      }
+
     };
 
-
-    $scope.predictNextValue = function(key, entry){
-      // Flow 1
-      // archiveType -> proxyObservationType -> units
-      //
-      // Flow 2
-      // archiveType -> proxyObservationType -> interpretation/variable -> 
-      //    interpretation/VariableDetail -> inferredVariable -> inferredVariableUnits
-      //
-      var _flows = {
-        "archiveType": "proxyObservationType",
-        "proxyObservationType": "units",
-        "interpretationVariable": "interpretationVariableDetail",
-        "interpretationVariableDetail": "inferredVariable",
-        "inferredVariable": "inferredVariableUnits"
-      }
-      var _rm_chain = {
-        "archiveType": ["proxyObservationType", "units", "interpretationVariable", "interpretationVariableDetail", "inferredVariable", "inferredVariableUnits"],
-        "proxyObservationType": ["units", "interpretationVariable", "interpretationVariableDetail", "inferredVariable", "inferredVariableUnits"],
-        "units": ["interpretationVariable", "interpretationVariableDetail", "inferredVariable", "inferredVariableUnits"],
-        "interpretationVariable": ["interpretationVariableDetail", "inferredVariable", "inferredVariableUnits"],
-        "interpretationVariableDetial": ["inferredVariable", "inferredVariableUnits"],
-        "inferredVariable": ["inferredVariableUnits"],
-        "inferredVariableUnits": [],
-        "variableType": ["proxyObservationType", "units", "interpretationVariable", "interpretationVariableDetail", "inferredVariableUnits"]
-      };
-
-      console.log("predictNextValue: " + key);
-
-      // If the user moves backwards in the chain process (makes a different selection on a previous field), 
-      // remove the subsequent fields in the chain
-      if (key === "variableType" && entry.variableType === "inferred"){
-        for (var _i in _rm_chain[key]){
-          try{
-            _field = _rm_chain[key][_i];
-            delete entry[_field];
-            console.log("Removing data 1: " + _field);
-          }catch(err){}
-        };
-      } else {
-        for (var _i in _rm_chain[key]){
-          try{
-            _field = _rm_chain[key][_i];
-            delete entry[_field];
-            console.log("Removing data 2: " + _field);
-          }catch(err){}
-        };
-      }
-
-
-      // Start the Query string, and build on it with whatever data is available.
-      var _query = "inputstr=";
-
-      // Do this if you're at the root level doing ArchiveType
-      if (key === "archiveType" && entry === null){
-        _query += $scope.files.json.archiveType;
-      } 
-
-      // Do this if you're at the column level
-      else {
-
-        // Reset the paleorec if we're choosing a new archiveType
-        if (key === "archiveType"){
-          entry.tmp.paleorec = {};
-          entry.tmp.paleorec.archiveType = $scope.files.json.archiveType;
-        }
-
-        if($scope.files.json.archiveType){
-          _query += $scope.files.json.archiveType;
-        }
-        if(entry.proxyObservationType){
-          _query = _query + "," + entry.proxyObservationType;
-        }
-        if (entry.interpretationVariable){
-          _query = _query + "," + entry.interpretationVariable;
-        }
-        if (entry.interpretationVariableDetail){
-          _query = _query + "," + entry.interpretationVariableDetail;
-        }
-        if (entry.inferredVariable){
-          _query = _query + "," + entry.inferredVariable;
-        }
-        if (entry.inferredVariableUnits){
-          _query = _query + "," + entry.inferredVariableUnits;
-        }
-  
-        // Save the VariableType for last, since this is an optional piece.
-        if(entry.variableType){
-          _query += "&variableType=" + entry.variableType;
-        }
-
-      }
-
-      // Is there an ArchiveType? Then call the API. This is the minimum item we need to start API calls. 
-      if ($scope.files.json.archiveType){
+    $scope.call_paleorec_api = function(query, cb){
+        console.log("Sending Query: " + query);
         // Add the query to the URL GET request. (This goes to the backend nodejs, before sending out to the API)
-        $http.get("/api/predictNextValue/" + encodeURIComponent(_query))
+        $http.get("/api/predictNextValue/" + encodeURIComponent(query))
           .then(function (response) {
             // Successful response.
             console.log("/predictNextValue Response: ");
             console.log(response);
-
-            // Two result arrays : Place results in units and interpretation variable
-            if(key === "proxyObservationType"){
-              entry.tmp.paleorec["units"] = response.data.result[0];
-              entry.tmp.paleorec["interpretationVariable"] = response.data.result[1];
-            } else {
-              // use the current key to find the next key in the flow
-              // put the response data into the field for the next key. 
-              if (entry === null){
-                $scope.paleorec[_flows[key]] = response.data.result[0];
-              } else {
-                entry.tmp.paleorec[_flows[key]] = response.data.result[0];
-              }
-            }
+            cb(response);
             
           }, function(response) {
-            console.log("API Request error: /predictNextValue/" + _query);
+            console.log("API Request error: /predictNextValue/" + query);
             //alert("/predictNextValue: API Response error");
+            cb({"data": {"result": [""]}});
           });
-      }
     };
 
   /**
@@ -455,14 +585,14 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       } catch{};
 
       // Items that are added via paleorec in a specific order. Dont allow to be added manually
-      if(["archivetype", "proxyobservationtype", "units", "inferredvariableunits", "inferredvariable", "interpretationvariable", "interpretationvariabledetail"].indexOf(_field_lower_no_space) !== -1){
+      if(["archivetype", "proxyobservationtype", "units", "inferredVarUnits", "inferredvariable", "interpretationvariable", "interpretationvariabledetail"].indexOf(_field_lower_no_space) !== -1){
         $scope.showModalAlert({"title": "Cannot add that field manually", "message": "This field is added via an automated flows. \
          Please complete one of the two flows below to get to your field.  \
          1. archiveType -> proxyObservationType -> units \
-         2. archiveType -> proxyObservationType -> interpretation/variable -> interpretation/VariableDetail -> inferredVariable -> inferredVariableUnits"});
+         2. archiveType -> proxyObservationType -> interpretation/variable -> interpretation/VariableDetail -> inferredVariable -> inferredVarUnits"});
       } else {
         // Adding an entry that is a nested array item
-        if(["proxyobservationtype", "incompilation"].indexOf(_field_lower_no_space) !== -1){
+        if(["proxyobservationtype", "incompilation", "interpretation"].indexOf(_field_lower_no_space) !== -1){
           $scope.showModalBlock(entry, true, _field, 0);
         }
         // Adding an entry that is a nested object item
@@ -980,7 +1110,7 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
         // Do not show any temporary fields or fields that are static for each column
         return ["number", "toggle", "tmp", "values", "checked", "units", "TSid", "variableType", "description",
             "variableName", "archiveType", "interpretationVariable", "interpretationVariableDetail", 
-          "inferredVariable", "inferredVariableUnits", "proxyObservationType"].includes(field);
+          "inferredVariable", "inferredVarUnits", "proxyObservationType", "inferredFrom"].includes(field);
     };
 
   /**
@@ -1069,6 +1199,15 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
         // Don't remove fields. just alert
         $scope.showModalAlert({"title": "Fields may be ignored", "message": "Validation is no longer using Wiki rules."});
       }
+    };
+
+    $scope.openInterpretation = function(entry, _create, _key, idx, table){
+      // If interpretation 0 doesn't exist, create it. 
+      entry = $scope.setupInterpretation(entry);
+      // Call predict to fill in the options list. 
+      $scope.predictNextValue("variableName", entry, table);
+      // open interpretation 0
+      $scope.showModalBlock(entry, _create, _key, idx);
     };
 
   /**
@@ -1585,7 +1724,7 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope', '$log', '$tim
       }
 
       // Set options to pass to modal controller
-      $scope.modal = {"data": _data, "create": _create, "key": _key, "idx": idx};
+      $scope.modal = {"data": _data, "create": _create, "key": _key, "idx": idx, "column": entry};
       // Use the uib module to open the modal
       var modalInstance = $uibModal.open({
         templateUrl: templateUrl,

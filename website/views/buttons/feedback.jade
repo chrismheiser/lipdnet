@@ -32,3 +32,9 @@ li.step10(style="list-style-type: none;")
       li(ng-click="showModalFileContent({data: files.json, type: 'json', filenameShort: 'metadata.jsonld'})") metadata.jsonld
       // The CSV files and bagit data will only refresh during a validation cycle.
       li(ng-repeat="file in allFiles track by $index" ng-click="showModalFileContent(file)" ng-if="file.type !== 'json' ") {{ file.filenameShort }}
+
+div
+  p(style="color:#2C6FAE;font-size:15px;font-weight:400;") &#8224; = Recommender System 
+    md-tooltip The recommender system offers predictions for certain fields to make data entry easier for you.
+  p(style="font-size:15px;font-weight:400;") &#x2055; = Required Field 
+    md-tooltip Required fields represent the minimum amount of data needed to create a dataset.

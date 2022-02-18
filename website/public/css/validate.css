@@ -731,6 +731,10 @@ label , md-label, input{
     font-weight: 400 !important;
 }
 
+.pr-label{
+    color: #2C6FAE !important;
+}
+
 input{
     color: rgba(0,0,0,1) !important;
     font-weight: 400 !important;
