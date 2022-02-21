@@ -527,11 +527,7 @@ var _getWikiOntologyField = function(field, query){
             timeout: 3000,
             qs: {"query": query}
         };
-        // If we're on the production server, then we need to add in the proxy option
-        if (!dev){
-            // This is the cefns nau proxy route.
-            options.proxy = "http://rishi.cefns.nau.edu:3128";
-        }
+
         try{
             // Send out the POST request
             request(options, function (err, res, body){
@@ -964,7 +960,6 @@ var sendDigestEmail = function(){
                 }
             };
             if(!dev){
-                _transportConfig.proxy =  "http://rishi.cefns.nau.edu:3128";
                 _recipients = 'Chris <cmh553@nau.edu>, Nick McKay <nicholas.mckay@nau.edu>';
             } else {
                 _recipients = 'Chris <cmh553@nau.edu>';
@@ -1082,11 +1077,7 @@ var uploadToAws = function(filepath, filename, mode, cb) {
 
         // If we're in production, add in the proxy.
         if (!dev) {
-            AWS.config.update({
-                httpOptions: {
-                    proxy: "http://rishi.cefns.nau.edu:3128"
-                }
-            });
+            AWS.config.update();
         }
 
         // Create params for putObject call
@@ -1280,10 +1271,6 @@ router.post("/remote", function(req, res, next){
             rejectUnauthorized: false
         };
 
-        // If we're on the production server, then we need to add in the proxy option
-        if (!dev){
-            options.proxy = "http://rishi.cefns.nau.edu:3128";
-        }
         // Send the request to get the remote LiPD file.
         request(options, function (error, response, body) {
             // If the response is a string, then it is likely an error message.
@@ -1472,11 +1459,6 @@ router.post("/noaa", function(req, res, next){
         timeout: 3000
       };
 
-      // If we're on the production server, then we need to add in the proxy option
-      if (!dev){
-        options.proxy = "http://rishi.cefns.nau.edu:3128";
-      }
-
       // Send the request to the NOAA API
       console.log("Sending LiPD data to NOAA Conversion API: ", master.name);
       // console.log("PORT : ", port);
@@ -1625,10 +1607,7 @@ router.post("/query", function(req, res, next){
     json: req.body,
     timeout: 3000
   };
-  // If we're on the production server, then we need to add in the proxy option
-  if (!dev){
-    options.proxy = "http://rishi.cefns.nau.edu:3128";
-  }
+
   try{
 
     process.on("uncaughtException", function(err){
@@ -1664,9 +1643,7 @@ router.post("/query", function(req, res, next){
                     uri: "http://wiki.linked.earth/store/ds/query",
                     qs: {"query": res1.body}
                 };
-                if (!dev){
-                    options.proxy = "http://rishi.cefns.nau.edu:3128";
-                }
+
                 console.log("query: Wiki: Sending request...");
                 request(options, function(err2, res2, body2){
                     console.log("query: Wiki: Response Status: ", res2.statusCode);
@@ -1982,11 +1959,6 @@ router.post("/api/doi", function(req, res, next){
             headers: {"accept": "application/rdf+xml;q=0.5, application/citeproc+json;q=1.0"}
         };
 
-        // If we're on the production server, then we need to add in the proxy option
-        if (!dev){
-            options.proxy = "http://rishi.cefns.nau.edu:3128";
-        }
-
         request(options, function (error, response, body) {
 
             // Did the process complete and respond with data?
@@ -2033,10 +2005,7 @@ router.get("/api/predictNextValue/:url", function(req, res, next){
           method: 'GET',
           timeout: 3000
         };
-        // If we're on the production server, then we need to add in the proxy option
-        if (!dev){
-          options.proxy = "http://rishi.cefns.nau.edu:3128";
-        }
+
         // Send the request to the NOAA API
         console.log("Sending request /api/predictNextValue");
         request(options, function (error, response, body) {
@@ -2110,10 +2079,7 @@ router.get("/api/archiveTypes", function(req, res, next){
         method: 'GET',
         timeout: 3000
       };
-      // If we're on the production server, then we need to add in the proxy option
-      if (!dev){
-        options.proxy = "http://rishi.cefns.nau.edu:3128";
-      }
+
       // Send the request to the NOAA API
       console.log("Sending request /api/archiveTypes");
       request(options, function (error, response, body) {
