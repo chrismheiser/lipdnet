@@ -277,6 +277,9 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope','$rootScope', 
               return false;
             }
           }
+        }
+      }
+    };
 
     // "archiveType": "",
     // "variableType": "",
