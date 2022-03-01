@@ -541,7 +541,6 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope','$rootScope', 
           });
         }
       }
-
     };
 
     $scope.call_paleorec_api = function(query, cb){

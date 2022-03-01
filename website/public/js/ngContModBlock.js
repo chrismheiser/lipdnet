@@ -1,4 +1,4 @@
-angular.module('ngValidate').controller('ModalCtrlBlock', function ($scope, $uibModalInstance, data) {
+angular.module('ngValidate').controller('ModalCtrlBlock', function ($scope, $rootScope, $uibModalInstance, data) {
   $scope.customField = "";
   $scope.editMode = false;
   $scope.custom = [];
@@ -6,6 +6,7 @@ angular.module('ngValidate').controller('ModalCtrlBlock', function ($scope, $uib
   $scope.standard = [];
   $scope.optional = [];
   $scope.initial = [];
+  $scope.column = data.column; // the full column data
   $scope.create = data.create; // bool, creating new entry or modifying existing.
   $scope.entry = data.data; // data 
   $scope.idx = data.idx; // index of entry, if working on an array item. 
@@ -33,13 +34,13 @@ angular.module('ngValidate').controller('ModalCtrlBlock', function ($scope, $uib
     $scope.initial = ["hasMedianValue", "hasMeanValue", "hasMaxValue", "hasMinValue"];
 
   } else if (data.key === "interpretation") {
-    $scope.required = ["variable", "direction", "scope"];
-    $scope.standard = ["variableDetail", "seasonality", "rank"];
+    $scope.required = ["variable", "variableDetail", "direction", "scope"];
+    $scope.standard = ["seasonality", "rank"];
     $scope.optional = ["basis", "coefficient", "equilibriumEvidence", "fraction", "inferredMaterial",
       "integrationTime", "integrationTimeBasis", "integrationTimeUncertainty",
       "integrationTimeUnits", "mathematicalRelation", "integrationTimeUncertaintyType"];
-    $scope.selected = ["variable", "direction", "scope", "variableDetail", "seasonality", "rank"];
-    $scope.initial = ["variable", "direction", "scope", "variableDetail", "seasonality", "rank"];
+    $scope.selected = ["variable",  "variableDetail", "direction", "scope"];
+    $scope.initial = ["variable",  "variableDetail", "direction", "scope"];
   } else if (data.key === "inCompilationBeta"){
     $scope.required = ["compilationName", "compilationVersion"];
     $scope.custom = false; // don't allow any custom fields. disable custom. 
@@ -55,6 +56,11 @@ angular.module('ngValidate').controller('ModalCtrlBlock', function ($scope, $uib
         $scope.entry[_key] = "";
       }
     }
+  }
+
+  //Send event to call predictNextValue in the ValidateCtrl sibling controller.
+  $scope.call_predictNextValueParent = function(key, column) {
+    $rootScope.$emit("call_predictNextValue", {"key": key, "column": column});
   }
 
   // Add a new entry to the given array
