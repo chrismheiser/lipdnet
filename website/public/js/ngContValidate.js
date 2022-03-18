@@ -412,6 +412,9 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope','$rootScope', 
 
     $scope.setupTmpPaleoRec = function(entry){
       try{
+        if(!entry){
+          entry = {};
+        }
         if (!entry.tmp.paleorec){
           entry.tmp["paleorec"] = {};
         }
@@ -532,13 +535,13 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope','$rootScope', 
       // Flow 3 : Time + depth
       else if (_variable_type == "time" || _variable_type == "depth"){
         if(key == "variableType"){``
-          _query = "inputstr=&variableType=" + _variable_type;
+          _query = "inputstr=" + _archive_type + "&variableType=" + _variable_type;
           $scope.call_paleorec_api(_query, function(_res){
             entry.tmp.paleorec["variableName"] = _res.data.result[0];
           });
         }
         else if(key === "variableName"){
-          _query = "inputstr=" + _variable_name + "&variableType=" + _variable_type;
+          _query = "inputstr=" + _archive_type + "," + _variable_name + "&variableType=" + _variable_type;
           $scope.call_paleorec_api(_query, function(_res){
             entry.tmp.paleorec["units"] = _res.data.result[0];
           });
