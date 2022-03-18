@@ -1,0 +1,123 @@
+// Column Data
+
+md-subheader.md-primary Columns
+
+
+div.btn-row(layout="row")
+    div(ng-repeat='column in entry2.columns track by $index' style="padding-left:3px;")
+        button.table-tab-btn-on(type="button" ng-if="column.tmp.toggle" ng-click="column.tmp.toggle = false") Column {{$index}}:<br />{{column.variableName}}
+        button.table-tab-btn-off(type="button" ng-if="!column.tmp.toggle" ng-click="expandEntry(entry2.columns, column)") Column {{$index}}:<br />{{column.variableName}}
+
+div(layout="column" ng-repeat='entry3 in entry2.columns track by $index' layout-wrap="")
+    md-card(ng-if="entry3.tmp.toggle" style="width:99%;")
+        md-subheader.md-primary Column {{$index}}: {{entry3.variableName}}
+        div(layout='row', layout-padding='', layout-sm='column')
+            div(flex)
+                md-subheader.md-primary Standard fields
+
+                div(layout='', layout-padding='', layout-sm='column')
+                    md-input-container(flex="")
+                        label.pr-label Archive Type &#8224;
+                        input.mdautocomplete(type="text" list="archiveType" ng-model="files.json.archiveType")
+                        datalist(id="archiveType")
+                            option(ng-repeat="entry in paleorec['archiveType']" value="{{entry}}")
+
+                div(layout='', layout-padding='', layout-sm='column')
+                    md-input-container(flex="")
+                        label Variable Type
+                        input.mdautocomplete(type="text" list="variableType" ng-model="entry3.variableType")              
+                        datalist(id="variableType")
+                            option(ng-repeat="entry in ['measured', 'inferred', 'time', 'depth']" value="{{entry}}")  
+
+                div(layout='', layout-padding='', layout-sm='column')
+                    md-input-container(flex='', class="md-input-has-value")
+                        label Inferred From
+                        input(ng-model="entry3.inferredFrom" ng-click="getMeasuredColumns(entry2, entry3);" list="inferredFrom")
+                        datalist(id="inferredFrom")
+                            option(ng-repeat="entry in entry3.tmp.inferredFrom.variableNames" value="{{entry}}")  
+                        md-tooltip {{getTooltip("paleoData", "inferredFrom")}}
+
+                div(layout='', layout-padding='', layout-sm='column')
+                    md-input-container(flex='', class="md-input-has-value")
+                        label Variable Name *
+                        input(ng-model="entry3.variableName" ng-change="sc.updateHeaders(entry2)")
+                        md-tooltip {{getTooltip("paleoData", "variableName")}}
+
+                div(layout='', layout-padding='', layout-sm='column')
+                    md-input-container(flex="")
+                        label Units
+                        input.mdautocomplete(type="text" list="units" ng-model="entry3.units")
+                
+                div(layout='', layout-padding='', layout-sm='column')
+                    md-input-container(flex='', class="md-input-has-value")
+                        label TSid
+                        input(ng-model="entry3.TSid" disabled)
+                        md-tooltip {{getTooltip("paleoData", "tsid")}}
+
+                div(layout='', layout-padding='', layout-sm='column')
+                    md-input-container(flex='', class="md-input-has-value")
+                        label(ng-if="pageMeta.noaaReady") Description *
+                        label(ng-if="!pageMeta.noaaReady") Description
+                        textarea(ng-model='entry3.description', columns='1', md-maxlength='500')
+                        md-tooltip {{getTooltip("paleoData", "description")}}
+
+
+
+            div(flex)
+                md-subheader.md-primary Add Fields
+
+                div(layout='', layout-padding='', layout-sm='column')
+                    md-input-container(flex="")
+                        label Enter Field Name
+                        // Use autocomplete for lists that are >20 items
+                        input.mdautocomplete(type="text" ng-model="entry3.tmp.custom" list="columnFields")
+                        datalist(id="columnFields")
+                            option(ng-repeat="entry in  dropdowns.columnFields" value="{{entry}}")
+                        md-tooltip {{getTooltip("misc", "addFields")}}
+                    button.green-btn-off(flex='' type="button" ng-click='addColumnField(entry3)' style="margin: 1.5em;") Add
+
+                md-subheader.md-primary Additional fields
+                div.btn-row(layout="row" style="overflow: scroll;")
+                    // Button row for fields that hold nested data inside Objects.
+                    div(ng-repeat="(k,v) in entry3" ng-if="isObject(k)" layout='', layout-padding='', layout-sm='row' style="padding: 0px 2px 2px 2px !important;")
+                        button.table-tab-btn-off(type="button" ng-click="showModalBlock(entry3, false, k, null)") {{k}}
+
+                    // Button row for fields that hold nested data inside Arrays
+                    div(ng-repeat="(k, entry4) in entry3" ng-if="isArr(k)" layout='', layout-padding='', layout-sm='row' style="padding: 0px 2px 2px 2px !important;")
+                        button.table-tab-btn-off(ng-if="k === 'interpretation' && $index === 0" ng-repeat="i in entry4 track by $index" type="button" ng-click="showModalBlock(entry3, false, k, $index)") {{k}} {{$index+1}} &#8224;
+                        button.table-tab-btn-off(ng-if="k !== 'interpretation' && $index !== 0" ng-repeat="i in entry4 track by $index" type="button" ng-click="showModalBlock(entry3, false, k, $index)") {{k}} {{$index+1}}
+
+                div(style="overflow: scroll; height:300px;")
+                    div(ng-repeat="(k,v) in entry3" ng-if="showField(k)" layout='', layout-padding='', layout-sm='column')
+                        // Normal input field for any text field that does not include TSid.
+                        md-input-container(ng-if="!isAutocomplete(k) && !isOntology(k)" flex='', class="md-input-has-value")
+                            label {{k}}
+                            input(ng-model="entry3[k]")
+                            md-tooltip {{getTooltip("paleoData", k)}}
+
+                        // Autocomplete fields for any field that uses ontology data as sources
+                        md-input-container(flex="" ng-if="isAutocomplete(k) && isOntology(k)", class="md-input-has-value")
+                            label {{k}}
+                            input.mdautocomplete(type="text" ng-model="entry3[k]"
+                            uib-typeahead="entry for entry in ontology[k] | filter:$viewValue"
+                            typeahead-min-length="0")
+                            md-tooltip {{getTooltip("paleoData", k)}}
+
+                        // Autocomplete for takenAtDepth field, or (future) fields that don't use ontology data.
+                        md-input-container(flex="" ng-if="isLinkColumns(k)", class="md-input-has-value")
+                            label {{k}}
+                            input.mdautocomplete(type="text" ng-model="entry3[k]"
+                            uib-typeahead="entry for entry in entry2.tmp.varNames | filter:$viewValue"
+                            typeahead-min-length="0" ng-focus="gatherVariableNames(entry2)")
+                            md-tooltip {{getTooltip("paleoData", k)}}
+
+                        div(flex='10' layout='', layout-padding='', layout-sm='column')
+                            button.red-btn-sm-on(type="button" ng-show="pageMeta.editColumn" ng-click="rmColumnField(entry3, k)") X
+
+        .md-toolbar-tools(style="background-color:white;")
+            span(flex)
+            button.yellow-btn-off(type="button" ng-if="!pageMeta.editColumn" ng-click="pageMeta.editColumn = !pageMeta.editColumn" style="padding-right: 4px;") Edit
+            button.yellow-btn-on(type="button" ng-if="pageMeta.editColumn" ng-click="pageMeta.editColumn = !pageMeta.editColumn" style="padding-right: 4px;") Edit
+            button.green-btn-off(type="button" ng-click="duplicateColumn(entry2, $index)" style="padding-right: 4px;") Duplicate Column
+            button.red-btn-off(type="button" ng-click="removeColumn(entry2, $index)" style="padding-right: 4px;") Delete Column
+

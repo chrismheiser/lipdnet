@@ -1465,8 +1465,7 @@ var create = (function(){
           "radio carbon year before present",
           "billion years ago",
           "calendar kiloyear before present",
-          "radiocarbon kiloyear before present",
-          "calendar kiloyear before present"
+          "radiocarbon kiloyear before present"
       ];
     }),
 

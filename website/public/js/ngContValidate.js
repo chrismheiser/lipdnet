@@ -249,6 +249,38 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope','$rootScope', 
     $scope.paleorec = {
     };
 
+    $scope.paleoRecShow = function(entry, prev_steps, field){
+      // Only show the given field, if the preceding fields are also showing
+      // prev_steps is an int of how many levels should be filled in before showing this current field. 
+      var _steps = ["archiveType", "proxyObservationType", "interpretationVariable", "interpretationVariableDetail",
+              "inferredVariable", "inferredVariableUnits"]
+      var _inferred =["inferredVariable", "archiveType", "variableType"];
+      console.log("========= " + field + " ======= " + entry.variableType);
+
+      if(_inferred.indexOf(field) !== -1 && entry.variableType === "inferred"){
+        console.log("Show Field 1: " + field);
+        return true;
+      } else if (_inferred.indexOf(field) === -1 && entry.variableType === "inferred"){
+        console.log("Hide field 1: " + field);
+        return false;
+      } else {
+        for (var _i=0; _i<prev_steps;_i++){
+          var _field = _steps[_i];
+          // archiveType is at root level. Check there for it. 
+          if (_field === "archiveType" && !$scope.files.json.hasOwnProperty("archiveType") || $scope.files.json.archiveType=== ""){
+            console.log("Hide field 2: " + field);
+            return false;
+          } else {
+            // Everything else is at column level. Check there for it.
+            if (!entry.hasOwnProperty(_field) || entry[_field] === ""){
+              console.log("Hide Field 3: " + field);
+              return false;
+            }
+          }
+        }
+      }
+    };
+
     // "archiveType": "",
     // "variableType": "",
     // "variableName": "",
@@ -380,6 +412,9 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope','$rootScope', 
 
     $scope.setupTmpPaleoRec = function(entry){
       try{
+        if(!entry){
+          entry = {};
+        }
         if (!entry.tmp.paleorec){
           entry.tmp["paleorec"] = {};
         }
@@ -500,19 +535,18 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope','$rootScope', 
       // Flow 3 : Time + depth
       else if (_variable_type == "time" || _variable_type == "depth"){
         if(key == "variableType"){``
-          _query = "inputstr=&variableType=" + _variable_type;
+          _query = "inputstr=" + _archive_type + "&variableType=" + _variable_type;
           $scope.call_paleorec_api(_query, function(_res){
             entry.tmp.paleorec["variableName"] = _res.data.result[0];
           });
         }
         else if(key === "variableName"){
-          _query = "inputstr=" + _variable_name + "&variableType=" + _variable_type;
+          _query = "inputstr=" + _archive_type + "," + _variable_name + "&variableType=" + _variable_type;
           $scope.call_paleorec_api(_query, function(_res){
             entry.tmp.paleorec["units"] = _res.data.result[0];
           });
         }
       }
-
     };
 
     $scope.call_paleorec_api = function(query, cb){

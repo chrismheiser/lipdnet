@@ -11,7 +11,7 @@ div(ng-repeat='entry in files.json.chronData track by $index' layout-wrap="" ng-
             div.step16
                 div(ng-controller="SpreadsheetCtrl as sc")
                     // Column Data
-                    include ./table_column
+                    include ./table_column_chron
                     div
                         // Spreadsheet Parser
                         div(ng-if="pageMeta.spreadsheetBeta")
