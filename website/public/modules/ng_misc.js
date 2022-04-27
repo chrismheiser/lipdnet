@@ -205,6 +205,35 @@ var misc = (function(){
       }
     }),
 
+    // Create and add TSids. Make sure they don't already exist
+    replaceAllTSids: (function(_TSids, _objs, cb){
+      try{
+        console.log("misc: replaceAllTSids");
+        // loop for each new tsid that was generated.
+        for(var _i = 0; _i < _objs.length; _i++){
+          var _loop = true;
+          // grab one tsid for this loop
+          var _currTSid = misc.generateTSid();
+          // loop until we get a tsid that doesn't conflict with the master list
+          while(_loop){
+            // does it exist already?
+            _exists = misc.tsidExists(_TSids, _currTSid);
+            if(_exists){
+              // this TSid is already in master. generate a new TSid.
+              _currTSid = misc.generateTSid();
+            } else {
+              // this TSid is not in use! save it to the object
+              _objs[_i].tsid = _currTSid;
+              _loop = false;
+            }
+          } // end while
+        } // end for
+        cb(_objs);
+      } catch(err){
+        console.log(err);
+      }
+    }),
+
     // Check that our given TSid isn't already registered. Remove any TSids that exist, so we dont re-register them.
     reconcileTSidRegister: (function(_TSids, _objs, cb){
       try{
