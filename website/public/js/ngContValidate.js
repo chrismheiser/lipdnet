@@ -1483,9 +1483,7 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope','$rootScope', 
     $scope.renewAllTsids = function(){
       console.log("renewAllTsids");
       lipdValidator.renewTsids($scope.files, function(res){
-        print("Files after renewed tsids");
         $scope.files = res.files;
-        console.log(res);
       });
     };
 
@@ -1975,8 +1973,6 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope','$rootScope', 
                           }
                       }); // end sortBeforeValidate
                       
-                      console.log("SCOPE FILES");
-                      console.log($scope.files);
                       //RETURNS OBJECT : {"dat": files.json, "feedback": feedback, "filename": files.lipdFilename, "status": feedback.status};
                   }, function(reason){
                       $scope.resetPage();
@@ -2030,8 +2026,6 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope','$rootScope', 
                     $scope.allFiles = res;
                     $scope.pageMeta.fileUploaded = true;
                     $scope.pageMeta.keepColumnMeta = true;
-                    console.log("scope files");
-                    console.log($scope.files);
                     // Gather some metadata about the lipd file, and organize it so it's easier to manage.
                     lipdValidator.restructure(res, $scope.files, function(_response_1){
                         $scope.files = _response_1;
@@ -2048,14 +2042,9 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope','$rootScope', 
                             $scope.files.json = create.minorUpdates($scope.files.json);
                             $scope.$broadcast('newUpload', $scope.files);
                         }
-
-                        // Now remove all the unneeded data from the file
-                        console.log("START REMOVING DATA");
                         
-                        // DATA TO REMOVE : 
-                        // Creates new TSids
+                        // Start removing data to make this a "Template"
 
-                        console.log($scope.files);
                         // Delete numeric data
                         // For each csv file, remove the data, and have one row of placeholders for each column
                         for(var _file in $scope.files.csv){
@@ -2064,7 +2053,7 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope','$rootScope', 
                           $scope.files.csv[_file].data.push(Array($scope.files.csv[_file].cols).fill(""));
                           $scope.files.csv[_file].transposed = Array($scope.files.csv[_file].cols).fill([""])
                         }
-
+                        // Renew all TSids  in the file.
                         $scope.renewAllTsids();
                         console.log("After Updates");
                         console.log($scope.files);

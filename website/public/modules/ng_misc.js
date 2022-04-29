@@ -272,9 +272,6 @@ var misc = (function(){
         })
       }
 
-      // Create TSID.
-      // VAL prefix for tracability back to validator
-      // 8 alphanumeric characters to match TSid standard format.
       _tsid = "WEB-" + uuidv4();
       console.log("misc: Generating TSid: " + _tsid);
       return _tsid;

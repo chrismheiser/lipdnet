@@ -75,15 +75,13 @@ var lipdValidator = (function(){
       var _tsid = "";
       function uuidv4() {
         // https://stackoverflow.com/a/2117523
-        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        return 'xxxxx-xxxx-4xxx-yxxx-xxxxx'.replace(/[xy]/g, function(c) {
           var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
           return v.toString(16);
         })
       }
 
       // Create TSID.
-      // VAL prefix for tracability back to validator
-      // 8 alphanumeric characters to match TSid standard format.
       _tsid = "WEB-" + uuidv4();
       console.log("misc: Generating TSid: " + _tsid);
       return _tsid;
@@ -136,7 +134,7 @@ var lipdValidator = (function(){
         }
     }),
 
-        /**
+    /**
      *  Renew all Tsids in all columns
      *
      * @param {array} files LiPD data sorted by type.
@@ -161,8 +159,6 @@ var lipdValidator = (function(){
               _generated_count++;
             }
           }
-          // console.log("MODIFIED TABLE");
-          // console.log(table);
         } catch(err){
           console.log("renewTsids3: " + err);
         }
@@ -215,8 +211,6 @@ var lipdValidator = (function(){
               } // end model
             } // end paleoData loop
           } // end if hasOwnProperty
-          // console.log("TSIDS 2: MODIFIED" + pcData);
-          // console.log(d);
         } catch(err){
           console.log("renewTsids2: " + err);
         }
@@ -231,14 +225,11 @@ var lipdValidator = (function(){
         // run once for paleoData and chronData
         try{
           var pc = ["paleo", "chron"];
-          // console.log("Starting populateTSID loop");
           for (var _i4 = 0; _i4 < pc.length; _i4++) {
             var _pc1 = pc[_i4];
             var _pc2 = pc[_i4] + "Data";
             // If paleoData found, continue.
-            // console.log(_pc2 + " exists?");
             if(files["json"].hasOwnProperty(_pc2)){
-              // console.log("yes, " + _pc2 + " exists");
               // Process the paleoData, and replace the data in the json
               files["json"] = renewTsids2(files["json"], _pc1);
             } else {
@@ -251,9 +242,7 @@ var lipdValidator = (function(){
 
         return {"files": files, "# of TSids Replaced": _generated_count};
       };
-
       // Revalidate to remove TSid errors
-      // console.log(_files);
       cb(renewTsids1(_files));
     }),
             
