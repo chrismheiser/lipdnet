@@ -256,24 +256,33 @@ var misc = (function(){
       }
     }),
 
-    // Generate a TSid. An alphanumeric unique ID. Prefix + 8 chars.
+    /**
+     * Generate a TSid. An alphanumeric unique ID for every column. Prefix + 8 chars.
+     * 'WEB' prefix for LiPD Playground + 8 generated characters (TsID standard)
+     *
+     * @return {string} _tsid TsID
+     */
     generateTSid: (function(){
       var _tsid = "";
-      function s4() {
-        return Math.floor((1 + Math.random()) * 0x10000)
-          .toString(16)
-          .substring(1);
+      function uuidv4() {
+        // https://stackoverflow.com/a/2117523
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+          var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+          return v.toString(16);
+        })
       }
 
       // Create TSID.
       // VAL prefix for tracability back to validator
       // 8 alphanumeric characters to match TSid standard format.
-      _tsid = "WEB" + s4() + s4();
+      _tsid = "WEB-" + uuidv4();
       console.log("misc: Generating TSid: " + _tsid);
       return _tsid;
     }),
 
-    // Generate a TSid. An alphanumeric unique ID. Prefix + 8 chars.
+    /**
+     * Wrapper for Batch creation of TSids
+     */
     generateTSids: (function(_count){
       try{
         var _data = [];

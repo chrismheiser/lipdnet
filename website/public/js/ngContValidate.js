@@ -1480,6 +1480,15 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope','$rootScope', 
       create.rmBlock(entry, idx);
     };
 
+    $scope.renewAllTsids = function(){
+      console.log("renewAllTsids");
+      lipdValidator.renewTsids($scope.files, function(res){
+        print("Files after renewed tsids");
+        $scope.files = res.files;
+        console.log(res);
+      });
+    };
+
   /**
    * Reset the parsed csv data each time after data is parsed. We want to keep the textarea element clear for parsing
    * new data at all times.
@@ -2044,25 +2053,22 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope','$rootScope', 
                         console.log("START REMOVING DATA");
                         
                         // DATA TO REMOVE : 
-                        // $scope.files.json
-                        // $scope.files.
-                        console.log($scope.files);
+                        // Creates new TSids
 
+                        console.log($scope.files);
+                        // Delete numeric data
+                        // For each csv file, remove the data, and have one row of placeholders for each column
                         for(var _file in $scope.files.csv){
                           $scope.files.csv[_file].rows = 1;
-                          console.log(_file);
-                          console.log($scope.files.csv[_file].cols);
-                          console.log(Array($scope.files.csv[_file].cols));
                           $scope.files.csv[_file].data = [];
                           $scope.files.csv[_file].data.push(Array($scope.files.csv[_file].cols).fill(""));
-                          console.log($scope.files.csv[_file].data.length);
                           $scope.files.csv[_file].transposed = Array($scope.files.csv[_file].cols).fill([""])
                         }
-                        console.log("NEW CSVs");
-                        console.log($scope.files.csv);
+
+                        $scope.renewAllTsids();
+                        console.log("After Updates");
+                        console.log($scope.files);
                       
-
-
                     }); // end sortBeforeValidate
                     //RETURNS OBJECT : {"dat": files.json, "feedback": feedback, "filename": files.lipdFilename, "status": feedback.status};
                 }, function(reason){

@@ -66,20 +66,27 @@ var lipdValidator = (function(){
     }),
 
     /**
-     * Generate a TSid. This is a Time Series Identifier. It allows us to index all columns with a unique ID.
-     * 'VAL' prefix for validator + 8 generated characters (TsID standard)
+     * Generate a TSid. An alphanumeric unique ID for every column. Prefix + 8 chars.
+     * 'WEB' prefix for LiPD Playground + 8 generated characters (TsID standard)
      *
      * @return {string} _tsid TsID
      */
     generateTSid: (function(){
-      function s4() {
-        return Math.floor((1 + Math.random()) * 0x10000)
-          .toString(16)
-          .substring(1);
+      var _tsid = "";
+      function uuidv4() {
+        // https://stackoverflow.com/a/2117523
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+          var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+          return v.toString(16);
+        })
       }
+
       // Create TSID.
-      //console.log("misc: Generated TSid: " + _tsid);
-      return "WEB" + s4() + s4();
+      // VAL prefix for tracability back to validator
+      // 8 alphanumeric characters to match TSid standard format.
+      _tsid = "WEB-" + uuidv4();
+      console.log("misc: Generating TSid: " + _tsid);
+      return _tsid;
     }),
 
     /**
@@ -128,6 +135,128 @@ var lipdValidator = (function(){
           // console.log(cb);
         }
     }),
+
+        /**
+     *  Renew all Tsids in all columns
+     *
+     * @param {array} files LiPD data sorted by type.
+     *   files = { "modal": {}, "lipdFilename": "", "dataSetName": "", "fileCt": 0, "bagit": {}, "csv": {},
+                  "jsonSimple": {}, "json": {} };
+     *  @param {callback} cb
+     */
+    renewTsids: (function(_files, cb){
+
+      var _generated_count = 0;
+
+      // renewTsids: Columns
+      // Replace all Tsids everywhere with new ones
+      var renewTsids3 = function(table){
+        try{
+          // Safe check. Make sure table has "columns"
+          if (table.hasOwnProperty("columns")) {
+            // Loop over all columns in the table
+            for (var _i2 = 0; _i2 < table["columns"].length; _i2++) {
+              // Create a new TSid for this column
+              table["columns"][_i2]["TSid"] =  lipdValidator.generateTSid();
+              _generated_count++;
+            }
+          }
+          // console.log("MODIFIED TABLE");
+          // console.log(table);
+        } catch(err){
+          console.log("renewTsids3: " + err);
+        }
+        return table;
+      };
+
+      // PopulateTSid: Tables
+      // Loop for each data table
+      var renewTsids2 = function(d, pc){
+        var pcData = pc + "Data";
+        try{
+          // Check for entry
+          if (d.hasOwnProperty(pcData)) {
+            // Loop for each paleoData/chronData table
+            for (var _k2 = 0; _k2 < d[pcData].length; _k2++) {
+              // Is there a measurement table?
+              if (d[pcData][_k2].hasOwnProperty("measurementTable")) {
+                var _table1 = d[pcData][_k2]["measurementTable"];
+                // Loop for all meas tables
+                for (var _j = 0; _j < _table1.length; _j++) {
+                  // Process table entry
+                  d[pcData][_k2]["measurementTable"][_j] = renewTsids3(_table1[_j]);
+                }
+              }
+              // Is there a model table?
+              if (d[pcData][_k2].hasOwnProperty("model")) {
+                var table = d[pcData][_k2]["model"];
+                // Loop for each paleoModel table
+                for (var _j2 = 0; _j2 < table.length; _j2++) {
+                  // Is there a summaryTable?
+                  if (d[pcData][_k2]["model"][_j2].hasOwnProperty("summaryTable")) {
+                    // Process table
+                    d[pcData][_k2]["model"][_j2]["summaryTable"] = renewTsids3(table[_j2]["summaryTable"]);
+                  } // end summary
+                  // Is there a ensembleTable?
+                  if (table[_j2].hasOwnProperty("ensembleTable")) {
+                    // Process table
+                    d[pcData][_k2]["model"][_j2]["ensembleTable"] = renewTsids3(table[_j2]["ensembleTable"]);
+                  } // end ensemble
+                  // Is there a distributionTable?
+                  if (table[_j2].hasOwnProperty("distributionTable")) {
+                    var _table2 = table[_j2]["distributionTable"];
+                    // Loop for all dist tables
+                    for (var p = 0; p < _table2[_j2]["distributionTable"].length; p++) {
+                      // Process table
+                      d[pcData][_k2]["model"][_j2]["distributionTable"][p] = renewTsids3(_table2[p]);
+                    }
+                  } // end dist
+                } // end model loop
+              } // end model
+            } // end paleoData loop
+          } // end if hasOwnProperty
+          // console.log("TSIDS 2: MODIFIED" + pcData);
+          // console.log(d);
+        } catch(err){
+          console.log("renewTsids2: " + err);
+        }
+
+        return d;
+      };
+
+      // PopulateTSid: Paleo/Chron
+      // Loop for each paleo/chron entry
+      var renewTsids1 = function(files){
+        // using files.json
+        // run once for paleoData and chronData
+        try{
+          var pc = ["paleo", "chron"];
+          // console.log("Starting populateTSID loop");
+          for (var _i4 = 0; _i4 < pc.length; _i4++) {
+            var _pc1 = pc[_i4];
+            var _pc2 = pc[_i4] + "Data";
+            // If paleoData found, continue.
+            // console.log(_pc2 + " exists?");
+            if(files["json"].hasOwnProperty(_pc2)){
+              // console.log("yes, " + _pc2 + " exists");
+              // Process the paleoData, and replace the data in the json
+              files["json"] = renewTsids2(files["json"], _pc1);
+            } else {
+              // console.log("no, " + _pc2 + " doesnt exist");
+            }
+          }
+        } catch(err) {
+          console.log("renewTsids1: " + err);
+        }
+
+        return {"files": files, "# of TSids Replaced": _generated_count};
+      };
+
+      // Revalidate to remove TSid errors
+      // console.log(_files);
+      cb(renewTsids1(_files));
+    }),
+            
 
     /**
      *  Populate TsIDs in columns that do not have one.
