@@ -985,16 +985,18 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope','$rootScope', 
             //           "headers": {"accept": "application/rdf+xml;q=0.5, application/citeproc+json;q=1.0"}
           .then(function (response) {
             // We got a successful API response.
-            console.log("DOI Response object");
+            console.log("/api/doi response:");
             console.log(response);
             // Sort the data and use our map to match doi.org keys to our LiPD keys. The data is placed into the
             // publication entry here.
             entry = create.sortDoiResponse(response, entry);
-          }, function(response) {
+          }, function(response, err) {
             // Something went wrong. There was an error making a GET request to the API
             console.log("Unable to fetch DOI data: ");
             // console.log(response);
-            alert("HTTP 404: No data found for that DOI");
+            alert("HTTP: No data found for that DOI");
+            console.log(response);
+            console.log(err);
           });
         // Whenever a successful DOI auto-fill is complete, set this warning flag. This flag triggers a banner at the
         // top of the publication entry that tells the user to verify the data check for mistakes. The auto-fill
