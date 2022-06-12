@@ -205,6 +205,35 @@ var misc = (function(){
       }
     }),
 
+    // Create and add TSids. Make sure they don't already exist
+    replaceAllTSids: (function(_TSids, _objs, cb){
+      try{
+        console.log("misc: replaceAllTSids");
+        // loop for each new tsid that was generated.
+        for(var _i = 0; _i < _objs.length; _i++){
+          var _loop = true;
+          // grab one tsid for this loop
+          var _currTSid = misc.generateTSid();
+          // loop until we get a tsid that doesn't conflict with the master list
+          while(_loop){
+            // does it exist already?
+            _exists = misc.tsidExists(_TSids, _currTSid);
+            if(_exists){
+              // this TSid is already in master. generate a new TSid.
+              _currTSid = misc.generateTSid();
+            } else {
+              // this TSid is not in use! save it to the object
+              _objs[_i].tsid = _currTSid;
+              _loop = false;
+            }
+          } // end while
+        } // end for
+        cb(_objs);
+      } catch(err){
+        console.log(err);
+      }
+    }),
+
     // Check that our given TSid isn't already registered. Remove any TSids that exist, so we dont re-register them.
     reconcileTSidRegister: (function(_TSids, _objs, cb){
       try{
@@ -227,24 +256,30 @@ var misc = (function(){
       }
     }),
 
-    // Generate a TSid. An alphanumeric unique ID. Prefix + 8 chars.
+    /**
+     * Generate a TSid. An alphanumeric unique ID for every column. Prefix + 8 chars.
+     * 'WEB' prefix for LiPD Playground + 8 generated characters (TsID standard)
+     *
+     * @return {string} _tsid TsID
+     */
     generateTSid: (function(){
       var _tsid = "";
-      function s4() {
-        return Math.floor((1 + Math.random()) * 0x10000)
-          .toString(16)
-          .substring(1);
+      function uuidv4() {
+        // https://stackoverflow.com/a/2117523
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+          var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+          return v.toString(16);
+        })
       }
 
-      // Create TSID.
-      // VAL prefix for tracability back to validator
-      // 8 alphanumeric characters to match TSid standard format.
-      _tsid = "WEB" + s4() + s4();
+      _tsid = "WEB-" + uuidv4();
       console.log("misc: Generating TSid: " + _tsid);
       return _tsid;
     }),
 
-    // Generate a TSid. An alphanumeric unique ID. Prefix + 8 chars.
+    /**
+     * Wrapper for Batch creation of TSids
+     */
     generateTSids: (function(_count){
       try{
         var _data = [];

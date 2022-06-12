@@ -12,6 +12,7 @@ var misc = require("../node_modules_custom/node_misc.js");
 var port = process.env.PORT || 3000;
 var dev = port === 3000;
 var router = express.Router();
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
 // Disable console logs in production
 if(!dev){
@@ -1958,20 +1959,24 @@ router.post("/api/doi", function(req, res, next){
             timeout: 3000,
             headers: {"accept": "application/rdf+xml;q=0.5, application/citeproc+json;q=1.0"}
         };
-
         request(options, function (error, response, body) {
-
             // Did the process complete and respond with data?
-            if (response.statusCode === 200) {
-                logger.info("Success");
-                res.status(200).send(response.body);
-            } else{
-                logger.info("Error: Status " + response.statusCode);
-                res.status(404).send("Error: 404");
+            if (typeof response !== "undefined"){
+              if (response.statusCode >= 200 || response.statusCode <= 299) {
+                logger.info("/api/doi Status: " + response.statusCode);
+                res.status(response.statusCode).send(response.body);
+              } else {
+                logger.info("/api/doi Error: " + error);
+                logger.info("/api/doi Status: " + response.statusCode);
+                res.status(response.statusCode).send("Error: " + response.statusCode);
                 res.end();
-
+              }
+            } else {
+              logger.info("/api/doi Error: " + error);
+              logger.info("Error: Response Undefined");
+              res.status(500).send("Error: Response Undefined");
+              res.end();
             }
-
         });
     } catch(err){
         logger.info("/api/doi exception: " + err);
@@ -2009,42 +2014,39 @@ router.get("/api/predictNextValue/:url", function(req, res, next){
         // Send the request to the NOAA API
         console.log("Sending request /api/predictNextValue");
         request(options, function (error, response, body) {
-          console.log("PythonAnywhere API: Response received");
-          console.log(typeof response);
+          console.log("/api/predictNextValue: Response received");
           if(dev){
               if (typeof response !== "undefined"){
                   console.log("Response Status: ", response.statusCode);
               } else {
                   console.log("No response");
               }
-              console.log("Response error: ");
-              console.log(error);
-
+              console.log("/api/predictNextValue error: " + error);
               //{"result":{"0":["ARS","Core","Trsgi","Rbar","SE"]}}
-              console.log("Response Body: ");
+              console.log("/api/predictNextValue body");
               console.log(body);
           }
 
-            // Did the process complete and respond with data?
-            if (!error && response.statusCode === 200) {
-              // 200, good response
-              try {
-                // Write the NOAA data to the tmp folder as text files
-                console.log("200 response");
-                console.log(body)
-                res.status(200).send(body);
-              } catch(err){
-                // Something went wrong while trying to process the API response.
-                console.log("200 response, /predictNextValue error: ", err);
-                res.writeHead(500, "API Error: Invalid response", {'content-type' : 'text/plain'});
-                res.end();
-              }
-            } else{
-              // Something went wrong in the Python process and the API gave us a bad response.
-              console.log("API Error: Invalid response code", error);
-              res.writeHead(403, "API Error: Invalid response", {'content-type' : 'text/plain'});
+          // Did the process complete and respond with data?
+          if (!error && response.statusCode <= 299 && response.statusCode >= 200) {
+            // 200, good response
+            try {
+              // Write the NOAA data to the tmp folder as text files
+              console.log("200 response");
+              console.log(body)
+              res.status(200).send(body);
+            } catch(err){
+              // Something went wrong while trying to process the API response.
+              console.log("200 response, /predictNextValue error: ", err);
+              res.writeHead(500, "API Error: Invalid response", {'content-type' : 'text/plain'});
               res.end();
             }
+          } else{
+            // Something went wrong in the Python process and the API gave us a bad response.
+            console.log("API Error: Invalid response code", error);
+            res.writeHead(403, "API Error: Invalid response", {'content-type' : 'text/plain'});
+            res.end();
+          }
         });
       } catch(err){
         console.log("/predictNextValue: catchall error");

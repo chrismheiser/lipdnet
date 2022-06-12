@@ -985,7 +985,7 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope','$rootScope', 
             //           "headers": {"accept": "application/rdf+xml;q=0.5, application/citeproc+json;q=1.0"}
           .then(function (response) {
             // We got a successful API response.
-            console.log("DOI Response object");
+            console.log("/api/doi response:");
             console.log(response);
             // Sort the data and use our map to match doi.org keys to our LiPD keys. The data is placed into the
             // publication entry here.
@@ -994,7 +994,8 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope','$rootScope', 
             // Something went wrong. There was an error making a GET request to the API
             console.log("Unable to fetch DOI data: ");
             // console.log(response);
-            alert("HTTP 404: No data found for that DOI");
+            alert("HTTP: Error fetching DOI data");
+            console.log(response);
           });
         // Whenever a successful DOI auto-fill is complete, set this warning flag. This flag triggers a banner at the
         // top of the publication entry that tells the user to verify the data check for mistakes. The auto-fill
@@ -1478,6 +1479,13 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope','$rootScope', 
    */
     $scope.removeBlock = function(entry, idx){
       create.rmBlock(entry, idx);
+    };
+
+    $scope.renewAllTsids = function(){
+      console.log("renewAllTsids");
+      lipdValidator.renewTsids($scope.files, function(res){
+        $scope.files = res.files;
+      });
     };
 
   /**
@@ -1965,6 +1973,7 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope','$rootScope', 
                               $scope.$broadcast('newUpload', $scope.files);
                           }
                       }); // end sortBeforeValidate
+                      
                       //RETURNS OBJECT : {"dat": files.json, "feedback": feedback, "filename": files.lipdFilename, "status": feedback.status};
                   }, function(reason){
                       $scope.resetPage();
@@ -1975,6 +1984,92 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope','$rootScope', 
       });
       // once the change even has triggered, it cannot be triggered again until page refreshes.
       typeof cb === 'function' && cb();
+  };
+
+  /**
+   * LiPD file upload as Template. 
+   * When there is an event change on the file upload button, go through the process of uploading the LiPD file into
+   * the page.
+   * 
+   * Delete certain data from file after upload. Leave only the template.
+   *
+   * Use the zip.js library to upload the file.
+   *
+   * @param  {Object}     event   Data from button event listener.
+   * @param  {Function}   cb      Callback function or null.
+   */
+  $scope.uploadBtnChangeTemplate = function(event, cb){
+    var fileInput = event.target;
+    // console.log(event.target.files);
+    // // var fileInput = document.getElementById("file-input");
+    // // if the upload button is clicked && a file is chosen, THEN reset the page and data.
+    $scope.resetPage();
+    $scope.files.lipdFilename = fileInput.files[0].name;
+    $scope.files.dataSetName = fileInput.files[0].name.slice(0, -4);
+    // Get a list of file entries inside this LiPD upload
+    // console.log(fileInput.files[0]);
+    $scope.model.getEntries(fileInput.files[0], function (entries) {
+
+        // Before we do anything with the LiPD data upload, we need to make sure that the jsonld is valid and usable
+        // If it is not, then either the user needs to manually fix the errors through a dialog box, or we need to
+        // cancel the file upload.
+        // console.log(entries);
+        $scope.validateJsonld(entries, function(entries){
+            // If the user cancelled fixing the JSON data, then they cannot continue with the upload.
+            if(entries){
+                // Use the Import service to parse data from the ZipJS entries
+                $scope.pageMeta.busyPromise = ImportService.parseFiles(entries);
+                $scope.pageMeta.busyPromise.then(function (res) {
+                    // There will be one undefined entry in this array. Placeholder for the original JSON promise.
+                    // Remove it. We already have the fixed JSON as a separate entry.
+                    res = res.filter(function(n){ return n !== undefined });
+                    // Set response to allFiles so we can list all the filenames found in the LiPD archive.
+                    $scope.allFiles = res;
+                    $scope.pageMeta.fileUploaded = true;
+                    $scope.pageMeta.keepColumnMeta = true;
+                    // Gather some metadata about the lipd file, and organize it so it's easier to manage.
+                    lipdValidator.restructure(res, $scope.files, function(_response_1){
+                        $scope.files = _response_1;
+                        if($scope.files.fileCt > 40){
+                            $scope.showModalAlert({"title": "Wow! That's a lot of files!", "message": "We expanded the page to fit everything, so be sure to scroll down to see your data tables."});
+                        }
+                        if(typeof($scope.files.json) !== "object"){
+                            $scope.showModalAlert({"title": "Metadata.jsonld file is incorrect", "message": "There is something wrong with that file. The metadata.jsonld file is missing or incorrectly formatted. Please check the file manually, or create an issue on our Github repository and provide the problematic file."});
+                            $scope.resetPage();
+                        } else {
+                            $scope.validate();
+                            $scope.files.json = create.initColumnTmp($scope.files.json);
+                            $scope.files.json = create.initMissingArrs($scope.files.json);
+                            $scope.files.json = create.minorUpdates($scope.files.json);
+                            $scope.$broadcast('newUpload', $scope.files);
+                        }
+                        
+                        // Start removing data to make this a "Template"
+
+                        // Delete numeric data
+                        // For each csv file, remove the data, and have one row of placeholders for each column
+                        for(var _file in $scope.files.csv){
+                          $scope.files.csv[_file].rows = 1;
+                          $scope.files.csv[_file].data = [];
+                          $scope.files.csv[_file].data.push(Array($scope.files.csv[_file].cols).fill(""));
+                          $scope.files.csv[_file].transposed = Array($scope.files.csv[_file].cols).fill([""])
+                        }
+                        // Renew all TSids  in the file.
+                        $scope.renewAllTsids();
+                        console.log("After Updates");
+                        console.log($scope.files);
+                      
+                    }); // end sortBeforeValidate
+                    //RETURNS OBJECT : {"dat": files.json, "feedback": feedback, "filename": files.lipdFilename, "status": feedback.status};
+                }, function(reason){
+                    $scope.resetPage();
+                    alert("Error parsing JSON-LD file. File cannot be validated");
+                }); // end ImportService
+            }
+        });
+    });
+    // once the change even has triggered, it cannot be triggered again until page refreshes.
+    typeof cb === 'function' && cb();
   };
 
   /**

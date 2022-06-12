@@ -2,7 +2,10 @@
 div(style="margin-top:30px;")
   div.choosefileheader Upload LiPD File
   li#buttons(style="list-style-type: none;")
-    input.step2.choosefile(custom-on-change="uploadBtnChange" ng-click="uploadBtnClick" title="Upload LiPD file for comparison" name='file' type="file" accept=".lpd")
+    input.step2.choosefile(custom-on-change="uploadBtnChange" ng-click="uploadBtnClick" title="Upload LiPD file" name='file' type="file" accept=".lpd")
+  div.choosefileheader Upload as Template
+  li#buttons(style="list-style-type: none;")
+    input.step2.choosefile(custom-on-change="uploadBtnChangeTemplate" ng-click="uploadBtnClick" title="Upload LiPD file as a template. Removes numeric data, Creates new TSids, and retains file metadata including tables and columns." name='file' type="file" accept=".lpd")
 
 div
   li#buttons(style="list-style-type: none;")
@@ -22,11 +25,11 @@ div
     button.btn.green-btn-right.stepdlnoaa#download-btn(type="button" ng-click="downloadNoaa()" ) NOAA (Beta)
       md-tooltip Download NOAA file when all requirements are met and errors are fixed
   li#buttons(style="list-style-type: none;")
-    div.green-header Upload to..
+    div.green-header Send to..
     button.btn.green-btn-left.stepwikiupload#download-btn(type="button" ng-click="uploadToWiki()") Linked Earth Wiki
-      md-tooltip Upload data to the Linked Earth Wiki once it successfully conforms to Wiki standards
+      md-tooltip Send data to the Linked Earth Wiki once it successfully conforms to Wiki standards
     button.btn.green-btn-right.stepwikiupload#download-btn(type="button" ng-click="uploadToLipdverse()" ) Lipdverse
-      md-tooltip Upload data to the Lipdverse when all requirements are met and errors are fixed
+      md-tooltip Send data to the Lipdverse when all requirements are met and errors are fixed
     //div(vc-recaptcha key="'6LdkZEAUAAAAADoC8AFc8f2DLkIuQ0zmvx0S34jx'" ng-model="gRecaptchaResponse" on-success="checkCaptcha(pageMeta.downloadMode, true)" ng-show="pageMeta.captcha")
     //button(class="g-recaptcha" data-sitekey="6LdkZEAUAAAAADoC8AFc8f2DLkIuQ0zmvx0S34jx" data-callback="ccb(resp)") Submit
 
