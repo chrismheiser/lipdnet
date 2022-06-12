@@ -990,13 +990,12 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope','$rootScope', 
             // Sort the data and use our map to match doi.org keys to our LiPD keys. The data is placed into the
             // publication entry here.
             entry = create.sortDoiResponse(response, entry);
-          }, function(response, err) {
+          }, function(response) {
             // Something went wrong. There was an error making a GET request to the API
             console.log("Unable to fetch DOI data: ");
             // console.log(response);
-            alert("HTTP: No data found for that DOI");
+            alert("HTTP: Error fetching DOI data");
             console.log(response);
-            console.log(err);
           });
         // Whenever a successful DOI auto-fill is complete, set this warning flag. This flag triggers a banner at the
         // top of the publication entry that tells the user to verify the data check for mistakes. The auto-fill
