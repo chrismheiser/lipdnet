@@ -86,7 +86,7 @@ var storage = multer.diskStorage({
   }
 });
 
-if (port === 3000){
+if (port == 3000){
   app.set("environment", "development");
 } else {
   app.set("environment", "production");
