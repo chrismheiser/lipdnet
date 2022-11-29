@@ -86,7 +86,7 @@ var storage = multer.diskStorage({
   }
 });
 
-if (port === 3000){
+if (port == 3000){
   app.set("environment", "development");
 } else {
   app.set("environment", "production");
@@ -125,7 +125,7 @@ app.use(function(req, res, next) {
 
 // development error handler
 // will print stacktrace
-if (app.get("environment") === 'development') {
+if (app.get("environment") == 'development') {
   app.use(function(err, req, res, next) {
     res.status(err.status || 500);
     logger.info(err.message);
