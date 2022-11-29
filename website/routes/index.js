@@ -1040,6 +1040,9 @@ var updateTSidOnly = function(_objs){
   }
 };
 
+
+
+
 /**
  * Upload a local LiPD file to Dropbox, create a public share link, and return the share link (direct link to file)
  * Dropbox user: lipd.manager
@@ -1053,12 +1056,6 @@ var updateTSidOnly = function(_objs){
  */
 var uploadToAws = function(filepath, filename, mode, cb) {
     try {
-        var _emailUpdateMetadata = {
-            "filename": filename,
-            "time": new Date(),
-            "uploadStatus": "NA",
-            "url": "NA"
-        };
         // Load the aws sdk
         var AWS = require('aws-sdk');
         var _creds = JSON.parse(fs.readFileSync("./tokens.json"))["aws"];
@@ -1077,9 +1074,9 @@ var uploadToAws = function(filepath, filename, mode, cb) {
         });
 
         // If we're in production, add in the proxy.
-        if (!dev) {
-            AWS.config.update();
-        }
+        // if (!dev) {
+        //     AWS.config.update();
+        // }
 
         // Create params for putObject call
         var objectParams = {
@@ -1095,26 +1092,32 @@ var uploadToAws = function(filepath, filename, mode, cb) {
         // After upload success, cb the URL.
         uploadPromise.then(
             function (data) {
-                logger.info("Successful AWS Upload: " + bucket + "/" + filename);
                 var _direct_url = "https://s3-us-west-2.amazonaws.com/" + bucket + "/" + filename;
-                logger.info("URL to file: " + _direct_url);
-                _emailUpdateMetadata.uploadStatus = "Success";
-                _emailUpdateMetadata.url = _direct_url;
-                newLipdverseFiles.push(_emailUpdateMetadata);
+                logFileForEmailDigest(filename, "Success", _direct_url, bucket);
                 cb(_direct_url)
             }).catch(
                 function(err){
-                    _emailUpdateMetadata.uploadStatus = "Fail";
-                    newLipdverseFiles.push(_emailUpdateMetadata);
-                    logger.info("Failed AWS Upload: " + err);
+                    logFileForEmailDigest(filename, "Fail", "", bucket);
+                    logger.info("uploadToAws error during upload: " + err);
                     cb("");
             });
     } catch (err) {
-        _emailUpdateMetadata.uploadStatus = "Fail";
-        newLipdverseFiles.push(_emailUpdateMetadata);
-        logger.info("uploadToAws error: " + err);
+        logEmailMetadataForDigest(filename, "Fail", "", bucket);
+        logger.info("uploadToAws error before upload: " + err);
         cb("");
     }
+};
+
+var logFileForEmailDigest = function(filename, status, url, bucket){
+  var metadata = {
+    "filename": filename,
+    "time": new Date(),
+    "uploadStatus": status || "NA",
+    "url": url || "NA",
+    "bucket": bucket || "NA"
+  };
+  newLipdverseFiles.push(metadata);
+  logger.info("logEmailMetadataForDigest: ", metadata);
 };
 
 var walk = function(directoryName) {
@@ -1239,6 +1242,10 @@ router.get("/lipdverse/:fileid", function(req, res, next){
         for(var i in files) {
             // Get the first lipd file you find (there should only be one)
             if(path.extname(files[i]) === ".lpd") {
+                // logFileForEmailDigest(pathTmpZip, files[i], "lipdverse", function(){
+
+                // });
+
                 // Upload the LiPD file to AWS
                 uploadToAws(pathTmpZip, files[i], "lipdverse", function(){
                     // Upload the text file to AWS. This has the metadata about the file.
