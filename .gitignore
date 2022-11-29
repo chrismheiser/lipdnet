@@ -82,6 +82,10 @@ Parser/p1.py
 
 lipd_R/.RData
 
-website/node_modules/*
+website/node_modules/
 website/tokens.json
 website/.vscode/launch.json
+
+node_modules/
+.vscode/
+.env 
