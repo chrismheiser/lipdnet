@@ -961,16 +961,16 @@ var sendDigestEmail = function(){
                 }
             };
             if(!dev){
-                _recipients = 'Chris <cmh553@nau.edu>, Nick McKay <nicholas.mckay@nau.edu>';
+                _recipients = 'Chris <heiser@nau.edu>, Nick McKay <nicholas.mckay@nau.edu>';
             } else {
-                _recipients = 'Chris <cmh553@nau.edu>';
+                _recipients = 'Chris <heiser@nau.edu>';
             }
             var transporter = nodemailer.createTransport(_transportConfig);
             // nodemailer.createTransport('smtps://' + _user + ':' + _pass + '@smtp.gmail.com');
 
             // setup e-mail data with unicode symbols
             var mailOptions = {
-                from: "Lipd.net <lipd.manager@gmail.com>", // sender address
+                from: "Lipd.net <lipd.contact@gmail.com>", // sender address
                 to: _recipients, // list of receivers
                 subject: 'Daily Lipdverse Uploads', // Subject line
                 text: _body, // plaintext body

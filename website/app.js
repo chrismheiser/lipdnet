@@ -35,7 +35,7 @@ var cleanTmpDir = function(){
   // this code will only run when time has elapsed
 
   var tmpDir = path.join(process.cwd(), "tmp");
-  logger.info("app: Starting tmp cleaning...");
+  logger.info("app: Cleaning...");
   try {
     var _dirs = getDirectories(tmpDir);
     // logger.info("Tmp Directories: [" + _dirs + "]");
