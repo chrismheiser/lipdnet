@@ -1076,11 +1076,6 @@ var uploadToAws = function(filepath, filename, mode, cb) {
             s3ForcePathStyle: true
         });
 
-        // If we're in production, add in the proxy.
-        if (!dev) {
-            AWS.config.update();
-        }
-
         // Create params for putObject call
         var objectParams = {
             Bucket: bucket,

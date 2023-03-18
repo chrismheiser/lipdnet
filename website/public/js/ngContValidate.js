@@ -550,20 +550,22 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope','$rootScope', 
     };
 
     $scope.call_paleorec_api = function(query, cb){
-        console.log("Sending Query: " + query);
+      // TEMPORARILY SHUT OFF PALEOREC
+        // console.log("Sending Query: " + query);
         // Add the query to the URL GET request. (This goes to the backend nodejs, before sending out to the API)
-        $http.get("/api/predictNextValue/" + encodeURIComponent(query))
-          .then(function (response) {
-            // Successful response.
-            console.log("/predictNextValue Response: ");
-            console.log(response);
-            cb(response);
+        // $http.get("/api/predictNextValue/" + encodeURIComponent(query))
+        //   .then(function (response) {
+        //     // Successful response.
+        //     console.log("/predictNextValue Response: ");
+        //     console.log(response);
+        //     cb(response);
             
-          }, function(response) {
-            console.log("API Request error: /predictNextValue/" + query);
-            //alert("/predictNextValue: API Response error");
-            cb({"data": {"result": [""]}});
-          });
+        //   }, function(response) {
+        //     console.log("API Request error: /predictNextValue/" + query);
+        //     //alert("/predictNextValue: API Response error");
+        //     cb({"data": {"result": [""]}});
+        //   });
+        cb({"data": {"result": [""]}});
     };
 
   /**
