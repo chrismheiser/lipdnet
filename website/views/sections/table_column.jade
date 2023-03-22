@@ -45,6 +45,13 @@ div(layout="column" ng-repeat='entry3 in entry2.columns track by $index' layout-
                             option(ng-repeat="entry in common['standardized_keys']['paleoData_units']" value="{{entry}}")  
 
                 div(layout='', layout-padding='', layout-sm='column')
+                    md-input-container(flex="")
+                        label Proxy
+                        input.mdautocomplete(type="text" list="proxy" ng-model="entry3.proxy")
+                        datalist(id="proxy")
+                            option(ng-repeat="entry in common['standardized_keys']['paleoData_proxy']" value="{{entry}}")  
+
+                div(layout='', layout-padding='', layout-sm='column')
                     md-input-container(flex='', class="md-input-has-value")
                         label Inferred From
                         input(ng-model="entry3.inferredFrom" ng-click="getMeasuredColumns(entry2, entry3)" list="inferredFrom")
