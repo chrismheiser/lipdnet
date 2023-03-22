@@ -33,7 +33,7 @@ div(layout='', layout-padding='', layout-sm='column')
     label Archive Type *
     input.mdautocomplete(type="text" list="archiveType" ng-model="files.json.archiveType" ng-change="predictNextValue('archiveType', null)")
     datalist(id="archiveType")
-        option(ng-repeat="entry in paleorec['archiveType']" value="{{entry}}")
+        option(ng-repeat="entry in common['standardized_keys']['archiveType']" value="{{entry}}")
     md-tooltip {{getTooltip("root", "archiveType")}}
 
 div(layout='', layout-padding='', layout-sm='column')

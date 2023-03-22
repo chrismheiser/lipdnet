@@ -1,4 +1,4 @@
-angular.module('ngValidate').controller('ModalCtrlBlock', function ($scope, $rootScope, $uibModalInstance, data) {
+angular.module('ngValidate').controller('ModalCtrlBlock', function ($scope, $rootScope, $uibModalInstance, data, $http) {
   $scope.customField = "";
   $scope.editMode = false;
   $scope.custom = [];
@@ -15,6 +15,18 @@ angular.module('ngValidate').controller('ModalCtrlBlock', function ($scope, $roo
   $scope.arr = [];
   $scope.scope = ["isotope", "chronology", "climate", "ecology"];
   $scope.inCompilation = ["compilationName", "compilationVersion"];
+  $scope.standardizedKeys = {};
+
+  var getStandardizedValues = (function(atl){
+    $http.get("/api/standardizedValues")
+      .then(function (response) {
+        // We got a successful API response.
+        $scope.standardizedKeys = response.data.standardized_keys;
+        console.log($scope.standardizedKeys)
+      }, function(response) {
+        console.log("/api/archiveTypes response error");
+      });
+  })();
 
     // If we receive an index number from parent controller, then we need to work on that specific index entry only. 
     if($scope.idx !== null){

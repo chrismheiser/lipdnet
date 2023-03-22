@@ -40,11 +40,22 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope','$rootScope', 
     // LinkedEarth Wiki by index.js and served to us on page load. If the response is bad, we use fall back data.
 
 
-    var getArchiveTypes = (function(atl){
-      $http.get("/api/archiveTypes")
+    // var getArchiveTypes = (function(atl){
+    //   $http.get("/api/archiveTypes")
+    //     .then(function (response) {
+    //       // We got a successful API response.
+    //       $scope.paleorec['archiveType'] = response.data.result[0];
+    //     }, function(response) {
+    //       console.log("/api/archiveTypes response error");
+    //     });
+    // })();
+
+    var getStandardizedValues = (function(atl){
+      $http.get("/api/standardizedValues")
         .then(function (response) {
           // We got a successful API response.
-          $scope.paleorec['archiveType'] = response.data.result[0];
+          $scope.common = response.data;
+          // console.log(response.data);
         }, function(response) {
           console.log("/api/archiveTypes response error");
         });
@@ -246,8 +257,8 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope','$rootScope', 
       $scope.downloadZip(null);
     });
 
-    $scope.paleorec = {
-    };
+    $scope.paleorec = {};
+    $scope.common = {};
 
     $scope.paleoRecShow = function(entry, prev_steps, field){
       // Only show the given field, if the preceding fields are also showing

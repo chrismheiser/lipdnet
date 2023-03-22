@@ -34,20 +34,32 @@
                         input.mdautocomplete(type="text" ng-model="entry[k]"
                             uib-typeahead="entry for entry in scope | filter:$viewValue" typeahead-min-length="0")
                 
+                    // PALEOREC
+                    //- md-input-container(flex="" ng-if="k === 'variable'")
+                    //-     label.pr-label variable &#8224;
+                    //-     input.mdautocomplete(type="text" list="interpretationVariable" ng-model="entry.variable" ng-change="call_predictNextValueParent('interpretationVariable', column)")
+                    //-     datalist(id="interpretationVariable")
+                    //-         option(ng-repeat="item in column.tmp.paleorec['interpretationVariable']" value="{{item}}")
+
                     md-input-container(flex="" ng-if="k === 'variable'")
                         label.pr-label variable &#8224;
-                        input.mdautocomplete(type="text" list="interpretationVariable" ng-model="entry.variable" ng-change="call_predictNextValueParent('interpretationVariable', column)")
+                        input.mdautocomplete(type="text" list="interpretationVariable" ng-model="entry.variable")
                         datalist(id="interpretationVariable")
-                            option(ng-repeat="item in column.tmp.paleorec['interpretationVariable']" value="{{item}}")
-                        
+                            option(ng-repeat="item in standardizedKeys['interpretation_variable']" value="{{item}}")  
+
                     md-input-container(flex="" ng-if="k === 'variableDetail'")
                         label.pr-label variableDetail &#8224;
                         input.mdautocomplete(type="text" list="interpretationVariableDetail" ng-model="entry.variableDetail" ng-change="call_predictNextValueParent('interpretationVariableDetail', column)")
                         datalist(id="interpretationVariableDetail")
                             option(ng-repeat="item in column.tmp.paleorec['interpretationVariableDetail']" value="{{item}}")
 
+                    md-input-container(flex="" ng-if="k === 'seasonality'")
+                        label seasonality
+                        input.mdautocomplete(type="text" list="interpretationSeasonality" ng-model="entry.seasonality")
+                        datalist(id="interpretationSeasonality")
+                            option(ng-repeat="item in standardizedKeys['interpretation_seasonality']" value="{{item}}")  
 
-                    md-input-container(flex='', class="md-input-has-value" ng-if="k !== 'scope' && k !== 'variable' && k !== 'variableDetail'")
+                    md-input-container(flex='', class="md-input-has-value" ng-if="k !== 'scope' && k !== 'variable' && k !== 'variableDetail' && k !== 'seasonality'")
                         label {{k}}
                         input(ng-model="entry[k]")
                     div(flex='10' layout='', layout-padding='', layout-sm='column')
