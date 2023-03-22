@@ -50,12 +50,12 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope','$rootScope', 
     //     });
     // })();
 
+    $scope.common = {};
     var getStandardizedValues = (function(atl){
       $http.get("/api/standardizedValues")
         .then(function (response) {
           // We got a successful API response.
           $scope.common = response.data;
-          // console.log(response.data);
         }, function(response) {
           console.log("/api/archiveTypes response error");
         });
@@ -123,26 +123,6 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope','$rootScope', 
       // Countries is used in the Geo section
       "countries" : map.getCountries()
     };
-
-  /**
-   * Initialize the Ontology data. Get the ontology from the backend.
-   *
-   * Process:  LinkedEarth Wiki > Node > data cleaned up, organized, stored > sent to front end (here)
-   */
-    // var initOntology = function () {
-    //     // Get the ontology data from the node backend
-    //     $http.get("/api/ontology")
-    //         .then(function(response) {
-    //           // Success. Set the data to the scope directly
-    //             $scope.ontology = response.data;
-    //         }, function myError(err) {
-    //             console.log(err);
-    //             // Error, use our hardcoded lists as a fallback.
-    //             $scope.ontology = create.getOntologyBackup();
-    //         });
-    // };
-    // // Call the function during page load
-    // initOntology();
 
     // NOT CURRENTLY IN USE
     $scope.fields = create.defaultColumnFields();
@@ -258,7 +238,6 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope','$rootScope', 
     });
 
     $scope.paleorec = {};
-    $scope.common = {};
 
     $scope.paleoRecShow = function(entry, prev_steps, field){
       // Only show the given field, if the preceding fields are also showing
