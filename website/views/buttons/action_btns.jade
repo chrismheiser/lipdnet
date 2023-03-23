@@ -24,12 +24,12 @@ div
       md-tooltip Download LiPD file when all requirements are met and errors are fixed
     button.btn.green-btn-right.stepdlnoaa#download-btn(type="button" ng-click="downloadNoaa()" ) NOAA (Beta)
       md-tooltip Download NOAA file when all requirements are met and errors are fixed
-  li#buttons(style="list-style-type: none;")
-    div.green-header Send to..
-    button.btn.green-btn-left.stepwikiupload#download-btn(type="button" ng-click="uploadToWiki()") Linked Earth Wiki
-      md-tooltip Send data to the Linked Earth Wiki once it successfully conforms to Wiki standards
-    button.btn.green-btn-right.stepwikiupload#download-btn(type="button" ng-click="uploadToLipdverse()" ) Lipdverse
-      md-tooltip Send data to the Lipdverse when all requirements are met and errors are fixed
+  //- li#buttons(style="list-style-type: none;")
+  //-   div.green-header Send to..
+  //-   button.btn.green-btn-left.stepwikiupload#download-btn(type="button" ng-click="uploadToWiki()") Linked Earth Wiki
+  //-     md-tooltip Send data to the Linked Earth Wiki once it successfully conforms to Wiki standards
+  //-   button.btn.green-btn-right.stepwikiupload#download-btn(type="button" ng-click="uploadToLipdverse()" ) Lipdverse
+  //-     md-tooltip Send data to the Lipdverse when all requirements are met and errors are fixed
     //div(vc-recaptcha key="'6LdkZEAUAAAAADoC8AFc8f2DLkIuQ0zmvx0S34jx'" ng-model="gRecaptchaResponse" on-success="checkCaptcha(pageMeta.downloadMode, true)" ng-show="pageMeta.captcha")
     //button(class="g-recaptcha" data-sitekey="6LdkZEAUAAAAADoC8AFc8f2DLkIuQ0zmvx0S34jx" data-callback="ccb(resp)") Submit
 
