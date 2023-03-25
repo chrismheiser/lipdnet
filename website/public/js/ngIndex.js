@@ -77,12 +77,12 @@ p.controller('IndexCtrl', function ($scope) {
         "link": "https://github.com/LinkedEarth/Pyleoclim_util",
         "tooltip": "A Python package for analyzing and visualizing paleoclimate data in LiPD."
       },
-      {
-        "icon": "chrome_reader_mode",
-        "title": "PyleoClim Docs",
-        "link": "http://linkedearth.github.io/Pyleoclim_util/",
-        "tooltip": "The PyleoClim package documentation."
-      },
+      // {
+      //   "icon": "chrome_reader_mode",
+      //   "title": "PyleoClim Docs",
+      //   "link": "http://linkedearth.github.io/Pyleoclim_util/",
+      //   "tooltip": "The PyleoClim package documentation."
+      // },
       {
         "icon": "public",
         "title": "LinkedEarth Wiki",
@@ -95,12 +95,12 @@ p.controller('IndexCtrl', function ($scope) {
         "link": "https://www1.ncdc.noaa.gov/pub/data/paleo/pages2k/NAm2kHydro-2017/",
         "tooltip": "A sample of NOAA text template files that have been generated from LiPD files."
       },
-      {
-        "icon": "chrome_reader_mode",
-        "title": "LiPD Ontology",
-        "link": "http://linked.earth/ontology/core/1.2.0/index-en.html",
-        "tooltip": "A controlled vocabulary of terms used in LiPD."
-      },
+      // {
+      //   "icon": "chrome_reader_mode",
+      //   "title": "LiPD Ontology",
+      //   "link": "http://linked.earth/ontology/core/1.2.0/index-en.html",
+      //   "tooltip": "A controlled vocabulary of terms used in LiPD."
+      // },
       {
         "icon": "chrome_reader_mode",
         "title": "LinkedEarth Ontology",
@@ -113,12 +113,12 @@ p.controller('IndexCtrl', function ($scope) {
         "link": "https://github.com/nickmckay/LiPD-utilities/raw/master/Examples/LiPD_template.xlsx",
         "tooltip": "Create a LiPD file by entering your data into the Excel template and converting it using the LiPD Utilities (Python)."
       },
-      {
-        "icon": "chrome_reader_mode",
-        "title": "NOAA Variable Naming",
-        "link": "https://www1.ncdc.noaa.gov/pub/data/paleo/templates/Variable_naming_guide.pdf",
-        "tooltip": "A short guide to naming variables using NOAA standards."
-      },
+      // {
+      //   "icon": "chrome_reader_mode",
+      //   "title": "NOAA Variable Naming",
+      //   "link": "https://www1.ncdc.noaa.gov/pub/data/paleo/templates/Variable_naming_guide.pdf",
+      //   "tooltip": "A short guide to naming variables using NOAA standards."
+      // },
 
 
     ];
