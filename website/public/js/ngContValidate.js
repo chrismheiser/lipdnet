@@ -40,11 +40,22 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope','$rootScope', 
     // LinkedEarth Wiki by index.js and served to us on page load. If the response is bad, we use fall back data.
 
 
-    var getArchiveTypes = (function(atl){
-      $http.get("/api/archiveTypes")
+    // var getArchiveTypes = (function(atl){
+    //   $http.get("/api/archiveTypes")
+    //     .then(function (response) {
+    //       // We got a successful API response.
+    //       $scope.paleorec['archiveType'] = response.data.result[0];
+    //     }, function(response) {
+    //       console.log("/api/archiveTypes response error");
+    //     });
+    // })();
+
+    $scope.common = {};
+    var getStandardizedValues = (function(atl){
+      $http.get("/api/standardizedValues")
         .then(function (response) {
           // We got a successful API response.
-          $scope.paleorec['archiveType'] = response.data.result[0];
+          $scope.common = response.data;
         }, function(response) {
           console.log("/api/archiveTypes response error");
         });
@@ -112,26 +123,6 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope','$rootScope', 
       // Countries is used in the Geo section
       "countries" : map.getCountries()
     };
-
-  /**
-   * Initialize the Ontology data. Get the ontology from the backend.
-   *
-   * Process:  LinkedEarth Wiki > Node > data cleaned up, organized, stored > sent to front end (here)
-   */
-    // var initOntology = function () {
-    //     // Get the ontology data from the node backend
-    //     $http.get("/api/ontology")
-    //         .then(function(response) {
-    //           // Success. Set the data to the scope directly
-    //             $scope.ontology = response.data;
-    //         }, function myError(err) {
-    //             console.log(err);
-    //             // Error, use our hardcoded lists as a fallback.
-    //             $scope.ontology = create.getOntologyBackup();
-    //         });
-    // };
-    // // Call the function during page load
-    // initOntology();
 
     // NOT CURRENTLY IN USE
     $scope.fields = create.defaultColumnFields();
@@ -246,8 +237,7 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope','$rootScope', 
       $scope.downloadZip(null);
     });
 
-    $scope.paleorec = {
-    };
+    $scope.paleorec = {};
 
     $scope.paleoRecShow = function(entry, prev_steps, field){
       // Only show the given field, if the preceding fields are also showing
@@ -550,20 +540,22 @@ angular.module("ngValidate").controller('ValidateCtrl', ['$scope','$rootScope', 
     };
 
     $scope.call_paleorec_api = function(query, cb){
-        console.log("Sending Query: " + query);
+      // TEMPORARILY SHUT OFF PALEOREC
+        // console.log("Sending Query: " + query);
         // Add the query to the URL GET request. (This goes to the backend nodejs, before sending out to the API)
-        $http.get("/api/predictNextValue/" + encodeURIComponent(query))
-          .then(function (response) {
-            // Successful response.
-            console.log("/predictNextValue Response: ");
-            console.log(response);
-            cb(response);
+        // $http.get("/api/predictNextValue/" + encodeURIComponent(query))
+        //   .then(function (response) {
+        //     // Successful response.
+        //     console.log("/predictNextValue Response: ");
+        //     console.log(response);
+        //     cb(response);
             
-          }, function(response) {
-            console.log("API Request error: /predictNextValue/" + query);
-            //alert("/predictNextValue: API Response error");
-            cb({"data": {"result": [""]}});
-          });
+        //   }, function(response) {
+        //     console.log("API Request error: /predictNextValue/" + query);
+        //     //alert("/predictNextValue: API Response error");
+        //     cb({"data": {"result": [""]}});
+        //   });
+        cb({"data": {"result": [""]}});
     };
 
   /**

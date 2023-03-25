@@ -1076,11 +1076,6 @@ var uploadToAws = function(filepath, filename, mode, cb) {
             s3ForcePathStyle: true
         });
 
-        // If we're in production, add in the proxy.
-        if (!dev) {
-            AWS.config.update();
-        }
-
         // Create params for putObject call
         var objectParams = {
             Bucket: bucket,
@@ -1205,15 +1200,15 @@ setInterval(sendDigestEmail, 86400000); //24 hr
 /**
  * Retrieve and compile ontology on a set interval.
  */
-try{
-    // Run once on initialization. All other updates are done on the timer below.
-    compileOntology();
-    // Refresh the LinkedEarth Wiki ontology data every 1 WEEK, or once every time node is restarted
-    setInterval(compileOntology, 604800000);
-}catch(err){
-    // Error. Use the existing or local ontology instead.
-    console.log(err);
-}
+// try{
+//     // Run once on initialization. All other updates are done on the timer below.
+//     compileOntology();
+//     // Refresh the LinkedEarth Wiki ontology data every 1 WEEK, or once every time node is restarted
+//     setInterval(compileOntology, 604800000);
+// }catch(err){
+//     // Error. Use the existing or local ontology instead.
+//     console.log(err);
+// }
 
 
 // PAGE ROUTES
@@ -2132,6 +2127,26 @@ router.get("/api/archiveTypes", function(req, res, next){
     res.writeHead(500, "/archiveTypes: catchall error", {'content-type' : 'text/plain'});
     res.end();
   }
+});
+
+/**
+ * Get standardized values for dropdown menus
+ *
+ * @param   {Object}   req   Request object
+ * @param   {String}   res   Response string
+ * @param   {Function} next  Callback, not in use
+ * @return  none             List of items for next recommendation
+ */
+router.get("/api/standardizedValues", function(req, res, next){
+  try{
+    // Read the file with the file stream module
+    fs.readFile('./data/common.json', function (err, data) {
+      res.status(200).send(data);
+      res.end();
+    });
+} catch(err){
+    console.log("index.js: standardizedValues: " + err);
+}
 });
 
 module.exports = router;
