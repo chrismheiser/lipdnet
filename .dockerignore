@@ -1,0 +1,8 @@
+
+website/node_modules
+website/npm-debug.log
+lipdnet.Dockerfile
+.dockerignore
+website/tokens.json
+website/Procfile
+website/*.log

@@ -1,0 +1,11 @@
+version: '2'
+services:
+  website:
+    build: .
+    command: npm start
+    volumes:
+      - .:/app/
+      - /app/node_modules
+      - /app/node_modules_custom
+    ports:
+      - "3000:3000"

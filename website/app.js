@@ -1,6 +1,14 @@
 // app.js
 var express = require('express');
 var process = require("process");
+process
+    .on('unhandledRejection', (reason, p) => {
+        console.error(reason, 'Unhandled Rejection at Promise', p);
+    })
+    .on('uncaughtException', err => {
+        console.error(err, 'Uncaught Exception thrown');
+        process.exit(1);
+    });
 var port = process.env.PORT || 3000;
 var logger = require("./node_modules_custom/node_log.js");
 var rimraf = require("rimraf");
