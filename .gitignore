@@ -85,7 +85,7 @@ lipd_R/.RData
 website/node_modules/
 website/tokens.json
 website/.vscode/launch.json
-
+node_modules
 */node_modules/*
 .vscode/
 .env 
