@@ -1,12 +1,26 @@
-FROM node:12.18.2
+# Use an official Node.js runtime as the base image
+FROM node:16-alpine
 
-# Create app directory
-RUN mkdir -p /app/node_modules && chown -R node:node /app
+# Set the working directory in the container
 WORKDIR /app
-COPY website/ ./
-USER node
-RUN npm install
-COPY --chown=node:node . .
 
-EXPOSE 8080
-CMD [ "node", "website/app.js" ]
+# Copy the rest of the application code to the container
+COPY . .
+
+WORKDIR /app/website 
+
+# Copy the package.json and package-lock.json files to the container
+COPY package*.json ./
+
+# Install build tools
+RUN apk add --no-cache build-base krb5-dev
+RUN apk add --no-cache python3
+
+# Install the Node.js dependencies
+RUN npm install
+
+# Expose the port that the web application will listen on
+EXPOSE 3000
+
+# Run the web application
+CMD ["npm", "start"]

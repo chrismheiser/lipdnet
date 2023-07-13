@@ -1,9 +1,17 @@
 var express = require('express');
 var fs = require("fs");
 var archiver = require('archiver');
-var gladstone = require('gladstone');
+var gladstone = require('gladstone/gladstone');
 var path = require("path");
 var process = require("process");
+process
+    .on('unhandledRejection', (reason, p) => {
+        console.error(reason, 'Unhandled Rejection at Promise', p);
+    })
+    .on('uncaughtException', err => {
+        console.error(err, 'Uncaught Exception thrown');
+        process.exit(1);
+    });
 var fastcsv = require("fast-csv");
 var request = require('request');
 var logger = require("../node_modules_custom/node_log.js");
