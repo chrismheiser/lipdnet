@@ -86,6 +86,6 @@ website/node_modules/
 website/tokens.json
 website/.vscode/launch.json
 
-website/node_modules/*
+*/node_modules/*
 .vscode/
 .env 
