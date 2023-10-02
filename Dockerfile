@@ -15,6 +15,7 @@ COPY package*.json ./
 # Install build tools
 RUN apk add --no-cache build-base krb5-dev
 RUN apk add --no-cache python3
+RUN apk add bash
 
 # Install the Node.js dependencies
 RUN npm install
